@@ -1,21 +1,20 @@
 ---
 name: auto-ralph
 description: >-
-  PROACTIVELY activates for ANY task with clear success criteria.
-  This skill should be used when the user provides tasks like:
-  "fix the bug", "add tests", "implement feature X", "refactor Y".
-
-  Explicit triggers: "ralph this", "auto ralph", "loop it", "iterate".
-
-  Auto-detects Ralph-suitable tasks (score >= 3/4):
-  - Clear success criteria (tests pass, error gone, feature works)
-  - Benefits from iteration (not one-shot)
-  - Well-defined scope (specific files/functions)
-  - Verifiable completion (can honestly output promise)
-
-  Does NOT activate for: explanations, questions, vague requests.
-
-  Output: Romanian. Input: Any (ro/en/ru/mixed).
+  Score-and-gate decision skill that decides whether an imperative coding task
+  should run as a Ralph Loop (iterative agent run with promise-based completion
+  via the /ralph-loop command). MUST be invoked BEFORE composing any response
+  when the user's prompt contains an imperative coding verb (fix, repair, add,
+  implement, create, build, test, refactor — or ro/ru equivalents: repară,
+  fixează, adaugă, implementează, creează, testează, refactorizează, исправь,
+  добавь, создай, сделай, протестируй). Emits the (AUTONALYK) banner with the
+  computed 0–4 score, then either invokes /ralph-loop (score ≥ 3) or returns
+  control for a normal response (score ≤ 2). ALWAYS invoke on explicit triggers
+  regardless of score: "ralph this", "auto ralph", "loop it", "iterate", "keep
+  trying", "until done". NEVER invoke on questions, explanations, or when the
+  user says "just answer", "don't loop", "explain first". Wraps and depends on
+  the ralph-loop plugin — they are complementary, not alternatives.
+  Output: Romanian. Input: en/ro/ru/mixed.
 ---
 
 # auto-ralph

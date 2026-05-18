@@ -1,7 +1,7 @@
 {
   "name": "auto-ralph",
-  "description": "Deterministic Ralph Loop activation via UserPromptSubmit hook - scores every task and auto-invokes when suitable",
-  "version": "2.0.0",
+  "description": "Deterministic Ralph Loop activation via SessionStart priming + UserPromptSubmit context injection - scores every imperative coding task and routes to /ralph-loop when suitable",
+  "version": "2.1.0",
   "author": {
     "name": "nalyk"
   },

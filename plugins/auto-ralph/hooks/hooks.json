@@ -1,6 +1,17 @@
 {
-  "description": "Auto-ralph deterministic activation hook - ensures every task is scored for Ralph Loop suitability",
+  "description": "auto-ralph v2.1 deterministic activation: SessionStart primes the model; UserPromptSubmit injects per-turn scoring gate via plain-stdout context injection.",
   "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/sessionstart.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
     "UserPromptSubmit": [
       {
         "hooks": [
