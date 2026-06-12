@@ -34,6 +34,10 @@ reality) · Poincaré (how to choose between equivalents) · Aquinas (how to syn
 
 The complete principle index lives in `skills/organon/references/quick-reference.md`.
 
+## Credits
+
+Original idea and code by Anatolie Golovco.
+
 ## License
 
 Based on [Organon](https://gitlab.com/lightcyphers-open/organon) by [Lightcyphers SRL](https://lightcyphers.com).

@@ -157,6 +157,8 @@ Philosophical reasoning engine. 63 principles (0-62) from 20 philosophers applie
 
 **License:** CC-BY-SA-4.0
 
+**Credits:** Original idea and code by Anatolie Golovco.
+
 ---
 
 ### seo-skill (v3.0.0)
