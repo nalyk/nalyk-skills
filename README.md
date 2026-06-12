@@ -59,9 +59,7 @@ Decomposes a task into parallel subagent workstreams, routes them to appropriate
 | `/parallel <tasks...>` | Quick parallel launch without decomposition |
 | `/plan-only <task>` | Preview execution plan without running |
 
-**Auto-detects:** "research and implement", "comprehensive review", multiple AND-connected tasks, migrations, multi-file refactoring.
-
-**Configuration:** `~/.claude/orchestrator.local.md`
+Commands-only — no auto-trigger. The skill activates exclusively via the three commands above.
 
 ---
 
@@ -82,7 +80,7 @@ Three audit frameworks: Steve Jobs (design simplification, 13 questions), George
 | `/vibe-audit <target>` | Engineering quality -- 20 metrics, 0-5 scale each |
 | `/multi-audit <target>` | Run multiple frameworks + cross-reference synthesis |
 
-**Auto-detects:** "simplify", "too complex", "BS", "jargon", "code review", "production ready", "vibe check".
+**Triggers:** "feature bloat" / "design audit" (Jobs), "BS detector" / "marketing speak" / "corporate speak" (Carlin), "vibe check" / "slop check" / "technical due diligence" (Vibe). Generic phrases like "simplify" and "code review" are intentionally not claimed.
 
 ---
 
@@ -133,7 +131,7 @@ Elite Senior Principal Engineer persona. Four specialized diagnostic protocols f
 | protocol-visual | UI/CSS/frontend | UI quality enforcement |
 | protocol-core | Algorithms, bugs | Surgical debugging |
 
-**Auto-detects:** code snippets, PRs, system design, UI issues, algorithm problems, performance bugs.
+**Triggers:** noun-domain signals only (race condition, time complexity, deadlock, database schema, API design, CSS/typography/accessibility). The main persona is invoked explicitly; generic verbs like "fix bug" or "code review" are not claimed.
 
 ---
 
@@ -206,7 +204,7 @@ Flutter/Dart development skill. Architecture scaffolds, Riverpod 3/BLoC state ma
 
 No external dependencies. Knowledge plugin.
 
-**Auto-activates on:** Flutter, Dart, mobile app, widgets, Riverpod, BLoC, GoRouter, iOS/Android build issues.
+**Auto-activates on:** explicit Flutter/Dart signals only — `pubspec.yaml` present, or Flutter, Dart, Riverpod, BLoC, GoRouter, iOS/Android Flutter build issues mentioned. Bare "mobile app" requests are intentionally not claimed.
 
 **Reference material:** ~2,250 lines covering architecture patterns, state management comparison, code templates, and quality gates.
 
