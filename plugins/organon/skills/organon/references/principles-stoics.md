@@ -2,9 +2,8 @@
 
 # Marcus Aurelius + Epictetus — Stoic Discipline
 
-> Marcus Aurelius (121–180 AD), Epictetus (c. 50–135 AD).
 > Principles: Dichotomy of Control (1), Obstacle is the Way (4), Praemeditatio Malorum (5), Askesis (6), View from Above (7), Prohairesis (16).
-> For the principle index and routing table, see `SKILL.md`. For the full lookup table, see `quick-reference.md`.
+> For routing and the principle index, see `quick-reference.md`.
 
 ---
 
@@ -27,8 +26,6 @@
 
 **Application in code:** Do not write code that assumes perfect conditions. Write code that performs excellently within what you control and degrades gracefully for what you don't. Error handling is not paranoia — it is applied stoicism. Retry logic is not defensiveness — it is praemeditatio malorum in production.
 
-**Computational rationale:** This maps directly to fault isolation in distributed systems. A well-designed microservice does not crash because an upstream dependency is slow — it has timeouts, circuit breakers, and fallback paths. The dichotomy of control is the philosophical foundation of defensive programming and resilient system design.
-
 ---
 
 ## 4. The Obstacle is the Way (Marcus Aurelius)
@@ -43,8 +40,6 @@
 - Legacy code is incomprehensible → documenting it *is* the contribution
 
 **Anti-pattern:** "I can't make progress because of X." The stoic response: X is your new task. Solve it, document it, and you've made the project stronger than if the original task had gone smoothly.
-
-**Computational rationale:** This is isomorphic to constraint-driven development. In optimization theory, constraints don't prevent solutions — they define the solution space. A memory limit forces efficient algorithms. A latency requirement forces caching and locality. The constraint *is* the design guidance.
 
 ---
 
@@ -67,8 +62,6 @@
 
 **But (Seneca):** Anticipation must not become paralysis. Walk the checklist, address the real risks, then execute.
 
-**Computational rationale:** Praemeditatio is the philosophical underpinning of failure mode analysis (FMEA), chaos engineering, and pre-mortem reviews. The checklist above is a lightweight FMEA for every code change.
-
 ---
 
 ## 6. Askesis — Every Commit is Training (Epictetus)
@@ -82,8 +75,6 @@
 - A TODO in code gets an issue tracker ID, not `"TODO: fix later"` for eternity
 
 **The anti-pattern askesis prevents:** "Lazy completion" — the tendency to reduce effort on tasks that seem trivial. If you skip the small reps, you fail the heavy lifts. A large project is the sum of thousands of small tasks. If each small task is "good enough," the project as a whole is mediocre.
-
-**Computational rationale:** This directly addresses the broken windows theory in software. A codebase with sloppy commit messages, unexplained TODOs, and un-handled edge cases signals that carelessness is acceptable — and carelessness compounds. Askesis prevents entropy from accumulating one "minor" shortcut at a time.
 
 ---
 
@@ -99,8 +90,6 @@
 
 **Concrete application:** Every subagent, before requesting review or declaring "done," zooms out: "If I look at this from the perspective of the project as a whole, does what I've done make sense? Does it integrate coherently?"
 
-**Computational rationale:** This is the philosophical equivalent of moving between levels of abstraction. A developer stuck in implementation details is operating at L0 (machine/code level). The View from Above moves to L1 (component), L2 (system), or L3 (business domain). Most architectural errors are invisible at L0 and obvious at L2. The discipline is knowing when to shift levels.
-
 ---
 
 ## 16. Prohairesis in Graceful Degradation (Epictetus)
@@ -114,5 +103,3 @@
 - LLM context window is nearly full → deliberate prioritization of what remains, not random truncation.
 
 **Design principle:** Every system must have a graceful degradation mode that is designed intentionally, not discovered accidentally in production. Prohairesis = the quality of decision-making remains maximal regardless of conditions.
-
-**Computational rationale:** This is the philosophical equivalent of the robustness principle (Postel's Law): "Be conservative in what you send, be liberal in what you accept." A system practicing prohairesis maintains its core invariants (correctness, safety, clarity) even when peripheral capabilities (speed, completeness, feature richness) must be sacrificed. The hierarchy of what degrades first must be designed explicitly.

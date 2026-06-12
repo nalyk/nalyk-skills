@@ -1,28 +1,25 @@
 # State Management Reference
 
+> Verify versions against the live project before copying any snippet. Add packages with `flutter pub add <pkg>` and verify current majors on pub.dev.
+
 ## Table of Contents
-1. [Riverpod 2.0 (Default)](#riverpod)
+1. [Riverpod 3 (Default)](#riverpod)
 2. [BLoC / Cubit](#bloc)
 3. [Provider (Legacy)](#provider-legacy)
 4. [Comparison Matrix](#comparison)
 
 ---
 
-## Riverpod 2.0 (Default Recommendation) {#riverpod}
+## Riverpod 3 (Default Recommendation) {#riverpod}
 
 ### Setup
 
-```yaml
-dependencies:
-  flutter_riverpod: ^2.5.1
-  riverpod_annotation: ^2.3.5
-
-dev_dependencies:
-  riverpod_generator: ^2.4.0
-  build_runner: ^2.4.8
-  riverpod_lint: ^2.3.10
-  custom_lint: ^0.6.4
+```bash
+flutter pub add flutter_riverpod riverpod_annotation
+flutter pub add -d riverpod_generator build_runner riverpod_lint custom_lint
 ```
+
+Riverpod 3 codegen note: generated function providers take a plain `Ref` parameter — the per-provider typed refs (`FooRef`) are gone.
 
 Add to `analysis_options.yaml`:
 ```yaml
@@ -92,7 +89,7 @@ class Products extends _$Products {
 
 // Derived/filtered provider
 @riverpod
-List<Product> filteredProducts(FilteredProductsRef ref, {String? category}) {
+List<Product> filteredProducts(Ref ref, {String? category}) {
   final products = ref.watch(productsProvider).valueOrNull ?? [];
   if (category == null) return products;
   return products.where((p) => p.category == category).toList();
@@ -129,7 +126,7 @@ class AuthState extends _$AuthState {
 
 // Convenience provider for checking auth status
 @riverpod
-bool isAuthenticated(IsAuthenticatedRef ref) {
+bool isAuthenticated(Ref ref) {
   return ref.watch(authStateProvider).valueOrNull != null;
 }
 ```
@@ -242,13 +239,9 @@ Use when: team mandate, event-driven architecture, complex state machines.
 
 ### Setup
 
-```yaml
-dependencies:
-  flutter_bloc: ^8.1.5
-  equatable: ^2.0.5
-
-dev_dependencies:
-  bloc_test: ^9.1.7
+```bash
+flutter pub add flutter_bloc equatable
+flutter pub add -d bloc_test
 ```
 
 ### Cubit Pattern (Simpler — Use by Default)
@@ -441,7 +434,7 @@ void main() {
 
 ## Comparison Matrix {#comparison}
 
-| Criterion | Riverpod 2.0 | BLoC/Cubit | Provider |
+| Criterion | Riverpod 3 | BLoC/Cubit | Provider |
 |---|---|---|---|
 | Learning curve | Medium | Medium-High | Low |
 | Boilerplate | Low (with codegen) | Medium | Low |

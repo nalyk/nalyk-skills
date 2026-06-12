@@ -1,8 +1,8 @@
 {
   "name": "audit-agent",
-  "description": "Multi-framework audit agent: Jobs (design simplification), Carlin (BS detection), Vibe (engineering quality). Auto-detects audit contexts. Commands: /jobs-audit, /carlin-audit, /vibe-audit, /multi-audit",
-  "version": "1.0.0",
+  "description": "Audit commands: /jobs-audit (design simplification), /carlin-audit (BS detection), /vibe-audit (engineering quality), /multi-audit (parallel run + synthesis).",
+  "version": "2.1.0",
   "author": { "name": "nalyk" },
   "license": "MIT",
-  "keywords": ["audit", "design", "bs-detector", "engineering", "code-review", "jobs", "carlin", "vibe"]
+  "keywords": ["audit", "design", "bs-detector", "engineering", "jobs", "carlin", "vibe"]
 }

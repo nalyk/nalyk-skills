@@ -1,8 +1,8 @@
 # Communication Protocol Reference
 
-## Response Header Template
+## Response Header Template (optional, first response only)
 
-Every response MUST start with:
+If used, the opening response starts with:
 
 ```
 [PROTOCOL: {CRITIC|ARCHITECT|VISUAL|CORE} | DISPOSITION: CYNICAL | DATE: 2026]

@@ -1,40 +1,33 @@
 # Flutter Expert
 
-Expert-level Flutter and Dart development assistant — architecture decisions, state management, code templates, quality gates, CI/CD, and production deployment.
+Flutter/Dart development skill — architecture decisions, state management, code templates, and quality gates for production apps.
 
 ## What It Does
 
-A single-skill knowledge plugin that provides deep Flutter expertise through phased workflows and comprehensive reference material (~2,250 lines of battle-tested patterns).
+A single-skill knowledge plugin: a lean SKILL.md router plus four reference files loaded on demand.
 
-| Topic | Covers |
-|-------|--------|
-| **Architecture** | Small/Medium/Large/Monorepo scaffolds, DI, flavors, migration |
-| **State Management** | Riverpod 2.0, BLoC/Cubit, Provider, comparison matrix |
-| **Code Templates** | Freezed, repository, GoRouter, forms, responsive, widgets, tests, i18n |
-| **Quality Gates** | 60+ lint rules, CI/CD, coverage, pre-commit hooks, release, profiling |
+| Reference | Covers |
+|-----------|--------|
+| `architecture-patterns.md` | Small/Medium/Large/Monorepo scaffolds, DI, flavors, Failure hierarchy, migration |
+| `state-management.md` | Riverpod 3, BLoC/Cubit, Provider, comparison matrix |
+| `code-templates.md` | App entry point, Dio ApiClient (flavor-gated logging, 401 refresh), Freezed 3, GoRouter, forms, tests, i18n |
+| `quality-gates.md` | flutter_lints 6 rule set, CI/CD, coverage, pre-commit hooks, Kotlin DSL release signing, profiling |
+
+Snippets are version-agnostic: no pinned dependency versions — add packages with `flutter pub add` and verify current majors on pub.dev. Syntax targets current majors (Riverpod 3, freezed 3, go_router 16).
 
 ## Install
 
 ```bash
-/plugin install flutter@nalyk-skills-demo
+/plugin install flutter@nalyk-skills
 ```
 
 ## Usage
 
-The skill auto-activates when you mention Flutter, Dart, mobile apps, widgets, Riverpod, BLoC, GoRouter, or related topics. Just ask naturally:
+The skill activates only on a Flutter/Dart signal — a `pubspec.yaml` in the project or an explicit mention of Flutter/Dart. Examples:
 
-- "Build me a Flutter app with authentication"
+- "Scaffold a feature-first Flutter project with authentication"
 - "Set up Riverpod state management"
 - "Add CI/CD quality gates to my Flutter project"
-- "Debug this iOS build error"
-- "Scaffold a medium-sized feature-first project"
+- "Debug this iOS build error in my Flutter app"
 
-## Workflow Phases
-
-1. **Phase 0** — Orientation (detect project state)
-2. **Phase 1** — Architecture decision tree
-3. **Phase 2** — State management selection
-4. **Phase 3** — Implementation workflow
-5. **Phase 4** — Critical patterns enforcement
-6. **Phase 5** — Quality gates
-7. **Phase 6** — Platform-specific handling
+Environment orientation (`flutter doctor` etc.) runs only for new projects or unknown environments, not for targeted edits.

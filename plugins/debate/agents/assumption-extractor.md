@@ -51,7 +51,7 @@ Create the assumption map:
 | Party | Core Assumption | If True → | If False → |
 |-------|-----------------|-----------|------------|
 | Claude | [assumption] | Claude correct | Claude wrong |
-| Gemini | [assumption] | Gemini correct | Gemini wrong |
+| agy | [assumption] | agy correct | agy wrong |
 | Codex | [assumption] | Codex correct | Codex wrong |
 ```
 
@@ -122,7 +122,7 @@ This common ground is solid regardless of which path you choose.
 | Party | Core Assumption | Leads To |
 |-------|-----------------|----------|
 | Claude | Team will grow to 20+ engineers in 2 years | Microservices |
-| Gemini | Current 5-person team is stable | Monolith |
+| agy | Current 5-person team is stable | Monolith |
 | Codex | DevOps capability is limited | Monolith |
 
 **The Real Question:** "What is your realistic team growth trajectory and DevOps maturity?"

@@ -2,83 +2,11 @@
 
 All built-in tools, browser, skills, plugins, slash commands, sub-agents.
 
-
 ---
 ## Tools > Agent Send
 
 [Source: https://docs.openclaw.ai/tools/agent-send]
 
-Agent Send - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Agent coordination
-Agent Send
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Tools
-Built-in tools
-Lobster
-LLM Task
-Exec Tool
-Web Tools
-apply_patch Tool
-Elevated Mode
-Thinking Levels
-Reactions
-Browser
-Browser (OpenClaw-managed)
-Browser Login
-Chrome Extension
-Browser Troubleshooting
-Agent coordination
-Agent Send
-Sub-Agents
-Multi-Agent Sandbox &amp; Tools
-Skills
-Slash Commands
-Skills
-Skills Config
-ClawHub
-Plugins
-Extensions
-Voice Call Plugin
-Zalo Personal Plugin
-Automation
-Hooks
-Cron Jobs
-Cron vs Heartbeat
-Automation Troubleshooting
-Webhooks
-Gmail PubSub
-Polls
-Auth Monitoring
-Media and devices
-Nodes
-Node Troubleshooting
-Image and Media Support
-Audio and Voice Notes
-Camera Capture
-Talk Mode
-Voice Wake
-Location Command
-openclaw agent (direct agent runs)
-Behavior
-Examples
-Flags
-Agent coordination
-Agent Send
-openclaw agent
 (direct agent runs)
 openclaw agent
 runs a single agent turn without needing an inbound chat message.
@@ -90,14 +18,14 @@ to force the embedded
 runtime on the current machine.
 Behavior
 Required:
---message &lt;text&gt;
+--message <text>
 Session selection:
---to &lt;dest&gt;
+--to <dest>
 derives the session key (group/channel targets preserve isolation; direct chats collapse to
 main
---session-id &lt;id&gt;
+--session-id <id>
 reuses an existing session by id,
---agent &lt;id&gt;
+--agent <id>
 targets a configured agent directly (uses that agent’s
 main
 session key)
@@ -105,7 +33,7 @@ Runs the same embedded agent runtime as normal inbound replies.
 Thinking/verbose flags persist into the session store.
 Output:
 default: prints reply text (plus
-MEDIA:&lt;url&gt;
+MEDIA:<url>
 lines)
 --json
 : prints structured payload + metadata
@@ -123,25 +51,24 @@ If the Gateway is unreachable, the CLI
 falls back
 to the embedded local run.
 Examples
-Copy
 openclaw
 agent
 --to
 +15555550123
 --message
-&quot;status update&quot;
+"status update"
 openclaw
 agent
 --agent
 ops
 --message
-&quot;Summarize logs&quot;
+"Summarize logs"
 openclaw
 agent
 --session-id
 1234
 --message
-&quot;Summarize inbox&quot;
+"Summarize inbox"
 --thinking
 medium
 openclaw
@@ -149,7 +76,7 @@ agent
 --to
 +15555550123
 --message
-&quot;Trace logs&quot;
+"Trace logs"
 --verbose
 --json
 openclaw
@@ -157,19 +84,19 @@ agent
 --to
 +15555550123
 --message
-&quot;Summon reply&quot;
+"Summon reply"
 --deliver
 openclaw
 agent
 --agent
 ops
 --message
-&quot;Generate report&quot;
+"Generate report"
 --deliver
 --reply-channel
 slack
 --reply-to
-&quot;#reports&quot;
+"#reports"
 Flags
 --local
 : run locally (requires model provider API keys in your shell)
@@ -186,11 +113,11 @@ whatsapp
 : delivery channel override
 --reply-account
 : delivery account id override
---thinking &lt;off|minimal|low|medium|high|xhigh&gt;
+--thinking <off|minimal|low|medium|high|xhigh>
 : persist thinking level (GPT-5.2 + Codex models only)
---verbose &lt;on|full|off&gt;
+--verbose <on|full|off>
 : persist verbose level
---timeout &lt;seconds&gt;
+--timeout <seconds>
 : override agent timeout
 --json
 : output structured JSON
@@ -202,77 +129,6 @@ Sub-Agents
 
 [Source: https://docs.openclaw.ai/tools/apply-patch]
 
-apply_patch Tool - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Built-in tools
-apply_patch Tool
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Tools
-Built-in tools
-Lobster
-LLM Task
-Exec Tool
-Web Tools
-apply_patch Tool
-Elevated Mode
-Thinking Levels
-Reactions
-Browser
-Browser (OpenClaw-managed)
-Browser Login
-Chrome Extension
-Browser Troubleshooting
-Agent coordination
-Agent Send
-Sub-Agents
-Multi-Agent Sandbox &amp; Tools
-Skills
-Slash Commands
-Skills
-Skills Config
-ClawHub
-Plugins
-Extensions
-Voice Call Plugin
-Zalo Personal Plugin
-Automation
-Hooks
-Cron Jobs
-Cron vs Heartbeat
-Automation Troubleshooting
-Webhooks
-Gmail PubSub
-Polls
-Auth Monitoring
-Media and devices
-Nodes
-Node Troubleshooting
-Image and Media Support
-Audio and Voice Notes
-Camera Capture
-Talk Mode
-Voice Wake
-Location Command
-apply_patch tool
-Parameters
-Notes
-Example
-Built-in tools
-apply_patch Tool
-apply_patch tool
 Apply file changes using a structured patch format. This is ideal for multi-file
 or multi-hunk edits where a single
 edit
@@ -280,7 +136,6 @@ call would be brittle.
 The tool accepts a single
 input
 string that wraps one or more file operations:
-Copy
 *** Begin Patch
 *** Add File: path/to/file.txt
 +line 1
@@ -320,11 +175,10 @@ tools.exec.applyPatch.allowModels
 Config is only under
 tools.exec
 Example
-Copy
-&quot;tool&quot;
-&quot;apply_patch&quot;
-&quot;input&quot;
-&quot;*** Begin Patch\n*** Update File: src/index.ts\n@@\n-const foo = 1\n+const foo = 2\n*** End Patch&quot;
+"tool"
+"apply_patch"
+"input"
+"*** Begin Patch\n*** Update File: src/index.ts\n@@\n-const foo = 1\n+const foo = 2\n*** End Patch"
 Web Tools
 Elevated Mode
 
@@ -333,85 +187,13 @@ Elevated Mode
 
 [Source: https://docs.openclaw.ai/tools/browser-linux-troubleshooting]
 
-Browser Troubleshooting - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Browser
-Browser Troubleshooting
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Tools
-Built-in tools
-Lobster
-LLM Task
-Exec Tool
-Web Tools
-apply_patch Tool
-Elevated Mode
-Thinking Levels
-Reactions
-Browser
-Browser (OpenClaw-managed)
-Browser Login
-Chrome Extension
-Browser Troubleshooting
-Agent coordination
-Agent Send
-Sub-Agents
-Multi-Agent Sandbox &amp; Tools
-Skills
-Slash Commands
-Skills
-Skills Config
-ClawHub
-Plugins
-Extensions
-Voice Call Plugin
-Zalo Personal Plugin
-Automation
-Hooks
-Cron Jobs
-Cron vs Heartbeat
-Automation Troubleshooting
-Webhooks
-Gmail PubSub
-Polls
-Auth Monitoring
-Media and devices
-Nodes
-Node Troubleshooting
-Image and Media Support
-Audio and Voice Notes
-Camera Capture
-Talk Mode
-Voice Wake
-Location Command
-Browser Troubleshooting (Linux)
-Problem: “Failed to start Chrome CDP on port 18800”
-Root Cause
-Solution 1: Install Google Chrome (Recommended)
-Solution 2: Use Snap Chromium with Attach-Only Mode
-Verifying the Browser Works
-Config Reference
 Problem: “Chrome extension relay is running, but no tab is connected”
 Browser
 Browser Troubleshooting
 Browser Troubleshooting (Linux)
 Problem: “Failed to start Chrome CDP on port 18800”
 OpenClaw’s browser control server fails to launch Chrome/Brave/Edge/Chromium with the error:
-Copy
-{&quot;error&quot;:&quot;Error: Failed to start Chrome CDP on port 18800 for profile \&quot;openclaw\&quot;.&quot;}
+{"error":"Error: Failed to start Chrome CDP on port 18800 for profile \"openclaw\"."}
 Root Cause
 On Ubuntu (and many Linux distros), the default Chromium installation is a
 snap package
@@ -419,15 +201,13 @@ snap package
 The
 apt install chromium
 command installs a stub package that redirects to snap:
-Copy
-Note, selecting &#x27;chromium-browser&#x27; instead of &#x27;chromium&#x27;
+Note, selecting 'chromium-browser' instead of 'chromium'
 chromium-browser is already the newest version (2:1snap1-0ubuntu2).
 This is NOT a real browser — it’s just a wrapper.
 Solution 1: Install Google Chrome (Recommended)
 Install the official Google Chrome
 .deb
 package, which is not sandboxed by snap:
-Copy
 wget
 https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 sudo
@@ -440,31 +220,28 @@ install
 # if there are dependency errors
 Then update your OpenClaw config (
 ~/.openclaw/openclaw.json
-Copy
-&quot;browser&quot;
-&quot;enabled&quot;
+"browser"
+"enabled"
 true
-&quot;executablePath&quot;
-&quot;/usr/bin/google-chrome-stable&quot;
-&quot;headless&quot;
+"executablePath"
+"/usr/bin/google-chrome-stable"
+"headless"
 true
-&quot;noSandbox&quot;
+"noSandbox"
 true
 Solution 2: Use Snap Chromium with Attach-Only Mode
 If you must use snap Chromium, configure OpenClaw to attach to a manually-started browser:
 Update config:
-Copy
-&quot;browser&quot;
-&quot;enabled&quot;
+"browser"
+"enabled"
 true
-&quot;attachOnly&quot;
+"attachOnly"
 true
-&quot;headless&quot;
+"headless"
 true
-&quot;noSandbox&quot;
+"noSandbox"
 true
 Start Chromium manually:
-Copy
 chromium-browser
 --headless
 --no-sandbox
@@ -472,9 +249,8 @@ chromium-browser
 --remote-debugging-port=18800
 --user-data-dir=$HOME/.openclaw/browser/openclaw/user-data
 about:blank
-&amp;
+&
 Optionally create a systemd user service to auto-start Chrome:
-Copy
 # ~/.config/systemd/user/openclaw-browser.service
 [Unit]
 Description=
@@ -498,12 +274,10 @@ Enable with:
 systemctl --user enable --now openclaw-browser.service
 Verifying the Browser Works
 Check status:
-Copy
 curl
 http://127.0.0.1:18791/
-&#x27;{running, pid, chosenBrowser}&#x27;
+'{running, pid, chosenBrowser}'
 Test browsing:
-Copy
 curl
 POST
 http://127.0.0.1:18791/start
@@ -542,7 +316,7 @@ Fix options:
 Use the managed browser:
 openclaw browser start --browser-profile openclaw
 (or set
-browser.defaultProfile: &quot;openclaw&quot;
+browser.defaultProfile: "openclaw"
 Use the extension relay:
 install the extension, open a tab, and click the
 OpenClaw extension icon to attach it.
@@ -566,79 +340,6 @@ Agent Send
 
 [Source: https://docs.openclaw.ai/tools/browser-login]
 
-Browser Login - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Browser
-Browser Login
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Tools
-Built-in tools
-Lobster
-LLM Task
-Exec Tool
-Web Tools
-apply_patch Tool
-Elevated Mode
-Thinking Levels
-Reactions
-Browser
-Browser (OpenClaw-managed)
-Browser Login
-Chrome Extension
-Browser Troubleshooting
-Agent coordination
-Agent Send
-Sub-Agents
-Multi-Agent Sandbox &amp; Tools
-Skills
-Slash Commands
-Skills
-Skills Config
-ClawHub
-Plugins
-Extensions
-Voice Call Plugin
-Zalo Personal Plugin
-Automation
-Hooks
-Cron Jobs
-Cron vs Heartbeat
-Automation Troubleshooting
-Webhooks
-Gmail PubSub
-Polls
-Auth Monitoring
-Media and devices
-Nodes
-Node Troubleshooting
-Image and Media Support
-Audio and Voice Notes
-Camera Capture
-Talk Mode
-Voice Wake
-Location Command
-Browser login + X/Twitter posting
-Manual login (recommended)
-Which Chrome profile is used?
-X/Twitter: recommended flow
-Sandboxing + host browser access
-Browser
-Browser Login
-Browser login + X/Twitter posting
-Manual login (recommended)
 When a site requires login,
 sign in manually
 in the
@@ -658,7 +359,6 @@ Two easy ways to access it:
 Ask the agent to open the browser
 and then log in yourself.
 Open it via CLI
-Copy
 openclaw
 browser
 start
@@ -667,7 +367,7 @@ browser
 open
 https://x.com
 If you have multiple profiles, pass
---browser-profile &lt;name&gt;
+--browser-profile <name>
 (the default is
 openclaw
 X/Twitter: recommended flow
@@ -686,17 +386,15 @@ to trigger bot detection. For X/Twitter (and other strict sites), prefer the
 host
 browser.
 If the agent is sandboxed, the browser tool defaults to the sandbox. To allow host control:
-Copy
 agents
 defaults
 sandbox
 mode
-&quot;non-main&quot;
+"non-main"
 browser
 allowHostControl
 true
 Then target the host browser:
-Copy
 openclaw
 browser
 open
@@ -714,101 +412,6 @@ Chrome Extension
 
 [Source: https://docs.openclaw.ai/tools/browser]
 
-Browser (OpenClaw-managed) - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Browser
-Browser (OpenClaw-managed)
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Tools
-Built-in tools
-Lobster
-LLM Task
-Exec Tool
-Web Tools
-apply_patch Tool
-Elevated Mode
-Thinking Levels
-Reactions
-Browser
-Browser (OpenClaw-managed)
-Browser Login
-Chrome Extension
-Browser Troubleshooting
-Agent coordination
-Agent Send
-Sub-Agents
-Multi-Agent Sandbox &amp; Tools
-Skills
-Slash Commands
-Skills
-Skills Config
-ClawHub
-Plugins
-Extensions
-Voice Call Plugin
-Zalo Personal Plugin
-Automation
-Hooks
-Cron Jobs
-Cron vs Heartbeat
-Automation Troubleshooting
-Webhooks
-Gmail PubSub
-Polls
-Auth Monitoring
-Media and devices
-Nodes
-Node Troubleshooting
-Image and Media Support
-Audio and Voice Notes
-Camera Capture
-Talk Mode
-Voice Wake
-Location Command
-Browser (openclaw-managed)
-What you get
-Quick start
-Profiles: openclaw vs chrome
-Configuration
-Use Brave (or another Chromium-based browser)
-Local vs remote control
-Node browser proxy (zero-config default)
-Browserless (hosted remote CDP)
-Security
-Profiles (multi-browser)
-Chrome extension relay (use your existing Chrome)
-Sandboxed sessions
-Setup
-Isolation guarantees
-Browser selection
-Control API (optional)
-Playwright requirement
-Docker Playwright install
-How it works (internal)
-CLI quick reference
-Snapshots and refs
-Wait power-ups
-Debug workflows
-JSON output
-State and environment knobs
-Security &amp; privacy
-Troubleshooting
-Agent tools + how control works
-Browser
-Browser (OpenClaw-managed)
 Browser (openclaw-managed)
 OpenClaw can run a
 dedicated Chrome/Brave/Edge/Chromium profile
@@ -850,7 +453,6 @@ not
 your daily driver. It is a safe, isolated surface for
 agent automation and verification.
 Quick start
-Copy
 openclaw
 browser
 --browser-profile
@@ -885,17 +487,16 @@ system browser
 (requires the OpenClaw
 extension to be attached to a tab).
 Set
-browser.defaultProfile: &quot;openclaw&quot;
+browser.defaultProfile: "openclaw"
 if you want managed mode by default.
 Configuration
 Browser settings live in
 ~/.openclaw/openclaw.json
-Copy
 browser
 enabled
 true
 // default: true
-// cdpUrl: &quot;http://127.0.0.1:18792&quot;,
+// cdpUrl: "http://127.0.0.1:18792",
 // legacy single-profile override
 remoteCdpTimeoutMs
 1500
@@ -904,9 +505,9 @@ remoteCdpHandshakeTimeoutMs
 3000
 // remote CDP WebSocket handshake timeout (ms)
 defaultProfile
-&quot;chrome&quot;
+"chrome"
 color
-&quot;#FF4500&quot;
+"#FF4500"
 headless
 false
 noSandbox
@@ -914,23 +515,23 @@ false
 attachOnly
 false
 executablePath
-&quot;/Applications/Brave Browser.app/Contents/MacOS/Brave Browser&quot;
+"/Applications/Brave Browser.app/Contents/MacOS/Brave Browser"
 profiles
 openclaw
 cdpPort
 18800
 color
-&quot;#FF4500&quot;
+"#FF4500"
 work
 cdpPort
 18801
 color
-&quot;#0066CC&quot;
+"#0066CC"
 remote
 cdpUrl
-&quot;http://10.0.0.42:9222&quot;
+"http://10.0.0.42:9222"
 color
-&quot;#00AA00&quot;
+"#00AA00"
 Notes:
 The browser control service binds to loopback on a port derived from
 gateway.port
@@ -957,7 +558,7 @@ tint the browser UI so you can see which profile is active.
 Default profile is
 chrome
 (extension relay). Use
-defaultProfile: &quot;openclaw&quot;
+defaultProfile: "openclaw"
 for the managed browser.
 Auto-detect order: system default browser if Chromium-based; otherwise Chrome → Brave → Edge → Chromium → Chrome Canary.
 Local
@@ -975,25 +576,23 @@ browser.executablePath
 to override
 auto-detection:
 CLI example:
-Copy
 openclaw
 config
 set
 browser.executablePath
-&quot;/usr/bin/google-chrome&quot;
-Copy
+"/usr/bin/google-chrome"
 // macOS
 browser
 executablePath
-&quot;/Applications/Brave Browser.app/Contents/MacOS/Brave Browser&quot;
+"/Applications/Brave Browser.app/Contents/MacOS/Brave Browser"
 // Windows
 browser
 executablePath
-&quot;C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe&quot;
+"C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe"
 // Linux
 browser
 executablePath
-&quot;/usr/bin/brave-browser&quot;
+"/usr/bin/brave-browser"
 Local vs remote control
 Local control (default):
 the Gateway starts the loopback control service and can launch a local browser.
@@ -1001,17 +600,17 @@ Remote control (node host):
 run a node host on the machine that has the browser; the Gateway proxies browser actions to it.
 Remote CDP:
 set
-browser.profiles.&lt;name&gt;.cdpUrl
+browser.profiles.<name>.cdpUrl
 (or
 browser.cdpUrl
 ) to
 attach to a remote Chromium-based browser. In this case, OpenClaw will not launch a local browser.
 Remote CDP URLs can include auth:
 Query tokens (e.g.,
-https://provider.example?token=&lt;token&gt;
+https://provider.example?token=<token>
 HTTP Basic auth (e.g.,
 https://user:
-[email&#160;protected]
+[email protected]
 OpenClaw preserves the auth when calling
 /json/*
 endpoints and when connecting
@@ -1033,19 +632,18 @@ Disable if you don’t want it:
 On the node:
 nodeHost.browserProxy.enabled=false
 On the gateway:
-gateway.nodes.browser.mode=&quot;off&quot;
+gateway.nodes.browser.mode="off"
 Browserless (hosted remote CDP)
 Browserless
 is a hosted Chromium service that exposes
 CDP endpoints over HTTPS. You can point a OpenClaw browser profile at a
 Browserless region endpoint and authenticate with your API key.
 Example:
-Copy
 browser
 enabled
 true
 defaultProfile
-&quot;browserless&quot;
+"browserless"
 remoteCdpTimeoutMs
 2000
 remoteCdpHandshakeTimeoutMs
@@ -1053,12 +651,12 @@ remoteCdpHandshakeTimeoutMs
 profiles
 browserless
 cdpUrl
-&quot;https://production-sfo.browserless.io?token=&lt;BROWSERLESS_API_KEY&gt;&quot;
+"https://production-sfo.browserless.io?token=<BROWSERLESS_API_KEY>"
 color
-&quot;#00AA00&quot;
+"#00AA00"
 Notes:
 Replace
-&lt;BROWSERLESS_API_KEY&gt;
+<BROWSERLESS_API_KEY>
 with your real Browserless token.
 Choose the region endpoint that matches your Browserless account (see their docs).
 Security
@@ -1094,7 +692,7 @@ Local CDP ports allocate from
 by default.
 Deleting a profile moves its local data directory to Trash.
 All control endpoints accept
-?profile=&lt;name&gt;
+?profile=<name>
 ; the CLI uses
 --browser-profile
 Chrome extension relay (use your existing Chrome)
@@ -1122,18 +720,17 @@ Sandboxed sessions
 If the agent session is sandboxed, the
 browser
 tool may default to
-target=&quot;sandbox&quot;
+target="sandbox"
 (sandbox browser).
 Chrome extension relay takeover requires host browser control, so either:
 run the session unsandboxed, or
 set
 agents.defaults.sandbox.browser.allowHostControl: true
 and use
-target=&quot;host&quot;
+target="host"
 when calling the tool.
 Setup
 Load the extension (dev/unpacked):
-Copy
 openclaw
 browser
 extension
@@ -1150,9 +747,8 @@ openclaw browser --browser-profile chrome tabs
 Agent tool:
 browser
 with
-profile=&quot;chrome&quot;
+profile="chrome"
 Optional: if you want a different name or relay port, create your own profile:
-Copy
 openclaw
 browser
 create-profile
@@ -1163,7 +759,7 @@ extension
 --cdp-url
 http://127.0.0.1:18792
 --color
-&quot;#00AA00&quot;
+"#00AA00"
 Notes:
 This mode relies on Playwright-on-CDP for most operations (screenshots/snapshots/actions).
 Detach by clicking the extension icon again.
@@ -1251,10 +847,10 @@ POST /set/timezone
 POST /set/locale
 POST /set/device
 All endpoints accept
-?profile=&lt;name&gt;
+?profile=<name>
 If gateway auth is configured, browser HTTP routes require auth too:
-Authorization: Bearer &lt;gateway token&gt;
-x-openclaw-password: &lt;gateway password&gt;
+Authorization: Bearer <gateway token>
+x-openclaw-password: <gateway password>
 or HTTP Basic auth with that password
 Playwright requirement
 Some features (navigate/act/AI snapshot/role snapshot, element screenshots, PDF) require
@@ -1273,7 +869,6 @@ If your Gateway runs in Docker, avoid
 npx playwright
 (npm override conflicts).
 Use the bundled CLI instead:
-Copy
 docker
 compose
 run
@@ -1309,7 +904,7 @@ This design keeps the agent on a stable, deterministic interface while letting
 you swap local/remote browsers and profiles.
 CLI quick reference
 All commands accept
---browser-profile &lt;name&gt;
+--browser-profile <name>
 to target a specific profile.
 All commands also accept
 --json
@@ -1336,19 +931,19 @@ openclaw browser snapshot --format aria --limit 200
 openclaw browser snapshot --interactive --compact --depth 6
 openclaw browser snapshot --efficient
 openclaw browser snapshot --labels
-openclaw browser snapshot --selector &quot;#main&quot; --interactive
-openclaw browser snapshot --frame &quot;iframe#main&quot; --interactive
+openclaw browser snapshot --selector "#main" --interactive
+openclaw browser snapshot --frame "iframe#main" --interactive
 openclaw browser console --level error
 openclaw browser errors --clear
 openclaw browser requests --filter api --clear
 openclaw browser pdf
-openclaw browser responsebody &quot;**/api&quot; --max-chars 5000
+openclaw browser responsebody "**/api" --max-chars 5000
 Actions:
 openclaw browser navigate https://example.com
 openclaw browser resize 1280 720
 openclaw browser click 12 --double
 openclaw browser click e12 --double
-openclaw browser type 23 &quot;hello&quot; --submit
+openclaw browser type 23 "hello" --submit
 openclaw browser press Enter
 openclaw browser hover 44
 openclaw browser scrollintoview e12
@@ -1357,31 +952,31 @@ openclaw browser select 9 OptionA OptionB
 openclaw browser download e12 report.pdf
 openclaw browser waitfordownload report.pdf
 openclaw browser upload /tmp/openclaw/uploads/file.pdf
-openclaw browser fill --fields &#x27;[{&quot;ref&quot;:&quot;1&quot;,&quot;type&quot;:&quot;text&quot;,&quot;value&quot;:&quot;Ada&quot;}]&#x27;
+openclaw browser fill --fields '[{"ref":"1","type":"text","value":"Ada"}]'
 openclaw browser dialog --accept
-openclaw browser wait --text &quot;Done&quot;
-openclaw browser wait &quot;#main&quot; --url &quot;**/dash&quot; --load networkidle --fn &quot;window.ready===true&quot;
-openclaw browser evaluate --fn &#x27;(el) =&gt; el.textContent&#x27; --ref 7
+openclaw browser wait --text "Done"
+openclaw browser wait "#main" --url "**/dash" --load networkidle --fn "window.ready===true"
+openclaw browser evaluate --fn '(el) => el.textContent' --ref 7
 openclaw browser highlight e12
 openclaw browser trace start
 openclaw browser trace stop
 State:
 openclaw browser cookies
-openclaw browser cookies set session abc123 --url &quot;https://example.com&quot;
+openclaw browser cookies set session abc123 --url "https://example.com"
 openclaw browser cookies clear
 openclaw browser storage local get
 openclaw browser storage local set theme dark
 openclaw browser storage session clear
 openclaw browser set offline on
-openclaw browser set headers --json &#x27;{&quot;X-Debug&quot;:&quot;1&quot;}&#x27;
+openclaw browser set headers --json '{"X-Debug":"1"}'
 openclaw browser set credentials user pass
 openclaw browser set credentials --clear
-openclaw browser set geo 37.7749 -122.4194 --origin &quot;https://example.com&quot;
+openclaw browser set geo 37.7749 -122.4194 --origin "https://example.com"
 openclaw browser set geo --clear
 openclaw browser set media dark
 openclaw browser set timezone America/New_York
 openclaw browser set locale en-US
-openclaw browser set device &quot;iPhone 14&quot;
+openclaw browser set device "iPhone 14"
 Notes:
 upload
 and
@@ -1411,7 +1006,7 @@ can also set file inputs directly via
 snapshot
 --format ai
 (default when Playwright is installed): returns an AI snapshot with numeric refs (
-aria-ref=&quot;&lt;n&gt;&quot;
+aria-ref="<n>"
 --format aria
 : returns the accessibility tree (no refs; inspection only).
 --efficient
@@ -1419,7 +1014,7 @@ aria-ref=&quot;&lt;n&gt;&quot;
 --mode efficient
 ): compact role snapshot preset (interactive + compact + depth + lower maxChars).
 Config default (tool/CLI only): set
-browser.snapshotDefaults.mode: &quot;efficient&quot;
+browser.snapshotDefaults.mode: "efficient"
 to use efficient snapshots when the caller does not pass a mode (see
 Gateway configuration
 Role snapshot options (
@@ -1429,14 +1024,14 @@ Role snapshot options (
 --selector
 ) force a role-based snapshot with refs like
 ref=e12
---frame &quot;&lt;iframe selector&gt;&quot;
+--frame "<iframe selector>"
 scopes role snapshots to an iframe (pairs with role refs like
 e12
 --interactive
 outputs a flat, easy-to-pick list of interactive elements (best for driving actions).
 --labels
 adds a viewport-only screenshot with overlayed ref labels (prints
-MEDIA:&lt;path&gt;
+MEDIA:<path>
 click
 type
 /etc require a
@@ -1456,7 +1051,7 @@ openclaw browser snapshot
 Output: a text snapshot that includes numeric refs.
 Actions:
 openclaw browser click 12
-openclaw browser type 23 &quot;hello&quot;
+openclaw browser type 23 "hello"
 Internally, the ref is resolved via Playwright’s
 aria-ref
 Role snapshot (role refs like
@@ -1496,36 +1091,35 @@ If the role snapshot was taken with
 Wait power-ups
 You can wait on more than just time/text:
 Wait for URL (globs supported by Playwright):
-openclaw browser wait --url &quot;**/dash&quot;
+openclaw browser wait --url "**/dash"
 Wait for load state:
 openclaw browser wait --load networkidle
 Wait for a JS predicate:
-openclaw browser wait --fn &quot;window.ready===true&quot;
+openclaw browser wait --fn "window.ready===true"
 Wait for a selector to become visible:
-openclaw browser wait &quot;#main&quot;
+openclaw browser wait "#main"
 These can be combined:
-Copy
 openclaw
 browser
 wait
-&quot;#main&quot;
+"#main"
 --url
-&quot;**/dash&quot;
+"**/dash"
 --load
 networkidle
 --fn
-&quot;window.ready===true&quot;
+"window.ready===true"
 --timeout-ms
 15000
 Debug workflows
 When an action fails (e.g. “not visible”, “strict mode violation”, “covered”):
 openclaw browser snapshot --interactive
 Use
-click &lt;ref&gt;
-type &lt;ref&gt;
+click <ref>
+type <ref>
 (prefer role refs in interactive mode)
 If it still fails:
-openclaw browser highlight &lt;ref&gt;
+openclaw browser highlight <ref>
 to see what Playwright is targeting
 If the page behaves oddly:
 openclaw browser errors --clear
@@ -1535,12 +1129,11 @@ openclaw browser trace start
 reproduce the issue
 openclaw browser trace stop
 (prints
-TRACE:&lt;path&gt;
+TRACE:<path>
 JSON output
 --json
 is for scripting and structured tooling.
 Examples:
-Copy
 openclaw
 browser
 status
@@ -1576,7 +1169,7 @@ storage local|session get|set|clear
 Offline:
 set offline on|off
 Headers:
-set headers --json &#x27;{&quot;X-Debug&quot;:&quot;1&quot;}&#x27;
+set headers --json '{"X-Debug":"1"}'
 (or
 --clear
 HTTP basic auth:
@@ -1584,7 +1177,7 @@ set credentials user pass
 (or
 --clear
 Geolocation:
-set geo &lt;lat&gt; &lt;lon&gt; --origin &quot;https://example.com&quot;
+set geo <lat> <lon> --origin "https://example.com"
 (or
 --clear
 Media:
@@ -1593,10 +1186,10 @@ Timezone / locale:
 set timezone ...
 set locale ...
 Device / viewport:
-set device &quot;iPhone 14&quot;
+set device "iPhone 14"
 (Playwright device presets)
 set viewport 1280 720
-Security &amp; privacy
+Security & privacy
 The openclaw browser profile may contain logged-in sessions; treat it as sensitive.
 browser act kind=evaluate
 openclaw browser evaluate
@@ -1638,7 +1231,7 @@ host
 node
 ) to select where the browser lives.
 In sandboxed sessions,
-target: &quot;host&quot;
+target: "host"
 requires
 agents.defaults.sandbox.browser.allowHostControl=true
 target
@@ -1647,8 +1240,8 @@ sandbox
 , non-sandbox sessions default to
 host
 If a browser-capable node is connected, the tool may auto-route to it unless you pin
-target=&quot;host&quot;
-target=&quot;node&quot;
+target="host"
+target="node"
 This keeps the agent deterministic and avoids brittle selectors.
 Reactions
 Browser Login
@@ -1658,79 +1251,6 @@ Browser Login
 
 [Source: https://docs.openclaw.ai/tools/chrome-extension]
 
-Chrome Extension - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Browser
-Chrome Extension
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Tools
-Built-in tools
-Lobster
-LLM Task
-Exec Tool
-Web Tools
-apply_patch Tool
-Elevated Mode
-Thinking Levels
-Reactions
-Browser
-Browser (OpenClaw-managed)
-Browser Login
-Chrome Extension
-Browser Troubleshooting
-Agent coordination
-Agent Send
-Sub-Agents
-Multi-Agent Sandbox &amp; Tools
-Skills
-Slash Commands
-Skills
-Skills Config
-ClawHub
-Plugins
-Extensions
-Voice Call Plugin
-Zalo Personal Plugin
-Automation
-Hooks
-Cron Jobs
-Cron vs Heartbeat
-Automation Troubleshooting
-Webhooks
-Gmail PubSub
-Polls
-Auth Monitoring
-Media and devices
-Nodes
-Node Troubleshooting
-Image and Media Support
-Audio and Voice Notes
-Camera Capture
-Talk Mode
-Voice Wake
-Location Command
-Chrome extension (browser relay)
-What it is (concept)
-Install / load (unpacked)
-Updates (no build step)
-Use it (no extra config)
-Attach / detach (toolbar button)
-Which tab does it control?
-Badge + common errors
-Remote Gateway (use a node host)
 Local Gateway (same machine as Chrome) — usually no extra steps
 Remote Gateway (Gateway runs elsewhere) — run a node host
 Sandboxing (tool containers)
@@ -1762,13 +1282,11 @@ browser
 tool surface (selecting the right profile).
 Install / load (unpacked)
 Install the extension to a stable local path:
-Copy
 openclaw
 browser
 extension
 install
 Print the installed extension directory path:
-Copy
 openclaw
 browser
 extension
@@ -1797,9 +1315,8 @@ openclaw browser --browser-profile chrome tabs
 Agent tool:
 browser
 with
-profile=&quot;chrome&quot;
+profile="chrome"
 If you want a different name or a different relay port, create your own profile:
-Copy
 openclaw
 browser
 create-profile
@@ -1810,7 +1327,7 @@ extension
 --cdp-url
 http://127.0.0.1:18792
 --color
-&quot;#00AA00&quot;
+"#00AA00"
 Attach / detach (toolbar button)
 Open the tab you want OpenClaw to control.
 Click the extension icon.
@@ -1847,13 +1364,13 @@ or set
 gateway.nodes.browser.mode
 Sandboxing (tool containers)
 If your agent session is sandboxed (
-agents.defaults.sandbox.mode != &quot;off&quot;
+agents.defaults.sandbox.mode != "off"
 ), the
 browser
 tool can be restricted:
 By default, sandboxed sessions often target the
 sandbox browser
-target=&quot;sandbox&quot;
+target="sandbox"
 ), not your host Chrome.
 Chrome extension relay takeover requires controlling the
 host
@@ -1863,7 +1380,6 @@ Easiest: use the extension from a
 non-sandboxed
 session/agent.
 Or allow host browser control for sandboxed sessions:
-Copy
 agents
 defaults
 sandbox
@@ -1873,13 +1389,13 @@ true
 Then ensure the tool isn’t denied by tool policy, and (if needed) call
 browser
 with
-target=&quot;host&quot;
+target="host"
 Debugging:
 openclaw sandbox explain
 Remote access tips
 Keep the Gateway and node host on the same tailnet; avoid exposing relay ports to LAN or public Internet.
 Pair nodes intentionally; disable browser proxy routing if you don’t want remote control (
-gateway.nodes.browser.mode=&quot;off&quot;
+gateway.nodes.browser.mode="off"
 How “extension path” works
 openclaw browser extension path
 prints the
@@ -1926,99 +1442,6 @@ Browser Troubleshooting
 
 [Source: https://docs.openclaw.ai/tools/clawhub]
 
-ClawHub - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Skills
-ClawHub
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Tools
-Built-in tools
-Lobster
-LLM Task
-Exec Tool
-Web Tools
-apply_patch Tool
-Elevated Mode
-Thinking Levels
-Reactions
-Browser
-Browser (OpenClaw-managed)
-Browser Login
-Chrome Extension
-Browser Troubleshooting
-Agent coordination
-Agent Send
-Sub-Agents
-Multi-Agent Sandbox &amp; Tools
-Skills
-Slash Commands
-Skills
-Skills Config
-ClawHub
-Plugins
-Extensions
-Voice Call Plugin
-Zalo Personal Plugin
-Automation
-Hooks
-Cron Jobs
-Cron vs Heartbeat
-Automation Troubleshooting
-Webhooks
-Gmail PubSub
-Polls
-Auth Monitoring
-Media and devices
-Nodes
-Node Troubleshooting
-Image and Media Support
-Audio and Voice Notes
-Camera Capture
-Talk Mode
-Voice Wake
-Location Command
-ClawHub
-What ClawHub is
-How it works
-What you can do
-Who this is for (beginner-friendly)
-Quick start (non-technical)
-Install the CLI
-How it fits into OpenClaw
-Skill system overview
-What the service provides (features)
-Security and moderation
-CLI commands and parameters
-Common workflows for agents
-Search for skills
-Download new skills
-Update installed skills
-Back up your skills (publish or sync)
-Advanced details (technical)
-Versioning and tags
-Local changes vs registry versions
-Sync scanning and fallback roots
-Storage and lockfile
-Telemetry (install counts)
-Environment variables
-Skills
-ClawHub
-ClawHub
-ClawHub is the
-public skill registry for OpenClaw
 . It is a free service: all skills are public, open, and visible to everyone for sharing and reuse. A skill is just a folder with a
 SKILL.md
 file (plus supporting text files). You can browse skills in the web app or use the CLI to search, install, update, and publish skills.
@@ -2048,16 +1471,14 @@ Back up your own skills by publishing them.
 Quick start (non-technical)
 Install the CLI (see next section).
 Search for something you need:
-clawhub search &quot;calendar&quot;
+clawhub search "calendar"
 Install a skill:
-clawhub install &lt;skill-slug&gt;
+clawhub install <skill-slug>
 Start a new OpenClaw session so it picks up the new skill.
 Install the CLI
 Pick one:
-Copy
 npm
 clawhub
-Copy
 pnpm
 add
 clawhub
@@ -2071,7 +1492,7 @@ falls back to that workspace unless you override
 (or
 CLAWHUB_WORKDIR
 ). OpenClaw loads workspace skills from
-&lt;workspace&gt;/skills
+<workspace>/skills
 and will pick them up in the
 next
 session. If you already use
@@ -2124,14 +1545,14 @@ Interested in becoming a moderator? Ask in the OpenClaw Discord and contact a
 moderator or maintainer.
 CLI commands and parameters
 Global options (apply to all commands):
---workdir &lt;dir&gt;
+--workdir <dir>
 : Working directory (default: current dir; falls back to OpenClaw workspace).
---dir &lt;dir&gt;
+--dir <dir>
 : Skills directory, relative to workdir (default:
 skills
---site &lt;url&gt;
+--site <url>
 : Site base URL (browser login).
---registry &lt;url&gt;
+--registry <url>
 : Registry API base URL.
 --no-input
 : Disable prompts (non-interactive).
@@ -2140,32 +1561,32 @@ skills
 Auth:
 clawhub login
 (browser flow) or
-clawhub login --token &lt;token&gt;
+clawhub login --token <token>
 clawhub logout
 clawhub whoami
 Options:
---token &lt;token&gt;
+--token <token>
 : Paste an API token.
---label &lt;label&gt;
+--label <label>
 : Label stored for browser login tokens (default:
 CLI token
 --no-browser
 : Do not open a browser (requires
 --token
 Search:
-clawhub search &quot;query&quot;
---limit &lt;n&gt;
+clawhub search "query"
+--limit <n>
 : Max results.
 Install:
-clawhub install &lt;slug&gt;
---version &lt;version&gt;
+clawhub install <slug>
+--version <version>
 : Install a specific version.
 --force
 : Overwrite if the folder already exists.
 Update:
-clawhub update &lt;slug&gt;
+clawhub update <slug>
 clawhub update --all
---version &lt;version&gt;
+--version <version>
 : Update to a specific version (single slug only).
 --force
 : Overwrite when local files do not match any published version.
@@ -2174,72 +1595,67 @@ clawhub list
 (reads
 .clawhub/lock.json
 Publish:
-clawhub publish &lt;path&gt;
---slug &lt;slug&gt;
+clawhub publish <path>
+--slug <slug>
 : Skill slug.
---name &lt;name&gt;
+--name <name>
 : Display name.
---version &lt;version&gt;
+--version <version>
 : Semver version.
---changelog &lt;text&gt;
+--changelog <text>
 : Changelog text (can be empty).
---tags &lt;tags&gt;
+--tags <tags>
 : Comma-separated tags (default:
 latest
 Delete/undelete (owner/admin only):
-clawhub delete &lt;slug&gt; --yes
-clawhub undelete &lt;slug&gt; --yes
+clawhub delete <slug> --yes
+clawhub undelete <slug> --yes
 Sync (scan local skills + publish new/updated):
 clawhub sync
---root &lt;dir...&gt;
+--root <dir...>
 : Extra scan roots.
 --all
 : Upload everything without prompts.
 --dry-run
 : Show what would be uploaded.
---bump &lt;type&gt;
+--bump <type>
 patch|minor|major
 for updates (default:
 patch
---changelog &lt;text&gt;
+--changelog <text>
 : Changelog for non-interactive updates.
---tags &lt;tags&gt;
+--tags <tags>
 : Comma-separated tags (default:
 latest
---concurrency &lt;n&gt;
+--concurrency <n>
 : Registry checks (default: 4).
 Common workflows for agents
 Search for skills
-Copy
 clawhub
 search
-&quot;postgres backups&quot;
+"postgres backups"
 Download new skills
-Copy
 clawhub
 install
 my-skill-pack
 Update installed skills
-Copy
 clawhub
 update
 --all
 Back up your skills (publish or sync)
 For a single skill folder:
-Copy
 clawhub
 publish
 ./my-skill
 --slug
 my-skill
 --name
-&quot;My Skill&quot;
+"My Skill"
 --version
 1.0.0
 --tags
 latest
 To scan and back up many skills at once:
-Copy
 clawhub
 sync
 --all
@@ -2273,7 +1689,6 @@ Telemetry (install counts)
 When you run
 clawhub sync
 while logged in, the CLI sends a minimal snapshot to compute install counts. You can disable this entirely:
-Copy
 export
 CLAWHUB_DISABLE_TELEMETRY
 Environment variables
@@ -2296,87 +1711,6 @@ Plugins
 
 [Source: https://docs.openclaw.ai/tools/elevated]
 
-Elevated Mode - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Built-in tools
-Elevated Mode
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Tools
-Built-in tools
-Lobster
-LLM Task
-Exec Tool
-Web Tools
-apply_patch Tool
-Elevated Mode
-Thinking Levels
-Reactions
-Browser
-Browser (OpenClaw-managed)
-Browser Login
-Chrome Extension
-Browser Troubleshooting
-Agent coordination
-Agent Send
-Sub-Agents
-Multi-Agent Sandbox &amp; Tools
-Skills
-Slash Commands
-Skills
-Skills Config
-ClawHub
-Plugins
-Extensions
-Voice Call Plugin
-Zalo Personal Plugin
-Automation
-Hooks
-Cron Jobs
-Cron vs Heartbeat
-Automation Troubleshooting
-Webhooks
-Gmail PubSub
-Polls
-Auth Monitoring
-Media and devices
-Nodes
-Node Troubleshooting
-Image and Media Support
-Audio and Voice Notes
-Camera Capture
-Talk Mode
-Voice Wake
-Location Command
-Elevated Mode (/elevated directives)
-What it does
-What it controls (and what it doesn’t)
-Resolution order
-Setting a session default
-Availability + allowlists
-Logging + status
-Built-in tools
-Elevated Mode
-Elevated Mode (/elevated directives)
-What it does
-/elevated on
-runs on the gateway host and keeps exec approvals (same as
-/elevated ask
-/elevated full
-runs on the gateway host
-and
 auto-approves exec (skips exec approvals).
 /elevated ask
 runs on the gateway host but keeps exec approvals (same as
@@ -2494,83 +1828,6 @@ Thinking Levels
 
 [Source: https://docs.openclaw.ai/tools/exec]
 
-Exec Tool - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Built-in tools
-Exec Tool
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Tools
-Built-in tools
-Lobster
-LLM Task
-Exec Tool
-Web Tools
-apply_patch Tool
-Elevated Mode
-Thinking Levels
-Reactions
-Browser
-Browser (OpenClaw-managed)
-Browser Login
-Chrome Extension
-Browser Troubleshooting
-Agent coordination
-Agent Send
-Sub-Agents
-Multi-Agent Sandbox &amp; Tools
-Skills
-Slash Commands
-Skills
-Skills Config
-ClawHub
-Plugins
-Extensions
-Voice Call Plugin
-Zalo Personal Plugin
-Automation
-Hooks
-Cron Jobs
-Cron vs Heartbeat
-Automation Troubleshooting
-Webhooks
-Gmail PubSub
-Polls
-Auth Monitoring
-Media and devices
-Nodes
-Node Troubleshooting
-Image and Media Support
-Audio and Voice Notes
-Camera Capture
-Talk Mode
-Voice Wake
-Location Command
-Exec tool
-Parameters
-Config
-PATH handling
-Session overrides (/exec)
-Authorization model
-Exec approvals (companion app / node host)
-Allowlist + safe bins
-Examples
-apply_patch (experimental)
-Built-in tools
-Exec Tool
-Exec tool
 Run shell commands in the workspace. Supports foreground + background execution via
 process
 process
@@ -2693,12 +1950,11 @@ for exec runs (gateway + sandbox only).
 tools.exec.safeBins
 : stdin-only safe binaries that can run without explicit allowlist entries.
 Example:
-Copy
 tools
 exec
 pathPrepend
-&quot;~/bin&quot;
-&quot;/opt/oss/bin&quot;
+"~/bin"
+"/opt/oss/bin"
 PATH handling
 host=gateway
 : merges your login-shell
@@ -2736,7 +1992,6 @@ overrides are
 rejected for host execution and ignored by node hosts. If you need additional PATH entries on a node,
 configure the node host service environment (systemd/launchd) or install tools in standard locations.
 Per-agent node binding (use the agent list index in config):
-Copy
 openclaw
 config
 get
@@ -2745,7 +2000,7 @@ openclaw
 config
 set
 agents.list[0].tools.exec.node
-&quot;node-id-or-name&quot;
+"node-id-or-name"
 Control UI: the Nodes tab includes a small “Exec node binding” panel for the same settings.
 Session overrides (
 /exec
@@ -2763,7 +2018,6 @@ Send
 /exec
 with no arguments to show the current values.
 Example:
-Copy
 /exec host=gateway security=allowlist ask=on-miss node=mac-1
 Authorization model
 /exec
@@ -2775,7 +2029,7 @@ It updates
 session state only
 and does not write config. To hard-disable exec, deny it via tool
 policy (
-tools.deny: [&quot;exec&quot;]
+tools.deny: ["exec"]
 or per-agent). Host approvals still apply unless you explicitly set
 security=full
 and
@@ -2788,7 +2042,7 @@ See
 Exec approvals
 for the policy, allowlist, and UI flow.
 When approvals are required, the exec tool returns immediately with
-status: &quot;approval-pending&quot;
+status: "approval-pending"
 and an approval id. Once approved (or denied / timed out),
 the Gateway emits system events (
 Exec finished
@@ -2806,84 +2060,78 @@ resolved binary paths only
 security=allowlist
 , shell commands are auto-allowed only if every pipeline segment is
 allowlisted or a safe bin. Chaining (
-&amp;&amp;
+&&
 ) and redirections are rejected in
 allowlist mode unless every top-level segment satisfies the allowlist (including safe bins).
 Redirections remain unsupported.
 Examples
 Foreground:
-Copy
-&quot;tool&quot;
-&quot;exec&quot;
-&quot;command&quot;
-&quot;ls -la&quot;
+"tool"
+"exec"
+"command"
+"ls -la"
 Background + poll:
-Copy
-&quot;tool&quot;
-&quot;exec&quot;
-&quot;command&quot;
-&quot;npm run build&quot;
-&quot;yieldMs&quot;
+"tool"
+"exec"
+"command"
+"npm run build"
+"yieldMs"
 1000
-&quot;tool&quot;
-&quot;process&quot;
-&quot;action&quot;
-&quot;poll&quot;
-&quot;sessionId&quot;
-&quot;&lt;id&gt;&quot;
+"tool"
+"process"
+"action"
+"poll"
+"sessionId"
+"<id>"
 Send keys (tmux-style):
-Copy
-&quot;tool&quot;
-&quot;process&quot;
-&quot;action&quot;
-&quot;send-keys&quot;
-&quot;sessionId&quot;
-&quot;&lt;id&gt;&quot;
-&quot;keys&quot;
-&quot;Enter&quot;
-&quot;tool&quot;
-&quot;process&quot;
-&quot;action&quot;
-&quot;send-keys&quot;
-&quot;sessionId&quot;
-&quot;&lt;id&gt;&quot;
-&quot;keys&quot;
-&quot;C-c&quot;
-&quot;tool&quot;
-&quot;process&quot;
-&quot;action&quot;
-&quot;send-keys&quot;
-&quot;sessionId&quot;
-&quot;&lt;id&gt;&quot;
-&quot;keys&quot;
-&quot;Up&quot;
-&quot;Up&quot;
-&quot;Enter&quot;
+"tool"
+"process"
+"action"
+"send-keys"
+"sessionId"
+"<id>"
+"keys"
+"Enter"
+"tool"
+"process"
+"action"
+"send-keys"
+"sessionId"
+"<id>"
+"keys"
+"C-c"
+"tool"
+"process"
+"action"
+"send-keys"
+"sessionId"
+"<id>"
+"keys"
+"Up"
+"Up"
+"Enter"
 Submit (send CR only):
-Copy
-&quot;tool&quot;
-&quot;process&quot;
-&quot;action&quot;
-&quot;submit&quot;
-&quot;sessionId&quot;
-&quot;&lt;id&gt;&quot;
+"tool"
+"process"
+"action"
+"submit"
+"sessionId"
+"<id>"
 Paste (bracketed by default):
-Copy
-&quot;tool&quot;
-&quot;process&quot;
-&quot;action&quot;
-&quot;paste&quot;
-&quot;sessionId&quot;
-&quot;&lt;id&gt;&quot;
-&quot;text&quot;
-&quot;line1\nline2\n&quot;
+"tool"
+"process"
+"action"
+"paste"
+"sessionId"
+"<id>"
+"text"
+"line1\nline2\n"
 apply_patch (experimental)
 apply_patch
 is a subtool of
 exec
 for structured multi-file edits.
 Enable it explicitly:
-Copy
 tools
 exec
 applyPatch
@@ -2892,12 +2140,12 @@ true
 workspaceOnly
 true
 allowModels
-&quot;gpt-5.2&quot;
+"gpt-5.2"
 ] }
 Notes:
 Only available for OpenAI/OpenAI Codex models.
 Tool policy still applies;
-allow: [&quot;exec&quot;]
+allow: ["exec"]
 implicitly allows
 apply_patch
 Config lives under
@@ -2918,80 +2166,6 @@ Web Tools
 
 [Source: https://docs.openclaw.ai/tools/llm-task]
 
-LLM Task - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Built-in tools
-LLM Task
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Tools
-Built-in tools
-Lobster
-LLM Task
-Exec Tool
-Web Tools
-apply_patch Tool
-Elevated Mode
-Thinking Levels
-Reactions
-Browser
-Browser (OpenClaw-managed)
-Browser Login
-Chrome Extension
-Browser Troubleshooting
-Agent coordination
-Agent Send
-Sub-Agents
-Multi-Agent Sandbox &amp; Tools
-Skills
-Slash Commands
-Skills
-Skills Config
-ClawHub
-Plugins
-Extensions
-Voice Call Plugin
-Zalo Personal Plugin
-Automation
-Hooks
-Cron Jobs
-Cron vs Heartbeat
-Automation Troubleshooting
-Webhooks
-Gmail PubSub
-Polls
-Auth Monitoring
-Media and devices
-Nodes
-Node Troubleshooting
-Image and Media Support
-Audio and Voice Notes
-Camera Capture
-Talk Mode
-Voice Wake
-Location Command
-LLM Task
-Enable the plugin
-Config (optional)
-Tool parameters
-Output
-Example: Lobster workflow step
-Safety notes
-Built-in tools
-LLM Task
-LLM Task
 llm-task
 is an
 optional plugin tool
@@ -3001,42 +2175,39 @@ This is ideal for workflow engines like Lobster: you can add a single LLM step
 without writing custom OpenClaw code for each workflow.
 Enable the plugin
 Enable the plugin:
-Copy
-&quot;plugins&quot;
-&quot;entries&quot;
-&quot;llm-task&quot;
-&quot;enabled&quot;
+"plugins"
+"entries"
+"llm-task"
+"enabled"
 true
 Allowlist the tool (it is registered with
 optional: true
-Copy
-&quot;agents&quot;
-&quot;list&quot;
-&quot;id&quot;
-&quot;main&quot;
-&quot;tools&quot;
-&quot;allow&quot;
-&quot;llm-task&quot;
+"agents"
+"list"
+"id"
+"main"
+"tools"
+"allow"
+"llm-task"
 ] }
 Config (optional)
-Copy
-&quot;plugins&quot;
-&quot;entries&quot;
-&quot;llm-task&quot;
-&quot;enabled&quot;
+"plugins"
+"entries"
+"llm-task"
+"enabled"
 true
-&quot;config&quot;
-&quot;defaultProvider&quot;
-&quot;openai-codex&quot;
-&quot;defaultModel&quot;
-&quot;gpt-5.2&quot;
-&quot;defaultAuthProfileId&quot;
-&quot;main&quot;
-&quot;allowedModels&quot;
-&quot;openai-codex/gpt-5.3-codex&quot;
-&quot;maxTokens&quot;
+"config"
+"defaultProvider"
+"openai-codex"
+"defaultModel"
+"gpt-5.2"
+"defaultAuthProfileId"
+"main"
+"allowedModels"
+"openai-codex/gpt-5.3-codex"
+"maxTokens"
 800
-&quot;timeoutMs&quot;
+"timeoutMs"
 30000
 allowedModels
 is an allowlist of
@@ -3069,20 +2240,19 @@ containing the parsed JSON (and validates against
 schema
 when provided).
 Example: Lobster workflow step
-Copy
-openclaw.invoke --tool llm-task --action json --args-json &#x27;{
-&quot;prompt&quot;: &quot;Given the input email, return intent and draft.&quot;,
-&quot;input&quot;: {
-&quot;subject&quot;: &quot;Hello&quot;,
-&quot;body&quot;: &quot;Can you help?&quot;
-&quot;schema&quot;: {
-&quot;type&quot;: &quot;object&quot;,
-&quot;properties&quot;: {
-&quot;intent&quot;: { &quot;type&quot;: &quot;string&quot; },
-&quot;draft&quot;: { &quot;type&quot;: &quot;string&quot; }
-&quot;required&quot;: [&quot;intent&quot;, &quot;draft&quot;],
-&quot;additionalProperties&quot;: false
-}&#x27;
+openclaw.invoke --tool llm-task --action json --args-json '{
+"prompt": "Given the input email, return intent and draft.",
+"input": {
+"subject": "Hello",
+"body": "Can you help?"
+"schema": {
+"type": "object",
+"properties": {
+"intent": { "type": "string" },
+"draft": { "type": "string" }
+"required": ["intent", "draft"],
+"additionalProperties": false
+}'
 Safety notes
 The tool is
 JSON-only
@@ -3100,94 +2270,6 @@ Exec Tool
 
 [Source: https://docs.openclaw.ai/tools/lobster]
 
-Lobster - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Built-in tools
-Lobster
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Tools
-Built-in tools
-Lobster
-LLM Task
-Exec Tool
-Web Tools
-apply_patch Tool
-Elevated Mode
-Thinking Levels
-Reactions
-Browser
-Browser (OpenClaw-managed)
-Browser Login
-Chrome Extension
-Browser Troubleshooting
-Agent coordination
-Agent Send
-Sub-Agents
-Multi-Agent Sandbox &amp; Tools
-Skills
-Slash Commands
-Skills
-Skills Config
-ClawHub
-Plugins
-Extensions
-Voice Call Plugin
-Zalo Personal Plugin
-Automation
-Hooks
-Cron Jobs
-Cron vs Heartbeat
-Automation Troubleshooting
-Webhooks
-Gmail PubSub
-Polls
-Auth Monitoring
-Media and devices
-Nodes
-Node Troubleshooting
-Image and Media Support
-Audio and Voice Notes
-Camera Capture
-Talk Mode
-Voice Wake
-Location Command
-Lobster
-Hook
-Why
-Why a DSL instead of plain programs?
-How it works
-Pattern: small CLI + JSON pipes + approvals
-JSON-only LLM steps (llm-task)
-Workflow files (.lobster)
-Install Lobster
-Enable the tool
-Example: Email triage
-Tool parameters
-run
-resume
-Optional inputs
-Output envelope
-Approvals
-OpenProse
-Safety
-Troubleshooting
-Learn more
-Case study: community workflows
-Built-in tools
-Lobster
 Typed workflow runtime for OpenClaw — composable pipelines with approval gates.
 Lobster
 Lobster is a workflow shell that lets OpenClaw run multi-step tool sequences as a single, deterministic operation with explicit approval checkpoints.
@@ -3228,7 +2310,6 @@ resumeToken
 so you can continue later.
 Pattern: small CLI + JSON pipes + approvals
 Build tiny commands that speak JSON, then chain them into a single Lobster call. (Example command names below — swap in your own.)
-Copy
 inbox
 list
 --json
@@ -3238,27 +2319,24 @@ categorize
 inbox
 apply
 --json
-Copy
-&quot;action&quot;
-&quot;run&quot;
-&quot;pipeline&quot;
-&quot;exec --json --shell &#x27;inbox list --json&#x27; | exec --stdin json --shell &#x27;inbox categorize --json&#x27; | exec --stdin json --shell &#x27;inbox apply --json&#x27; | approve --preview-from-stdin --limit 5 --prompt &#x27;Apply changes?&#x27;&quot;
-&quot;timeoutMs&quot;
+"action"
+"run"
+"pipeline"
+"exec --json --shell 'inbox list --json' | exec --stdin json --shell 'inbox categorize --json' | exec --stdin json --shell 'inbox apply --json' | approve --preview-from-stdin --limit 5 --prompt 'Apply changes?'"
+"timeoutMs"
 30000
 If the pipeline requests approval, resume with the token:
-Copy
-&quot;action&quot;
-&quot;resume&quot;
-&quot;token&quot;
-&quot;&lt;resumeToken&gt;&quot;
-&quot;approve&quot;
+"action"
+"resume"
+"token"
+"<resumeToken>"
+"approve"
 true
 AI triggers the workflow; Lobster executes the steps. Approval gates keep side effects explicit and auditable.
 Example: map input items into tool calls:
-Copy
 gog.gmail.search
 --query
-&#x27;newer_than:1d&#x27;
+'newer_than:1d'
 openclaw.invoke
 --tool
 message
@@ -3268,7 +2346,7 @@ send
 --item-key
 message
 --args-json
-&#x27;{&quot;provider&quot;:&quot;telegram&quot;,&quot;to&quot;:&quot;...&quot;}&#x27;
+'{"provider":"telegram","to":"..."}'
 JSON-only LLM steps (llm-task)
 For workflows that need a
 structured LLM step
@@ -3277,33 +2355,31 @@ llm-task
 plugin tool and call it from Lobster. This keeps the workflow
 deterministic while still letting you classify/summarize/draft with a model.
 Enable the tool:
-Copy
-&quot;plugins&quot;
-&quot;entries&quot;
-&quot;llm-task&quot;
-&quot;enabled&quot;
+"plugins"
+"entries"
+"llm-task"
+"enabled"
 true
-&quot;agents&quot;
-&quot;list&quot;
-&quot;id&quot;
-&quot;main&quot;
-&quot;tools&quot;
-&quot;allow&quot;
-&quot;llm-task&quot;
+"agents"
+"list"
+"id"
+"main"
+"tools"
+"allow"
+"llm-task"
 ] }
 Use it in a pipeline:
-Copy
-openclaw.invoke --tool llm-task --action json --args-json &#x27;{
-&quot;prompt&quot;: &quot;Given the input email, return intent and draft.&quot;,
-&quot;input&quot;: { &quot;subject&quot;: &quot;Hello&quot;, &quot;body&quot;: &quot;Can you help?&quot; },
-&quot;schema&quot;: {
-&quot;type&quot;: &quot;object&quot;,
-&quot;properties&quot;: {
-&quot;intent&quot;: { &quot;type&quot;: &quot;string&quot; },
-&quot;draft&quot;: { &quot;type&quot;: &quot;string&quot; }
-&quot;required&quot;: [&quot;intent&quot;, &quot;draft&quot;],
-&quot;additionalProperties&quot;: false
-}&#x27;
+openclaw.invoke --tool llm-task --action json --args-json '{
+"prompt": "Given the input email, return intent and draft.",
+"input": { "subject": "Hello", "body": "Can you help?" },
+"schema": {
+"type": "object",
+"properties": {
+"intent": { "type": "string" },
+"draft": { "type": "string" }
+"required": ["intent", "draft"],
+"additionalProperties": false
+}'
 See
 LLM Task
 for details and configuration options.
@@ -3319,13 +2395,12 @@ approval
 fields. In OpenClaw tool calls, set
 pipeline
 to the file path.
-Copy
 name
 inbox-triage
 args
 tag
 default
-&quot;family&quot;
+"family"
 steps
 collect
 command
@@ -3377,21 +2452,19 @@ Lobster is an
 optional
 plugin tool (not enabled by default).
 Recommended (additive, safe):
-Copy
-&quot;tools&quot;
-&quot;alsoAllow&quot;
-&quot;lobster&quot;
+"tools"
+"alsoAllow"
+"lobster"
 Or per-agent:
-Copy
-&quot;agents&quot;
-&quot;list&quot;
-&quot;id&quot;
-&quot;main&quot;
-&quot;tools&quot;
-&quot;alsoAllow&quot;
-&quot;lobster&quot;
+"agents"
+"list"
+"id"
+"main"
+"tools"
+"alsoAllow"
+"lobster"
 Avoid using
-tools.allow: [&quot;lobster&quot;]
+tools.allow: ["lobster"]
 unless you intend to run in restrictive allowlist mode.
 Note: allowlists are opt-in for optional plugins. If your allowlist only names
 plugin tools (like
@@ -3400,79 +2473,72 @@ lobster
 tools, include the core tools or groups you want in the allowlist too.
 Example: Email triage
 Without Lobster:
-Copy
-User: &quot;Check my email and draft replies&quot;
+User: "Check my email and draft replies"
 → openclaw calls gmail.list
 → LLM summarizes
-→ User: &quot;draft replies to #2 and #5&quot;
+→ User: "draft replies to #2 and #5"
 → LLM drafts
-→ User: &quot;send #2&quot;
+→ User: "send #2"
 → openclaw calls gmail.send
 (repeat daily, no memory of what was triaged)
 With Lobster:
-Copy
-&quot;action&quot;
-&quot;run&quot;
-&quot;pipeline&quot;
-&quot;email.triage --limit 20&quot;
-&quot;timeoutMs&quot;
+"action"
+"run"
+"pipeline"
+"email.triage --limit 20"
+"timeoutMs"
 30000
 Returns a JSON envelope (truncated):
-Copy
-&quot;ok&quot;
+"ok"
 true
-&quot;status&quot;
-&quot;needs_approval&quot;
-&quot;output&quot;
-&quot;summary&quot;
-&quot;5 need replies, 2 need action&quot;
-&quot;requiresApproval&quot;
-&quot;type&quot;
-&quot;approval_request&quot;
-&quot;prompt&quot;
-&quot;Send 2 draft replies?&quot;
-&quot;items&quot;
-&quot;resumeToken&quot;
-&quot;...&quot;
+"status"
+"needs_approval"
+"output"
+"summary"
+"5 need replies, 2 need action"
+"requiresApproval"
+"type"
+"approval_request"
+"prompt"
+"Send 2 draft replies?"
+"items"
+"resumeToken"
+"..."
 User approves → resume:
-Copy
-&quot;action&quot;
-&quot;resume&quot;
-&quot;token&quot;
-&quot;&lt;resumeToken&gt;&quot;
-&quot;approve&quot;
+"action"
+"resume"
+"token"
+"<resumeToken>"
+"approve"
 true
 One workflow. Deterministic. Safe.
 Tool parameters
 run
 Run a pipeline in tool mode.
-Copy
-&quot;action&quot;
-&quot;run&quot;
-&quot;pipeline&quot;
-&quot;gog.gmail.search --query &#x27;newer_than:1d&#x27; | email.triage&quot;
-&quot;cwd&quot;
-&quot;/path/to/workspace&quot;
-&quot;timeoutMs&quot;
+"action"
+"run"
+"pipeline"
+"gog.gmail.search --query 'newer_than:1d' | email.triage"
+"cwd"
+"/path/to/workspace"
+"timeoutMs"
 30000
-&quot;maxStdoutBytes&quot;
+"maxStdoutBytes"
 512000
 Run a workflow file with args:
-Copy
-&quot;action&quot;
-&quot;run&quot;
-&quot;pipeline&quot;
-&quot;/path/to/inbox-triage.lobster&quot;
-&quot;argsJson&quot;
-&quot;{\&quot;tag\&quot;:\&quot;family\&quot;}&quot;
+"action"
+"run"
+"pipeline"
+"/path/to/inbox-triage.lobster"
+"argsJson"
+"{\"tag\":\"family\"}"
 resume
 Continue a halted workflow after approval.
-Copy
-&quot;action&quot;
-&quot;resume&quot;
-&quot;token&quot;
-&quot;&lt;resumeToken&gt;&quot;
-&quot;approve&quot;
+"action"
+"resume"
+"token"
+"<resumeToken>"
+"approve"
 true
 Optional inputs
 lobsterPath
@@ -3567,98 +2633,6 @@ LLM Task
 
 [Source: https://docs.openclaw.ai/tools/multi-agent-sandbox-tools]
 
-Multi-Agent Sandbox &amp; Tools - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Agent coordination
-Multi-Agent Sandbox &amp; Tools
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Tools
-Built-in tools
-Lobster
-LLM Task
-Exec Tool
-Web Tools
-apply_patch Tool
-Elevated Mode
-Thinking Levels
-Reactions
-Browser
-Browser (OpenClaw-managed)
-Browser Login
-Chrome Extension
-Browser Troubleshooting
-Agent coordination
-Agent Send
-Sub-Agents
-Multi-Agent Sandbox &amp; Tools
-Skills
-Slash Commands
-Skills
-Skills Config
-ClawHub
-Plugins
-Extensions
-Voice Call Plugin
-Zalo Personal Plugin
-Automation
-Hooks
-Cron Jobs
-Cron vs Heartbeat
-Automation Troubleshooting
-Webhooks
-Gmail PubSub
-Polls
-Auth Monitoring
-Media and devices
-Nodes
-Node Troubleshooting
-Image and Media Support
-Audio and Voice Notes
-Camera Capture
-Talk Mode
-Voice Wake
-Location Command
-Multi-Agent Sandbox &amp; Tools Configuration
-Overview
-Configuration Examples
-Example 1: Personal + Restricted Family Agent
-Example 2: Work Agent with Shared Sandbox
-Example 2b: Global coding profile + messaging-only agent
-Example 3: Different Sandbox Modes per Agent
-Configuration Precedence
-Sandbox Config
-Tool Restrictions
-Tool groups (shorthands)
-Elevated Mode
-Migration from Single Agent
-Tool Restriction Examples
-Read-only Agent
-Safe Execution Agent (no file modifications)
-Communication-only Agent
-Common Pitfall: “non-main”
-Testing
-Troubleshooting
-Agent not sandboxed despite mode: &quot;all&quot;
-Tools still available despite deny list
-Container not isolated per agent
-See Also
-Agent coordination
-Multi-Agent Sandbox &amp; Tools
-Multi-Agent Sandbox &amp; Tools Configuration
-Overview
 Each agent in a multi-agent setup can now have its own:
 Sandbox configuration
 agents.list[].sandbox
@@ -3681,8 +2655,7 @@ when the container is created.
 Auth is per-agent: each agent reads from its own
 agentDir
 auth store at:
-Copy
-~/.openclaw/agents/&lt;agentId&gt;/agent/auth-profiles.json
+~/.openclaw/agents/<agentId>/agent/auth-profiles.json
 Credentials are
 not
 shared between agents. Never reuse
@@ -3700,56 +2673,55 @@ and
 openclaw sandbox explain
 Configuration Examples
 Example 1: Personal + Restricted Family Agent
-Copy
-&quot;agents&quot;
-&quot;list&quot;
-&quot;id&quot;
-&quot;main&quot;
-&quot;default&quot;
+"agents"
+"list"
+"id"
+"main"
+"default"
 true
-&quot;name&quot;
-&quot;Personal Assistant&quot;
-&quot;workspace&quot;
-&quot;~/.openclaw/workspace&quot;
-&quot;sandbox&quot;
-&quot;mode&quot;
-&quot;off&quot;
-&quot;id&quot;
-&quot;family&quot;
-&quot;name&quot;
-&quot;Family Bot&quot;
-&quot;workspace&quot;
-&quot;~/.openclaw/workspace-family&quot;
-&quot;sandbox&quot;
-&quot;mode&quot;
-&quot;all&quot;
-&quot;scope&quot;
-&quot;agent&quot;
-&quot;tools&quot;
-&quot;allow&quot;
-&quot;read&quot;
-&quot;deny&quot;
-&quot;exec&quot;
-&quot;write&quot;
-&quot;edit&quot;
-&quot;apply_patch&quot;
-&quot;process&quot;
-&quot;browser&quot;
-&quot;bindings&quot;
-&quot;agentId&quot;
-&quot;family&quot;
-&quot;match&quot;
-&quot;provider&quot;
-&quot;whatsapp&quot;
-&quot;accountId&quot;
-&quot;*&quot;
-&quot;peer&quot;
-&quot;kind&quot;
-&quot;group&quot;
-&quot;id&quot;
-&quot;
-[email&#160;protected]
-&quot;
+"name"
+"Personal Assistant"
+"workspace"
+"~/.openclaw/workspace"
+"sandbox"
+"mode"
+"off"
+"id"
+"family"
+"name"
+"Family Bot"
+"workspace"
+"~/.openclaw/workspace-family"
+"sandbox"
+"mode"
+"all"
+"scope"
+"agent"
+"tools"
+"allow"
+"read"
+"deny"
+"exec"
+"write"
+"edit"
+"apply_patch"
+"process"
+"browser"
+"bindings"
+"agentId"
+"family"
+"match"
+"provider"
+"whatsapp"
+"accountId"
+"*"
+"peer"
+"kind"
+"group"
+"id"
+"
+[email protected]
+"
 Result:
 main
 agent: Runs on host, full tool access
@@ -3758,93 +2730,90 @@ agent: Runs in Docker (one container per agent), only
 read
 tool
 Example 2: Work Agent with Shared Sandbox
-Copy
-&quot;agents&quot;
-&quot;list&quot;
-&quot;id&quot;
-&quot;personal&quot;
-&quot;workspace&quot;
-&quot;~/.openclaw/workspace-personal&quot;
-&quot;sandbox&quot;
-&quot;mode&quot;
-&quot;off&quot;
-&quot;id&quot;
-&quot;work&quot;
-&quot;workspace&quot;
-&quot;~/.openclaw/workspace-work&quot;
-&quot;sandbox&quot;
-&quot;mode&quot;
-&quot;all&quot;
-&quot;scope&quot;
-&quot;shared&quot;
-&quot;workspaceRoot&quot;
-&quot;/tmp/work-sandboxes&quot;
-&quot;tools&quot;
-&quot;allow&quot;
-&quot;read&quot;
-&quot;write&quot;
-&quot;apply_patch&quot;
-&quot;exec&quot;
-&quot;deny&quot;
-&quot;browser&quot;
-&quot;gateway&quot;
-&quot;discord&quot;
+"agents"
+"list"
+"id"
+"personal"
+"workspace"
+"~/.openclaw/workspace-personal"
+"sandbox"
+"mode"
+"off"
+"id"
+"work"
+"workspace"
+"~/.openclaw/workspace-work"
+"sandbox"
+"mode"
+"all"
+"scope"
+"shared"
+"workspaceRoot"
+"/tmp/work-sandboxes"
+"tools"
+"allow"
+"read"
+"write"
+"apply_patch"
+"exec"
+"deny"
+"browser"
+"gateway"
+"discord"
 Example 2b: Global coding profile + messaging-only agent
-Copy
-&quot;tools&quot;
-&quot;profile&quot;
-&quot;coding&quot;
-&quot;agents&quot;
-&quot;list&quot;
-&quot;id&quot;
-&quot;support&quot;
-&quot;tools&quot;
-&quot;profile&quot;
-&quot;messaging&quot;
-&quot;allow&quot;
-&quot;slack&quot;
+"tools"
+"profile"
+"coding"
+"agents"
+"list"
+"id"
+"support"
+"tools"
+"profile"
+"messaging"
+"allow"
+"slack"
 ] }
 Result:
 default agents get coding tools
 support
 agent is messaging-only (+ Slack tool)
 Example 3: Different Sandbox Modes per Agent
-Copy
-&quot;agents&quot;
-&quot;defaults&quot;
-&quot;sandbox&quot;
-&quot;mode&quot;
-&quot;non-main&quot;
+"agents"
+"defaults"
+"sandbox"
+"mode"
+"non-main"
 // Global default
-&quot;scope&quot;
-&quot;session&quot;
-&quot;list&quot;
-&quot;id&quot;
-&quot;main&quot;
-&quot;workspace&quot;
-&quot;~/.openclaw/workspace&quot;
-&quot;sandbox&quot;
-&quot;mode&quot;
-&quot;off&quot;
+"scope"
+"session"
+"list"
+"id"
+"main"
+"workspace"
+"~/.openclaw/workspace"
+"sandbox"
+"mode"
+"off"
 // Override: main never sandboxed
-&quot;id&quot;
-&quot;public&quot;
-&quot;workspace&quot;
-&quot;~/.openclaw/workspace-public&quot;
-&quot;sandbox&quot;
-&quot;mode&quot;
-&quot;all&quot;
+"id"
+"public"
+"workspace"
+"~/.openclaw/workspace-public"
+"sandbox"
+"mode"
+"all"
 // Override: public always sandboxed
-&quot;scope&quot;
-&quot;agent&quot;
-&quot;tools&quot;
-&quot;allow&quot;
-&quot;read&quot;
-&quot;deny&quot;
-&quot;exec&quot;
-&quot;write&quot;
-&quot;edit&quot;
-&quot;apply_patch&quot;
+"scope"
+"agent"
+"tools"
+"allow"
+"read"
+"deny"
+"exec"
+"write"
+"edit"
+"apply_patch"
 Configuration Precedence
 When both global (
 agents.defaults.*
@@ -3853,20 +2822,19 @@ agents.list[].*
 ) configs exist:
 Sandbox Config
 Agent-specific settings override global:
-Copy
-agents.list[].sandbox.mode &gt; agents.defaults.sandbox.mode
-agents.list[].sandbox.scope &gt; agents.defaults.sandbox.scope
-agents.list[].sandbox.workspaceRoot &gt; agents.defaults.sandbox.workspaceRoot
-agents.list[].sandbox.workspaceAccess &gt; agents.defaults.sandbox.workspaceAccess
-agents.list[].sandbox.docker.* &gt; agents.defaults.sandbox.docker.*
-agents.list[].sandbox.browser.* &gt; agents.defaults.sandbox.browser.*
-agents.list[].sandbox.prune.* &gt; agents.defaults.sandbox.prune.*
+agents.list[].sandbox.mode > agents.defaults.sandbox.mode
+agents.list[].sandbox.scope > agents.defaults.sandbox.scope
+agents.list[].sandbox.workspaceRoot > agents.defaults.sandbox.workspaceRoot
+agents.list[].sandbox.workspaceAccess > agents.defaults.sandbox.workspaceAccess
+agents.list[].sandbox.docker.* > agents.defaults.sandbox.docker.*
+agents.list[].sandbox.browser.* > agents.defaults.sandbox.browser.*
+agents.list[].sandbox.prune.* > agents.defaults.sandbox.prune.*
 Notes:
 agents.list[].sandbox.{docker,browser,prune}.*
 overrides
 agents.defaults.sandbox.{docker,browser,prune}.*
 for that agent (ignored when sandbox scope resolves to
-&quot;shared&quot;
+"shared"
 Tool Restrictions
 The filtering order is:
 Tool profile
@@ -3950,7 +2918,7 @@ Mitigation patterns:
 Deny
 exec
 for untrusted agents (
-agents.list[].tools.deny: [&quot;exec&quot;]
+agents.list[].tools.deny: ["exec"]
 Avoid allowlisting senders that route to restricted agents
 Disable elevated globally (
 tools.elevated.enabled: false
@@ -3960,36 +2928,34 @@ agents.list[].tools.elevated.enabled: false
 ) for sensitive profiles
 Migration from Single Agent
 Before (single agent):
-Copy
-&quot;agents&quot;
-&quot;defaults&quot;
-&quot;workspace&quot;
-&quot;~/.openclaw/workspace&quot;
-&quot;sandbox&quot;
-&quot;mode&quot;
-&quot;non-main&quot;
-&quot;tools&quot;
-&quot;sandbox&quot;
-&quot;tools&quot;
-&quot;allow&quot;
-&quot;read&quot;
-&quot;write&quot;
-&quot;apply_patch&quot;
-&quot;exec&quot;
-&quot;deny&quot;
+"agents"
+"defaults"
+"workspace"
+"~/.openclaw/workspace"
+"sandbox"
+"mode"
+"non-main"
+"tools"
+"sandbox"
+"tools"
+"allow"
+"read"
+"write"
+"apply_patch"
+"exec"
+"deny"
 After (multi-agent with different profiles):
-Copy
-&quot;agents&quot;
-&quot;list&quot;
-&quot;id&quot;
-&quot;main&quot;
-&quot;default&quot;
+"agents"
+"list"
+"id"
+"main"
+"default"
 true
-&quot;workspace&quot;
-&quot;~/.openclaw/workspace&quot;
-&quot;sandbox&quot;
-&quot;mode&quot;
-&quot;off&quot;
+"workspace"
+"~/.openclaw/workspace"
+"sandbox"
+"mode"
+"off"
 Legacy
 agent.*
 configs are migrated by
@@ -4000,79 +2966,73 @@ agents.list
 going forward.
 Tool Restriction Examples
 Read-only Agent
-Copy
-&quot;tools&quot;
-&quot;allow&quot;
-&quot;read&quot;
-&quot;deny&quot;
-&quot;exec&quot;
-&quot;write&quot;
-&quot;edit&quot;
-&quot;apply_patch&quot;
-&quot;process&quot;
+"tools"
+"allow"
+"read"
+"deny"
+"exec"
+"write"
+"edit"
+"apply_patch"
+"process"
 Safe Execution Agent (no file modifications)
-Copy
-&quot;tools&quot;
-&quot;allow&quot;
-&quot;read&quot;
-&quot;exec&quot;
-&quot;process&quot;
-&quot;deny&quot;
-&quot;write&quot;
-&quot;edit&quot;
-&quot;apply_patch&quot;
-&quot;browser&quot;
-&quot;gateway&quot;
+"tools"
+"allow"
+"read"
+"exec"
+"process"
+"deny"
+"write"
+"edit"
+"apply_patch"
+"browser"
+"gateway"
 Communication-only Agent
-Copy
-&quot;tools&quot;
-&quot;sessions&quot;
-&quot;visibility&quot;
-&quot;tree&quot;
-&quot;allow&quot;
-&quot;sessions_list&quot;
-&quot;sessions_send&quot;
-&quot;sessions_history&quot;
-&quot;session_status&quot;
-&quot;deny&quot;
-&quot;exec&quot;
-&quot;write&quot;
-&quot;edit&quot;
-&quot;apply_patch&quot;
-&quot;read&quot;
-&quot;browser&quot;
+"tools"
+"sessions"
+"visibility"
+"tree"
+"allow"
+"sessions_list"
+"sessions_send"
+"sessions_history"
+"session_status"
+"deny"
+"exec"
+"write"
+"edit"
+"apply_patch"
+"read"
+"browser"
 Common Pitfall: “non-main”
-agents.defaults.sandbox.mode: &quot;non-main&quot;
+agents.defaults.sandbox.mode: "non-main"
 is based on
 session.mainKey
 (default
-&quot;main&quot;
+"main"
 not the agent id. Group/channel sessions always get their own keys, so they
 are treated as non-main and will be sandboxed. If you want an agent to never
 sandbox, set
-agents.list[].sandbox.mode: &quot;off&quot;
+agents.list[].sandbox.mode: "off"
 Testing
 After configuring multi-agent sandbox and tools:
 Check agent resolution:
-Copy
 openclaw agents list --bindings
 Verify sandbox containers:
-Copy
-docker ps --filter &quot;name=openclaw-sbx-&quot;
+docker ps --filter "name=openclaw-sbx-"
 Test tool restrictions:
 Send a message requiring restricted tools
 Verify the agent cannot use denied tools
 Monitor logs:
-Copy
-tail -f &quot;${OPENCLAW_STATE_DIR:-$HOME/.openclaw}/logs/gateway.log&quot; | grep -E &quot;routing|sandbox|tools&quot;
+tail -f "${OPENCLAW_STATE_DIR:-$HOME/.openclaw}/logs/gateway.log" | grep -E "routing|sandbox|tools"
 Troubleshooting
 Agent not sandboxed despite
-mode: &quot;all&quot;
+mode: "all"
 Check if there’s a global
 agents.defaults.sandbox.mode
 that overrides it
 Agent-specific config takes precedence, so set
-agents.list[].sandbox.mode: &quot;all&quot;
+agents.list[].sandbox.mode: "all"
 Tools still available despite deny list
 Check tool filtering order: global → agent → sandbox → subagent
 Each level can only further restrict, not grant back
@@ -4080,10 +3040,10 @@ Verify with logs:
 [tools] filtering tools for agent:${agentId}
 Container not isolated per agent
 Set
-scope: &quot;agent&quot;
+scope: "agent"
 in agent-specific sandbox config
 Default is
-&quot;session&quot;
+"session"
 which creates one container per session
 See Also
 Multi-Agent Routing
@@ -4097,101 +3057,6 @@ Slash Commands
 
 [Source: https://docs.openclaw.ai/tools/plugin]
 
-Plugins - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Skills
-Plugins
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Tools
-Built-in tools
-Lobster
-LLM Task
-Exec Tool
-Web Tools
-apply_patch Tool
-Elevated Mode
-Thinking Levels
-Reactions
-Browser
-Browser (OpenClaw-managed)
-Browser Login
-Chrome Extension
-Browser Troubleshooting
-Agent coordination
-Agent Send
-Sub-Agents
-Multi-Agent Sandbox &amp; Tools
-Skills
-Slash Commands
-Skills
-Skills Config
-ClawHub
-Plugins
-Extensions
-Voice Call Plugin
-Zalo Personal Plugin
-Automation
-Hooks
-Cron Jobs
-Cron vs Heartbeat
-Automation Troubleshooting
-Webhooks
-Gmail PubSub
-Polls
-Auth Monitoring
-Media and devices
-Nodes
-Node Troubleshooting
-Image and Media Support
-Audio and Voice Notes
-Camera Capture
-Talk Mode
-Voice Wake
-Location Command
-Plugins (Extensions)
-Quick start (new to plugins?)
-Available plugins (official)
-Runtime helpers
-Discovery &amp; precedence
-Package packs
-Channel catalog metadata
-Plugin IDs
-Config
-Plugin slots (exclusive categories)
-Control UI (schema + labels)
-CLI
-Plugin API (overview)
-Plugin hooks
-Example
-Provider plugins (model auth)
-Register a messaging channel
-Write a new messaging channel (step‑by‑step)
-Agent tools
-Register a gateway RPC method
-Register CLI commands
-Register auto-reply commands
-Register background services
-Naming conventions
-Skills
-Distribution (npm)
-Example plugin: Voice Call
-Safety notes
-Testing plugins
-Skills
-Plugins
 Plugins (Extensions)
 Quick start (new to plugins?)
 A plugin is just a
@@ -4203,12 +3068,10 @@ into core OpenClaw yet (or you want to keep optional features out of your main
 install).
 Fast path:
 See what’s already loaded:
-Copy
 openclaw
 plugins
 list
 Install an official plugin (example: Voice Call):
-Copy
 openclaw
 plugins
 install
@@ -4218,7 +3081,7 @@ registry-only
 (package name + optional version/tag). Git/URL/file
 specs are rejected.
 Restart the Gateway, then configure under
-plugins.entries.&lt;id&gt;.config
+plugins.entries.<id>.config
 See
 Voice Call
 for a concrete example plugin.
@@ -4229,7 +3092,7 @@ if you use Teams.
 Memory (Core) — bundled memory search plugin (enabled by default via
 plugins.slots.memory
 Memory (LanceDB) — bundled long-term memory plugin (auto-recall/capture; set
-plugins.slots.memory = &quot;memory-lancedb&quot;
+plugins.slots.memory = "memory-lancedb"
 Voice Call
 @openclaw/voice-call
 Zalo Personal
@@ -4284,7 +3147,6 @@ Runtime helpers
 Plugins can access selected core helpers via
 api.runtime
 . For telephony TTS:
-Copy
 const
 result
 await
@@ -4293,7 +3155,7 @@ runtime
 tts
 .textToSpeechTelephony
 text
-&quot;Hello from OpenClaw&quot;
+"Hello from OpenClaw"
 cfg
 api
 .config
@@ -4304,23 +3166,23 @@ messages.tts
 configuration (OpenAI or ElevenLabs).
 Returns PCM audio buffer + sample rate. Plugins must resample/encode for providers.
 Edge TTS is not supported for telephony.
-Discovery &amp; precedence
+Discovery & precedence
 OpenClaw scans, in order:
 Config paths
 plugins.load.paths
 (file or directory)
 Workspace extensions
-&lt;workspace&gt;/.openclaw/extensions/*.ts
-&lt;workspace&gt;/.openclaw/extensions/*/index.ts
+<workspace>/.openclaw/extensions/*.ts
+<workspace>/.openclaw/extensions/*/index.ts
 Global extensions
 ~/.openclaw/extensions/*.ts
 ~/.openclaw/extensions/*/index.ts
 Bundled extensions (shipped with OpenClaw,
 disabled by default
-&lt;openclaw&gt;/extensions/*
+<openclaw>/extensions/*
 Bundled plugins must be enabled explicitly via
-plugins.entries.&lt;id&gt;.enabled
-openclaw plugins enable &lt;id&gt;
+plugins.entries.<id>.enabled
+openclaw plugins enable <id>
 . Installed plugins are enabled by default,
 but can be disabled the same way.
 Each plugin must include a
@@ -4335,16 +3197,15 @@ A plugin directory may include a
 package.json
 with
 openclaw.extensions
-Copy
-&quot;name&quot;
-&quot;my-pack&quot;
-&quot;openclaw&quot;
-&quot;extensions&quot;
-&quot;./src/safety.ts&quot;
-&quot;./src/tools.ts&quot;
+"name"
+"my-pack"
+"openclaw"
+"extensions"
+"./src/safety.ts"
+"./src/tools.ts"
 Each entry becomes a plugin. If the pack lists multiple extensions, the plugin id
 becomes
-name/&lt;fileBase&gt;
+name/<fileBase>
 If your plugin imports npm deps, install them in that directory so
 node_modules
 is available (
@@ -4366,36 +3227,35 @@ install hints via
 openclaw.install
 . This keeps the core catalog data-free.
 Example:
-Copy
-&quot;name&quot;
-&quot;@openclaw/nextcloud-talk&quot;
-&quot;openclaw&quot;
-&quot;extensions&quot;
-&quot;./index.ts&quot;
-&quot;channel&quot;
-&quot;id&quot;
-&quot;nextcloud-talk&quot;
-&quot;label&quot;
-&quot;Nextcloud Talk&quot;
-&quot;selectionLabel&quot;
-&quot;Nextcloud Talk (self-hosted)&quot;
-&quot;docsPath&quot;
-&quot;/channels/nextcloud-talk&quot;
-&quot;docsLabel&quot;
-&quot;nextcloud-talk&quot;
-&quot;blurb&quot;
-&quot;Self-hosted chat via Nextcloud Talk webhook bots.&quot;
-&quot;order&quot;
-&quot;aliases&quot;
-&quot;nc-talk&quot;
-&quot;nc&quot;
-&quot;install&quot;
-&quot;npmSpec&quot;
-&quot;@openclaw/nextcloud-talk&quot;
-&quot;localPath&quot;
-&quot;extensions/nextcloud-talk&quot;
-&quot;defaultChoice&quot;
-&quot;npm&quot;
+"name"
+"@openclaw/nextcloud-talk"
+"openclaw"
+"extensions"
+"./index.ts"
+"channel"
+"id"
+"nextcloud-talk"
+"label"
+"Nextcloud Talk"
+"selectionLabel"
+"Nextcloud Talk (self-hosted)"
+"docsPath"
+"/channels/nextcloud-talk"
+"docsLabel"
+"nextcloud-talk"
+"blurb"
+"Self-hosted chat via Nextcloud Talk webhook bots."
+"order"
+"aliases"
+"nc-talk"
+"nc"
+"install"
+"npmSpec"
+"@openclaw/nextcloud-talk"
+"localPath"
+"extensions/nextcloud-talk"
+"defaultChoice"
+"npm"
 OpenClaw can also merge
 external channel catalogs
 (for example, an MPM
@@ -4412,7 +3272,7 @@ one or more JSON files (comma/semicolon/
 PATH
 -delimited). Each file should
 contain
-{ &quot;entries&quot;: [ { &quot;name&quot;: &quot;@scope/pkg&quot;, &quot;openclaw&quot;: { &quot;channel&quot;: {...}, &quot;install&quot;: {...} } } ] }
+{ "entries": [ { "name": "@scope/pkg", "openclaw": { "channel": {...}, "install": {...} } } ] }
 Plugin IDs
 Default plugin ids:
 Package packs:
@@ -4425,25 +3285,24 @@ If a plugin exports
 , OpenClaw uses it but warns when it doesn’t match the
 configured id.
 Config
-Copy
 plugins
 enabled
 true
 allow
-&quot;voice-call&quot;
+"voice-call"
 deny
-&quot;untrusted-plugin&quot;
+"untrusted-plugin"
 load
 paths
-&quot;~/Projects/oss/voice-call-extension&quot;
+"~/Projects/oss/voice-call-extension"
 ] }
 entries
-&quot;voice-call&quot;
+"voice-call"
 enabled
 true
 config
 provider
-&quot;twilio&quot;
+"twilio"
 } }
 Fields:
 enabled
@@ -4454,7 +3313,7 @@ deny
 : denylist (optional; deny wins)
 load.paths
 : extra plugin files/dirs
-entries.&lt;id&gt;
+entries.<id>
 : per‑plugin toggles + config
 Config changes
 require a gateway restart
@@ -4468,7 +3327,7 @@ slots
 are
 errors
 Unknown
-channels.&lt;id&gt;
+channels.<id>
 keys are
 errors
 unless a plugin manifest declares
@@ -4485,14 +3344,13 @@ exclusive
 (only one active at a time). Use
 plugins.slots
 to select which plugin owns the slot:
-Copy
 plugins
 slots
 memory
-&quot;memory-core&quot;
-// or &quot;none&quot; to disable memory plugins
+"memory-core"
+// or "none" to disable memory plugins
 If multiple plugins declare
-kind: &quot;memory&quot;
+kind: "memory"
 , only the selected one loads. Others
 are disabled with diagnostics.
 Control UI (schema + labels)
@@ -4505,59 +3363,57 @@ OpenClaw augments
 uiHints
 at runtime based on discovered plugins:
 Adds per-plugin labels for
-plugins.entries.&lt;id&gt;
+plugins.entries.<id>
 .enabled
 .config
 Merges optional plugin-provided config field hints under:
-plugins.entries.&lt;id&gt;.config.&lt;field&gt;
+plugins.entries.<id>.config.<field>
 If you want your plugin config fields to show good labels/placeholders (and mark secrets as sensitive),
 provide
 uiHints
 alongside your JSON Schema in the plugin manifest.
 Example:
-Copy
-&quot;id&quot;
-&quot;my-plugin&quot;
-&quot;configSchema&quot;
-&quot;type&quot;
-&quot;object&quot;
-&quot;additionalProperties&quot;
+"id"
+"my-plugin"
+"configSchema"
+"type"
+"object"
+"additionalProperties"
 false
-&quot;properties&quot;
-&quot;apiKey&quot;
-&quot;type&quot;
-&quot;string&quot;
-&quot;region&quot;
-&quot;type&quot;
-&quot;string&quot;
-&quot;uiHints&quot;
-&quot;apiKey&quot;
-&quot;label&quot;
-&quot;API Key&quot;
-&quot;sensitive&quot;
+"properties"
+"apiKey"
+"type"
+"string"
+"region"
+"type"
+"string"
+"uiHints"
+"apiKey"
+"label"
+"API Key"
+"sensitive"
 true
-&quot;region&quot;
-&quot;label&quot;
-&quot;Region&quot;
-&quot;placeholder&quot;
-&quot;us-east-1&quot;
+"region"
+"label"
+"Region"
+"placeholder"
+"us-east-1"
 CLI
-Copy
 openclaw
 plugins
 list
 openclaw
 plugins
 info
-&lt;
-&gt;
+<
+>
 openclaw
 plugins
 install
-&lt;
+<
 pat
-&gt;
-# copy a local file/dir into ~/.openclaw/extensions/&lt;id&gt;
+>
+# copy a local file/dir into ~/.openclaw/extensions/<id>
 openclaw
 plugins
 install
@@ -4586,8 +3442,8 @@ install
 openclaw
 plugins
 update
-&lt;
-&gt;
+<
+>
 openclaw
 plugins
 update
@@ -4595,13 +3451,13 @@ update
 openclaw
 plugins
 enable
-&lt;
-&gt;
+<
+>
 openclaw
 plugins
 disable
-&lt;
-&gt;
+<
+>
 openclaw
 plugins
 doctor
@@ -4613,17 +3469,16 @@ openclaw voicecall
 Plugin API (overview)
 Plugins export either:
 A function:
-(api) =&gt; { ... }
+(api) => { ... }
 An object:
 { id, name, configSchema, register(api) { ... } }
 Plugin hooks
 Plugins can ship hooks and register them at runtime. This lets a plugin bundle
 event-driven automation without a separate hook pack install.
 Example
-Copy
-import { registerPluginHooksFromDir } from &quot;openclaw/plugin-sdk&quot;;
+import { registerPluginHooksFromDir } from "openclaw/plugin-sdk";
 export default function register(api) {
-registerPluginHooksFromDir(api, &quot;./hooks&quot;);
+registerPluginHooksFromDir(api, "./hooks");
 Notes:
 Hook directories follow the normal hook structure (
 HOOK.md
@@ -4632,7 +3487,7 @@ Hook eligibility rules still apply (OS/bins/env/config requirements).
 Plugin-managed hooks show up in
 openclaw hooks list
 with
-plugin:&lt;id&gt;
+plugin:<id>
 You cannot enable/disable plugin-managed hooks via
 openclaw hooks
 ; enable/disable the plugin instead.
@@ -4645,45 +3500,44 @@ Register a provider via
 api.registerProvider(...)
 . Each provider exposes one
 or more auth methods (OAuth, API key, device code, etc.). These methods power:
-openclaw models auth login --provider &lt;id&gt; [--method &lt;id&gt;]
+openclaw models auth login --provider <id> [--method <id>]
 Example:
-Copy
 api
 .registerProvider
-&quot;acme&quot;
+"acme"
 label
-&quot;AcmeAI&quot;
+"AcmeAI"
 auth
-&quot;oauth&quot;
+"oauth"
 label
-&quot;OAuth&quot;
+"OAuth"
 kind
-&quot;oauth&quot;
+"oauth"
 run
 async
 (ctx)
-=&gt;
+=>
 // Run OAuth flow and return auth profiles.
 return
 profiles
 profileId
-&quot;acme:default&quot;
+"acme:default"
 credential
 type
-&quot;oauth&quot;
+"oauth"
 provider
-&quot;acme&quot;
+"acme"
 access
-&quot;...&quot;
+"..."
 refresh
-&quot;...&quot;
+"..."
 expires
 Date
 .now
 3600
 1000
 defaultModel
-&quot;acme/opus-1&quot;
+"acme/opus-1"
 });
 Notes:
 run
@@ -4708,33 +3562,32 @@ Plugins can register
 channel plugins
 that behave like built‑in channels
 (WhatsApp, Telegram, etc.). Channel config lives under
-channels.&lt;id&gt;
+channels.<id>
 and is
 validated by your channel plugin code.
-Copy
 const
 myChannel
-&quot;acmechat&quot;
+"acmechat"
 meta
-&quot;acmechat&quot;
+"acmechat"
 label
-&quot;AcmeChat&quot;
+"AcmeChat"
 selectionLabel
-&quot;AcmeChat (API)&quot;
+"AcmeChat (API)"
 docsPath
-&quot;/channels/acmechat&quot;
+"/channels/acmechat"
 blurb
-&quot;demo channel plugin.&quot;
+"demo channel plugin."
 aliases
-&quot;acme&quot;
+"acme"
 capabilities
 { chatTypes
-&quot;direct&quot;
+"direct"
 ] }
 config
 listAccountIds
 (cfg)
-=&gt;
+=>
 Object
 .keys
 cfg
@@ -4745,19 +3598,19 @@ acmechat
 resolveAccount
 (cfg
 accountId)
-=&gt;
+=>
 cfg
 channels
 acmechat
 ?.accounts?.[accountId
-&quot;default&quot;
+"default"
 accountId
 outbound
 deliveryMode
-&quot;direct&quot;
+"direct"
 sendText
 async
-=&gt;
+=>
 ({ ok
 true
 export
@@ -4770,7 +3623,7 @@ api
 myChannel });
 Notes:
 Put config under
-channels.&lt;id&gt;
+channels.<id>
 (not
 plugins.entries
 meta.label
@@ -4791,9 +3644,9 @@ Model provider docs live under
 /providers/*
 Pick an id + config shape
 All channel config lives under
-channels.&lt;id&gt;
+channels.<id>
 Prefer
-channels.&lt;id&gt;.accounts.&lt;accountId&gt;
+channels.<id>.accounts.<accountId>
 for multi‑account setups.
 Define the channel metadata
 meta.label
@@ -4803,7 +3656,7 @@ meta.blurb
 control CLI/UI lists.
 meta.docsPath
 should point at a docs page like
-/channels/&lt;id&gt;
+/channels/<id>
 meta.preferOver
 lets a plugin replace another channel (auto-enable prefers it).
 meta.detailLabel
@@ -4837,40 +3690,38 @@ commands
 Register the channel in your plugin
 api.registerChannel({ plugin })
 Minimal config example:
-Copy
 channels
 acmechat
 accounts
 default
 token
-&quot;ACME_TOKEN&quot;
+"ACME_TOKEN"
 enabled
 true
 Minimal channel plugin (outbound‑only):
-Copy
 const
 plugin
-&quot;acmechat&quot;
+"acmechat"
 meta
-&quot;acmechat&quot;
+"acmechat"
 label
-&quot;AcmeChat&quot;
+"AcmeChat"
 selectionLabel
-&quot;AcmeChat (API)&quot;
+"AcmeChat (API)"
 docsPath
-&quot;/channels/acmechat&quot;
+"/channels/acmechat"
 blurb
-&quot;AcmeChat messaging channel.&quot;
+"AcmeChat messaging channel."
 aliases
-&quot;acme&quot;
+"acme"
 capabilities
 { chatTypes
-&quot;direct&quot;
+"direct"
 ] }
 config
 listAccountIds
 (cfg)
-=&gt;
+=>
 Object
 .keys
 cfg
@@ -4881,20 +3732,20 @@ acmechat
 resolveAccount
 (cfg
 accountId)
-=&gt;
+=>
 cfg
 channels
 acmechat
 ?.accounts?.[accountId
-&quot;default&quot;
+"default"
 accountId
 outbound
 deliveryMode
-&quot;direct&quot;
+"direct"
 sendText
 async
 ({ text })
-=&gt;
+=>
 // deliver `text` to your channel here
 return
 { ok
@@ -4910,22 +3761,21 @@ Load the plugin (extensions dir or
 plugins.load.paths
 ), restart the gateway,
 then configure
-channels.&lt;id&gt;
+channels.<id>
 in your config.
 Agent tools
 See the dedicated guide:
 Plugin agent tools
 Register a gateway RPC method
-Copy
 export
 default
 function
 (api) {
 api
 .registerGatewayMethod
-&quot;myplugin.status&quot;
+"myplugin.status"
 ({ respond })
-=&gt;
+=>
 respond
 true
 { ok
@@ -4933,7 +3783,6 @@ true
 });
 });
 Register CLI commands
-Copy
 export
 default
 function
@@ -4941,19 +3790,19 @@ function
 api
 .registerCli
 ({ program })
-=&gt;
+=>
 program
 .command
-&quot;mycmd&quot;
+"mycmd"
 .action
 (()
-=&gt;
+=>
 console
 .log
-&quot;Hello&quot;
+"Hello"
 });
 { commands
-&quot;mycmd&quot;
+"mycmd"
 ] }
 Register auto-reply commands
 Plugins can register custom slash commands that execute
@@ -4961,7 +3810,6 @@ without invoking the
 AI agent
 . This is useful for toggle commands, status checks, or quick actions
 that don’t need LLM processing.
-Copy
 export
 default
 function
@@ -4969,12 +3817,12 @@ function
 api
 .registerCommand
 name
-&quot;mystatus&quot;
+"mystatus"
 description
-&quot;Show plugin status&quot;
+"Show plugin status"
 handler
 (ctx)
-=&gt;
+=>
 text
 `Plugin is running! Channel:
 ctx
@@ -5008,13 +3856,12 @@ handler
 { text: string }
 (can be async)
 Example with authorization and arguments:
-Copy
 api
 .registerCommand
 name
-&quot;setmode&quot;
+"setmode"
 description
-&quot;Set plugin mode&quot;
+"Set plugin mode"
 acceptsArgs
 true
 requireAuth
@@ -5022,13 +3869,13 @@ true
 handler
 async
 (ctx)
-=&gt;
+=>
 const
 mode
 ctx
 args
 ?.trim
-&quot;default&quot;
+"default"
 await
 saveMode
 (mode);
@@ -5054,26 +3901,25 @@ reset
 , etc.) cannot be overridden by plugins
 Duplicate command registration across plugins will fail with a diagnostic error
 Register background services
-Copy
 export
 default
 function
 (api) {
 api
 .registerService
-&quot;my-service&quot;
+"my-service"
 start
-=&gt;
+=>
 api
 logger
 .info
-&quot;ready&quot;
+"ready"
 stop
-=&gt;
+=>
 api
 logger
 .info
-&quot;bye&quot;
+"bye"
 });
 Naming conventions
 Gateway methods:
@@ -5087,9 +3933,9 @@ voice_call
 CLI commands: kebab or camel, but avoid clashing with core commands
 Skills
 Plugins can ship a skill in the repo (
-skills/&lt;name&gt;/SKILL.md
+skills/<name>/SKILL.md
 Enable it with
-plugins.entries.&lt;id&gt;.enabled
+plugins.entries.<id>.enabled
 (or other config gates) and ensure
 it’s present in your workspace/managed skills locations.
 Distribution (npm)
@@ -5111,11 +3957,11 @@ Entry files can be
 .js
 .ts
 (jiti loads TS at runtime).
-openclaw plugins install &lt;npm-spec&gt;
+openclaw plugins install <npm-spec>
 uses
 npm pack
 , extracts into
-~/.openclaw/extensions/&lt;id&gt;/
+~/.openclaw/extensions/<id>/
 , and enables it in config.
 Config key stability: scoped packages are normalized to the
 unscoped
@@ -5135,13 +3981,13 @@ RPC:
 voicecall.start
 voicecall.status
 Config (twilio):
-provider: &quot;twilio&quot;
+provider: "twilio"
 twilio.accountSid/authToken/from
 (optional
 statusCallbackUrl
 twimlUrl
 Config (dev):
-provider: &quot;log&quot;
+provider: "log"
 (no network)
 See
 Voice Call
@@ -5173,78 +4019,10 @@ Voice Call Plugin
 
 [Source: https://docs.openclaw.ai/tools/reactions]
 
-Reactions - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Built-in tools
-Reactions
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Tools
-Built-in tools
-Lobster
-LLM Task
-Exec Tool
-Web Tools
-apply_patch Tool
-Elevated Mode
-Thinking Levels
-Reactions
-Browser
-Browser (OpenClaw-managed)
-Browser Login
-Chrome Extension
-Browser Troubleshooting
-Agent coordination
-Agent Send
-Sub-Agents
-Multi-Agent Sandbox &amp; Tools
-Skills
-Slash Commands
-Skills
-Skills Config
-ClawHub
-Plugins
-Extensions
-Voice Call Plugin
-Zalo Personal Plugin
-Automation
-Hooks
-Cron Jobs
-Cron vs Heartbeat
-Automation Troubleshooting
-Webhooks
-Gmail PubSub
-Polls
-Auth Monitoring
-Media and devices
-Nodes
-Node Troubleshooting
-Image and Media Support
-Audio and Voice Notes
-Camera Capture
-Talk Mode
-Voice Wake
-Location Command
-Reaction tooling
-Built-in tools
-Reactions
-Reaction tooling
 Shared reaction semantics across channels:
 emoji
 is required when adding a reaction.
-emoji=&quot;&quot;
+emoji=""
 removes the bot’s reaction(s) when supported.
 remove: true
 removes the specified emoji when supported (requires
@@ -5289,108 +4067,16 @@ Browser (OpenClaw-managed)
 
 [Source: https://docs.openclaw.ai/tools/skills-config]
 
-Skills Config - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Skills
-Skills Config
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Tools
-Built-in tools
-Lobster
-LLM Task
-Exec Tool
-Web Tools
-apply_patch Tool
-Elevated Mode
-Thinking Levels
-Reactions
-Browser
-Browser (OpenClaw-managed)
-Browser Login
-Chrome Extension
-Browser Troubleshooting
-Agent coordination
-Agent Send
-Sub-Agents
-Multi-Agent Sandbox &amp; Tools
-Skills
-Slash Commands
-Skills
-Skills Config
-ClawHub
-Plugins
-Extensions
-Voice Call Plugin
-Zalo Personal Plugin
-Automation
-Hooks
-Cron Jobs
-Cron vs Heartbeat
-Automation Troubleshooting
-Webhooks
-Gmail PubSub
-Polls
-Auth Monitoring
-Media and devices
-Nodes
-Node Troubleshooting
-Image and Media Support
-Audio and Voice Notes
-Camera Capture
-Talk Mode
-Voice Wake
-Location Command
-Skills Config
-Fields
-Notes
-Sandboxed skills + env vars
-Skills
-Skills Config
-Skills Config
-All skills-related configuration lives under
-skills
-~/.openclaw/openclaw.json
-Copy
-skills
-allowBundled
-&quot;gemini&quot;
-&quot;peekaboo&quot;
-load
-extraDirs
-&quot;~/Projects/agent-scripts/skills&quot;
-&quot;~/Projects/oss/some-skill-pack/skills&quot;
-watch
-true
-watchDebounceMs
-250
-install
-preferBrew
-true
-nodeManager
-&quot;npm&quot;
 // npm | pnpm | yarn | bun (Gateway runtime still Node; bun not recommended)
 entries
-&quot;nano-banana-pro&quot;
+"nano-banana-pro"
 enabled
 true
 apiKey
-&quot;GEMINI_KEY_HERE&quot;
+"GEMINI_KEY_HERE"
 env
 GEMINI_API_KEY
-&quot;GEMINI_KEY_HERE&quot;
+"GEMINI_KEY_HERE"
 peekaboo
 enabled
 true
@@ -5422,7 +4108,7 @@ This only affects
 skill installs
 ; the Gateway runtime should still be Node
 (Bun not recommended for WhatsApp/Telegram).
-entries.&lt;skillKey&gt;
+entries.<skillKey>
 : per-skill overrides.
 Per-skill fields:
 enabled
@@ -5456,7 +4142,7 @@ bake the env into your custom sandbox image
 Global
 env
 and
-skills.entries.&lt;skill&gt;.env/apiKey
+skills.entries.<skill>.env/apiKey
 apply to
 host
 runs only.
@@ -5468,92 +4154,6 @@ ClawHub
 
 [Source: https://docs.openclaw.ai/tools/skills]
 
-Skills - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Skills
-Skills
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Tools
-Built-in tools
-Lobster
-LLM Task
-Exec Tool
-Web Tools
-apply_patch Tool
-Elevated Mode
-Thinking Levels
-Reactions
-Browser
-Browser (OpenClaw-managed)
-Browser Login
-Chrome Extension
-Browser Troubleshooting
-Agent coordination
-Agent Send
-Sub-Agents
-Multi-Agent Sandbox &amp; Tools
-Skills
-Slash Commands
-Skills
-Skills Config
-ClawHub
-Plugins
-Extensions
-Voice Call Plugin
-Zalo Personal Plugin
-Automation
-Hooks
-Cron Jobs
-Cron vs Heartbeat
-Automation Troubleshooting
-Webhooks
-Gmail PubSub
-Polls
-Auth Monitoring
-Media and devices
-Nodes
-Node Troubleshooting
-Image and Media Support
-Audio and Voice Notes
-Camera Capture
-Talk Mode
-Voice Wake
-Location Command
-Skills (OpenClaw)
-Locations and precedence
-Per-agent vs shared skills
-Plugins + skills
-ClawHub (install + sync)
-Security notes
-Format (AgentSkills + Pi-compatible)
-Gating (load-time filters)
-Config overrides (~/.openclaw/openclaw.json)
-Environment injection (per agent run)
-Session snapshot (performance)
-Remote macOS nodes (Linux gateway)
-Skills watcher (auto-refresh)
-Token impact (skills list)
-Managed skills lifecycle
-Config reference
-Looking for more skills?
-Skills
-Skills
-Skills (OpenClaw)
-OpenClaw uses
-AgentSkills
 -compatible
 skill folders to teach the agent how to use tools. Each skill is a directory containing a
 SKILL.md
@@ -5569,9 +4169,9 @@ Bundled skills
 Managed/local skills
 ~/.openclaw/skills
 Workspace skills
-&lt;workspace&gt;/skills
+<workspace>/skills
 If a skill name conflicts, precedence is:
-&lt;workspace&gt;/skills
+<workspace>/skills
 (highest) →
 ~/.openclaw/skills
 → bundled skills (lowest)
@@ -5583,7 +4183,7 @@ multi-agent
 setups, each agent has its own workspace. That means:
 Per-agent skills
 live in
-&lt;workspace&gt;/skills
+<workspace>/skills
 for that agent only.
 Shared skills
 live in
@@ -5622,7 +4222,7 @@ Full guide:
 ClawHub
 Common flows:
 Install a skill into your workspace:
-clawhub install &lt;skill-slug&gt;
+clawhub install <skill-slug>
 Update all installed skills:
 clawhub update --all
 Sync (scan + publish updates):
@@ -5634,7 +4234,7 @@ installs into
 under your current working
 directory (or falls back to the configured OpenClaw workspace). OpenClaw picks
 that up as
-&lt;workspace&gt;/skills
+<workspace>/skills
 on the next session.
 Security notes
 Treat third-party skills as
@@ -5654,7 +4254,6 @@ Security
 Format (AgentSkills + Pi-compatible)
 SKILL.md
 must include at least:
-Copy
 ---
 name
 nano-banana-pro
@@ -5703,31 +4302,30 @@ command-arg-mode
 raw
 (default). For tool dispatch, forwards the raw args string to the tool (no core parsing).
 The tool is invoked with params:
-{ command: &quot;&lt;raw args&gt;&quot;, commandName: &quot;&lt;slash command&gt;&quot;, skillName: &quot;&lt;skill name&gt;&quot; }
+{ command: "<raw args>", commandName: "<slash command>", skillName: "<skill name>" }
 Gating (load-time filters)
 OpenClaw
 filters skills at load time
 using
 metadata
 (single-line JSON):
-Copy
 ---
 name
 nano-banana-pro
 description
 Generate or edit images via Gemini 3 Pro Image
 metadata
-&quot;openclaw&quot;
-&quot;requires&quot;
-&quot;bins&quot;
-&quot;uv&quot;
-&quot;env&quot;
-&quot;GEMINI_API_KEY&quot;
-&quot;config&quot;
-&quot;browser.enabled&quot;
+"openclaw"
+"requires"
+"bins"
+"uv"
+"env"
+"GEMINI_API_KEY"
+"config"
+"browser.enabled"
 ] }
-&quot;primaryEnv&quot;
-&quot;GEMINI_API_KEY&quot;
+"primaryEnv"
+"GEMINI_API_KEY"
 ---
 Fields under
 metadata.openclaw
@@ -5757,7 +4355,7 @@ openclaw.json
 paths that must be truthy.
 primaryEnv
 — env var name associated with
-skills.entries.&lt;name&gt;.apiKey
+skills.entries.<name>.apiKey
 install
 — optional array of installer specs used by the macOS Skills UI (brew/node/go/uv/download).
 Note on sandboxing:
@@ -5782,31 +4380,30 @@ summarize
 CLI
 in the sandbox container to run there.
 Installer example:
-Copy
 ---
 name
 gemini
 description
 Use Gemini CLI for coding assistance and Google search lookups.
 metadata
-&quot;openclaw&quot;
-&quot;emoji&quot;
-&quot;♊️&quot;
-&quot;requires&quot;
-&quot;bins&quot;
-&quot;gemini&quot;
+"openclaw"
+"emoji"
+"♊️"
+"requires"
+"bins"
+"gemini"
 ] }
-&quot;install&quot;
-&quot;id&quot;
-&quot;brew&quot;
-&quot;kind&quot;
-&quot;brew&quot;
-&quot;formula&quot;
-&quot;gemini-cli&quot;
-&quot;bins&quot;
-&quot;gemini&quot;
-&quot;label&quot;
-&quot;Install Gemini CLI (brew)&quot;
+"install"
+"id"
+"brew"
+"kind"
+"brew"
+"formula"
+"gemini-cli"
+"bins"
+"gemini"
+"label"
+"Install Gemini CLI (brew)"
 ---
 Notes:
 If multiple installers are listed, the gateway picks a
@@ -5816,7 +4413,7 @@ If all installers are
 download
 , OpenClaw lists each entry so you can see the available artifacts.
 Installer specs can include
-os: [&quot;darwin&quot;|&quot;linux&quot;|&quot;win32&quot;]
+os: ["darwin"|"linux"|"win32"]
 to filter options by platform.
 Node installs honor
 skills.install.nodeManager
@@ -5846,7 +4443,7 @@ extract
 stripComponents
 targetDir
 (default:
-~/.openclaw/tools/&lt;skillKey&gt;
+~/.openclaw/tools/<skillKey>
 If no
 metadata.openclaw
 is present, the skill is always eligible (unless
@@ -5856,22 +4453,21 @@ for bundled skills).
 Config overrides (
 ~/.openclaw/openclaw.json
 Bundled/managed skills can be toggled and supplied with env values:
-Copy
 skills
 entries
-&quot;nano-banana-pro&quot;
+"nano-banana-pro"
 enabled
 true
 apiKey
-&quot;GEMINI_KEY_HERE&quot;
+"GEMINI_KEY_HERE"
 env
 GEMINI_API_KEY
-&quot;GEMINI_KEY_HERE&quot;
+"GEMINI_KEY_HERE"
 config
 endpoint
-&quot;https://example.invalid&quot;
+"https://example.invalid"
 model
-&quot;nano-pro&quot;
+"nano-pro"
 peekaboo
 enabled
 true
@@ -5906,8 +4502,8 @@ Environment injection (per agent run)
 When an agent run starts, OpenClaw:
 Reads skill metadata.
 Applies any
-skills.entries.&lt;key&gt;.env
-skills.entries.&lt;key&gt;.apiKey
+skills.entries.<key>.env
+skills.entries.<key>.apiKey
 process.env
 Builds the system prompt with
 eligible
@@ -5944,7 +4540,6 @@ By default, OpenClaw watches skill folders and bumps the skills snapshot when
 SKILL.md
 files change. Configure this under
 skills.load
-Copy
 skills
 load
 watch
@@ -5960,20 +4555,19 @@ Base overhead (only when ≥1 skill):
 195 characters.
 Per skill:
 97 characters + the length of the XML-escaped
-&lt;name&gt;
-&lt;description&gt;
+<name>
+<description>
 , and
-&lt;location&gt;
+<location>
 values.
 Formula (characters):
-Copy
 total = 195 + Σ (97 + len(name_escaped) + len(description_escaped) + len(location_escaped))
 Notes:
 XML escaping expands
-&amp; &lt; &gt; &quot; &#x27;
+& < > " '
 into entities (
-&amp;amp;
-&amp;lt;
+&
+<
 , etc.), increasing length.
 Token counts vary by model tokenizer. A rough OpenAI-style estimate is ~4 chars/token, so
 97 chars ≈ 24 tokens
@@ -6002,88 +4596,13 @@ Skills Config
 
 [Source: https://docs.openclaw.ai/tools/slash-commands]
 
-Slash Commands - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Skills
-Slash Commands
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Tools
-Built-in tools
-Lobster
-LLM Task
-Exec Tool
-Web Tools
-apply_patch Tool
-Elevated Mode
-Thinking Levels
-Reactions
-Browser
-Browser (OpenClaw-managed)
-Browser Login
-Chrome Extension
-Browser Troubleshooting
-Agent coordination
-Agent Send
-Sub-Agents
-Multi-Agent Sandbox &amp; Tools
-Skills
-Slash Commands
-Skills
-Skills Config
-ClawHub
-Plugins
-Extensions
-Voice Call Plugin
-Zalo Personal Plugin
-Automation
-Hooks
-Cron Jobs
-Cron vs Heartbeat
-Automation Troubleshooting
-Webhooks
-Gmail PubSub
-Polls
-Auth Monitoring
-Media and devices
-Nodes
-Node Troubleshooting
-Image and Media Support
-Audio and Voice Notes
-Camera Capture
-Talk Mode
-Voice Wake
-Location Command
-Slash commands
-Config
-Command list
-Usage surfaces (what shows where)
-Model selection (/model)
-Debug overrides
-Config updates
-Surface notes
-Skills
-Slash Commands
-Slash commands
 Commands are handled by the Gateway. Most commands must be sent as a
 standalone
 message that starts with
 The host-only bash chat command uses
-! &lt;cmd&gt;
+! <cmd>
 (with
-/bash &lt;cmd&gt;
+/bash <cmd>
 as an alias).
 There are two related systems:
 Commands
@@ -6121,12 +4640,11 @@ inline shortcuts
 /id
 They run immediately, are stripped before the model sees the message, and the remaining text continues through the normal flow.
 Config
-Copy
 commands
 native
-&quot;auto&quot;
+"auto"
 nativeSkills
-&quot;auto&quot;
+"auto"
 text
 true
 bash
@@ -6140,10 +4658,10 @@ false
 restart
 false
 allowFrom
-&quot;*&quot;
-&quot;user1&quot;
+"*"
+"user1"
 discord
-&quot;user:123&quot;
+"user:123"
 useAccessGroups
 true
 commands.text
@@ -6156,7 +4674,7 @@ On surfaces without native commands (WhatsApp/WebChat/Signal/iMessage/Google Cha
 false
 commands.native
 (default
-&quot;auto&quot;
+"auto"
 ) registers native commands.
 Auto: on for Discord/Telegram; off for Slack (until you add slash commands); ignored for providers without native support.
 Set
@@ -6165,12 +4683,12 @@ channels.telegram.commands.native
 , or
 channels.slack.commands.native
 to override per provider (bool or
-&quot;auto&quot;
+"auto"
 false
 clears previously registered commands on Discord/Telegram at startup. Slack commands are managed in the Slack app and are not removed automatically.
 commands.nativeSkills
 (default
-&quot;auto&quot;
+"auto"
 ) registers
 skill
 commands natively when supported.
@@ -6181,14 +4699,14 @@ channels.telegram.commands.nativeSkills
 , or
 channels.slack.commands.nativeSkills
 to override per provider (bool or
-&quot;auto&quot;
+"auto"
 commands.bash
 (default
 false
 ) enables
-! &lt;cmd&gt;
+! <cmd>
 to run host shell commands (
-/bash &lt;cmd&gt;
+/bash <cmd>
 is an alias; requires
 tools.elevated
 allowlists).
@@ -6215,7 +4733,7 @@ commands.allowFrom
 only authorization source for commands and directives (channel allowlists/pairing and
 commands.useAccessGroups
 are ignored). Use
-&quot;*&quot;
+"*"
 for a global default; provider-specific keys override it.
 commands.useAccessGroups
 (default
@@ -6227,13 +4745,13 @@ Command list
 Text + native (when enabled):
 /help
 /commands
-/skill &lt;name&gt; [input]
+/skill <name> [input]
 (run a skill by name)
 /status
 (show current status; includes provider usage/quota for the current model provider when available)
 /allowlist
 (list/add/remove allowlist entries)
-/approve &lt;id&gt; allow-once|allow-always|deny
+/approve <id> allow-once|allow-always|deny
 (resolve exec approval prompts)
 /context [list|detail|json]
 (explain “context”;
@@ -6244,11 +4762,11 @@ shows per-file + per-tool + per-skill + system prompt size)
 /id
 /subagents list|kill|log|info|send|steer
 (inspect, kill, log, or steer sub-agent runs for the current session)
-/kill &lt;id|#|all&gt;
+/kill <id|#|all>
 (immediately abort one or all running sub-agents for this session; no confirmation message)
-/steer &lt;id|#&gt; &lt;message&gt;
+/steer <id|#> <message>
 (steer a running sub-agent immediately: in-run when possible, otherwise abort current work and restart on the steer message)
-/tell &lt;id|#&gt; &lt;message&gt;
+/tell <id|#> <message>
 (alias for
 /steer
 /config show|get|set|unset
@@ -6290,7 +4808,7 @@ still works.
 /reset
 /new [model]
 (optional model hint; remainder is passed through)
-/think &lt;off|minimal|low|medium|high|xhigh&gt;
+/think <off|minimal|low|medium|high|xhigh>
 (dynamic choices by model/provider; aliases:
 /thinking
 /verbose on|full|off
@@ -6307,26 +4825,26 @@ stream
 /elev
 full
 skips exec approvals)
-/exec host=&lt;sandbox|gateway|node&gt; security=&lt;deny|allowlist|full&gt; ask=&lt;off|on-miss|always&gt; node=&lt;id&gt;
+/exec host=<sandbox|gateway|node> security=<deny|allowlist|full> ask=<off|on-miss|always> node=<id>
 (send
 /exec
 to show current)
-/model &lt;name&gt;
+/model <name>
 (alias:
 /models
 ; or
-/&lt;alias&gt;
+/<alias>
 from
 agents.defaults.models.*.alias
-/queue &lt;mode&gt;
+/queue <mode>
 (plus options like
 debounce:2s cap:25 drop:summarize
 ; send
 /queue
 to see current settings)
-/bash &lt;command&gt;
+/bash <command>
 (host-only; alias for
-! &lt;command&gt;
+! <command>
 ; requires
 commands.bash: true
 tools.elevated
@@ -6335,7 +4853,7 @@ Text-only:
 /compact [instructions]
 (see
 /concepts/compaction
-! &lt;command&gt;
+! <command>
 (host-only; one at a time; use
 !poll
 !stop
@@ -6356,7 +4874,7 @@ between the command and args (e.g.
 /think: high
 /send: on
 /help:
-/new &lt;model&gt;
+/new <model>
 accepts a model alias,
 provider/model
 , or a provider name (fuzzy match); if no match, the text is treated as the message body.
@@ -6406,7 +4924,7 @@ user-invocable
 skills are exposed as slash commands. Names are sanitized to
 a-z0-9_
 (max 32 chars); collisions get numeric suffixes (e.g.
-/skill &lt;name&gt; [input]
+/skill <name> [input]
 runs a skill by name (useful when native command limits prevent per-skill commands).
 By default, skill commands are forwarded to the model as a normal request.
 Skills may optionally declare
@@ -6436,7 +4954,6 @@ Model selection (
 /model
 is implemented as a directive.
 Examples:
-Copy
 /model
 /model list
 /model 3
@@ -6448,7 +4965,7 @@ Notes:
 and
 /model list
 show a compact, numbered picker (model family + available providers).
-/model &lt;#&gt;
+/model <#>
 selects from that picker (and prefers the current provider when possible).
 /model status
 shows the detailed view, including configured provider endpoint (
@@ -6463,10 +4980,9 @@ runtime-only
 config overrides (memory, not disk). Owner-only. Disabled by default; enable with
 commands.debug: true
 Examples:
-Copy
 /debug show
-/debug set messages.responsePrefix=&quot;[openclaw]&quot;
-/debug set channels.whatsapp.allowFrom=[&quot;+1555&quot;,&quot;+4477&quot;]
+/debug set messages.responsePrefix="[openclaw]"
+/debug set channels.whatsapp.allowFrom=["+1555","+4477"]
 /debug unset messages.responsePrefix
 /debug reset
 Notes:
@@ -6484,11 +5000,10 @@ openclaw.json
 ). Owner-only. Disabled by default; enable with
 commands.config: true
 Examples:
-Copy
 /config show
 /config show messages.responsePrefix
 /config get messages.responsePrefix
-/config set messages.responsePrefix=&quot;[openclaw]&quot;
+/config set messages.responsePrefix="[openclaw]"
 /config unset messages.responsePrefix
 Notes:
 Config is validated before write; invalid changes are rejected.
@@ -6502,13 +5017,13 @@ main
 Native commands
 use isolated sessions:
 Discord:
-agent:&lt;agentId&gt;:discord:slash:&lt;userId&gt;
+agent:<agentId>:discord:slash:<userId>
 Slack:
-agent:&lt;agentId&gt;:slack:slash:&lt;userId&gt;
+agent:<agentId>:slack:slash:<userId>
 (prefix configurable via
 channels.slack.slashCommand.sessionPrefix
 Telegram:
-telegram:slash:&lt;userId&gt;
+telegram:slash:<userId>
 (targets the chat session via
 CommandTargetSessionKey
 /stop
@@ -6522,7 +5037,7 @@ commands.native
 , you must create one Slack slash command per built-in command (same names as
 /help
 ). Command argument menus for Slack are delivered as ephemeral Block Kit buttons.
-Multi-Agent Sandbox &amp; Tools
+Multi-Agent Sandbox & Tools
 Skills
 
 ---
@@ -6530,91 +5045,8 @@ Skills
 
 [Source: https://docs.openclaw.ai/tools/subagents]
 
-Sub-Agents - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Agent coordination
-Sub-Agents
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Tools
-Built-in tools
-Lobster
-LLM Task
-Exec Tool
-Web Tools
-apply_patch Tool
-Elevated Mode
-Thinking Levels
-Reactions
-Browser
-Browser (OpenClaw-managed)
-Browser Login
-Chrome Extension
-Browser Troubleshooting
-Agent coordination
-Agent Send
-Sub-Agents
-Multi-Agent Sandbox &amp; Tools
-Skills
-Slash Commands
-Skills
-Skills Config
-ClawHub
-Plugins
-Extensions
-Voice Call Plugin
-Zalo Personal Plugin
-Automation
-Hooks
-Cron Jobs
-Cron vs Heartbeat
-Automation Troubleshooting
-Webhooks
-Gmail PubSub
-Polls
-Auth Monitoring
-Media and devices
-Nodes
-Node Troubleshooting
-Image and Media Support
-Audio and Voice Notes
-Camera Capture
-Talk Mode
-Voice Wake
-Location Command
-Sub-agents
-Slash command
-Tool
-Nested Sub-Agents
-How to enable
-Depth levels
-Announce chain
-Tool policy by depth
-Per-agent spawn limit
-Cascade stop
-Authentication
-Announce
-Tool Policy (sub-agent tools)
-Concurrency
-Stopping
-Limitations
-Agent coordination
-Sub-Agents
-Sub-agents
 Sub-agents are background agent runs spawned from an existing agent run. They run in their own session (
-agent:&lt;agentId&gt;:subagent:&lt;uuid&gt;
+agent:<agentId>:subagent:<uuid>
 ) and, when finished,
 announce
 their result back to the requester chat channel.
@@ -6624,10 +5056,10 @@ Use
 to inspect or control sub-agent runs for the
 current session
 /subagents list
-/subagents kill &lt;id|#|all&gt;
-/subagents log &lt;id|#&gt; [limit] [tools]
-/subagents info &lt;id|#&gt;
-/subagents send &lt;id|#&gt; &lt;message&gt;
+/subagents kill <id|#|all>
+/subagents log <id|#> [limit] [tools]
+/subagents info <id|#>
+/subagents send <id|#> <message>
 /subagents info
 shows run metadata (status, timestamps, session id, transcript path, cleanup).
 Primary goals:
@@ -6688,7 +5120,7 @@ Allowlist:
 agents.list[].subagents.allowAgents
 : list of agent ids that can be targeted via
 agentId
-[&quot;*&quot;]
+["*"]
 to allow any). Default: only the requester agent.
 Discovery:
 Use
@@ -6702,9 +5134,9 @@ agents.defaults.subagents.archiveAfterMinutes
 Archive uses
 sessions.delete
 and renames the transcript to
-*.deleted.&lt;timestamp&gt;
+*.deleted.<timestamp>
 (same folder).
-cleanup: &quot;delete&quot;
+cleanup: "delete"
 archives immediately after announce (still keeps the transcript via rename).
 Auto-archive is best-effort; pending timers are lost if the gateway restarts.
 runTimeoutSeconds
@@ -6721,7 +5153,6 @@ maxSpawnDepth: 2
 orchestrator pattern
 : main → orchestrator sub-agent → worker sub-sub-agents.
 How to enable
-Copy
 agents
 defaults
 subagents
@@ -6736,14 +5167,14 @@ Depth
 Session key shape
 Role
 Can spawn?
-agent:&lt;id&gt;:main
+agent:<id>:main
 Main agent
 Always
-agent:&lt;id&gt;:subagent:&lt;uuid&gt;
+agent:<id>:subagent:<uuid>
 Sub-agent (orchestrator when depth 2 allowed)
 Only if
-maxSpawnDepth &gt;= 2
-agent:&lt;id&gt;:subagent:&lt;uuid&gt;:subagent:&lt;uuid&gt;
+maxSpawnDepth >= 2
+agent:<id>:subagent:<uuid>:subagent:<uuid>
 Sub-sub-agent (leaf worker)
 Never
 Announce chain
@@ -6754,7 +5185,7 @@ Main agent receives the announce and delivers to the user
 Each level only sees announces from its direct children.
 Tool policy by depth
 Depth 1 (orchestrator, when
-maxSpawnDepth &gt;= 2
+maxSpawnDepth >= 2
 : Gets
 sessions_spawn
 subagents
@@ -6776,7 +5207,7 @@ Cascade stop
 Stopping a depth-1 orchestrator automatically stops all its depth-2 children:
 /stop
 in the main chat stops all depth-1 agents and cascades to their depth-2 children.
-/subagents kill &lt;id&gt;
+/subagents kill <id>
 stops a specific sub-agent and cascades to its children.
 /subagents kill all
 stops all sub-agents for the requester and cascades.
@@ -6785,7 +5216,7 @@ Sub-agent auth is resolved by
 agent id
 , not by session type:
 The sub-agent session key is
-agent:&lt;agentId&gt;:subagent:&lt;uuid&gt;
+agent:<agentId>:subagent:<uuid>
 The auth store is loaded from that agent’s
 agentDir
 The main agent’s auth profiles are merged in as a
@@ -6839,7 +5270,7 @@ sessions_history
 sessions_send
 sessions_spawn
 When
-maxSpawnDepth &gt;= 2
+maxSpawnDepth >= 2
 , depth-1 orchestrator sub-agents additionally receive
 sessions_spawn
 subagents
@@ -6848,7 +5279,6 @@ sessions_list
 sessions_history
 so they can manage their children.
 Override via config:
-Copy
 agents
 defaults
 subagents
@@ -6858,10 +5288,10 @@ subagents
 tools
 // deny wins
 deny
-&quot;gateway&quot;
-&quot;cron&quot;
+"gateway"
+"cron"
 // if allow is set, it becomes allow-only (deny still wins)
-// allow: [&quot;read&quot;, &quot;exec&quot;, &quot;process&quot;]
+// allow: ["read", "exec", "process"]
 Concurrency
 Sub-agents use a dedicated in-process queue lane:
 Lane name:
@@ -6873,7 +5303,7 @@ Stopping
 Sending
 /stop
 in the requester chat aborts the requester session and stops any active sub-agent runs spawned from it, cascading to nested children.
-/subagents kill &lt;id&gt;
+/subagents kill <id>
 stops a specific sub-agent and cascades to its children.
 Limitations
 Sub-agent announce is
@@ -6884,7 +5314,7 @@ maxConcurrent
 as a safety valve.
 sessions_spawn
 is always non-blocking: it returns
-{ status: &quot;accepted&quot;, runId, childSessionKey }
+{ status: "accepted", runId, childSessionKey }
 immediately.
 Sub-agent context only injects
 AGENTS.md
@@ -6902,96 +5332,18 @@ range: 1–5). Depth 2 is recommended for most use cases.
 maxChildrenPerAgent
 caps active children per session (default: 5, range: 1–20).
 Agent Send
-Multi-Agent Sandbox &amp; Tools
+Multi-Agent Sandbox & Tools
 
 ---
 ## Tools > Thinking
 
 [Source: https://docs.openclaw.ai/tools/thinking]
 
-Thinking Levels - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Built-in tools
-Thinking Levels
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Tools
-Built-in tools
-Lobster
-LLM Task
-Exec Tool
-Web Tools
-apply_patch Tool
-Elevated Mode
-Thinking Levels
-Reactions
-Browser
-Browser (OpenClaw-managed)
-Browser Login
-Chrome Extension
-Browser Troubleshooting
-Agent coordination
-Agent Send
-Sub-Agents
-Multi-Agent Sandbox &amp; Tools
-Skills
-Slash Commands
-Skills
-Skills Config
-ClawHub
-Plugins
-Extensions
-Voice Call Plugin
-Zalo Personal Plugin
-Automation
-Hooks
-Cron Jobs
-Cron vs Heartbeat
-Automation Troubleshooting
-Webhooks
-Gmail PubSub
-Polls
-Auth Monitoring
-Media and devices
-Nodes
-Node Troubleshooting
-Image and Media Support
-Audio and Voice Notes
-Camera Capture
-Talk Mode
-Voice Wake
-Location Command
-Thinking Levels (/think directives)
-What it does
-Resolution order
-Setting a session default
-Application by agent
-Verbose directives (/verbose or /v)
-Reasoning visibility (/reasoning)
-Related
-Heartbeats
-Web chat UI
-Built-in tools
-Thinking Levels
-Thinking Levels (/think directives)
-What it does
 Inline directive in any inbound body:
-/t &lt;level&gt;
-/think:&lt;level&gt;
+/t <level>
+/think:<level>
 , or
-/thinking &lt;level&gt;
+/thinking <level>
 Levels (aliases):
 off | minimal | low | medium | high | xhigh
 (GPT-5.2 + Codex models only)
@@ -7072,7 +5424,7 @@ Send
 /verbose:
 ) with no argument to see the current verbose level.
 When verbose is on, agents that emit structured tool results (Pi, other JSON agents) send each tool call back as its own metadata-only message, prefixed with
-&lt;emoji&gt; &lt;tool-name&gt;: &lt;arg&gt;
+<emoji> <tool-name>: <arg>
 when available (path/command). These tool summaries are sent as soon as each tool starts (separate bubbles), not as streaming deltas.
 When verbose is
 full
@@ -7115,7 +5467,7 @@ Picking another level applies only to the next message (
 thinkingOnce
 ); after sending, the selector snaps back to the stored session level.
 To change the session default, send a
-/think:&lt;level&gt;
+/think:<level>
 directive (as before); the selector will reflect it after the next reload.
 Elevated Mode
 Reactions
@@ -7125,90 +5477,6 @@ Reactions
 
 [Source: https://docs.openclaw.ai/tools/web]
 
-Web Tools - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Built-in tools
-Web Tools
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Tools
-Built-in tools
-Lobster
-LLM Task
-Exec Tool
-Web Tools
-apply_patch Tool
-Elevated Mode
-Thinking Levels
-Reactions
-Browser
-Browser (OpenClaw-managed)
-Browser Login
-Chrome Extension
-Browser Troubleshooting
-Agent coordination
-Agent Send
-Sub-Agents
-Multi-Agent Sandbox &amp; Tools
-Skills
-Slash Commands
-Skills
-Skills Config
-ClawHub
-Plugins
-Extensions
-Voice Call Plugin
-Zalo Personal Plugin
-Automation
-Hooks
-Cron Jobs
-Cron vs Heartbeat
-Automation Troubleshooting
-Webhooks
-Gmail PubSub
-Polls
-Auth Monitoring
-Media and devices
-Nodes
-Node Troubleshooting
-Image and Media Support
-Audio and Voice Notes
-Camera Capture
-Talk Mode
-Voice Wake
-Location Command
-Web tools
-How it works
-Choosing a search provider
-Getting a Brave API key
-Where to set the key (recommended)
-Using Perplexity (direct or via OpenRouter)
-Getting an OpenRouter API key
-Setting up Perplexity search
-Available Perplexity models
-web_search
-Requirements
-Config
-Tool parameters
-web_fetch
-web_fetch requirements
-web_fetch config
-web_fetch tool parameters
-Built-in tools
-Web Tools
-Web tools
 OpenClaw ships two lightweight web tools:
 web_search
 — Search the web via Brave Search API (default) or Perplexity Sonar (direct or via OpenRouter).
@@ -7254,27 +5522,25 @@ and
 Perplexity Sonar
 for provider-specific details.
 Set the provider in config:
-Copy
 tools
 web
 search
 provider
-&quot;brave&quot;
-// or &quot;perplexity&quot;
+"brave"
+// or "perplexity"
 Example: switch to Perplexity Sonar (direct API):
-Copy
 tools
 web
 search
 provider
-&quot;perplexity&quot;
+"perplexity"
 perplexity
 apiKey
-&quot;pplx-...&quot;
+"pplx-..."
 baseUrl
-&quot;https://api.perplexity.ai&quot;
+"https://api.perplexity.ai"
 model
-&quot;perplexity/sonar-pro&quot;
+"perplexity/sonar-pro"
 Getting a Brave API key
 Create a Brave Search API account at
 https://brave.com/search/api/
@@ -7315,24 +5581,23 @@ https://openrouter.ai/
 Add credits (supports crypto, prepaid, or credit card)
 Generate an API key in your account settings
 Setting up Perplexity search
-Copy
 tools
 web
 search
 enabled
 true
 provider
-&quot;perplexity&quot;
+"perplexity"
 perplexity
 // API key (optional if OPENROUTER_API_KEY or PERPLEXITY_API_KEY is set)
 apiKey
-&quot;sk-or-v1-...&quot;
+"sk-or-v1-..."
 // Base URL (key-aware default if omitted)
 baseUrl
-&quot;https://openrouter.ai/api/v1&quot;
+"https://openrouter.ai/api/v1"
 // Model (defaults to perplexity/sonar-pro)
 model
-&quot;perplexity/sonar-pro&quot;
+"perplexity/sonar-pro"
 Environment alternative:
 set
 OPENROUTER_API_KEY
@@ -7353,7 +5618,7 @@ Model
 Description
 Best for
 perplexity/sonar
-Fast Q&amp;A with web search
+Fast Q&A with web search
 Quick lookups
 perplexity/sonar-pro
 (default)
@@ -7379,14 +5644,13 @@ PERPLEXITY_API_KEY
 , or
 tools.web.search.perplexity.apiKey
 Config
-Copy
 tools
 web
 search
 enabled
 true
 apiKey
-&quot;BRAVE_API_KEY_HERE&quot;
+"BRAVE_API_KEY_HERE"
 // optional if BRAVE_API_KEY is set
 maxResults
 timeoutSeconds
@@ -7409,37 +5673,36 @@ Brave:
 YYYY-MM-DDtoYYYY-MM-DD
 Perplexity:
 Examples:
-Copy
 // German-specific search
 await
 web_search
 query
-&quot;TV online schauen&quot;
+"TV online schauen"
 count
 country
-&quot;DE&quot;
+"DE"
 search_lang
-&quot;de&quot;
+"de"
 });
 // French search with French UI
 await
 web_search
 query
-&quot;actualités&quot;
+"actualités"
 country
-&quot;FR&quot;
+"FR"
 search_lang
-&quot;fr&quot;
+"fr"
 ui_lang
-&quot;fr&quot;
+"fr"
 });
 // Recent results (past week)
 await
 web_search
 query
-&quot;TMBG interview&quot;
+"TMBG interview"
 freshness
-&quot;pw&quot;
+"pw"
 });
 web_fetch
 Fetch a URL and extract readable content.
@@ -7452,7 +5715,6 @@ Optional Firecrawl fallback: set
 tools.web.fetch.firecrawl.apiKey
 FIRECRAWL_API_KEY
 web_fetch config
-Copy
 tools
 web
 fetch
@@ -7468,17 +5730,17 @@ timeoutSeconds
 cacheTtlMinutes
 maxRedirects
 userAgent
-&quot;Mozilla/5.0 (Macintosh; Intel Mac OS X 14_7_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36&quot;
+"Mozilla/5.0 (Macintosh; Intel Mac OS X 14_7_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
 readability
 true
 firecrawl
 enabled
 true
 apiKey
-&quot;FIRECRAWL_API_KEY_HERE&quot;
+"FIRECRAWL_API_KEY_HERE"
 // optional if FIRECRAWL_API_KEY is set
 baseUrl
-&quot;https://api.firecrawl.dev&quot;
+"https://api.firecrawl.dev"
 onlyMainContent
 true
 maxAgeMs

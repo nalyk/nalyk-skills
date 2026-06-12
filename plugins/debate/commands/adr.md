@@ -1,298 +1,57 @@
 ---
 description: "Adversarial debate with formal Architecture Decision Record output. Usage: /debate:adr <important decision>"
 argument-hint: "<important decision requiring formal documentation>"
-allowed-tools: Bash, Task, Read, Write, Glob, Grep, TodoWrite
+allowed-tools: Bash, Task, Read, Write, Glob, Grep, TodoWrite, Skill
 ---
 
 # Debate with ADR Output
 
 **DECISION:** $ARGUMENTS
 
-This command runs the full debate protocol but outputs a formal Architecture Decision Record (ADR) suitable for version control and team documentation.
+Runs the full debate protocol, then writes a formal Architecture Decision Record.
 
 ---
 
-## PRE-FLIGHT
+## 1. RUN THE DEBATE
 
-Same as `/debate` - check for available challengers:
+Execute the complete `/debate` flow from `${CLAUDE_PLUGIN_ROOT}/commands/debate.md` (preflight, workspace, personas, parallel challenge via `${CLAUDE_PLUGIN_ROOT}/scripts/challenge-all.sh`, confrontation rounds, assumption extraction if needed).
+
+**Track everything** — the ADR needs the complete audit trail.
+
+Banner: `(DEBATE:ADR) decision | challengers: <list> | output: ADR`
+
+---
+
+## 2. DETERMINE ADR NUMBER AND PATH
 
 ```bash
-if [ -f /tmp/debate-available-challengers ]; then
-    CHALLENGERS=$(cat /tmp/debate-available-challengers | tr '\n' ' ')
-    COUNT=$(cat /tmp/debate-available-challengers | wc -l)
-    echo "Challengers: $CHALLENGERS (count: $COUNT)"
-else
-    echo "No challengers. Run /debate:doctor"
+# adr_path from ~/.claude/debate.local.md if present, default ./docs/decisions
+ADR_PATH="./docs/decisions"
+SETTINGS="$HOME/.claude/debate.local.md"
+if [ -f "$SETTINGS" ]; then
+    v=$(grep -m1 -E '^adr_path:' "$SETTINGS" | sed -E 's/^adr_path:[[:space:]]*"?([^"]*)"?/\1/' || true)
+    [ -n "$v" ] && ADR_PATH="$v"
 fi
-```
-
-If no challengers → ABORT with same message as `/debate`.
-
----
-
-## ACTIVATION BANNER
-
-```
-(DEBATE:ADR) ═════════════════════════════════════════════════════
-  Decision: [first 50 chars of $ARGUMENTS]
-  Output: Architecture Decision Record
-  Path: [adr_path from settings or ./docs/decisions]
-  Challengers: [list]
-══════════════════════════════════════════════════════════════════
-```
-
----
-
-## DEBATE EXECUTION
-
-Run the FULL debate protocol as defined in `/debate`:
-
-1. Claude's opening position
-2. Parallel challenge
-3. Consensus check
-4. Sequential confrontation (if needed)
-5. Iteration until consensus or max rounds
-6. Assumption extraction (if no consensus)
-
-**Track everything** - ADR needs complete audit trail.
-
----
-
-## ADR GENERATION
-
-After debate completes, generate the ADR document:
-
-### Determine ADR number:
-
-```bash
-ADR_PATH="${ADR_PATH:-./docs/decisions}"
 mkdir -p "$ADR_PATH"
 
-# Find next ADR number
-LAST_ADR=$(ls "$ADR_PATH" 2>/dev/null | grep -E "^[0-9]+-" | sort -n | tail -1 | grep -oE "^[0-9]+" || echo "0")
-NEXT_ADR=$((LAST_ADR + 1))
-ADR_NUM=$(printf "%04d" $NEXT_ADR)
-
-echo "Next ADR: $ADR_NUM"
+LAST_ADR=$(ls "$ADR_PATH" 2>/dev/null | grep -E '^[0-9]+-' | sort -n | tail -1 | grep -oE '^[0-9]+' || true)
+ADR_NUM=$(printf '%04d' $((10#${LAST_ADR:-0} + 1)))
+echo "ADR_PATH=$ADR_PATH"; echo "ADR_NUM=$ADR_NUM"
 ```
 
-### Generate ADR filename:
-
-Convert topic to slug:
-```
-$ARGUMENTS → lowercase → spaces to hyphens → remove special chars → truncate to 50 chars
-```
-
-Filename: `[ADR_NUM]-[slug].md`
-
-Example: `0012-use-redis-for-session-caching.md`
+Filename: `$ADR_NUM-<slug>.md` (topic lowercased, hyphens, max 50 chars). Example: `0012-use-redis-for-session-caching.md`.
 
 ---
 
-## ADR TEMPLATE
+## 3. GENERATE THE ADR
 
-```markdown
-# ADR-[NUMBER]: [TITLE]
-
-**Date:** [YYYY-MM-DD]
-**Status:** PROPOSED
-**Deciders:** Claude + [challenger list]
-**Debate rounds:** [N]
-**Consensus:** [YES/NO]
+Read `${CLAUDE_PLUGIN_ROOT}/templates/adr-template.md` and fill it with the debate results (challenges per model — agy/codex/qwen, position evolution, consensus status, alternatives, consequences, risks, assumptions, full audit trail). Write the result to `$ADR_PATH/$ADR_NUM-<slug>.md`.
 
 ---
 
-## Context
-
-[Restate the decision topic and why it matters]
-
-What is the issue that we're seeing that motivates this decision or change?
-
----
-
-## Decision
-
-[Claude's final position after debate]
-
-We will [specific decision].
-
----
-
-## Debate Summary
-
-### Claude's Initial Position
-[Summary of opening position]
-
-### Challenges Raised
-
-**Gemini:**
-- [Key critique]
-- Verdict: [agree/partial/disagree]
-
-**Codex:**
-- [Key critique]
-- Verdict: [agree/partial/disagree]
-
-**Qwen:**
-- [Key critique]
-- Verdict: [agree/partial/disagree]
-
-### Position Evolution
-
-1. **v1 (initial):** [position]
-2. **v2 (after round 1):** [position + what changed]
-3. **v3 (final):** [position]
-
-### Consensus Status
-
-[CONSENSUS REACHED / TRADEOFF IDENTIFIED]
-
-[If tradeoff: explain the core disagreement and assumptions]
-
----
-
-## Alternatives Considered
-
-### Alternative 1: [Name]
-
-**Advocated by:** [model(s)]
-**Description:** [what this alternative proposes]
-
-**Pros:**
-- [pro 1]
-- [pro 2]
-
-**Cons:**
-- [con 1]
-- [con 2]
-
-**Why not chosen:** [reasoning]
-
-### Alternative 2: [Name]
-
-[Same format]
-
----
-
-## Consequences
-
-### Positive
-
-- [consequence 1]
-- [consequence 2]
-- [consequence 3]
-
-### Negative
-
-- [consequence 1]
-- [consequence 2]
-
-### Risks
-
-| Risk | Likelihood | Impact | Mitigation |
-|------|------------|--------|------------|
-| [risk 1] | [H/M/L] | [H/M/L] | [how to mitigate] |
-| [risk 2] | [H/M/L] | [H/M/L] | [how to mitigate] |
-
----
-
-## Assumptions
-
-This decision assumes:
-
-1. [assumption 1]
-2. [assumption 2]
-3. [assumption 3]
-
-**If these assumptions change, revisit this decision.**
-
----
-
-## Related Decisions
-
-- [Link to related ADRs if any]
-
----
-
-## Debate Audit Trail
-
-<details>
-<summary>Full debate transcript</summary>
-
-### Round 1: Parallel Challenge
-
-[Full critiques]
-
-### Round 2: Claude's Response
-
-[Full responses]
-
-### Round 3: Challenger Rebuttal
-
-[Full rebuttals]
-
-[Continue for all rounds]
-
-### Assumption Extraction (if applicable)
-
-[Full extraction]
-
-</details>
-
----
-
-*Generated by debate plugin via multi-model adversarial debate.*
-*Challengers: [list]*
-*Date: [timestamp]*
-```
-
----
-
-## SAVE ADR
-
-Write the generated ADR to the determined path:
-
-```bash
-ADR_FILE="$ADR_PATH/$ADR_NUM-$SLUG.md"
-echo "Saving ADR to: $ADR_FILE"
-```
-
-Use the Write tool to save the file.
-
----
-
-## FINAL OUTPUT
-
-After saving:
+## 4. FINAL OUTPUT
 
 ```
-+================================================================+
-|  ADR CREATED                                                     |
-+================================================================+
-|                                                                  |
-|  File: [path]                                                    |
-|  Number: ADR-[NUM]                                               |
-|  Title: [title]                                                  |
-|  Status: PROPOSED                                                |
-|  Consensus: [YES/NO]                                             |
-|                                                                  |
-|  Next steps:                                                     |
-|  - Review the ADR                                                |
-|  - Change status to ACCEPTED when approved                       |
-|  - Commit to version control                                     |
-|                                                                  |
-+================================================================+
-```
-
----
-
-## SETTINGS
-
-ADR-specific settings in `~/.claude/debate.local.md`:
-
-```yaml
----
-adr_path: "./docs/decisions"    # Where to save ADRs
-adr_status: "PROPOSED"          # Initial status for new ADRs
----
+ADR CREATED: <path>  (ADR-<num>, status PROPOSED, consensus YES/NO)
+Next: review, set status ACCEPTED, commit to version control.
 ```

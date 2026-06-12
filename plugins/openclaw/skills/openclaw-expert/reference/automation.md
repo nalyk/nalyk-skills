@@ -2,88 +2,14 @@
 
 Cron jobs, hooks, webhooks, Gmail PubSub, polls, auth monitoring.
 
-
 ---
 ## Automation > Auth Monitoring
 
 [Source: https://docs.openclaw.ai/automation/auth-monitoring]
 
-Auth Monitoring - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Automation
-Auth Monitoring
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Tools
-Built-in tools
-Lobster
-LLM Task
-Exec Tool
-Web Tools
-apply_patch Tool
-Elevated Mode
-Thinking Levels
-Reactions
-Browser
-Browser (OpenClaw-managed)
-Browser Login
-Chrome Extension
-Browser Troubleshooting
-Agent coordination
-Agent Send
-Sub-Agents
-Multi-Agent Sandbox &amp; Tools
-Skills
-Slash Commands
-Skills
-Skills Config
-ClawHub
-Plugins
-Extensions
-Voice Call Plugin
-Zalo Personal Plugin
-Automation
-Hooks
-Cron Jobs
-Cron vs Heartbeat
-Automation Troubleshooting
-Webhooks
-Gmail PubSub
-Polls
-Auth Monitoring
-Media and devices
-Nodes
-Node Troubleshooting
-Image and Media Support
-Audio and Voice Notes
-Camera Capture
-Talk Mode
-Voice Wake
-Location Command
-Auth monitoring
-Preferred: CLI check (portable)
-Optional scripts (ops / phone workflows)
-Automation
-Auth Monitoring
-Auth monitoring
-OpenClaw exposes OAuth expiry health via
-openclaw models status
 . Use that for
 automation and alerting; scripts are optional extras for phone workflows.
 Preferred: CLI check (portable)
-Copy
 openclaw
 models
 status
@@ -132,105 +58,6 @@ Nodes
 
 [Source: https://docs.openclaw.ai/automation/cron-jobs]
 
-Cron Jobs - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Automation
-Cron Jobs
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Tools
-Built-in tools
-Lobster
-LLM Task
-Exec Tool
-Web Tools
-apply_patch Tool
-Elevated Mode
-Thinking Levels
-Reactions
-Browser
-Browser (OpenClaw-managed)
-Browser Login
-Chrome Extension
-Browser Troubleshooting
-Agent coordination
-Agent Send
-Sub-Agents
-Multi-Agent Sandbox &amp; Tools
-Skills
-Slash Commands
-Skills
-Skills Config
-ClawHub
-Plugins
-Extensions
-Voice Call Plugin
-Zalo Personal Plugin
-Automation
-Hooks
-Cron Jobs
-Cron vs Heartbeat
-Automation Troubleshooting
-Webhooks
-Gmail PubSub
-Polls
-Auth Monitoring
-Media and devices
-Nodes
-Node Troubleshooting
-Image and Media Support
-Audio and Voice Notes
-Camera Capture
-Talk Mode
-Voice Wake
-Location Command
-Cron jobs (Gateway scheduler)
-TL;DR
-Quick start (actionable)
-Tool-call equivalents (Gateway cron tool)
-Where cron jobs are stored
-Beginner-friendly overview
-Concepts
-Jobs
-Schedules
-Main vs isolated execution
-Main session jobs (system events)
-Isolated jobs (dedicated cron sessions)
-Payload shapes (what runs)
-Announce delivery flow
-Model and thinking overrides
-Delivery (channel + target)
-Telegram delivery targets (topics / forum threads)
-JSON schema for tool calls
-cron.add params
-cron.update params
-cron.run and cron.remove params
-Storage &amp; history
-Configuration
-CLI quickstart
-Gateway API surface
-Troubleshooting
-“Nothing runs”
-A recurring job keeps delaying after failures
-Telegram delivers to the wrong place
-Automation
-Cron Jobs
-Cron jobs (Gateway scheduler)
-Cron vs Heartbeat?
-See
-Cron vs Heartbeat
 for guidance on when to use each.
 Cron is the Gateway’s built-in scheduler. It persists jobs, wakes the agent at
 the right time, and can optionally deliver output back to a chat.
@@ -252,7 +79,7 @@ Main session
 : enqueue a system event, then run on the next heartbeat.
 Isolated
 : run a dedicated agent turn in
-cron:&lt;jobId&gt;
+cron:<jobId>
 , with delivery (announce by default or none).
 Wakeups are first-class: a job can request “wake now” vs “next heartbeat”.
 Webhook posting is opt-in per job: set
@@ -261,18 +88,17 @@ and configure
 cron.webhook
 Quick start (actionable)
 Create a one-shot reminder, verify it exists, and run it immediately:
-Copy
 openclaw
 cron
 add
 --name
-&quot;Reminder&quot;
+"Reminder"
 --at
-&quot;2026-02-01T16:00:00Z&quot;
+"2026-02-01T16:00:00Z"
 --session
 main
 --system-event
-&quot;Reminder: check the cron docs draft&quot;
+"Reminder: check the cron docs draft"
 --wake
 now
 --delete-after-run
@@ -282,36 +108,35 @@ list
 openclaw
 cron
 run
-&lt;
+<
 job-i
-&gt;
+>
 openclaw
 cron
 runs
 --id
-&lt;
+<
 job-i
-&gt;
+>
 Schedule a recurring isolated job with delivery:
-Copy
 openclaw
 cron
 add
 --name
-&quot;Morning brief&quot;
+"Morning brief"
 --cron
-&quot;0 7 * * *&quot;
+"0 7 * * *"
 --tz
-&quot;America/Los_Angeles&quot;
+"America/Los_Angeles"
 --session
 isolated
 --message
-&quot;Summarize overnight updates.&quot;
+"Summarize overnight updates."
 --announce
 --channel
 slack
 --to
-&quot;channel:C1234567890&quot;
+"channel:C1234567890"
 Tool-call equivalents (Gateway cron tool)
 For the canonical JSON shapes and examples, see
 JSON schema for tool calls
@@ -332,27 +157,27 @@ what
 to do.
 Choose a schedule
 One-shot reminder →
-schedule.kind = &quot;at&quot;
+schedule.kind = "at"
 (CLI:
 --at
 Repeating job →
-schedule.kind = &quot;every&quot;
-schedule.kind = &quot;cron&quot;
+schedule.kind = "every"
+schedule.kind = "cron"
 If your ISO timestamp omits a timezone, it is treated as
 UTC
 Choose where it runs
-sessionTarget: &quot;main&quot;
+sessionTarget: "main"
 → run during the next heartbeat with main context.
-sessionTarget: &quot;isolated&quot;
+sessionTarget: "isolated"
 → run a dedicated agent turn in
-cron:&lt;jobId&gt;
+cron:<jobId>
 Choose the payload
 Main session →
-payload.kind = &quot;systemEvent&quot;
+payload.kind = "systemEvent"
 Isolated session →
-payload.kind = &quot;agentTurn&quot;
+payload.kind = "agentTurn"
 Optional: one-shot jobs (
-schedule.kind = &quot;at&quot;
+schedule.kind = "at"
 ) delete after success by default. Set
 deleteAfterRun: false
 to keep them (they will disable after success).
@@ -398,20 +223,20 @@ Main vs isolated execution
 Main session jobs (system events)
 Main jobs enqueue a system event and optionally wake the heartbeat runner.
 They must use
-payload.kind = &quot;systemEvent&quot;
-wakeMode: &quot;now&quot;
+payload.kind = "systemEvent"
+wakeMode: "now"
 (default): event triggers an immediate heartbeat run.
-wakeMode: &quot;next-heartbeat&quot;
+wakeMode: "next-heartbeat"
 : event waits for the next scheduled heartbeat.
 This is the best fit when you want the normal heartbeat prompt + main-session context.
 See
 Heartbeat
 Isolated jobs (dedicated cron sessions)
 Isolated jobs run a dedicated agent turn in session
-cron:&lt;jobId&gt;
+cron:<jobId>
 Key behaviors:
 Prompt is prefixed with
-[cron:&lt;jobId&gt; &lt;job name&gt;]
+[cron:<jobId> <job name>]
 for traceability.
 Each run starts a
 fresh session id
@@ -419,7 +244,7 @@ fresh session id
 Default behavior: if
 delivery
 is omitted, isolated jobs announce a summary (
-delivery.mode = &quot;announce&quot;
+delivery.mode = "announce"
 delivery.mode
 (isolated-only) chooses what happens:
 announce
@@ -465,14 +290,14 @@ Announce delivery suppresses messaging tool sends for the run; use
 delivery.channel
 delivery.to
 to target the chat instead. When
-delivery.mode = &quot;none&quot;
+delivery.mode = "none"
 , no summary is posted to the main session.
 delivery
 is omitted for isolated jobs, OpenClaw defaults to
 announce
 Announce delivery flow
 When
-delivery.mode = &quot;announce&quot;
+delivery.mode = "announce"
 , cron delivers directly via the outbound channel adapters.
 The main agent is not spun up to craft or forward the message.
 Behavior details:
@@ -486,7 +311,7 @@ skipped to avoid duplicates.
 Missing or invalid delivery targets fail the job unless
 delivery.bestEffort = true
 A short summary is posted to the main session only when
-delivery.mode = &quot;announce&quot;
+delivery.mode = "announce"
 The main-session summary respects
 wakeMode
 now
@@ -542,15 +367,15 @@ last
 delivery.to
 : channel-specific recipient target.
 Delivery config is only valid for isolated jobs (
-sessionTarget: &quot;isolated&quot;
+sessionTarget: "isolated"
 delivery.channel
 delivery.to
 is omitted, cron can fall back to the main session’s
 “last route” (the last place the agent replied).
 Target format reminders:
 Slack/Discord/Mattermost (plugin) targets should use explicit prefixes (e.g.
-channel:&lt;id&gt;
-user:&lt;id&gt;
+channel:<id>
+user:<id>
 ) to avoid ambiguity.
 Telegram topics should use the
 :topic:
@@ -585,53 +410,51 @@ and milliseconds for
 schedule.everyMs
 cron.add params
 One-shot, main session job (system event):
-Copy
-&quot;name&quot;
-&quot;Reminder&quot;
-&quot;schedule&quot;
-&quot;kind&quot;
-&quot;at&quot;
-&quot;at&quot;
-&quot;2026-02-01T16:00:00Z&quot;
-&quot;sessionTarget&quot;
-&quot;main&quot;
-&quot;wakeMode&quot;
-&quot;now&quot;
-&quot;payload&quot;
-&quot;kind&quot;
-&quot;systemEvent&quot;
-&quot;text&quot;
-&quot;Reminder text&quot;
-&quot;deleteAfterRun&quot;
+"name"
+"Reminder"
+"schedule"
+"kind"
+"at"
+"at"
+"2026-02-01T16:00:00Z"
+"sessionTarget"
+"main"
+"wakeMode"
+"now"
+"payload"
+"kind"
+"systemEvent"
+"text"
+"Reminder text"
+"deleteAfterRun"
 true
 Recurring, isolated job with delivery:
-Copy
-&quot;name&quot;
-&quot;Morning brief&quot;
-&quot;schedule&quot;
-&quot;kind&quot;
-&quot;cron&quot;
-&quot;expr&quot;
-&quot;0 7 * * *&quot;
-&quot;tz&quot;
-&quot;America/Los_Angeles&quot;
-&quot;sessionTarget&quot;
-&quot;isolated&quot;
-&quot;wakeMode&quot;
-&quot;next-heartbeat&quot;
-&quot;payload&quot;
-&quot;kind&quot;
-&quot;agentTurn&quot;
-&quot;message&quot;
-&quot;Summarize overnight updates.&quot;
-&quot;delivery&quot;
-&quot;mode&quot;
-&quot;announce&quot;
-&quot;channel&quot;
-&quot;slack&quot;
-&quot;to&quot;
-&quot;channel:C1234567890&quot;
-&quot;bestEffort&quot;
+"name"
+"Morning brief"
+"schedule"
+"kind"
+"cron"
+"expr"
+"0 7 * * *"
+"tz"
+"America/Los_Angeles"
+"sessionTarget"
+"isolated"
+"wakeMode"
+"next-heartbeat"
+"payload"
+"kind"
+"agentTurn"
+"message"
+"Summarize overnight updates."
+"delivery"
+"mode"
+"announce"
+"channel"
+"slack"
+"to"
+"channel:C1234567890"
+"bestEffort"
 true
 Notes:
 schedule.kind
@@ -647,8 +470,8 @@ everyMs
 is milliseconds.
 sessionTarget
 must be
-&quot;main&quot;
-&quot;isolated&quot;
+"main"
+"isolated"
 and must match
 payload.kind
 Optional fields:
@@ -661,19 +484,18 @@ deleteAfterRun
 delivery
 wakeMode
 defaults to
-&quot;now&quot;
+"now"
 when omitted.
 cron.update params
-Copy
-&quot;jobId&quot;
-&quot;job-123&quot;
-&quot;patch&quot;
-&quot;enabled&quot;
+"jobId"
+"job-123"
+"patch"
+"enabled"
 false
-&quot;schedule&quot;
-&quot;kind&quot;
-&quot;every&quot;
-&quot;everyMs&quot;
+"schedule"
+"kind"
+"every"
+"everyMs"
 3600000
 Notes:
 jobId
@@ -683,39 +505,36 @@ Use
 agentId: null
 in the patch to clear an agent binding.
 cron.run and cron.remove params
-Copy
-&quot;jobId&quot;
-&quot;job-123&quot;
-&quot;mode&quot;
-&quot;force&quot;
-Copy
-&quot;jobId&quot;
-&quot;job-123&quot;
-Storage &amp; history
+"jobId"
+"job-123"
+"mode"
+"force"
+"jobId"
+"job-123"
+Storage & history
 Job store:
 ~/.openclaw/cron/jobs.json
 (Gateway-managed JSON).
 Run history:
-~/.openclaw/cron/runs/&lt;jobId&gt;.jsonl
+~/.openclaw/cron/runs/<jobId>.jsonl
 (JSONL, auto-pruned).
 Override store path:
 cron.store
 in config.
 Configuration
-Copy
 cron
 enabled
 true
 // default true
 store
-&quot;~/.openclaw/cron/jobs.json&quot;
+"~/.openclaw/cron/jobs.json"
 maxConcurrentRuns
 // default 1
 webhook
-&quot;https://example.invalid/cron-finished&quot;
+"https://example.invalid/cron-finished"
 // optional finished-run webhook endpoint
 webhookToken
-&quot;replace-with-dedicated-webhook-token&quot;
+"replace-with-dedicated-webhook-token"
 // optional, do not reuse gateway auth token
 Webhook behavior:
 The Gateway posts finished run events to
@@ -725,7 +544,7 @@ notify: true
 Payload is the cron finished event JSON.
 cron.webhookToken
 is set, auth header is
-Authorization: Bearer &lt;cron.webhookToken&gt;
+Authorization: Bearer <cron.webhookToken>
 cron.webhookToken
 is not set, no
 Authorization
@@ -737,182 +556,172 @@ OPENCLAW_SKIP_CRON=1
 (env)
 CLI quickstart
 One-shot reminder (UTC ISO, auto-delete after success):
-Copy
 openclaw
 cron
 add
 --name
-&quot;Send reminder&quot;
+"Send reminder"
 --at
-&quot;2026-01-12T18:00:00Z&quot;
+"2026-01-12T18:00:00Z"
 --session
 main
 --system-event
-&quot;Reminder: submit expense report.&quot;
+"Reminder: submit expense report."
 --wake
 now
 --delete-after-run
 One-shot reminder (main session, wake immediately):
-Copy
 openclaw
 cron
 add
 --name
-&quot;Calendar check&quot;
+"Calendar check"
 --at
-&quot;20m&quot;
+"20m"
 --session
 main
 --system-event
-&quot;Next heartbeat: check calendar.&quot;
+"Next heartbeat: check calendar."
 --wake
 now
 Recurring isolated job (announce to WhatsApp):
-Copy
 openclaw
 cron
 add
 --name
-&quot;Morning status&quot;
+"Morning status"
 --cron
-&quot;0 7 * * *&quot;
+"0 7 * * *"
 --tz
-&quot;America/Los_Angeles&quot;
+"America/Los_Angeles"
 --session
 isolated
 --message
-&quot;Summarize inbox + calendar for today.&quot;
+"Summarize inbox + calendar for today."
 --announce
 --channel
 whatsapp
 --to
-&quot;+15551234567&quot;
+"+15551234567"
 Recurring isolated job (deliver to a Telegram topic):
-Copy
 openclaw
 cron
 add
 --name
-&quot;Nightly summary (topic)&quot;
+"Nightly summary (topic)"
 --cron
-&quot;0 22 * * *&quot;
+"0 22 * * *"
 --tz
-&quot;America/Los_Angeles&quot;
+"America/Los_Angeles"
 --session
 isolated
 --message
-&quot;Summarize today; send to the nightly topic.&quot;
+"Summarize today; send to the nightly topic."
 --announce
 --channel
 telegram
 --to
-&quot;-1001234567890:topic:123&quot;
+"-1001234567890:topic:123"
 Isolated job with model and thinking override:
-Copy
 openclaw
 cron
 add
 --name
-&quot;Deep analysis&quot;
+"Deep analysis"
 --cron
-&quot;0 6 * * 1&quot;
+"0 6 * * 1"
 --tz
-&quot;America/Los_Angeles&quot;
+"America/Los_Angeles"
 --session
 isolated
 --message
-&quot;Weekly deep analysis of project progress.&quot;
+"Weekly deep analysis of project progress."
 --model
-&quot;opus&quot;
+"opus"
 --thinking
 high
 --announce
 --channel
 whatsapp
 --to
-&quot;+15551234567&quot;
+"+15551234567"
 Agent selection (multi-agent setups):
-Copy
-# Pin a job to agent &quot;ops&quot; (falls back to default if that agent is missing)
+# Pin a job to agent "ops" (falls back to default if that agent is missing)
 openclaw
 cron
 add
 --name
-&quot;Ops sweep&quot;
+"Ops sweep"
 --cron
-&quot;0 6 * * *&quot;
+"0 6 * * *"
 --session
 isolated
 --message
-&quot;Check ops queue&quot;
+"Check ops queue"
 --agent
 ops
 # Switch or clear the agent on an existing job
 openclaw
 cron
 edit
-&lt;
+<
 jobI
-&gt;
+>
 --agent
 ops
 openclaw
 cron
 edit
-&lt;
+<
 jobI
-&gt;
+>
 --clear-agent
 Manual run (force is the default, use
 --due
 to only run when due):
-Copy
 openclaw
 cron
 run
-&lt;
+<
 jobI
-&gt;
+>
 openclaw
 cron
 run
-&lt;
+<
 jobI
-&gt;
+>
 --due
 Edit an existing job (patch fields):
-Copy
 openclaw
 cron
 edit
-&lt;
+<
 jobI
-&gt;
+>
 --message
-&quot;Updated prompt&quot;
+"Updated prompt"
 --model
-&quot;opus&quot;
+"opus"
 --thinking
 low
 Run history:
-Copy
 openclaw
 cron
 runs
 --id
-&lt;
+<
 jobI
-&gt;
+>
 --limit
 Immediate system event without creating a job:
-Copy
 openclaw
 system
 event
 --mode
 now
 --text
-&quot;Next heartbeat: check battery.&quot;
+"Next heartbeat: check battery."
 Gateway API surface
 cron.list
 cron.status
@@ -948,7 +757,7 @@ skipped
 ) and do not retry.
 Telegram delivers to the wrong place
 For forum topics, use
--100…:topic:&lt;id&gt;
+-100…:topic:<id>
 so it’s explicit and unambiguous.
 If you see
 telegram:...
@@ -962,97 +771,6 @@ Cron vs Heartbeat
 
 [Source: https://docs.openclaw.ai/automation/cron-vs-heartbeat]
 
-Cron vs Heartbeat - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Automation
-Cron vs Heartbeat
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Tools
-Built-in tools
-Lobster
-LLM Task
-Exec Tool
-Web Tools
-apply_patch Tool
-Elevated Mode
-Thinking Levels
-Reactions
-Browser
-Browser (OpenClaw-managed)
-Browser Login
-Chrome Extension
-Browser Troubleshooting
-Agent coordination
-Agent Send
-Sub-Agents
-Multi-Agent Sandbox &amp; Tools
-Skills
-Slash Commands
-Skills
-Skills Config
-ClawHub
-Plugins
-Extensions
-Voice Call Plugin
-Zalo Personal Plugin
-Automation
-Hooks
-Cron Jobs
-Cron vs Heartbeat
-Automation Troubleshooting
-Webhooks
-Gmail PubSub
-Polls
-Auth Monitoring
-Media and devices
-Nodes
-Node Troubleshooting
-Image and Media Support
-Audio and Voice Notes
-Camera Capture
-Talk Mode
-Voice Wake
-Location Command
-Cron vs Heartbeat: When to Use Each
-Quick Decision Guide
-Heartbeat: Periodic Awareness
-When to use heartbeat
-Heartbeat advantages
-Heartbeat example: HEARTBEAT.md checklist
-Configuring heartbeat
-Cron: Precise Scheduling
-When to use cron
-Cron advantages
-Cron example: Daily morning briefing
-Cron example: One-shot reminder
-Decision Flowchart
-Combining Both
-Example: Efficient automation setup
-Lobster: Deterministic workflows with approvals
-When Lobster fits
-How it pairs with heartbeat and cron
-Operational notes (from the code)
-Main Session vs Isolated Session
-When to use main session cron
-When to use isolated cron
-Cost Considerations
-Related
-Automation
-Cron vs Heartbeat
-Cron vs Heartbeat: When to Use Each
 Both heartbeats and cron jobs let you run tasks on a schedule. This guide helps you choose the right mechanism for your use case.
 Quick Decision Guide
 Use Case
@@ -1104,7 +822,6 @@ and no message is delivered.
 Natural timing
 : Drifts slightly based on queue load, which is fine for most monitoring.
 Heartbeat example: HEARTBEAT.md checklist
-Copy
 # Heartbeat checklist
 - Check email for urgent messages
 - Review calendar for events in next 2 hours
@@ -1112,21 +829,20 @@ Copy
 - If idle for 8+ hours, send a brief check-in
 The agent reads this on each heartbeat and handles all items in one turn.
 Configuring heartbeat
-Copy
 agents
 defaults
 heartbeat
 every
-&quot;30m&quot;
+"30m"
 // interval
 target
-&quot;last&quot;
+"last"
 // where to deliver alerts
 activeHours
 start
-&quot;08:00&quot;
+"08:00"
 end
-&quot;22:00&quot;
+"22:00"
 // optional
 See
 Heartbeat
@@ -1154,7 +870,7 @@ Exact timing
 : 5-field cron expressions with timezone support.
 Session isolation
 : Runs in
-cron:&lt;jobId&gt;
+cron:<jobId>
 without polluting main history.
 Model overrides
 : Use a cheaper or more powerful model per job.
@@ -1172,41 +888,39 @@ One-shot support
 --at
 for precise future timestamps.
 Cron example: Daily morning briefing
-Copy
 openclaw
 cron
 add
 --name
-&quot;Morning briefing&quot;
+"Morning briefing"
 --cron
-&quot;0 7 * * *&quot;
+"0 7 * * *"
 --tz
-&quot;America/New_York&quot;
+"America/New_York"
 --session
 isolated
 --message
-&quot;Generate today&#x27;s briefing: weather, calendar, top emails, news summary.&quot;
+"Generate today's briefing: weather, calendar, top emails, news summary."
 --model
 opus
 --announce
 --channel
 whatsapp
 --to
-&quot;+15551234567&quot;
+"+15551234567"
 This runs at exactly 7:00 AM New York time, uses Opus for quality, and announces a summary directly to WhatsApp.
 Cron example: One-shot reminder
-Copy
 openclaw
 cron
 add
 --name
-&quot;Meeting reminder&quot;
+"Meeting reminder"
 --at
-&quot;20m&quot;
+"20m"
 --session
 main
 --system-event
-&quot;Reminder: standup meeting starts in 10 minutes.&quot;
+"Reminder: standup meeting starts in 10 minutes."
 --wake
 now
 --delete-after-run
@@ -1214,22 +928,21 @@ See
 Cron jobs
 for full CLI reference.
 Decision Flowchart
-Copy
 Does the task need to run at an EXACT time?
-YES -&gt; Use cron
-NO -&gt; Continue...
+YES -> Use cron
+NO -> Continue...
 Does the task need isolation from main session?
-YES -&gt; Use cron (isolated)
-NO -&gt; Continue...
+YES -> Use cron (isolated)
+NO -> Continue...
 Can this task be batched with other periodic checks?
-YES -&gt; Use heartbeat (add to HEARTBEAT.md)
-NO -&gt; Use cron
+YES -> Use heartbeat (add to HEARTBEAT.md)
+NO -> Use cron
 Is this a one-shot reminder?
-YES -&gt; Use cron with --at
-NO -&gt; Continue...
+YES -> Use cron with --at
+NO -> Continue...
 Does it need a different model or thinking level?
-YES -&gt; Use cron (isolated) with --model/--thinking
-NO -&gt; Use heartbeat
+YES -> Use cron (isolated) with --model/--thinking
+NO -> Use heartbeat
 Combining Both
 The most efficient setup uses
 both
@@ -1240,7 +953,6 @@ handles precise schedules (daily reports, weekly reviews) and one-shot reminders
 Example: Efficient automation setup
 HEARTBEAT.md
 (checked every 30 min):
-Copy
 # Heartbeat checklist
 - Scan inbox for urgent emails
 - Check calendar for events in next 2h
@@ -1248,32 +960,31 @@ Copy
 - Light check-in if quiet for 8+ hours
 Cron jobs
 (precise timing):
-Copy
 # Daily morning briefing at 7am
 openclaw
 cron
 add
 --name
-&quot;Morning brief&quot;
+"Morning brief"
 --cron
-&quot;0 7 * * *&quot;
+"0 7 * * *"
 --session
 isolated
 --message
-&quot;...&quot;
+"..."
 --announce
 # Weekly project review on Mondays at 9am
 openclaw
 cron
 add
 --name
-&quot;Weekly review&quot;
+"Weekly review"
 --cron
-&quot;0 9 * * 1&quot;
+"0 9 * * 1"
 --session
 isolated
 --message
-&quot;...&quot;
+"..."
 --model
 opus
 # One-shot reminder
@@ -1281,13 +992,13 @@ openclaw
 cron
 add
 --name
-&quot;Call back&quot;
+"Call back"
 --at
-&quot;2h&quot;
+"2h"
 --session
 main
 --system-event
-&quot;Call back the client&quot;
+"Call back the client"
 --wake
 now
 Lobster: Deterministic workflows with approvals
@@ -1329,7 +1040,7 @@ flag.
 The tool is an
 optional plugin
 ; enable it additively via
-tools.alsoAllow: [&quot;lobster&quot;]
+tools.alsoAllow: ["lobster"]
 (recommended).
 If you pass
 lobsterPath
@@ -1346,7 +1057,7 @@ Cron (isolated)
 Session
 Main
 Main (via system event)
-cron:&lt;jobId&gt;
+cron:<jobId>
 History
 Shared
 Shared
@@ -1373,18 +1084,17 @@ when you want:
 The reminder/event to appear in main session context
 The agent to handle it during the next heartbeat with full context
 No separate isolated run
-Copy
 openclaw
 cron
 add
 --name
-&quot;Check project&quot;
+"Check project"
 --every
-&quot;4h&quot;
+"4h"
 --session
 main
 --system-event
-&quot;Time for a project health check&quot;
+"Time for a project health check"
 --wake
 now
 When to use isolated cron
@@ -1395,18 +1105,17 @@ A clean slate without prior context
 Different model or thinking settings
 Announce summaries directly to a channel
 History that doesn’t clutter main session
-Copy
 openclaw
 cron
 add
 --name
-&quot;Deep analysis&quot;
+"Deep analysis"
 --cron
-&quot;0 6 * * 0&quot;
+"0 6 * * 0"
 --session
 isolated
 --message
-&quot;Weekly codebase analysis...&quot;
+"Weekly codebase analysis..."
 --model
 opus
 --thinking
@@ -1427,7 +1136,7 @@ HEARTBEAT.md
 small to minimize token overhead.
 Batch similar checks into heartbeat instead of multiple cron jobs.
 Use
-target: &quot;none&quot;
+target: "none"
 on heartbeat if you only want internal processing.
 Use isolated cron with a cheaper model for routine tasks.
 Related
@@ -1445,86 +1154,7 @@ Automation Troubleshooting
 
 [Source: https://docs.openclaw.ai/automation/gmail-pubsub]
 
-Gmail PubSub - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Automation
-Gmail PubSub
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Tools
-Built-in tools
-Lobster
-LLM Task
-Exec Tool
-Web Tools
-apply_patch Tool
-Elevated Mode
-Thinking Levels
-Reactions
-Browser
-Browser (OpenClaw-managed)
-Browser Login
-Chrome Extension
-Browser Troubleshooting
-Agent coordination
-Agent Send
-Sub-Agents
-Multi-Agent Sandbox &amp; Tools
-Skills
-Slash Commands
-Skills
-Skills Config
-ClawHub
-Plugins
-Extensions
-Voice Call Plugin
-Zalo Personal Plugin
-Automation
-Hooks
-Cron Jobs
-Cron vs Heartbeat
-Automation Troubleshooting
-Webhooks
-Gmail PubSub
-Polls
-Auth Monitoring
-Media and devices
-Nodes
-Node Troubleshooting
-Image and Media Support
-Audio and Voice Notes
-Camera Capture
-Talk Mode
-Voice Wake
-Location Command
-Gmail Pub/Sub -&gt; OpenClaw
-Prereqs
-Wizard (recommended)
-One-time setup
-Start the watch
-Run the push handler
-Expose the handler (advanced, unsupported)
-Test
-Troubleshooting
-Cleanup
-Automation
-Gmail PubSub
-Gmail Pub/Sub -&gt; OpenClaw
-Goal: Gmail watch -&gt; Pub/Sub push -&gt;
-gog gmail watch serve
--&gt; OpenClaw webhook.
+-> OpenClaw webhook.
 Prereqs
 gcloud
 installed and logged in (
@@ -1541,54 +1171,52 @@ tailscale.com
 Other tunnel services can work, but are DIY/unsupported and require manual wiring.
 Right now, Tailscale is what we support.
 Example hook config (enable Gmail preset mapping):
-Copy
 hooks
 enabled
 true
 token
-&quot;OPENCLAW_HOOK_TOKEN&quot;
+"OPENCLAW_HOOK_TOKEN"
 path
-&quot;/hooks&quot;
+"/hooks"
 presets
-&quot;gmail&quot;
+"gmail"
 To deliver the Gmail summary to a chat surface, override the preset with a mapping
 that sets
 deliver
 + optional
 channel
-Copy
 hooks
 enabled
 true
 token
-&quot;OPENCLAW_HOOK_TOKEN&quot;
+"OPENCLAW_HOOK_TOKEN"
 presets
-&quot;gmail&quot;
+"gmail"
 mappings
 match
 path
-&quot;gmail&quot;
+"gmail"
 action
-&quot;agent&quot;
+"agent"
 wakeMode
-&quot;now&quot;
+"now"
 name
-&quot;Gmail&quot;
+"Gmail"
 sessionKey
-&quot;hook:gmail:{{messages[0].id}}&quot;
+"hook:gmail:{{messages[0].id}}"
 messageTemplate
-&quot;New email from {{messages[0].from}}\nSubject: {{messages[0].subject}}\n{{messages[0].snippet}}\n{{messages[0].body}}&quot;
+"New email from {{messages[0].from}}\nSubject: {{messages[0].subject}}\n{{messages[0].snippet}}\n{{messages[0].body}}"
 model
-&quot;openai/gpt-5.2-mini&quot;
+"openai/gpt-5.2-mini"
 deliver
 true
 channel
-&quot;last&quot;
-// to: &quot;+15551234567&quot;
+"last"
+// to: "+15551234567"
 If you want a fixed channel, set
 channel
 . Otherwise
-channel: &quot;last&quot;
+channel: "last"
 uses the last delivery route (falls back to WhatsApp).
 To force a cheaper model for Gmail runs, set
 model
@@ -1601,13 +1229,12 @@ To set a default model and thinking level specifically for Gmail hooks, add
 hooks.gmail.model
 hooks.gmail.thinking
 in your config:
-Copy
 hooks
 gmail
 model
-&quot;openrouter/meta-llama/llama-3.3-70b-instruct:free&quot;
+"openrouter/meta-llama/llama-3.3-70b-instruct:free"
 thinking
-&quot;off&quot;
+"off"
 Notes:
 Per-hook
 model
@@ -1631,13 +1258,12 @@ under
 Webhooks
 Wizard (recommended)
 Use the OpenClaw helper to wire everything together (installs deps on macOS via brew):
-Copy
 openclaw
 webhooks
 gmail
 setup
 --account
-[email&#160;protected]
+[email protected]
 Defaults:
 Uses Tailscale Funnel for the public push endpoint.
 Writes
@@ -1645,7 +1271,7 @@ hooks.gmail
 config for
 openclaw webhooks gmail run
 Enables the Gmail hook preset (
-hooks.presets: [&quot;gmail&quot;]
+hooks.presets: ["gmail"]
 Path note: when
 tailscale.mode
 is enabled, OpenClaw automatically sets
@@ -1665,7 +1291,7 @@ http://127.0.0.1:8788/gmail-pubsub
 and match
 hooks.gmail.serve.path
 Want a custom endpoint? Use
---push-endpoint &lt;url&gt;
+--push-endpoint <url>
 --tailscale off
 Platform note: on macOS the wizard installs
 gcloud
@@ -1689,7 +1315,6 @@ listen tcp 127.0.0.1:8788: bind: address already in use
 Manual daemon (starts
 gog gmail watch serve
 + auto-renew):
-Copy
 openclaw
 webhooks
 gmail
@@ -1699,7 +1324,6 @@ Select the GCP project
 that owns the OAuth client
 used by
 gog
-Copy
 gcloud
 auth
 login
@@ -1707,62 +1331,57 @@ gcloud
 config
 set
 project
-&lt;
+<
 project-i
-&gt;
+>
 Note: Gmail watch requires the Pub/Sub topic to live in the same project as the OAuth client.
 Enable APIs:
-Copy
 gcloud
 services
 enable
 gmail.googleapis.com
 pubsub.googleapis.com
 Create a topic:
-Copy
 gcloud
 pubsub
 topics
 create
 gog-gmail-watch
 Allow Gmail push to publish:
-Copy
 gcloud
 pubsub
 topics
 add-iam-policy-binding
 gog-gmail-watch
 --member=serviceAccount:
-[email&#160;protected]
+[email protected]
 --role=roles/pubsub.publisher
 Start the watch
-Copy
 gog
 gmail
 watch
 start
 --account
-[email&#160;protected]
+[email protected]
 --label
 INBOX
 --topic
 projects/
-&lt;
+<
 project-i
-&gt;
+>
 /topics/gog-gmail-watch
 Save the
 history_id
 from the output (for debugging).
 Run the push handler
 Local example (shared token auth):
-Copy
 gog
 gmail
 watch
 serve
 --account
-[email&#160;protected]
+[email protected]
 --bind
 127.0.0.1
 --port
@@ -1770,9 +1389,9 @@ serve
 --path
 /gmail-pubsub
 --token
-&lt;
+<
 share
-&gt;
+>
 --hook-url
 http://127.0.0.1:18789/hooks/gmail
 --hook-token
@@ -1799,14 +1418,12 @@ wraps the same flow and auto-renews the watch.
 Expose the handler (advanced, unsupported)
 If you need a non-Tailscale tunnel, wire it manually and use the public URL in the push
 subscription (unsupported, no guardrails):
-Copy
 cloudflared
 tunnel
 --url
 http://127.0.0.1:8788
 --no-autoupdate
 Use the generated URL as the push endpoint:
-Copy
 gcloud
 pubsub
 subscriptions
@@ -1815,49 +1432,46 @@ gog-gmail-watch-push
 --topic
 gog-gmail-watch
 --push-endpoint
-&quot;https://&lt;public-url&gt;/gmail-pubsub?token=&lt;shared&gt;&quot;
+"https://<public-url>/gmail-pubsub?token=<shared>"
 Production: use a stable HTTPS endpoint and configure Pub/Sub OIDC JWT, then run:
-Copy
 gog
 gmail
 watch
 serve
 --verify-oidc
 --oidc-email
-&lt;
+<
 svc@..
-&gt;
+>
 Test
 Send a message to the watched inbox:
-Copy
 gog
 gmail
 send
 --account
-[email&#160;protected]
+[email protected]
 --to
-[email&#160;protected]
+[email protected]
 --subject
-&quot;watch test&quot;
+"watch test"
 --body
-&quot;ping&quot;
+"ping"
 Check watch state and history:
-Copy
 gog
 gmail
 watch
 status
 --account
-[email&#160;protected]
+[email protected]
 gog
 gmail
 history
 --account
-[email&#160;protected]
+[email protected]
 --since
-&lt;
+<
 historyI
-&gt;
+>
 Troubleshooting
 Invalid topicName
 : project mismatch (topic not in the OAuth client project).
@@ -1870,13 +1484,12 @@ historyId
 ; fetch via
 gog gmail history
 Cleanup
-Copy
 gog
 gmail
 watch
 stop
 --account
-[email&#160;protected]
+[email protected]
 gcloud
 pubsub
 subscriptions
@@ -1895,138 +1508,6 @@ Polls
 
 [Source: https://docs.openclaw.ai/automation/hooks]
 
-Hooks - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Automation
-Hooks
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Tools
-Built-in tools
-Lobster
-LLM Task
-Exec Tool
-Web Tools
-apply_patch Tool
-Elevated Mode
-Thinking Levels
-Reactions
-Browser
-Browser (OpenClaw-managed)
-Browser Login
-Chrome Extension
-Browser Troubleshooting
-Agent coordination
-Agent Send
-Sub-Agents
-Multi-Agent Sandbox &amp; Tools
-Skills
-Slash Commands
-Skills
-Skills Config
-ClawHub
-Plugins
-Extensions
-Voice Call Plugin
-Zalo Personal Plugin
-Automation
-Hooks
-Cron Jobs
-Cron vs Heartbeat
-Automation Troubleshooting
-Webhooks
-Gmail PubSub
-Polls
-Auth Monitoring
-Media and devices
-Nodes
-Node Troubleshooting
-Image and Media Support
-Audio and Voice Notes
-Camera Capture
-Talk Mode
-Voice Wake
-Location Command
-Hooks
-Getting Oriented
-Overview
-Getting Started
-Bundled Hooks
-Onboarding
-Hook Discovery
-Hook Packs (npm/archives)
-Hook Structure
-HOOK.md Format
-Metadata Fields
-Handler Implementation
-Event Context
-Event Types
-Command Events
-Agent Events
-Gateway Events
-Tool Result Hooks (Plugin API)
-Future Events
-Creating Custom Hooks
-1. Choose Location
-2. Create Directory Structure
-3. Create HOOK.md
-4. Create handler.ts
-5. Enable and Test
-Configuration
-New Config Format (Recommended)
-Per-Hook Configuration
-Extra Directories
-Legacy Config Format (Still Supported)
-CLI Commands
-List Hooks
-Hook Information
-Check Eligibility
-Enable/Disable
-Bundled hook reference
-session-memory
-bootstrap-extra-files
-command-logger
-boot-md
-Best Practices
-Keep Handlers Fast
-Handle Errors Gracefully
-Filter Events Early
-Use Specific Event Keys
-Debugging
-Enable Hook Logging
-Check Discovery
-Check Registration
-Verify Eligibility
-Testing
-Gateway Logs
-Test Hooks Directly
-Architecture
-Core Components
-Discovery Flow
-Event Flow
-Troubleshooting
-Hook Not Discovered
-Hook Not Eligible
-Hook Not Executing
-Handler Errors
-Migration Guide
-From Legacy Config to Discovery
-See Also
-Automation
-Hooks
-Hooks
 Hooks provide an extensible event-driven system for automating actions in response to agent commands and events. Hooks are automatically discovered from directories and can be managed via CLI commands, similar to how skills work in OpenClaw.
 Getting Oriented
 Hooks are small scripts that run when something happens. There are two kinds:
@@ -2077,23 +1558,19 @@ agent:bootstrap
 BOOT.md
 when the gateway starts (requires internal hooks enabled)
 List available hooks:
-Copy
 openclaw
 hooks
 list
 Enable a hook:
-Copy
 openclaw
 hooks
 enable
 session-memory
 Check hook status:
-Copy
 openclaw
 hooks
 check
 Get detailed information:
-Copy
 openclaw
 hooks
 info
@@ -2105,13 +1582,13 @@ openclaw onboard
 Hook Discovery
 Hooks are automatically discovered from three directories (in order of precedence):
 Workspace hooks
-&lt;workspace&gt;/hooks/
+<workspace>/hooks/
 (per-agent, highest precedence)
 Managed hooks
 ~/.openclaw/hooks/
 (user-installed, shared across workspaces)
 Bundled hooks
-&lt;openclaw&gt;/dist/hooks/bundled/
+<openclaw>/dist/hooks/bundled/
 (shipped with OpenClaw)
 Managed hook directories can be either a
 single hook
@@ -2119,7 +1596,6 @@ or a
 hook pack
 (package directory).
 Each hook is a directory containing:
-Copy
 my-hook/
 ├── HOOK.md # Metadata + documentation
 └── handler.ts # Handler implementation
@@ -2128,25 +1604,23 @@ Hook packs are standard npm packages that export one or more hooks via
 openclaw.hooks
 package.json
 . Install them with:
-Copy
 openclaw
 hooks
 install
-&lt;
+<
 path-or-spe
-&gt;
+>
 Npm specs are registry-only (package name + optional version/tag). Git/URL/file specs are rejected.
 Example
 package.json
-Copy
-&quot;name&quot;
-&quot;@acme/my-hooks&quot;
-&quot;version&quot;
-&quot;0.1.0&quot;
-&quot;openclaw&quot;
-&quot;hooks&quot;
-&quot;./hooks/my-hook&quot;
-&quot;./hooks/other-hook&quot;
+"name"
+"@acme/my-hooks"
+"version"
+"0.1.0"
+"openclaw"
+"hooks"
+"./hooks/my-hook"
+"./hooks/other-hook"
 Each entry points to a hook directory containing
 HOOK.md
 and
@@ -2154,7 +1628,7 @@ handler.ts
 (or
 index.ts
 Hook packs can ship dependencies; they will be installed under
-~/.openclaw/hooks/&lt;id&gt;
+~/.openclaw/hooks/<id>
 Security note:
 openclaw hooks install
 installs dependencies with
@@ -2167,23 +1641,22 @@ HOOK.md Format
 The
 HOOK.md
 file contains metadata in YAML frontmatter plus Markdown documentation:
-Copy
 ---
 name
 my-hook
 description
-&quot;Short description of what this hook does&quot;
+"Short description of what this hook does"
 homepage
 https://docs.openclaw.ai/automation/hooks#my-hook
 metadata
-&quot;openclaw&quot;
-&quot;emoji&quot;
-&quot;🔗&quot;
-&quot;events&quot;
-&quot;command:new&quot;
-&quot;requires&quot;
-&quot;bins&quot;
-&quot;node&quot;
+"openclaw"
+"emoji"
+"🔗"
+"events"
+"command:new"
+"requires"
+"bins"
+"node"
 ] } } }
 ---
 # My Hook
@@ -2204,61 +1677,60 @@ metadata.openclaw
 object supports:
 emoji
 : Display emoji for CLI (e.g.,
-&quot;💾&quot;
+"💾"
 events
 : Array of events to listen for (e.g.,
-[&quot;command:new&quot;, &quot;command:reset&quot;]
+["command:new", "command:reset"]
 export
 : Named export to use (defaults to
-&quot;default&quot;
+"default"
 homepage
 : Documentation URL
 requires
 : Optional requirements
 bins
 : Required binaries on PATH (e.g.,
-[&quot;git&quot;, &quot;node&quot;]
+["git", "node"]
 anyBins
 : At least one of these binaries must be present
 env
 : Required environment variables
 config
 : Required config paths (e.g.,
-[&quot;workspace.dir&quot;]
+["workspace.dir"]
 : Required platforms (e.g.,
-[&quot;darwin&quot;, &quot;linux&quot;]
+["darwin", "linux"]
 always
 : Bypass eligibility checks (boolean)
 install
 : Installation methods (for bundled hooks:
-[{&quot;id&quot;:&quot;bundled&quot;,&quot;kind&quot;:&quot;bundled&quot;}]
+[{"id":"bundled","kind":"bundled"}]
 Handler Implementation
 The
 handler.ts
 file exports a
 HookHandler
 function:
-Copy
 import
 type
 { HookHandler }
 from
-&quot;../../src/hooks/hooks.js&quot;
+"../../src/hooks/hooks.js"
 const
 myHandler
 HookHandler
 async
 (event)
-=&gt;
-// Only trigger on &#x27;new&#x27; command
+=>
+// Only trigger on 'new' command
 event
 .type
 !==
-&quot;command&quot;
+"command"
 event
 .action
 !==
-&quot;new&quot;
+"new"
 ) {
 return
 console
@@ -2280,21 +1752,20 @@ timestamp
 event
 messages
 .push
-&quot;✨ My hook executed!&quot;
+"✨ My hook executed!"
 export
 default
 myHandler;
 Event Context
 Each event includes:
-Copy
 type
-&#x27;command&#x27;
-&#x27;session&#x27;
-&#x27;agent&#x27;
-&#x27;gateway&#x27;
+'command'
+'session'
+'agent'
+'gateway'
 action
 string
-// e.g., &#x27;new&#x27;, &#x27;reset&#x27;, &#x27;stop&#x27;
+// e.g., 'new', 'reset', 'stop'
 sessionKey
 string
 // Session identifier
@@ -2313,7 +1784,7 @@ sessionFile
 string
 commandSource
 string
-// e.g., &#x27;whatsapp&#x27;, &#x27;telegram&#x27;
+// e.g., 'whatsapp', 'telegram'
 senderId
 string
 workspaceDir
@@ -2369,66 +1840,62 @@ message:received
 Creating Custom Hooks
 1. Choose Location
 Workspace hooks
-&lt;workspace&gt;/hooks/
+<workspace>/hooks/
 ): Per-agent, highest precedence
 Managed hooks
 ~/.openclaw/hooks/
 ): Shared across workspaces
 2. Create Directory Structure
-Copy
 mkdir
 ~/.openclaw/hooks/my-hook
 ~/.openclaw/hooks/my-hook
 3. Create HOOK.md
-Copy
 ---
 name
 my-hook
 description
-&quot;Does something useful&quot;
+"Does something useful"
 metadata
-&quot;openclaw&quot;
-&quot;emoji&quot;
-&quot;🎯&quot;
-&quot;events&quot;
-&quot;command:new&quot;
+"openclaw"
+"emoji"
+"🎯"
+"events"
+"command:new"
 ] } }
 ---
 # My Custom Hook
 This hook does something useful when you issue
 `/new`
 4. Create handler.ts
-Copy
 import
 type
 { HookHandler }
 from
-&quot;../../src/hooks/hooks.js&quot;
+"../../src/hooks/hooks.js"
 const
 handler
 HookHandler
 async
 (event)
-=&gt;
+=>
 event
 .type
 !==
-&quot;command&quot;
+"command"
 event
 .action
 !==
-&quot;new&quot;
+"new"
 ) {
 return
 console
 .log
-&quot;[my-hook] Running!&quot;
+"[my-hook] Running!"
 // Your logic here
 export
 default
 handler;
 5. Enable and Test
-Copy
 # Verify hook is discovered
 openclaw
 hooks
@@ -2443,56 +1910,52 @@ my-hook
 # Send /new via your messaging channel
 Configuration
 New Config Format (Recommended)
-Copy
-&quot;hooks&quot;
-&quot;internal&quot;
-&quot;enabled&quot;
+"hooks"
+"internal"
+"enabled"
 true
-&quot;entries&quot;
-&quot;session-memory&quot;
-&quot;enabled&quot;
+"entries"
+"session-memory"
+"enabled"
 true
-&quot;command-logger&quot;
-&quot;enabled&quot;
+"command-logger"
+"enabled"
 false
 Per-Hook Configuration
 Hooks can have custom configuration:
-Copy
-&quot;hooks&quot;
-&quot;internal&quot;
-&quot;enabled&quot;
+"hooks"
+"internal"
+"enabled"
 true
-&quot;entries&quot;
-&quot;my-hook&quot;
-&quot;enabled&quot;
+"entries"
+"my-hook"
+"enabled"
 true
-&quot;env&quot;
-&quot;MY_CUSTOM_VAR&quot;
-&quot;value&quot;
+"env"
+"MY_CUSTOM_VAR"
+"value"
 Extra Directories
 Load hooks from additional directories:
-Copy
-&quot;hooks&quot;
-&quot;internal&quot;
-&quot;enabled&quot;
+"hooks"
+"internal"
+"enabled"
 true
-&quot;load&quot;
-&quot;extraDirs&quot;
-&quot;/path/to/more/hooks&quot;
+"load"
+"extraDirs"
+"/path/to/more/hooks"
 Legacy Config Format (Still Supported)
 The old config format still works for backwards compatibility:
-Copy
-&quot;hooks&quot;
-&quot;internal&quot;
-&quot;enabled&quot;
+"hooks"
+"internal"
+"enabled"
 true
-&quot;handlers&quot;
-&quot;event&quot;
-&quot;command:new&quot;
-&quot;module&quot;
-&quot;./hooks/handlers/my-handler.ts&quot;
-&quot;export&quot;
-&quot;default&quot;
+"handlers"
+"event"
+"command:new"
+"module"
+"./hooks/handlers/my-handler.ts"
+"export"
+"default"
 Note:
 module
 must be a workspace-relative path. Absolute paths and traversal outside the workspace are rejected.
@@ -2500,7 +1963,6 @@ Migration
 : Use the new discovery-based system for new hooks. Legacy handlers are loaded after directory-based hooks.
 CLI Commands
 List Hooks
-Copy
 # List all hooks
 openclaw
 hooks
@@ -2521,7 +1983,6 @@ hooks
 list
 --json
 Hook Information
-Copy
 # Show detailed info about a hook
 openclaw
 hooks
@@ -2534,7 +1995,6 @@ info
 session-memory
 --json
 Check Eligibility
-Copy
 # Show eligibility summary
 openclaw
 hooks
@@ -2545,7 +2005,6 @@ hooks
 check
 --json
 Enable/Disable
-Copy
 # Enable a hook
 openclaw
 hooks
@@ -2566,7 +2025,7 @@ Requirements
 workspace.dir
 must be configured
 Output
-&lt;workspace&gt;/memory/YYYY-MM-DD-slug.md
+<workspace>/memory/YYYY-MM-DD-slug.md
 (defaults to
 ~/.openclaw/workspace
 What it does
@@ -2575,7 +2034,6 @@ Extracts the last 15 lines of conversation
 Uses LLM to generate a descriptive filename slug
 Saves session metadata to a dated memory file
 Example output
-Copy
 # Session: 2026-01-16 14:30:00 UTC
 **Session Key**
 : agent:main:main
@@ -2589,7 +2047,6 @@ Filename examples
 2026-01-16-1430.md
 (fallback timestamp if slug generation fails)
 Enable
-Copy
 openclaw
 hooks
 enable
@@ -2608,18 +2065,17 @@ must be configured
 Output
 : No files written; bootstrap context is modified in-memory only.
 Config
-Copy
-&quot;hooks&quot;
-&quot;internal&quot;
-&quot;enabled&quot;
+"hooks"
+"internal"
+"enabled"
 true
-&quot;entries&quot;
-&quot;bootstrap-extra-files&quot;
-&quot;enabled&quot;
+"entries"
+"bootstrap-extra-files"
+"enabled"
 true
-&quot;paths&quot;
-&quot;packages/*/AGENTS.md&quot;
-&quot;packages/*/TOOLS.md&quot;
+"paths"
+"packages/*/AGENTS.md"
+"packages/*/TOOLS.md"
 Notes
 Paths are resolved relative to workspace.
 Files must stay inside workspace (realpath-checked).
@@ -2630,7 +2086,6 @@ and
 TOOLS.md
 only).
 Enable
-Copy
 openclaw
 hooks
 enable
@@ -2648,31 +2103,29 @@ Captures event details (command action, timestamp, session key, sender ID, sourc
 Appends to log file in JSONL format
 Runs silently in the background
 Example log entries
-Copy
-&quot;timestamp&quot;
-&quot;2026-01-16T14:30:00.000Z&quot;
-&quot;action&quot;
-&quot;new&quot;
-&quot;sessionKey&quot;
-&quot;agent:main:main&quot;
-&quot;senderId&quot;
-&quot;+1234567890&quot;
-&quot;source&quot;
-&quot;telegram&quot;
-&quot;timestamp&quot;
-&quot;2026-01-16T15:45:22.000Z&quot;
-&quot;action&quot;
-&quot;stop&quot;
-&quot;sessionKey&quot;
-&quot;agent:main:main&quot;
-&quot;senderId&quot;
-&quot;
-[email&#160;protected]
-&quot;
-&quot;source&quot;
-&quot;whatsapp&quot;
+"timestamp"
+"2026-01-16T14:30:00.000Z"
+"action"
+"new"
+"sessionKey"
+"agent:main:main"
+"senderId"
+"+1234567890"
+"source"
+"telegram"
+"timestamp"
+"2026-01-16T15:45:22.000Z"
+"action"
+"stop"
+"sessionKey"
+"agent:main:main"
+"senderId"
+"
+[email protected]
+"
+"source"
+"whatsapp"
 View logs
-Copy
 # View recent commands
 tail
 ~/.openclaw/logs/commands.log
@@ -2681,10 +2134,9 @@ cat
 ~/.openclaw/logs/commands.log
 # Filter by action
 grep
-&#x27;&quot;action&quot;:&quot;new&quot;&#x27;
+'"action":"new"'
 ~/.openclaw/logs/commands.log
 Enable
-Copy
 openclaw
 hooks
 enable
@@ -2706,7 +2158,6 @@ from your workspace
 Runs the instructions via the agent runner
 Sends any requested outbound messages via the message tool
 Enable
-Copy
 openclaw
 hooks
 enable
@@ -2714,14 +2165,13 @@ boot-md
 Best Practices
 Keep Handlers Fast
 Hooks run during command processing. Keep them lightweight:
-Copy
 // ✓ Good - async work, returns immediately
 const
 handler
 HookHandler
 async
 (event)
-=&gt;
+=>
 void
 processInBackground
 (event);
@@ -2732,7 +2182,7 @@ handler
 HookHandler
 async
 (event)
-=&gt;
+=>
 await
 slowDatabaseQuery
 (event);
@@ -2741,13 +2191,12 @@ evenSlowerAPICall
 (event);
 Handle Errors Gracefully
 Always wrap risky operations:
-Copy
 const
 handler
 HookHandler
 async
 (event)
-=&gt;
+=>
 try
 await
 riskyOperation
@@ -2756,7 +2205,7 @@ catch
 (err) {
 console
 .error
-&quot;[my-handler] Failed:&quot;
+"[my-handler] Failed:"
 err
 instanceof
 Error
@@ -2764,72 +2213,66 @@ err
 .message
 String
 (err));
-// Don&#x27;t throw - let other handlers run
+// Don't throw - let other handlers run
 Filter Events Early
 Return early if the event isn’t relevant:
-Copy
 const
 handler
 HookHandler
 async
 (event)
-=&gt;
-// Only handle &#x27;new&#x27; commands
+=>
+// Only handle 'new' commands
 event
 .type
 !==
-&quot;command&quot;
+"command"
 event
 .action
 !==
-&quot;new&quot;
+"new"
 ) {
 return
 // Your logic here
 Use Specific Event Keys
 Specify exact events in metadata when possible:
-Copy
 metadata
-&quot;openclaw&quot;
-&quot;events&quot;
-&quot;command:new&quot;
+"openclaw"
+"events"
+"command:new"
 ] } }
 # Specific
 Rather than:
-Copy
 metadata
-&quot;openclaw&quot;
-&quot;events&quot;
-&quot;command&quot;
+"openclaw"
+"events"
+"command"
 ] } }
 # General - more overhead
 Debugging
 Enable Hook Logging
 The gateway logs hook loading at startup:
-Copy
-Registered hook: session-memory -&gt; command:new
-Registered hook: bootstrap-extra-files -&gt; agent:bootstrap
-Registered hook: command-logger -&gt; command
-Registered hook: boot-md -&gt; gateway:startup
+Registered hook: session-memory -> command:new
+Registered hook: bootstrap-extra-files -> agent:bootstrap
+Registered hook: command-logger -> command
+Registered hook: boot-md -> gateway:startup
 Check Discovery
 List all discovered hooks:
-Copy
 openclaw
 hooks
 list
 --verbose
 Check Registration
 In your handler, log when it’s called:
-Copy
 const
 handler
 HookHandler
 async
 (event)
-=&gt;
+=>
 console
 .log
-&quot;[my-handler] Triggered:&quot;
+"[my-handler] Triggered:"
 event
 .type
 event
@@ -2837,7 +2280,6 @@ event
 // Your logic
 Verify Eligibility
 Check why a hook isn’t eligible:
-Copy
 openclaw
 hooks
 info
@@ -2846,7 +2288,6 @@ Look for missing requirements in the output.
 Testing
 Gateway Logs
 Monitor gateway logs to see hook execution:
-Copy
 # macOS
 ./scripts/clawlog.sh
 # Other platforms
@@ -2854,31 +2295,30 @@ tail
 ~/.openclaw/gateway.log
 Test Hooks Directly
 Test your handlers in isolation:
-Copy
 import
 { test }
 from
-&quot;vitest&quot;
+"vitest"
 import
 { createHookEvent }
 from
-&quot;./src/hooks/hooks.js&quot;
+"./src/hooks/hooks.js"
 import
 myHandler
 from
-&quot;./hooks/my-hook/handler.js&quot;
+"./hooks/my-hook/handler.js"
 test
-&quot;my handler works&quot;
+"my handler works"
 async
-=&gt;
+=>
 const
 event
 createHookEvent
-&quot;command&quot;
-&quot;new&quot;
-&quot;test-session&quot;
+"command"
+"new"
+"test-session"
 foo
-&quot;bar&quot;
+"bar"
 });
 await
 myHandler
@@ -2906,7 +2346,6 @@ src/gateway/server-startup.ts
 src/auto-reply/reply/commands-core.ts
 : Triggers command events
 Discovery Flow
-Copy
 Gateway startup
 Scan directories (workspace → managed → bundled)
 Parse HOOK.md files
@@ -2914,7 +2353,6 @@ Check eligibility (bins, env, config, os)
 Load handlers from eligible hooks
 Register handlers for events
 Event Flow
-Copy
 User sends /new
 Command validation
 Create hook event
@@ -2924,23 +2362,19 @@ Session reset
 Troubleshooting
 Hook Not Discovered
 Check directory structure:
-Copy
 -la
 ~/.openclaw/hooks/my-hook/
 # Should show: HOOK.md, handler.ts
 Verify HOOK.md format:
-Copy
 cat
 ~/.openclaw/hooks/my-hook/HOOK.md
 # Should have YAML frontmatter with name and metadata
 List all discovered hooks:
-Copy
 openclaw
 hooks
 list
 Hook Not Eligible
 Check requirements:
-Copy
 openclaw
 hooks
 info
@@ -2952,72 +2386,64 @@ Config values
 OS compatibility
 Hook Not Executing
 Verify hook is enabled:
-Copy
 openclaw
 hooks
 list
 # Should show ✓ next to enabled hooks
 Restart your gateway process so hooks reload.
 Check gateway logs for errors:
-Copy
 ./scripts/clawlog.sh
 grep
 hook
 Handler Errors
 Check for TypeScript/import errors:
-Copy
 # Test import directly
 node
-&quot;import(&#x27;./path/to/handler.ts&#x27;).then(console.log)&quot;
+"import('./path/to/handler.ts').then(console.log)"
 Migration Guide
 From Legacy Config to Discovery
 Before
-Copy
-&quot;hooks&quot;
-&quot;internal&quot;
-&quot;enabled&quot;
+"hooks"
+"internal"
+"enabled"
 true
-&quot;handlers&quot;
-&quot;event&quot;
-&quot;command:new&quot;
-&quot;module&quot;
-&quot;./hooks/handlers/my-handler.ts&quot;
+"handlers"
+"event"
+"command:new"
+"module"
+"./hooks/handlers/my-handler.ts"
 After
 Create hook directory:
-Copy
 mkdir
 ~/.openclaw/hooks/my-hook
 ./hooks/handlers/my-handler.ts
 ~/.openclaw/hooks/my-hook/handler.ts
 Create HOOK.md:
-Copy
 ---
 name
 my-hook
 description
-&quot;My custom hook&quot;
+"My custom hook"
 metadata
-&quot;openclaw&quot;
-&quot;emoji&quot;
-&quot;🎯&quot;
-&quot;events&quot;
-&quot;command:new&quot;
+"openclaw"
+"emoji"
+"🎯"
+"events"
+"command:new"
 ] } }
 ---
 # My Hook
 Does something useful.
 Update config:
-Copy
-&quot;hooks&quot;
-&quot;internal&quot;
-&quot;enabled&quot;
+"hooks"
+"internal"
+"enabled"
 true
-&quot;entries&quot;
-&quot;my-hook&quot;
-&quot;enabled&quot;
+"entries"
+"my-hook"
+"enabled"
 true
 Verify and restart your gateway process:
-Copy
 openclaw
 hooks
 list
@@ -3041,85 +2467,6 @@ Cron Jobs
 
 [Source: https://docs.openclaw.ai/automation/poll]
 
-Polls - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Automation
-Polls
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Tools
-Built-in tools
-Lobster
-LLM Task
-Exec Tool
-Web Tools
-apply_patch Tool
-Elevated Mode
-Thinking Levels
-Reactions
-Browser
-Browser (OpenClaw-managed)
-Browser Login
-Chrome Extension
-Browser Troubleshooting
-Agent coordination
-Agent Send
-Sub-Agents
-Multi-Agent Sandbox &amp; Tools
-Skills
-Slash Commands
-Skills
-Skills Config
-ClawHub
-Plugins
-Extensions
-Voice Call Plugin
-Zalo Personal Plugin
-Automation
-Hooks
-Cron Jobs
-Cron vs Heartbeat
-Automation Troubleshooting
-Webhooks
-Gmail PubSub
-Polls
-Auth Monitoring
-Media and devices
-Nodes
-Node Troubleshooting
-Image and Media Support
-Audio and Voice Notes
-Camera Capture
-Talk Mode
-Voice Wake
-Location Command
-Polls
-Supported channels
-CLI
-Gateway RPC
-Channel differences
-Agent tool (Message)
-Automation
-Polls
-Polls
-Supported channels
-WhatsApp (web channel)
-Discord
-MS Teams (Adaptive Cards)
-CLI
-Copy
 # WhatsApp
 openclaw
 message
@@ -3127,26 +2474,26 @@ poll
 --target
 +15555550123
 --poll-question
-&quot;Lunch today?&quot;
+"Lunch today?"
 --poll-option
-&quot;Yes&quot;
+"Yes"
 --poll-option
-&quot;No&quot;
+"No"
 --poll-option
-&quot;Maybe&quot;
+"Maybe"
 openclaw
 message
 poll
 --target
-[email&#160;protected]
+[email protected]
 --poll-question
-&quot;Meeting time?&quot;
+"Meeting time?"
 --poll-option
-&quot;10am&quot;
+"10am"
 --poll-option
-&quot;2pm&quot;
+"2pm"
 --poll-option
-&quot;4pm&quot;
+"4pm"
 --poll-multi
 # Discord
 openclaw
@@ -3157,11 +2504,11 @@ discord
 --target
 channel:123456789
 --poll-question
-&quot;Snack?&quot;
+"Snack?"
 --poll-option
-&quot;Pizza&quot;
+"Pizza"
 --poll-option
-&quot;Sushi&quot;
+"Sushi"
 openclaw
 message
 poll
@@ -3170,11 +2517,11 @@ discord
 --target
 channel:123456789
 --poll-question
-&quot;Plan?&quot;
+"Plan?"
 --poll-option
-&quot;A&quot;
+"A"
 --poll-option
-&quot;B&quot;
+"B"
 --poll-duration-hours
 # MS Teams
 openclaw
@@ -3184,13 +2531,13 @@ poll
 msteams
 --target
 conversation:19:
-[email&#160;protected]
+[email protected]
 --poll-question
-&quot;Lunch?&quot;
+"Lunch?"
 --poll-option
-&quot;Pizza&quot;
+"Pizza"
 --poll-option
-&quot;Sushi&quot;
+"Sushi"
 Options:
 --channel
 whatsapp
@@ -3228,7 +2575,7 @@ durationHours
 Discord: 2-10 options,
 durationHours
 clamped to 1-768 hours (default 24).
-maxSelections &gt; 1
+maxSelections > 1
 enables multi-select; Discord does not support a strict selection count.
 MS Teams: Adaptive Card polls (OpenClaw-managed). No native poll API;
 durationHours
@@ -3259,91 +2606,6 @@ Auth Monitoring
 
 [Source: https://docs.openclaw.ai/automation/troubleshooting]
 
-Automation Troubleshooting - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Automation
-Automation Troubleshooting
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Tools
-Built-in tools
-Lobster
-LLM Task
-Exec Tool
-Web Tools
-apply_patch Tool
-Elevated Mode
-Thinking Levels
-Reactions
-Browser
-Browser (OpenClaw-managed)
-Browser Login
-Chrome Extension
-Browser Troubleshooting
-Agent coordination
-Agent Send
-Sub-Agents
-Multi-Agent Sandbox &amp; Tools
-Skills
-Slash Commands
-Skills
-Skills Config
-ClawHub
-Plugins
-Extensions
-Voice Call Plugin
-Zalo Personal Plugin
-Automation
-Hooks
-Cron Jobs
-Cron vs Heartbeat
-Automation Troubleshooting
-Webhooks
-Gmail PubSub
-Polls
-Auth Monitoring
-Media and devices
-Nodes
-Node Troubleshooting
-Image and Media Support
-Audio and Voice Notes
-Camera Capture
-Talk Mode
-Voice Wake
-Location Command
-Automation troubleshooting
-Command ladder
-Cron not firing
-Cron fired but no delivery
-Heartbeat suppressed or skipped
-Timezone and activeHours gotchas
-Automation
-Automation Troubleshooting
-Automation troubleshooting
-Use this page for scheduler and delivery issues (
-cron
-heartbeat
-Command ladder
-Copy
-openclaw
-status
-openclaw
-gateway
-status
-openclaw
-logs
 --follow
 openclaw
 doctor
@@ -3352,7 +2614,6 @@ channels
 status
 --probe
 Then run automation checks:
-Copy
 openclaw
 cron
 status
@@ -3364,7 +2625,6 @@ system
 heartbeat
 last
 Cron not firing
-Copy
 openclaw
 cron
 status
@@ -3375,9 +2635,9 @@ openclaw
 cron
 runs
 --id
-&lt;
+<
 jobI
-&gt;
+>
 --limit
 openclaw
 logs
@@ -3400,14 +2660,13 @@ in run output → manual run called without
 --force
 and job not due yet.
 Cron fired but no delivery
-Copy
 openclaw
 cron
 runs
 --id
-&lt;
+<
 jobI
-&gt;
+>
 --limit
 openclaw
 cron
@@ -3436,7 +2695,6 @@ missing_scope
 Forbidden
 ) → delivery blocked by channel credentials/permissions.
 Heartbeat suppressed or skipped
-Copy
 openclaw
 system
 heartbeat
@@ -3471,7 +2729,6 @@ exists but has no actionable content.
 alerts-disabled
 → visibility settings suppress outbound heartbeat messages.
 Timezone and activeHours gotchas
-Copy
 openclaw
 config
 get
@@ -3485,7 +2742,7 @@ config
 get
 agents.defaults.userTimezone
 echo
-&quot;agents.defaults.userTimezone not set&quot;
+"agents.defaults.userTimezone not set"
 openclaw
 cron
 list
@@ -3526,101 +2783,21 @@ Webhooks
 
 [Source: https://docs.openclaw.ai/automation/webhook]
 
-Webhooks - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Automation
-Webhooks
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Tools
-Built-in tools
-Lobster
-LLM Task
-Exec Tool
-Web Tools
-apply_patch Tool
-Elevated Mode
-Thinking Levels
-Reactions
-Browser
-Browser (OpenClaw-managed)
-Browser Login
-Chrome Extension
-Browser Troubleshooting
-Agent coordination
-Agent Send
-Sub-Agents
-Multi-Agent Sandbox &amp; Tools
-Skills
-Slash Commands
-Skills
-Skills Config
-ClawHub
-Plugins
-Extensions
-Voice Call Plugin
-Zalo Personal Plugin
-Automation
-Hooks
-Cron Jobs
-Cron vs Heartbeat
-Automation Troubleshooting
-Webhooks
-Gmail PubSub
-Polls
-Auth Monitoring
-Media and devices
-Nodes
-Node Troubleshooting
-Image and Media Support
-Audio and Voice Notes
-Camera Capture
-Talk Mode
-Voice Wake
-Location Command
-Webhooks
-Enable
-Auth
-Endpoints
-POST /hooks/wake
-POST /hooks/agent
-Session key policy (breaking change)
-POST /hooks/&lt;name&gt; (mapped)
-Responses
-Examples
-Use a different model
-Security
-Automation
-Webhooks
-Webhooks
 Gateway can expose a small HTTP webhook endpoint for external triggers.
 Enable
-Copy
 hooks
 enabled
 true
 token
-&quot;shared-secret&quot;
+"shared-secret"
 path
-&quot;/hooks&quot;
+"/hooks"
 // Optional: restrict explicit `agentId` routing to this allowlist.
-// Omit or include &quot;*&quot; to allow any agent.
+// Omit or include "*" to allow any agent.
 // Set [] to deny all explicit `agentId` routing.
 allowedAgentIds
-&quot;hooks&quot;
-&quot;main&quot;
+"hooks"
+"main"
 Notes:
 hooks.token
 is required when
@@ -3630,9 +2807,9 @@ defaults to
 /hooks
 Auth
 Every request must include the hook token. Prefer headers:
-Authorization: Bearer &lt;token&gt;
+Authorization: Bearer <token>
 (recommended)
-x-openclaw-token: &lt;token&gt;
+x-openclaw-token: <token>
 Query-string tokens are rejected (
 ?token=...
 returns
@@ -3640,11 +2817,10 @@ returns
 Endpoints
 POST /hooks/wake
 Payload:
-Copy
-&quot;text&quot;
-&quot;System line&quot;
-&quot;mode&quot;
-&quot;now&quot;
+"text"
+"System line"
+"mode"
+"now"
 text
 required
 (string): The description of the event (e.g., “New email received”).
@@ -3663,28 +2839,27 @@ mode=now
 , triggers an immediate heartbeat
 POST /hooks/agent
 Payload:
-Copy
-&quot;message&quot;
-&quot;Run this&quot;
-&quot;name&quot;
-&quot;Email&quot;
-&quot;agentId&quot;
-&quot;hooks&quot;
-&quot;sessionKey&quot;
-&quot;hook:email:msg-123&quot;
-&quot;wakeMode&quot;
-&quot;now&quot;
-&quot;deliver&quot;
+"message"
+"Run this"
+"name"
+"Email"
+"agentId"
+"hooks"
+"sessionKey"
+"hook:email:msg-123"
+"wakeMode"
+"now"
+"deliver"
 true
-&quot;channel&quot;
-&quot;last&quot;
-&quot;to&quot;
-&quot;+15551234567&quot;
-&quot;model&quot;
-&quot;openai/gpt-5.2-mini&quot;
-&quot;thinking&quot;
-&quot;low&quot;
-&quot;timeoutSeconds&quot;
+"channel"
+"last"
+"to"
+"+15551234567"
+"model"
+"openai/gpt-5.2-mini"
+"thinking"
+"low"
+"timeoutSeconds"
 120
 message
 required
@@ -3754,31 +2929,29 @@ hooks.defaultSessionKey
 and keep request overrides off.
 Optional: allow request overrides only when needed, and restrict prefixes.
 Recommended config:
-Copy
 hooks
 enabled
 true
 token
-&quot;${OPENCLAW_HOOKS_TOKEN}&quot;
+"${OPENCLAW_HOOKS_TOKEN}"
 defaultSessionKey
-&quot;hook:ingress&quot;
+"hook:ingress"
 allowRequestSessionKey
 false
 allowedSessionKeyPrefixes
-&quot;hook:&quot;
+"hook:"
 Compatibility config (legacy behavior):
-Copy
 hooks
 enabled
 true
 token
-&quot;${OPENCLAW_HOOKS_TOKEN}&quot;
+"${OPENCLAW_HOOKS_TOKEN}"
 allowRequestSessionKey
 true
 allowedSessionKeyPrefixes
-&quot;hook:&quot;
+"hook:"
 // strongly recommended
-POST /hooks/&lt;name&gt;
+POST /hooks/<name>
 (mapped)
 Custom hook names are resolved via
 hooks.mappings
@@ -3789,7 +2962,7 @@ agent
 actions, with optional templates or
 code transforms.
 Mapping options (summary):
-hooks.presets: [&quot;gmail&quot;]
+hooks.presets: ["gmail"]
 enables the built-in Gmail mapping.
 hooks.mappings
 lets you define
@@ -3873,41 +3046,37 @@ on invalid payload
 413
 on oversized payloads
 Examples
-Copy
 curl
 POST
 http://127.0.0.1:18789/hooks/wake
-&#x27;Authorization: Bearer SECRET&#x27;
-&#x27;Content-Type: application/json&#x27;
-&#x27;{&quot;text&quot;:&quot;New email received&quot;,&quot;mode&quot;:&quot;now&quot;}&#x27;
-Copy
+'Authorization: Bearer SECRET'
+'Content-Type: application/json'
+'{"text":"New email received","mode":"now"}'
 curl
 POST
 http://127.0.0.1:18789/hooks/agent
-&#x27;x-openclaw-token: SECRET&#x27;
-&#x27;Content-Type: application/json&#x27;
-&#x27;{&quot;message&quot;:&quot;Summarize inbox&quot;,&quot;name&quot;:&quot;Email&quot;,&quot;wakeMode&quot;:&quot;next-heartbeat&quot;}&#x27;
+'x-openclaw-token: SECRET'
+'Content-Type: application/json'
+'{"message":"Summarize inbox","name":"Email","wakeMode":"next-heartbeat"}'
 Use a different model
 Add
 model
 to the agent payload (or mapping) to override the model for that run:
-Copy
 curl
 POST
 http://127.0.0.1:18789/hooks/agent
-&#x27;x-openclaw-token: SECRET&#x27;
-&#x27;Content-Type: application/json&#x27;
-&#x27;{&quot;message&quot;:&quot;Summarize inbox&quot;,&quot;name&quot;:&quot;Email&quot;,&quot;model&quot;:&quot;openai/gpt-5.2-mini&quot;}&#x27;
+'x-openclaw-token: SECRET'
+'Content-Type: application/json'
+'{"message":"Summarize inbox","name":"Email","model":"openai/gpt-5.2-mini"}'
 If you enforce
 agents.defaults.models
 , make sure the override model is included there.
-Copy
 curl
 POST
 http://127.0.0.1:18789/hooks/gmail
-&#x27;Authorization: Bearer SECRET&#x27;
-&#x27;Content-Type: application/json&#x27;
-&#x27;{&quot;source&quot;:&quot;gmail&quot;,&quot;messages&quot;:[{&quot;from&quot;:&quot;Ada&quot;,&quot;subject&quot;:&quot;Hello&quot;,&quot;snippet&quot;:&quot;Hi&quot;}]}&#x27;
+'Authorization: Bearer SECRET'
+'Content-Type: application/json'
+'{"source":"gmail","messages":[{"from":"Ada","subject":"Hello","snippet":"Hi"}]}'
 Security
 Keep hook endpoints behind loopback, tailnet, or trusted reverse proxy.
 Use a dedicated hook token; do not reuse gateway auth tokens.
@@ -3925,7 +3094,7 @@ sessionKey
 , restrict
 hooks.allowedSessionKeyPrefixes
 (for example,
-[&quot;hook:&quot;]
+["hook:"]
 Avoid including sensitive raw payloads in webhook logs.
 Hook payloads are treated as untrusted and wrapped with safety boundaries by default.
 If you must disable this for a specific hook, set

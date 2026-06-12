@@ -1,7 +1,7 @@
 {
   "name": "seo-skill",
-  "description": "Deterministic SEO analysis engine. 98 atomic checks, async multi-page crawler, real CWV via PageSpeed Insights, optional GSC integration for real search data, internal link graph with PageRank, auto-fix generation, audit history with regression detection, and CI/CD integration. Commands: /seo audit, /seo fix, /seo technical, /seo content, /seo schema, /seo geo",
-  "version": "2.2.1",
+  "description": "Deterministic SEO analysis: Python engine (98 atomic checks) with multi-page crawler, real CWV via PageSpeed, optional GSC data, link graph/PageRank, auto-fix generation, and audit history with regression detection. One orchestrator skill plus 7 specialist agents.",
+  "version": "3.0.0",
   "author": { "name": "nalyk" },
   "license": "MIT",
   "keywords": ["seo", "audit", "deterministic", "crawl", "pagespeed", "gsc", "schema", "eeat", "geo", "core-web-vitals"],

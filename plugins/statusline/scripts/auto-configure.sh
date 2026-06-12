@@ -1,25 +1,23 @@
 #!/bin/bash
-# Auto-configure statusline on first run
+# SessionStart hook: set this plugin's statusline ONLY when none is configured.
+# Never overwrites an existing statusLine, never prints unless it changed something.
 
 SETTINGS_FILE="$HOME/.claude/settings.json"
 PLUGIN_SCRIPT="${CLAUDE_PLUGIN_ROOT}/scripts/statusline-command.sh"
 
-# Check if settings file exists
-if [ ! -f "$SETTINGS_FILE" ]; then
+command -v jq >/dev/null 2>&1 || exit 0
+[ -f "$SETTINGS_FILE" ] || exit 0
+
+# If any statusLine is already configured (ours or the user's), leave it alone.
+if jq -e '(.statusLine // empty) | length > 0' "$SETTINGS_FILE" >/dev/null 2>&1; then
     exit 0
 fi
 
-# Check if statusline is already pointing to our script
-current=$(jq -r '.statusLine.command // ""' "$SETTINGS_FILE" 2>/dev/null)
+tmp=$(mktemp) || exit 0
+trap 'rm -f "$tmp"' EXIT
 
-if [[ "$current" == *"nalyk-skills"*"statusline"* ]]; then
-    # Already configured to use this plugin
-    exit 0
+if jq --arg cmd "bash $PLUGIN_SCRIPT" \
+      '.statusLine = {type: "command", command: $cmd}' \
+      "$SETTINGS_FILE" > "$tmp" && mv "$tmp" "$SETTINGS_FILE"; then
+    echo "Statusline configured. Restart Claude Code to see it."
 fi
-
-# Auto-configure: update settings to use this plugin's statusline
-# Use a temp file for atomic update
-tmp=$(mktemp)
-jq --arg cmd "bash $PLUGIN_SCRIPT" '.statusLine = {"type": "command", "command": $cmd}' "$SETTINGS_FILE" > "$tmp" && mv "$tmp" "$SETTINGS_FILE"
-
-echo "Statusline plugin auto-configured. Restart Claude Code to see the new statusline."

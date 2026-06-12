@@ -2,135 +2,39 @@
 
 Every CLI command and subcommand with flags, examples, and usage.
 
-
 ---
 ## Cli > Agent
 
 [Source: https://docs.openclaw.ai/cli/agent]
 
-agent - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-CLI commands
-agent
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-openclaw agent
-Examples
-CLI commands
-agent
-openclaw agent
-Run an agent turn via the Gateway (use
 --local
 for embedded).
 Use
---agent &lt;id&gt;
+--agent <id>
 to target a configured agent directly.
 Related:
 Agent send tool:
 Agent send
 Examples
-Copy
 openclaw
 agent
 --to
 +15555550123
 --message
-&quot;status update&quot;
+"status update"
 --deliver
 openclaw
 agent
 --agent
 ops
 --message
-&quot;Summarize logs&quot;
+"Summarize logs"
 openclaw
 agent
 --session-id
 1234
 --message
-&quot;Summarize inbox&quot;
+"Summarize inbox"
 --thinking
 medium
 openclaw
@@ -138,12 +42,12 @@ agent
 --agent
 ops
 --message
-&quot;Generate report&quot;
+"Generate report"
 --deliver
 --reply-channel
 slack
 --reply-to
-&quot;#reports&quot;
+"#reports"
 CLI Reference
 agents
 
@@ -152,101 +56,6 @@ agents
 
 [Source: https://docs.openclaw.ai/cli/agents]
 
-agents - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-CLI commands
-agents
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-openclaw agents
-Examples
-Identity files
-Set identity
-CLI commands
-agents
-openclaw agents
 Manage isolated agents (workspaces + auth + routing).
 Related:
 Multi-agent routing:
@@ -254,7 +63,6 @@ Multi-Agent Routing
 Agent workspace:
 Agent workspace
 Examples
-Copy
 openclaw
 agents
 list
@@ -302,7 +110,6 @@ avatar
 (workspace-relative path, http(s) URL, or data URI)
 Load from
 IDENTITY.md
-Copy
 openclaw
 agents
 set-identity
@@ -310,32 +117,30 @@ set-identity
 ~/.openclaw/workspace
 --from-identity
 Override fields explicitly:
-Copy
 openclaw
 agents
 set-identity
 --agent
 main
 --name
-&quot;OpenClaw&quot;
+"OpenClaw"
 --emoji
-&quot;🦞&quot;
+"🦞"
 --avatar
 avatars/openclaw.png
 Config sample:
-Copy
 agents
 list
-&quot;main&quot;
+"main"
 identity
 name
-&quot;OpenClaw&quot;
+"OpenClaw"
 theme
-&quot;space lobster&quot;
+"space lobster"
 emoji
-&quot;🦞&quot;
+"🦞"
 avatar
-&quot;avatars/openclaw.png&quot;
+"avatars/openclaw.png"
 agent
 approvals
 
@@ -344,101 +149,6 @@ approvals
 
 [Source: https://docs.openclaw.ai/cli/approvals]
 
-approvals - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-CLI commands
-approvals
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-openclaw approvals
-Common commands
-Replace approvals from a file
-Allowlist helpers
-Notes
-CLI commands
-approvals
 openclaw approvals
 Manage exec approvals for the
 local host
@@ -456,7 +166,6 @@ Exec approvals
 Nodes:
 Nodes
 Common commands
-Copy
 openclaw
 approvals
 get
@@ -464,15 +173,14 @@ openclaw
 approvals
 get
 --node
-&lt;
+<
 name
-&gt;
+>
 openclaw
 approvals
 get
 --gateway
 Replace approvals from a file
-Copy
 openclaw
 approvals
 set
@@ -482,9 +190,9 @@ openclaw
 approvals
 set
 --node
-&lt;
+<
 name
-&gt;
+>
 --file
 ./exec-approvals.json
 openclaw
@@ -494,12 +202,11 @@ set
 --file
 ./exec-approvals.json
 Allowlist helpers
-Copy
 openclaw
 approvals
 allowlist
 add
-&quot;~/Projects/**/bin/rg&quot;
+"~/Projects/**/bin/rg"
 openclaw
 approvals
 allowlist
@@ -507,22 +214,22 @@ add
 --agent
 main
 --node
-&lt;
+<
 name
-&gt;
-&quot;/usr/bin/uptime&quot;
+>
+"/usr/bin/uptime"
 openclaw
 approvals
 allowlist
 add
 --agent
-&quot;*&quot;
-&quot;/usr/bin/uname&quot;
+"*"
+"/usr/bin/uname"
 openclaw
 approvals
 allowlist
 remove
-&quot;~/Projects/**/bin/rg&quot;
+"~/Projects/**/bin/rg"
 Notes
 --node
 uses the same resolver as
@@ -530,7 +237,7 @@ openclaw nodes
 (id, name, ip, or id prefix).
 --agent
 defaults to
-&quot;*&quot;
+"*"
 , which applies to all agents.
 The node host must advertise
 system.execApprovals.get/set
@@ -545,105 +252,6 @@ browser
 
 [Source: https://docs.openclaw.ai/cli/browser]
 
-browser - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-CLI commands
-browser
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-openclaw browser
-Common flags
-Quick start (local)
-Profiles
-Tabs
-Snapshot / screenshot / actions
-Chrome extension relay (attach via toolbar button)
-Remote browser control (node host proxy)
-CLI commands
-browser
-openclaw browser
 Manage OpenClaw’s browser control server and run browser actions (tabs, snapshots, screenshots, navigation, clicks, typing).
 Related:
 Browser tool + API:
@@ -651,18 +259,17 @@ Browser tool
 Chrome extension relay:
 Chrome extension
 Common flags
---url &lt;gatewayWsUrl&gt;
+--url <gatewayWsUrl>
 : Gateway WebSocket URL (defaults to config).
---token &lt;token&gt;
+--token <token>
 : Gateway token (if required).
---timeout &lt;ms&gt;
+--timeout <ms>
 : request timeout (ms).
---browser-profile &lt;name&gt;
+--browser-profile <name>
 : choose a browser profile (default from config).
 --json
 : machine-readable output (where supported).
 Quick start (local)
-Copy
 openclaw
 browser
 --browser-profile
@@ -690,7 +297,6 @@ openclaw
 : launches/attaches to a dedicated OpenClaw-managed Chrome instance (isolated user data dir).
 chrome
 : controls your existing Chrome tab(s) via the Chrome extension relay.
-Copy
 openclaw
 browser
 profiles
@@ -700,21 +306,19 @@ create-profile
 --name
 work
 --color
-&quot;#FF5A36&quot;
+"#FF5A36"
 openclaw
 browser
 delete-profile
 --name
 work
 Use a specific profile:
-Copy
 openclaw
 browser
 --browser-profile
 work
 tabs
 Tabs
-Copy
 openclaw
 browser
 tabs
@@ -725,28 +329,25 @@ https://docs.openclaw.ai
 openclaw
 browser
 focus
-&lt;
+<
 targetI
-&gt;
+>
 openclaw
 browser
 close
-&lt;
+<
 targetI
-&gt;
+>
 Snapshot / screenshot / actions
 Snapshot:
-Copy
 openclaw
 browser
 snapshot
 Screenshot:
-Copy
 openclaw
 browser
 screenshot
 Navigate/click/type (ref-based UI automation):
-Copy
 openclaw
 browser
 navigate
@@ -754,18 +355,17 @@ https://example.com
 openclaw
 browser
 click
-&lt;
-&gt;
+<
+>
 openclaw
 browser
 type
-&lt;
-&gt;
-&quot;hello&quot;
+<
+>
+"hello"
 Chrome extension relay (attach via toolbar button)
 This mode lets the agent control an existing Chrome tab that you attach manually (it does not auto-attach).
 Install the unpacked extension to a stable path:
-Copy
 openclaw
 browser
 extension
@@ -801,104 +401,6 @@ channels
 
 [Source: https://docs.openclaw.ai/cli/channels]
 
-channels - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-CLI commands
-channels
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-openclaw channels
-Common commands
-Add / remove accounts
-Login / logout (interactive)
-Troubleshooting
-Capabilities probe
-Resolve names to IDs
-CLI commands
-channels
-openclaw channels
 Manage chat channel accounts and their runtime status on the Gateway.
 Related docs:
 Channel guides:
@@ -906,7 +408,6 @@ Channels
 Gateway configuration:
 Configuration
 Common commands
-Copy
 openclaw
 channels
 list
@@ -928,24 +429,23 @@ channels
 resolve
 --channel
 slack
-&quot;#general&quot;
-&quot;@jane&quot;
+"#general"
+"@jane"
 openclaw
 channels
 logs
 --channel
 all
 Add / remove accounts
-Copy
 openclaw
 channels
 add
 --channel
 telegram
 --token
-&lt;
+<
 bot-toke
-&gt;
+>
 openclaw
 channels
 remove
@@ -956,7 +456,6 @@ Tip:
 openclaw channels add --help
 shows per-channel flags (token, app token, signal-cli paths, etc).
 Login / logout (interactive)
-Copy
 openclaw
 channels
 login
@@ -987,7 +486,6 @@ CLAUDE_WEB_COOKIE
 ), or re-auth via Claude Code CLI.
 Capabilities probe
 Fetch provider capability hints (intents/scopes where available) plus static feature support:
-Copy
 openclaw
 channels
 capabilities
@@ -1003,33 +501,32 @@ Notes:
 is optional; omit it to list every channel (including extensions).
 --target
 accepts
-channel:&lt;id&gt;
+channel:<id>
 or a raw numeric channel id and only applies to Discord.
 Probes are provider-specific: Discord intents + optional channel permissions; Slack bot + user scopes; Telegram bot flags + webhook; Signal daemon version; MS Teams app token + Graph roles/scopes (annotated where known). Channels without probes report
 Probe: unavailable
 Resolve names to IDs
 Resolve channel/user names to IDs using the provider directory:
-Copy
 openclaw
 channels
 resolve
 --channel
 slack
-&quot;#general&quot;
-&quot;@jane&quot;
+"#general"
+"@jane"
 openclaw
 channels
 resolve
 --channel
 discord
-&quot;My Server/#support&quot;
-&quot;@someone&quot;
+"My Server/#support"
+"@someone"
 openclaw
 channels
 resolve
 --channel
 matrix
-&quot;Project Room&quot;
+"Project Room"
 Notes:
 Use
 --kind user|group|auto
@@ -1043,98 +540,6 @@ configure
 
 [Source: https://docs.openclaw.ai/cli/configure]
 
-configure - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-CLI commands
-configure
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-openclaw configure
-Examples
-CLI commands
-configure
 openclaw configure
 Interactive prompt to set up credentials, devices, and agent defaults.
 Note: The
@@ -1160,7 +565,6 @@ gateway.mode
 . You can select “Continue” without other sections if that is all you need.
 Channel-oriented services (Slack/Discord/Matrix/Microsoft Teams) prompt for channel/room allowlists during setup. You can enter names or IDs; the wizard resolves names to IDs when possible.
 Examples
-Copy
 openclaw
 configure
 openclaw
@@ -1177,98 +581,6 @@ cron
 
 [Source: https://docs.openclaw.ai/cli/cron]
 
-cron - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-CLI commands
-cron
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-openclaw cron
-Common edits
-CLI commands
-cron
 openclaw cron
 Manage cron jobs for the Gateway scheduler.
 Related:
@@ -1296,40 +608,37 @@ to keep them.
 Note: recurring jobs now use exponential retry backoff after consecutive errors (30s → 1m → 5m → 15m → 60m), then return to normal schedule after the next successful run.
 Common edits
 Update delivery settings without changing the message:
-Copy
 openclaw
 cron
 edit
-&lt;
+<
 job-i
-&gt;
+>
 --announce
 --channel
 telegram
 --to
-&quot;123456789&quot;
+"123456789"
 Disable delivery for an isolated job:
-Copy
 openclaw
 cron
 edit
-&lt;
+<
 job-i
-&gt;
+>
 --no-deliver
 Announce to a specific channel:
-Copy
 openclaw
 cron
 edit
-&lt;
+<
 job-i
-&gt;
+>
 --announce
 --channel
 slack
 --to
-&quot;channel:C1234567890&quot;
+"channel:C1234567890"
 configure
 dashboard
 
@@ -1338,100 +647,7 @@ dashboard
 
 [Source: https://docs.openclaw.ai/cli/dashboard]
 
-dashboard - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-CLI commands
-dashboard
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-openclaw dashboard
-CLI commands
-dashboard
-openclaw dashboard
 Open the Control UI using your current auth.
-Copy
 openclaw
 dashboard
 openclaw
@@ -1445,110 +661,11 @@ directory
 
 [Source: https://docs.openclaw.ai/cli/directory]
 
-directory - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-CLI commands
-directory
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-openclaw directory
-Common flags
-Notes
-Using results with message send
-ID formats (by channel)
-Self (“me”)
-Peers (contacts/users)
-Groups
-CLI commands
-directory
-openclaw directory
 Directory lookups for channels that support it (contacts/peers, groups, and “me”).
 Common flags
---channel &lt;name&gt;
+--channel <name>
 : channel id/alias (required when multiple channels are configured; auto when only one is configured)
---account &lt;id&gt;
+--account <id>
 : account id (default: channel default)
 --json
 : output JSON
@@ -1565,7 +682,6 @@ name
 for scripting.
 Using results with
 message send
-Copy
 openclaw
 directory
 peers
@@ -1573,7 +689,7 @@ list
 --channel
 slack
 --query
-&quot;U0&quot;
+"U0"
 openclaw
 message
 send
@@ -1582,12 +698,12 @@ slack
 --target
 user:U012ABCDEF
 --message
-&quot;hello&quot;
+"hello"
 ID formats (by channel)
 WhatsApp:
 +15551234567
 (DM),
-[email&#160;protected]
+[email protected]
 (group)
 Telegram:
 @username
@@ -1597,18 +713,18 @@ user:U…
 and
 channel:C…
 Discord:
-user:&lt;id&gt;
+user:<id>
 and
-channel:&lt;id&gt;
+channel:<id>
 Matrix (plugin):
 user:@user:server
 room:!roomId:server
 , or
 #alias:server
 Microsoft Teams (plugin):
-user:&lt;id&gt;
+user:<id>
 and
-conversation:&lt;id&gt;
+conversation:<id>
 Zalo (plugin): user id (Bot API)
 Zalo Personal /
 zalouser
@@ -1617,14 +733,12 @@ zca
 friend list
 group list
 Self (“me”)
-Copy
 openclaw
 directory
 self
 --channel
 zalouser
 Peers (contacts/users)
-Copy
 openclaw
 directory
 peers
@@ -1638,7 +752,7 @@ list
 --channel
 zalouser
 --query
-&quot;name&quot;
+"name"
 openclaw
 directory
 peers
@@ -1647,7 +761,6 @@ list
 zalouser
 --limit
 Groups
-Copy
 openclaw
 directory
 groups
@@ -1661,7 +774,7 @@ list
 --channel
 zalouser
 --query
-&quot;work&quot;
+"work"
 openclaw
 directory
 groups
@@ -1669,8 +782,8 @@ members
 --channel
 zalouser
 --group-id
-&lt;
-&gt;
+<
+>
 dashboard
 dns
 
@@ -1679,99 +792,6 @@ dns
 
 [Source: https://docs.openclaw.ai/cli/dns]
 
-dns - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-CLI commands
-dns
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-openclaw dns
-Setup
-CLI commands
-dns
-openclaw dns
 DNS helpers for wide-area discovery (Tailscale + CoreDNS). Currently focused on macOS + Homebrew CoreDNS.
 Related:
 Gateway discovery:
@@ -1779,7 +799,6 @@ Discovery
 Wide-area discovery config:
 Configuration
 Setup
-Copy
 openclaw
 dns
 setup
@@ -1795,100 +814,7 @@ docs
 
 [Source: https://docs.openclaw.ai/cli/docs]
 
-docs - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-CLI commands
-docs
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-openclaw docs
-CLI commands
-docs
-openclaw docs
 Search the live docs index.
-Copy
 openclaw
 docs
 browser
@@ -1905,100 +831,6 @@ doctor
 
 [Source: https://docs.openclaw.ai/cli/doctor]
 
-doctor - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-CLI commands
-doctor
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-openclaw doctor
-Examples
-macOS: launchctl env overrides
-CLI commands
-doctor
-openclaw doctor
 Health checks + quick fixes for the gateway and channels.
 Related:
 Troubleshooting:
@@ -2006,7 +838,6 @@ Troubleshooting
 Security audit:
 Security
 Examples
-Copy
 openclaw
 doctor
 openclaw
@@ -2034,7 +865,6 @@ launchctl setenv OPENCLAW_GATEWAY_TOKEN ...
 (or
 ...PASSWORD
 ), that value overrides your config file and can cause persistent “unauthorized” errors.
-Copy
 launchctl
 getenv
 OPENCLAW_GATEWAY_TOKEN
@@ -2055,109 +885,6 @@ gateway
 
 [Source: https://docs.openclaw.ai/cli/gateway]
 
-gateway - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-CLI commands
-gateway
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-Gateway CLI
-Run the Gateway
-Options
-Query a running Gateway
-gateway health
-gateway status
-gateway probe
-Remote over SSH (Mac app parity)
-gateway call &lt;method&gt;
-Manage the Gateway service
-Discover gateways (Bonjour)
-gateway discover
-CLI commands
-gateway
-Gateway CLI
 The Gateway is OpenClaw’s WebSocket server (channels, nodes, sessions, hooks).
 Subcommands in this page live under
 openclaw gateway …
@@ -2167,11 +894,9 @@ Related docs:
 /gateway/configuration
 Run the Gateway
 Run a local Gateway process:
-Copy
 openclaw
 gateway
 Foreground alias:
-Copy
 openclaw
 gateway
 run
@@ -2192,22 +917,22 @@ SIGINT
 SIGTERM
 handlers stop the gateway process, but they don’t restore any custom terminal state. If you wrap the CLI with a TUI or raw-mode input, restore the terminal before exit.
 Options
---port &lt;port&gt;
+--port <port>
 : WebSocket port (default comes from config/env; usually
 18789
---bind &lt;loopback|lan|tailnet|auto|custom&gt;
+--bind <loopback|lan|tailnet|auto|custom>
 : listener bind mode.
---auth &lt;token|password&gt;
+--auth <token|password>
 : auth mode override.
---token &lt;token&gt;
+--token <token>
 : token override (also sets
 OPENCLAW_GATEWAY_TOKEN
 for the process).
---password &lt;password&gt;
+--password <password>
 : password override (also sets
 OPENCLAW_GATEWAY_PASSWORD
 for the process).
---tailscale &lt;off|serve|funnel&gt;
+--tailscale <off|serve|funnel>
 : expose the Gateway via Tailscale.
 --tailscale-reset-on-exit
 : reset Tailscale serve/funnel config on shutdown.
@@ -2226,7 +951,7 @@ in config.
 : verbose logs.
 --claude-cli-logs
 : only show claude-cli logs in the console (and enable its stdout/stderr).
---ws-log &lt;auto|full|compact&gt;
+--ws-log <auto|full|compact>
 : websocket log style (default
 auto
 --compact
@@ -2234,7 +959,7 @@ auto
 --ws-log compact
 --raw-stream
 : log raw model stream events to jsonl.
---raw-stream-path &lt;path&gt;
+--raw-stream-path <path>
 : raw stream jsonl path.
 Query a running Gateway
 All query commands use WebSocket RPC.
@@ -2247,13 +972,13 @@ Default: human-readable (colored in TTY).
 NO_COLOR=1
 ): disable ANSI while keeping human layout.
 Shared options (where supported):
---url &lt;url&gt;
+--url <url>
 : Gateway WebSocket URL.
---token &lt;token&gt;
+--token <token>
 : Gateway token.
---password &lt;password&gt;
+--password <password>
 : Gateway password.
---timeout &lt;ms&gt;
+--timeout <ms>
 : timeout/budget (varies per command).
 --expect-final
 : wait for a “final” response (agent calls).
@@ -2265,7 +990,6 @@ Pass
 --password
 explicitly. Missing explicit credentials is an error.
 gateway health
-Copy
 openclaw
 gateway
 health
@@ -2274,7 +998,6 @@ ws://127.0.0.1:18789
 gateway status
 gateway status
 shows the Gateway service (launchd/systemd/schtasks) plus an optional RPC probe.
-Copy
 openclaw
 gateway
 status
@@ -2283,13 +1006,13 @@ gateway
 status
 --json
 Options:
---url &lt;url&gt;
+--url <url>
 : override the probe URL.
---token &lt;token&gt;
+--token <token>
 : token auth for the probe.
---password &lt;password&gt;
+--password <password>
 : password auth for the probe.
---timeout &lt;ms&gt;
+--timeout <ms>
 : probe timeout (default
 10000
 --no-probe
@@ -2303,7 +1026,6 @@ your configured remote gateway (if set), and
 localhost (loopback)
 even if remote is configured
 If multiple gateways are reachable, it prints all of them. Multiple gateways are supported when you use isolated profiles/ports (e.g., a rescue bot), but most installs still run a single gateway.
-Copy
 openclaw
 gateway
 probe
@@ -2313,29 +1035,27 @@ probe
 --json
 Remote over SSH (Mac app parity)
 The macOS app “Remote over SSH” mode uses a local port-forward so the remote gateway (which may be bound to loopback only) becomes reachable at
-ws://127.0.0.1:&lt;port&gt;
+ws://127.0.0.1:<port>
 CLI equivalent:
-Copy
 openclaw
 gateway
 probe
 --ssh
 user@gateway-host
 Options:
---ssh &lt;target&gt;
+--ssh <target>
 user@host
 user@host:port
 (port defaults to
---ssh-identity &lt;path&gt;
+--ssh-identity <path>
 : identity file.
 --ssh-auto
 : pick the first discovered gateway host as SSH target (LAN/WAB only).
 Config (optional, used as defaults):
 gateway.remote.sshTarget
 gateway.remote.sshIdentity
-gateway call &lt;method&gt;
+gateway call <method>
 Low-level RPC helper.
-Copy
 openclaw
 gateway
 call
@@ -2345,9 +1065,8 @@ gateway
 call
 logs.tail
 --params
-&#x27;{&quot;sinceMs&quot;: 60000}&#x27;
+'{"sinceMs": 60000}'
 Manage the Gateway service
-Copy
 openclaw
 gateway
 install
@@ -2405,18 +1124,16 @@ gatewayTlsSha256
 cliPath
 (optional hint for remote installs)
 gateway discover
-Copy
 openclaw
 gateway
 discover
 Options:
---timeout &lt;ms&gt;
+--timeout <ms>
 : per-command timeout (browse/resolve); default
 2000
 --json
 : machine-readable output (also disables styling/spinner).
 Examples:
-Copy
 openclaw
 gateway
 discover
@@ -2426,7 +1143,7 @@ openclaw
 gateway
 discover
 --json
-&#x27;.beacons[].wsUrl&#x27;
+'.beacons[].wsUrl'
 doctor
 health
 
@@ -2435,100 +1152,7 @@ health
 
 [Source: https://docs.openclaw.ai/cli/health]
 
-health - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-CLI commands
-health
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-openclaw health
-CLI commands
-health
-openclaw health
 Fetch health from the running Gateway.
-Copy
 openclaw
 health
 openclaw
@@ -2549,110 +1173,6 @@ hooks
 
 [Source: https://docs.openclaw.ai/cli/hooks]
 
-hooks - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-CLI commands
-hooks
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-openclaw hooks
-List All Hooks
-Get Hook Information
-Check Hooks Eligibility
-Enable a Hook
-Disable a Hook
-Install Hooks
-Update Hooks
-Bundled Hooks
-session-memory
-bootstrap-extra-files
-command-logger
-boot-md
-CLI commands
-hooks
-openclaw hooks
 Manage agent hooks (event-driven automations for commands like
 /new
 /reset
@@ -2663,7 +1183,6 @@ Hooks
 Plugin hooks:
 Plugins
 List All Hooks
-Copy
 openclaw
 hooks
 list
@@ -2676,7 +1195,6 @@ Options:
 -v, --verbose
 : Show detailed information including missing requirements
 Example output:
-Copy
 Hooks (4/4 ready)
 Ready:
 🚀 boot-md ✓ - Run BOOT.md on gateway startup
@@ -2684,43 +1202,38 @@ Ready:
 📝 command-logger ✓ - Log all command events to a centralized audit file
 💾 session-memory ✓ - Save session context to memory when /new command is issued
 Example (verbose):
-Copy
 openclaw
 hooks
 list
 --verbose
 Shows missing requirements for ineligible hooks.
 Example (JSON):
-Copy
 openclaw
 hooks
 list
 --json
 Returns structured JSON for programmatic use.
 Get Hook Information
-Copy
 openclaw
 hooks
 info
-&lt;
+<
 nam
-&gt;
+>
 Show detailed information about a specific hook.
 Arguments:
-&lt;name&gt;
+<name>
 : Hook name (e.g.,
 session-memory
 Options:
 --json
 : Output as JSON
 Example:
-Copy
 openclaw
 hooks
 info
 session-memory
 Output:
-Copy
 💾 session-memory ✓ Ready
 Save session context to memory when /new command is issued
 Details:
@@ -2732,7 +1245,6 @@ Events: command:new
 Requirements:
 Config: ✓ workspace.dir
 Check Hooks Eligibility
-Copy
 openclaw
 hooks
 check
@@ -2741,80 +1253,72 @@ Options:
 --json
 : Output as JSON
 Example output:
-Copy
 Hooks Status
 Total hooks: 4
 Ready: 4
 Not ready: 0
 Enable a Hook
-Copy
 openclaw
 hooks
 enable
-&lt;
+<
 nam
-&gt;
+>
 Enable a specific hook by adding it to your config (
 ~/.openclaw/config.json
 Note:
 Hooks managed by plugins show
-plugin:&lt;id&gt;
+plugin:<id>
 openclaw hooks list
 and
 can’t be enabled/disabled here. Enable/disable the plugin instead.
 Arguments:
-&lt;name&gt;
+<name>
 : Hook name (e.g.,
 session-memory
 Example:
-Copy
 openclaw
 hooks
 enable
 session-memory
 Output:
-Copy
 ✓ Enabled hook: 💾 session-memory
 What it does:
 Checks if hook exists and is eligible
 Updates
-hooks.internal.entries.&lt;name&gt;.enabled = true
+hooks.internal.entries.<name>.enabled = true
 in your config
 Saves config to disk
 After enabling:
 Restart the gateway so hooks reload (menu bar app restart on macOS, or restart your gateway process in dev).
 Disable a Hook
-Copy
 openclaw
 hooks
 disable
-&lt;
+<
 nam
-&gt;
+>
 Disable a specific hook by updating your config.
 Arguments:
-&lt;name&gt;
+<name>
 : Hook name (e.g.,
 command-logger
 Example:
-Copy
 openclaw
 hooks
 disable
 command-logger
 Output:
-Copy
 ⏸ Disabled hook: 📝 command-logger
 After disabling:
 Restart the gateway so hooks reload
 Install Hooks
-Copy
 openclaw
 hooks
 install
-&lt;
+<
 path-or-spe
-&gt;
+>
 Install a hook pack from a local folder/archive or npm.
 Npm specs are
 registry-only
@@ -2824,7 +1328,7 @@ specs are rejected. Dependency installs run with
 for safety.
 What it does:
 Copies the hook pack into
-~/.openclaw/hooks/&lt;id&gt;
+~/.openclaw/hooks/<id>
 Enables the installed hooks in
 hooks.internal.entries.*
 Records the install under
@@ -2839,7 +1343,6 @@ Supported archives:
 .tar.gz
 .tar
 Examples:
-Copy
 # Local directory
 openclaw
 hooks
@@ -2861,12 +1364,11 @@ hooks
 install
 ./my-hook-pack
 Update Hooks
-Copy
 openclaw
 hooks
 update
-&lt;
-&gt;
+<
+>
 openclaw
 hooks
 update
@@ -2882,7 +1384,6 @@ session-memory
 Saves session context to memory when you issue
 /new
 Enable:
-Copy
 openclaw
 hooks
 enable
@@ -2898,7 +1399,6 @@ TOOLS.md
 ) during
 agent:bootstrap
 Enable:
-Copy
 openclaw
 hooks
 enable
@@ -2908,7 +1408,6 @@ bootstrap-extra-files documentation
 command-logger
 Logs all command events to a centralized audit file.
 Enable:
-Copy
 openclaw
 hooks
 enable
@@ -2916,7 +1415,6 @@ command-logger
 Output:
 ~/.openclaw/logs/commands.log
 View logs:
-Copy
 # Recent commands
 tail
 ~/.openclaw/logs/commands.log
@@ -2925,7 +1423,7 @@ cat
 ~/.openclaw/logs/commands.log
 # Filter by action
 grep
-&#x27;&quot;action&quot;:&quot;new&quot;&#x27;
+'"action":"new"'
 ~/.openclaw/logs/commands.log
 See:
 command-logger documentation
@@ -2936,7 +1434,6 @@ when the gateway starts (after channels start).
 Events
 gateway:startup
 Enable
-Copy
 openclaw
 hooks
 enable
@@ -2951,105 +1448,11 @@ logs
 
 [Source: https://docs.openclaw.ai/cli/logs]
 
-logs - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-CLI commands
-logs
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-openclaw logs
-Examples
-CLI commands
-logs
-openclaw logs
 Tail Gateway file logs over RPC (works in remote mode).
 Related:
 Logging overview:
 Logging
 Examples
-Copy
 openclaw
 logs
 openclaw
@@ -3080,105 +1483,12 @@ memory
 
 [Source: https://docs.openclaw.ai/cli/memory]
 
-memory - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-CLI commands
-memory
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-openclaw memory
-Examples
-Options
-CLI commands
-memory
 openclaw memory
 Manage semantic memory indexing and search.
 Provided by the active memory plugin (default:
 memory-core
 ; set
-plugins.slots.memory = &quot;none&quot;
+plugins.slots.memory = "none"
 to disable).
 Related:
 Memory concept:
@@ -3186,7 +1496,6 @@ Memory
 Plugins:
 Plugins
 Examples
-Copy
 openclaw
 memory
 status
@@ -3215,7 +1524,7 @@ index
 openclaw
 memory
 search
-&quot;release checklist&quot;
+"release checklist"
 openclaw
 memory
 status
@@ -3229,7 +1538,7 @@ main
 --verbose
 Options
 Common:
---agent &lt;id&gt;
+--agent <id>
 : scope to a single agent (default: all configured agents).
 --verbose
 : emit detailed logs during probes and indexing.
@@ -3251,115 +1560,10 @@ message
 
 [Source: https://docs.openclaw.ai/cli/message]
 
-message - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-CLI commands
-message
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-openclaw message
-Usage
-Common flags
-Actions
-Core
-Threads
-Emojis
-Stickers
-Roles / Channels / Members / Voice
-Events
-Moderation (Discord)
-Broadcast
-Examples
-CLI commands
-message
-openclaw message
 Single outbound command for sending messages and channel actions
 (Discord/Google Chat/Slack/Mattermost (plugin)/Telegram/WhatsApp/Signal/iMessage/MS Teams).
 Usage
-Copy
-openclaw message &lt;subcommand&gt; [flags]
+openclaw message <subcommand> [flags]
 Channel selection:
 --channel
 required if more than one channel is configured.
@@ -3373,43 +1577,43 @@ WhatsApp: E.164 or group JID
 Telegram: chat id or
 @username
 Discord:
-channel:&lt;id&gt;
-user:&lt;id&gt;
+channel:<id>
+user:<id>
 (or
-&lt;@id&gt;
+<@id>
 mention; raw numeric ids are treated as channels)
 Google Chat:
-spaces/&lt;spaceId&gt;
-users/&lt;userId&gt;
+spaces/<spaceId>
+users/<userId>
 Slack:
-channel:&lt;id&gt;
-user:&lt;id&gt;
+channel:<id>
+user:<id>
 (raw channel id is accepted)
 Mattermost (plugin):
-channel:&lt;id&gt;
-user:&lt;id&gt;
+channel:<id>
+user:<id>
 , or
 @username
 (bare ids are treated as channels)
 Signal:
 +E.164
-group:&lt;id&gt;
+group:<id>
 signal:+E.164
-signal:group:&lt;id&gt;
+signal:group:<id>
 , or
-username:&lt;name&gt;
-u:&lt;name&gt;
+username:<name>
+u:<name>
 iMessage: handle,
-chat_id:&lt;id&gt;
-chat_guid:&lt;guid&gt;
+chat_id:<id>
+chat_guid:<guid>
 , or
-chat_identifier:&lt;id&gt;
+chat_identifier:<id>
 MS Teams: conversation id (
 19:
-[email&#160;protected]
+[email protected]
 ) or
-conversation:&lt;id&gt;
-user:&lt;aad-object-id&gt;
+conversation:<id>
+user:<aad-object-id>
 Name lookup:
 For supported providers (Discord/Slack/etc), channel names like
 Help
@@ -3417,11 +1621,11 @@ Help
 are resolved via the directory cache.
 On cache miss, OpenClaw will attempt a live directory lookup when the provider supports it.
 Common flags
---channel &lt;name&gt;
---account &lt;id&gt;
---target &lt;dest&gt;
+--channel <name>
+--account <id>
+--target <dest>
 (target channel or user for send/poll/read/etc)
---targets &lt;name&gt;
+--targets <name>
 (repeat; broadcast only)
 --json
 --dry-run
@@ -3691,49 +1895,41 @@ Optional:
 --dry-run
 Examples
 Send a Discord reply:
-Copy
 openclaw message send --channel discord \
---target channel:123 --message &quot;hi&quot; --reply-to 456
+--target channel:123 --message "hi" --reply-to 456
 Create a Discord poll:
-Copy
 openclaw message poll --channel discord \
 --target channel:123 \
---poll-question &quot;Snack?&quot; \
+--poll-question "Snack?" \
 --poll-option Pizza --poll-option Sushi \
 --poll-multi --poll-duration-hours 48
 Create a Telegram poll (auto-close in 2 minutes):
-Copy
 openclaw message poll --channel telegram \
 --target @mychat \
---poll-question &quot;Lunch?&quot; \
+--poll-question "Lunch?" \
 --poll-option Pizza --poll-option Sushi \
 --poll-duration-seconds 120 --silent
 Send a Teams proactive message:
-Copy
 openclaw message send --channel msteams \
 --target conversation:19:
-[email&#160;protected]
---message &quot;hi&quot;
+[email protected]
+--message "hi"
 Create a Teams poll:
-Copy
 openclaw message poll --channel msteams \
 --target conversation:19:
-[email&#160;protected]
---poll-question &quot;Lunch?&quot; \
+[email protected]
+--poll-question "Lunch?" \
 --poll-option Pizza --poll-option Sushi
 React in Slack:
-Copy
 openclaw message react --channel slack \
---target C123 --message-id 456 --emoji &quot;✅&quot;
+--target C123 --message-id 456 --emoji "✅"
 React in a Signal group:
-Copy
 openclaw message react --channel signal \
 --target signal:group:abc123 --message-id 1737630212345 \
---emoji &quot;✅&quot; --target-author-uuid 123e4567-e89b-12d3-a456-426614174000
+--emoji "✅" --target-author-uuid 123e4567-e89b-12d3-a456-426614174000
 Send Telegram inline buttons:
-Copy
-openclaw message send --channel telegram --target @mychat --message &quot;Choose:&quot; \
---buttons &#x27;[ [{&quot;text&quot;:&quot;Yes&quot;,&quot;callback_data&quot;:&quot;cmd:yes&quot;}], [{&quot;text&quot;:&quot;No&quot;,&quot;callback_data&quot;:&quot;cmd:no&quot;}] ]&#x27;
+openclaw message send --channel telegram --target @mychat --message "Choose:" \
+--buttons '[ [{"text":"Yes","callback_data":"cmd:yes"}], [{"text":"No","callback_data":"cmd:no"}] ]'
 memory
 models
 
@@ -3742,102 +1938,6 @@ models
 
 [Source: https://docs.openclaw.ai/cli/models]
 
-models - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-CLI commands
-models
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-openclaw models
-Common commands
-models status
-Aliases + fallbacks
-Auth profiles
-CLI commands
-models
-openclaw models
 Model discovery, scanning, and configuration (default model, fallbacks, auth profiles).
 Related:
 Providers + models:
@@ -3845,7 +1945,6 @@ Models
 Provider auth setup:
 Getting started
 Common commands
-Copy
 openclaw
 models
 status
@@ -3855,9 +1954,9 @@ list
 openclaw
 models
 set
-&lt;
+<
 model-or-alia
-&gt;
+>
 openclaw
 models
 scan
@@ -3870,7 +1969,7 @@ Add
 to run live auth probes against each configured provider profile.
 Probes are real requests (may consume tokens and trigger rate limits).
 Use
---agent &lt;id&gt;
+--agent <id>
 to inspect a configured agent’s model/auth state. When omitted,
 the command uses
 OPENCLAW_AGENT_DIR
@@ -3878,7 +1977,7 @@ PI_CODING_AGENT_DIR
 if set, otherwise the
 configured default agent.
 Notes:
-models set &lt;model-or-alias&gt;
+models set <model-or-alias>
 accepts
 provider/model
 or an alias.
@@ -3899,19 +1998,18 @@ Options:
 (exit 1=expired/missing, 2=expiring)
 --probe
 (live probe of configured auth profiles)
---probe-provider &lt;name&gt;
+--probe-provider <name>
 (probe one provider)
---probe-profile &lt;id&gt;
+--probe-profile <id>
 (repeat or comma-separated profile ids)
---probe-timeout &lt;ms&gt;
---probe-concurrency &lt;n&gt;
---probe-max-tokens &lt;n&gt;
---agent &lt;id&gt;
+--probe-timeout <ms>
+--probe-concurrency <n>
+--probe-max-tokens <n>
+--agent <id>
 (configured agent id; overrides
 OPENCLAW_AGENT_DIR
 PI_CODING_AGENT_DIR
 Aliases + fallbacks
-Copy
 openclaw
 models
 aliases
@@ -3921,7 +2019,6 @@ models
 fallbacks
 list
 Auth profiles
-Copy
 openclaw
 models
 auth
@@ -3931,8 +2028,8 @@ models
 auth
 login
 --provider
-&lt;
-&gt;
+<
+>
 openclaw
 models
 auth
@@ -3960,101 +2057,6 @@ nodes
 
 [Source: https://docs.openclaw.ai/cli/nodes]
 
-nodes - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-CLI commands
-nodes
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-openclaw nodes
-Common commands
-Invoke / run
-Exec-style defaults
-CLI commands
-nodes
-openclaw nodes
 Manage paired nodes (devices) and invoke node capabilities.
 Related:
 Nodes overview:
@@ -4069,7 +2071,6 @@ Common options:
 --timeout
 --json
 Common commands
-Copy
 openclaw
 nodes
 list
@@ -4088,9 +2089,9 @@ pending
 openclaw
 nodes
 approve
-&lt;
+<
 requestI
-&gt;
+>
 openclaw
 nodes
 status
@@ -4108,59 +2109,58 @@ prints pending/paired tables. Paired rows include the most recent connect age (L
 Use
 --connected
 to only show currently-connected nodes. Use
---last-connected &lt;duration&gt;
+--last-connected <duration>
 filter to nodes that connected within a duration (e.g.
 24h
 Invoke / run
-Copy
 openclaw
 nodes
 invoke
 --node
-&lt;
+<
 name
-&gt;
+>
 --command
-&lt;
+<
 comman
-&gt;
+>
 --params
-&lt;
+<
 jso
-&gt;
+>
 openclaw
 nodes
 run
 --node
-&lt;
+<
 name
-&gt;
-&lt;
+>
+<
 command..
-&gt;
+>
 openclaw
 nodes
 run
 --raw
-&quot;git status&quot;
+"git status"
 openclaw
 nodes
 run
 --agent
 main
 --node
-&lt;
+<
 name
-&gt;
+>
 --raw
-&quot;git status&quot;
+"git status"
 Invoke flags:
---params &lt;json&gt;
+--params <json>
 : JSON object string (default
---invoke-timeout &lt;ms&gt;
+--invoke-timeout <ms>
 : node invoke timeout (default
 15000
---idempotency-key &lt;key&gt;
+--idempotency-key <key>
 : optional idempotency key.
 Exec-style defaults
 nodes run
@@ -4182,29 +2182,29 @@ Requires a node that advertises
 system.run
 (macOS companion app or headless node host).
 Flags:
---cwd &lt;path&gt;
+--cwd <path>
 : working directory.
---env &lt;key=val&gt;
+--env <key=val>
 : env override (repeatable). Note: node hosts ignore
 PATH
 overrides (and
 tools.exec.pathPrepend
 is not applied to node hosts).
---command-timeout &lt;ms&gt;
+--command-timeout <ms>
 : command timeout.
---invoke-timeout &lt;ms&gt;
+--invoke-timeout <ms>
 : node invoke timeout (default
 30000
 --needs-screen-recording
 : require screen recording permission.
---raw &lt;command&gt;
+--raw <command>
 : run a shell string (
 /bin/sh -lc
 cmd.exe /c
---agent &lt;id&gt;
+--agent <id>
 : agent-scoped approvals/allowlists (defaults to configured agent).
---ask &lt;off|on-miss|always&gt;
---security &lt;deny|allowlist|full&gt;
+--ask <off|on-miss|always>
+--security <deny|allowlist|full>
 : overrides.
 models
 onboard
@@ -4214,100 +2214,6 @@ onboard
 
 [Source: https://docs.openclaw.ai/cli/onboard]
 
-onboard - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-CLI commands
-onboard
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-openclaw onboard
-Related guides
-Examples
-Common follow-up commands
-CLI commands
-onboard
 openclaw onboard
 Interactive onboarding wizard (local or remote Gateway setup).
 Related guides
@@ -4322,7 +2228,6 @@ CLI Automation
 macOS onboarding:
 Onboarding (macOS App)
 Examples
-Copy
 openclaw
 onboard
 openclaw
@@ -4340,18 +2245,17 @@ remote
 --remote-url
 ws://gateway-host:18789
 Non-interactive custom provider:
-Copy
 openclaw
 onboard
 --non-interactive
 --auth-choice
 custom-api-key
 --custom-base-url
-&quot;https://llm.example.com/v1&quot;
+"https://llm.example.com/v1"
 --custom-model-id
-&quot;foo-large&quot;
+"foo-large"
 --custom-api-key
-&quot;$CUSTOM_API_KEY&quot;
+"$CUSTOM_API_KEY"
 --custom-compatibility
 openai
 --custom-api-key
@@ -4365,7 +2269,6 @@ zai/glm-5
 If you specifically want the GLM Coding Plan endpoints, pick
 zai-coding-global
 zai-coding-cn
-Copy
 # Promptless endpoint selection
 openclaw
 onboard
@@ -4373,7 +2276,7 @@ onboard
 --auth-choice
 zai-coding-global
 --zai-api-key
-&quot;$ZAI_API_KEY&quot;
+"$ZAI_API_KEY"
 # Other Z.AI endpoint choices:
 # --auth-choice zai-coding-cn
 # --auth-choice zai-global
@@ -4390,15 +2293,14 @@ openclaw dashboard
 Custom Provider: connect any OpenAI or Anthropic compatible endpoint,
 including hosted providers not listed. Use Unknown to auto-detect.
 Common follow-up commands
-Copy
 openclaw
 configure
 openclaw
 agents
 add
-&lt;
+<
 nam
-&gt;
+>
 --json
 does not imply non-interactive mode. Use
 --non-interactive
@@ -4411,105 +2313,11 @@ pairing
 
 [Source: https://docs.openclaw.ai/cli/pairing]
 
-pairing - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-CLI commands
-pairing
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-openclaw pairing
-Commands
-CLI commands
-pairing
-openclaw pairing
 Approve or inspect DM pairing requests (for channels that support pairing).
 Related:
 Pairing flow:
 Pairing
 Commands
-Copy
 openclaw
 pairing
 list
@@ -4518,9 +2326,9 @@ openclaw
 pairing
 approve
 whatsapp
-&lt;
+<
 cod
-&gt;
+>
 --notify
 onboard
 plugins
@@ -4530,102 +2338,6 @@ plugins
 
 [Source: https://docs.openclaw.ai/cli/plugins]
 
-plugins - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-CLI commands
-plugins
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-openclaw plugins
-Commands
-Install
-Uninstall
-Update
-CLI commands
-plugins
-openclaw plugins
 Manage Gateway plugins/extensions (loaded in-process).
 Related:
 Plugin system:
@@ -4635,38 +2347,37 @@ Plugin manifest
 Security hardening:
 Security
 Commands
-Copy
 openclaw
 plugins
 list
 openclaw
 plugins
 info
-&lt;
-&gt;
+<
+>
 openclaw
 plugins
 enable
-&lt;
-&gt;
+<
+>
 openclaw
 plugins
 disable
-&lt;
-&gt;
+<
+>
 openclaw
 plugins
 uninstall
-&lt;
-&gt;
+<
+>
 openclaw
 plugins
 doctor
 openclaw
 plugins
 update
-&lt;
-&gt;
+<
+>
 openclaw
 plugins
 update
@@ -4681,13 +2392,12 @@ configSchema
 , even if empty). Missing/invalid manifests or schemas prevent
 the plugin from loading and fail config validation.
 Install
-Copy
 openclaw
 plugins
 install
-&lt;
+<
 path-or-spe
-&gt;
+>
 Security note: treat plugin installs like running code. Prefer pinned versions.
 Npm specs are
 registry-only
@@ -4704,29 +2414,27 @@ Use
 --link
 to avoid copying a local directory (adds to
 plugins.load.paths
-Copy
 openclaw
 plugins
 install
 ./my-plugin
 Uninstall
-Copy
 openclaw
 plugins
 uninstall
-&lt;
-&gt;
+<
+>
 openclaw
 plugins
 uninstall
-&lt;
-&gt;
+<
+>
 --dry-run
 openclaw
 plugins
 uninstall
-&lt;
-&gt;
+<
+>
 --keep-files
 uninstall
 removes plugin records from
@@ -4739,7 +2447,7 @@ For active memory plugins, the memory slot resets to
 memory-core
 By default, uninstall also removes the plugin install directory under the active
 state dir extensions root (
-$OPENCLAW_STATE_DIR/extensions/&lt;id&gt;
+$OPENCLAW_STATE_DIR/extensions/<id>
 ). Use
 --keep-files
 to keep files on disk.
@@ -4747,12 +2455,11 @@ to keep files on disk.
 is supported as a deprecated alias for
 --keep-files
 Update
-Copy
 openclaw
 plugins
 update
-&lt;
-&gt;
+<
+>
 openclaw
 plugins
 update
@@ -4760,8 +2467,8 @@ update
 openclaw
 plugins
 update
-&lt;
-&gt;
+<
+>
 --dry-run
 Updates only apply to plugins installed from npm (tracked in
 plugins.installs
@@ -4773,100 +2480,7 @@ reset
 
 [Source: https://docs.openclaw.ai/cli/reset]
 
-reset - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-CLI commands
-reset
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-openclaw reset
-CLI commands
-reset
-openclaw reset
 Reset local config/state (keeps the CLI installed).
-Copy
 openclaw
 reset
 openclaw
@@ -4886,111 +2500,6 @@ Sandbox CLI
 
 [Source: https://docs.openclaw.ai/cli/sandbox]
 
-Sandbox CLI - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-CLI commands
-Sandbox CLI
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-Sandbox CLI
-Overview
-Commands
-openclaw sandbox explain
-openclaw sandbox list
-openclaw sandbox recreate
-Use Cases
-After updating Docker images
-After changing sandbox configuration
-After changing setupCommand
-For a specific agent only
-Why is this needed?
-Configuration
-See Also
-CLI commands
-Sandbox CLI
-Sandbox CLI
 Manage Docker-based sandbox containers for isolated agent execution.
 Overview
 OpenClaw can run agents in isolated Docker containers for security. The
@@ -5001,7 +2510,6 @@ openclaw sandbox explain
 Inspect the
 effective
 sandbox mode/scope/workspace access, sandbox tool policy, and elevated gates (with fix-it config key paths).
-Copy
 openclaw
 sandbox
 explain
@@ -5021,7 +2529,6 @@ explain
 --json
 openclaw sandbox list
 List all sandbox containers with their status and configuration.
-Copy
 openclaw
 sandbox
 list
@@ -5043,7 +2550,6 @@ Idle time (time since last use)
 Associated session/agent
 openclaw sandbox recreate
 Remove sandbox containers to force recreation with updated images/config.
-Copy
 openclaw
 sandbox
 recreate
@@ -5075,9 +2581,9 @@ recreate
 Options:
 --all
 : Recreate all sandbox containers
---session &lt;key&gt;
+--session <key>
 : Recreate container for specific session
---agent &lt;id&gt;
+--agent <id>
 : Recreate containers for specific agent
 --browser
 : Only recreate browser containers
@@ -5087,7 +2593,6 @@ Important:
 Containers are automatically recreated when the agent is next used.
 Use Cases
 After updating Docker images
-Copy
 # Pull new image
 docker
 pull
@@ -5104,7 +2609,6 @@ sandbox
 recreate
 --all
 After changing sandbox configuration
-Copy
 # Edit config: agents.defaults.sandbox.* (or agents.list[].sandbox.*)
 # Recreate to apply new config
 openclaw
@@ -5112,7 +2616,6 @@ sandbox
 recreate
 --all
 After changing setupCommand
-Copy
 openclaw
 sandbox
 recreate
@@ -5124,8 +2627,7 @@ recreate
 --agent
 family
 For a specific agent only
-Copy
-# Update only one agent&#x27;s containers
+# Update only one agent's containers
 openclaw
 sandbox
 recreate
@@ -5154,26 +2656,25 @@ under
 agents.defaults.sandbox
 (per-agent overrides go in
 agents.list[].sandbox
-Copy
-&quot;agents&quot;
-&quot;defaults&quot;
-&quot;sandbox&quot;
-&quot;mode&quot;
-&quot;all&quot;
+"agents"
+"defaults"
+"sandbox"
+"mode"
+"all"
 // off, non-main, all
-&quot;scope&quot;
-&quot;agent&quot;
+"scope"
+"agent"
 // session, agent, shared
-&quot;docker&quot;
-&quot;image&quot;
-&quot;openclaw-sandbox:bookworm-slim&quot;
-&quot;containerPrefix&quot;
-&quot;openclaw-sbx-&quot;
+"docker"
+"image"
+"openclaw-sandbox:bookworm-slim"
+"containerPrefix"
+"openclaw-sbx-"
 // ... more Docker options
-&quot;prune&quot;
-&quot;idleHours&quot;
+"prune"
+"idleHours"
 // Auto-prune after 24h idle
-&quot;maxAgeDays&quot;
+"maxAgeDays"
 // Auto-prune after 7 days
 See Also
 Sandbox Documentation
@@ -5188,105 +2689,11 @@ security
 
 [Source: https://docs.openclaw.ai/cli/security]
 
-security - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-CLI commands
-security
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-openclaw security
-Audit
-CLI commands
-security
-openclaw security
 Security tools (audit + optional fixes).
 Related:
 Security guide:
 Security
 Audit
-Copy
 openclaw
 security
 audit
@@ -5300,12 +2707,12 @@ audit
 --fix
 The audit warns when multiple DM senders share the main session and recommends
 secure DM mode
-session.dmScope=&quot;per-channel-peer&quot;
+session.dmScope="per-channel-peer"
 (or
 per-account-channel-peer
 for multi-account channels) for shared inboxes.
 It also warns when small models (
-&lt;=300B
+<=300B
 ) are used without sandboxing and with web/browser tools enabled.
 For webhook ingress, it warns when
 hooks.defaultSessionKey
@@ -5316,7 +2723,7 @@ hooks.allowedSessionKeyPrefixes
 It also warns when sandbox Docker settings are configured while sandbox mode is off, when
 gateway.nodes.denyCommands
 uses ineffective pattern-like/unknown entries, when global
-tools.profile=&quot;minimal&quot;
+tools.profile="minimal"
 is overridden by agent tool profiles, and when installed extension plugin tools may be reachable under permissive tool policy.
 Sandbox CLI
 sessions
@@ -5326,100 +2733,7 @@ sessions
 
 [Source: https://docs.openclaw.ai/cli/sessions]
 
-sessions - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-CLI commands
-sessions
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-openclaw sessions
-CLI commands
-sessions
-openclaw sessions
 List stored conversation sessions.
-Copy
 openclaw
 sessions
 openclaw
@@ -5437,101 +2751,6 @@ setup
 
 [Source: https://docs.openclaw.ai/cli/setup]
 
-setup - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-CLI commands
-setup
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-openclaw setup
-Examples
-CLI commands
-setup
-openclaw setup
-Initialize
-~/.openclaw/openclaw.json
 and the agent workspace.
 Related:
 Getting started:
@@ -5539,7 +2758,6 @@ Getting started
 Wizard:
 Onboarding
 Examples
-Copy
 openclaw
 setup
 openclaw
@@ -5547,7 +2765,6 @@ setup
 --workspace
 ~/.openclaw/workspace
 To run the wizard via setup:
-Copy
 openclaw
 setup
 --wizard
@@ -5559,99 +2776,6 @@ skills
 
 [Source: https://docs.openclaw.ai/cli/skills]
 
-skills - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-CLI commands
-skills
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-openclaw skills
-Commands
-CLI commands
-skills
-openclaw skills
 Inspect skills (bundled + workspace + managed overrides) and see what’s eligible vs missing requirements.
 Related:
 Skills system:
@@ -5661,7 +2785,6 @@ Skills config
 ClawHub installs:
 ClawHub
 Commands
-Copy
 openclaw
 skills
 list
@@ -5672,9 +2795,9 @@ list
 openclaw
 skills
 info
-&lt;
+<
 nam
-&gt;
+>
 openclaw
 skills
 check
@@ -5686,100 +2809,7 @@ status
 
 [Source: https://docs.openclaw.ai/cli/status]
 
-status - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-CLI commands
-status
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-openclaw status
-CLI commands
-status
-openclaw status
 Diagnostics for channels + sessions.
-Copy
 openclaw
 status
 openclaw
@@ -5809,112 +2839,14 @@ system
 
 [Source: https://docs.openclaw.ai/cli/system]
 
-system - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-CLI commands
-system
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-openclaw system
-Common commands
-system event
-system heartbeat last|enable|disable
-system presence
-Notes
-CLI commands
-system
-openclaw system
 System-level helpers for the Gateway: enqueue system events, control heartbeats,
 and view presence.
 Common commands
-Copy
 openclaw
 system
 event
 --text
-&quot;Check for urgent follow-ups&quot;
+"Check for urgent follow-ups"
 --mode
 now
 openclaw
@@ -5941,9 +2873,9 @@ immediately;
 next-heartbeat
 waits for the next scheduled tick.
 Flags:
---text &lt;text&gt;
+--text <text>
 : required system event text.
---mode &lt;mode&gt;
+--mode <mode>
 now
 next-heartbeat
 (default).
@@ -5977,105 +2909,11 @@ tui
 
 [Source: https://docs.openclaw.ai/cli/tui]
 
-tui - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-CLI commands
-tui
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-openclaw tui
-Examples
-CLI commands
-tui
-openclaw tui
 Open the terminal UI connected to the Gateway.
 Related:
 TUI guide:
 TUI
 Examples
-Copy
 openclaw
 tui
 openclaw
@@ -6083,9 +2921,9 @@ tui
 --url
 ws://127.0.0.1:18789
 --token
-&lt;
+<
 toke
-&gt;
+>
 openclaw
 tui
 --session
@@ -6099,100 +2937,7 @@ uninstall
 
 [Source: https://docs.openclaw.ai/cli/uninstall]
 
-uninstall - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-CLI commands
-uninstall
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-openclaw uninstall
-CLI commands
-uninstall
-openclaw uninstall
 Uninstall the gateway service + local data (CLI remains).
-Copy
 openclaw
 uninstall
 openclaw
@@ -6210,101 +2955,6 @@ update
 
 [Source: https://docs.openclaw.ai/cli/update]
 
-update - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-CLI commands
-update
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-openclaw update
-Usage
-Options
-update status
-update wizard
-What it does
-Git checkout flow
 --update shorthand
 See also
 CLI commands
@@ -6316,7 +2966,6 @@ npm/pnpm
 (global install, no git metadata), updates happen via the package manager flow in
 Updating
 Usage
-Copy
 openclaw
 update
 openclaw
@@ -6348,20 +2997,19 @@ openclaw
 Options
 --no-restart
 : skip restarting the Gateway service after a successful update.
---channel &lt;stable|beta|dev&gt;
+--channel <stable|beta|dev>
 : set the update channel (git + npm; persisted in config).
---tag &lt;dist-tag|version&gt;
+--tag <dist-tag|version>
 : override the npm dist-tag or version for this update only.
 --json
 : print machine-readable
 UpdateRunResult
 JSON.
---timeout &lt;seconds&gt;
+--timeout <seconds>
 : per-step timeout (default is 1200s).
 Note: downgrades require confirmation because older versions can break configuration.
 update status
 Show the active update channel + git tag/branch/SHA (for source checkouts), plus update availability.
-Copy
 openclaw
 update
 status
@@ -6376,7 +3024,7 @@ status
 Options:
 --json
 : print machine-readable status JSON.
---timeout &lt;seconds&gt;
+--timeout <seconds>
 : timeout for checks (default is 3s).
 update wizard
 Interactive flow to pick an update channel and confirm whether to restart the Gateway
@@ -6442,138 +3090,41 @@ voicecall
 
 [Source: https://docs.openclaw.ai/cli/voicecall]
 
-voicecall - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-CLI commands
-voicecall
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-openclaw voicecall
-Common commands
-Exposing webhooks (Tailscale)
-CLI commands
-voicecall
-openclaw voicecall
-voicecall
 is a plugin-provided command. It only appears if the voice-call plugin is installed and enabled.
 Primary doc:
 Voice-call plugin:
 Voice Call
 Common commands
-Copy
 openclaw
 voicecall
 status
 --call-id
-&lt;
-&gt;
+<
+>
 openclaw
 voicecall
 call
 --to
-&quot;+15555550123&quot;
+"+15555550123"
 --message
-&quot;Hello&quot;
+"Hello"
 --mode
 notify
 openclaw
 voicecall
 continue
 --call-id
-&lt;
-&gt;
+<
+>
 --message
-&quot;Any questions?&quot;
+"Any questions?"
 openclaw
 voicecall
 end
 --call-id
-&lt;
-&gt;
+<
+>
 Exposing webhooks (Tailscale)
-Copy
 openclaw
 voicecall
 expose

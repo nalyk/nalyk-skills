@@ -1,63 +1,41 @@
 # statusline
 
-Powerline-style statusline for Claude Code. Displays git status, context window usage, model info, and vim mode in the terminal status bar.
+Powerline-style statusline for Claude Code: model badge, directory, git branch with ahead/behind and staged/modified/untracked counts, context window meter, vim mode, time. Single jq call and a single `git status --porcelain=v2` per render; plain-text fallback if `jq` is missing.
 
 ## Installation
 
 ```bash
-/plugin install statusline@nalyk-skills-demo
+/plugin install statusline@nalyk-skills
 ```
 
-The plugin auto-configures on first session start via a `SessionStart` hook. No manual setup required.
-
-## Requirements
-
-- `jq` (for JSON parsing)
-- Terminal with Unicode support
-- Powerline-compatible font (recommended, not required)
-
-## What It Shows
-
-- Model badge (Opus/Sonnet/Haiku)
-- Current directory
-- Git branch with ahead/behind counts
-- Staged/modified/untracked file counts
-- Context window usage meter
-- Vim mode indicator
-- Timestamp
-
-## Manual Configuration
-
-If auto-configuration fails, add to `~/.claude/settings.json`:
+A `SessionStart` hook sets `statusLine` in `~/.claude/settings.json` **only if no statusLine is configured**. It never touches an existing statusLine (yours or any other plugin's) and stays silent in that case. To switch from an existing statusline, use the `powerline-setup` agent or configure manually:
 
 ```json
 {
   "statusLine": {
     "type": "command",
-    "command": "bash <plugin-path>/scripts/statusline-command.sh"
+    "command": "bash <plugin-root>/scripts/statusline-command.sh"
   }
 }
 ```
 
-Where `<plugin-path>` is the installed plugin directory (typically `~/.claude/plugins/cache/nalyk-skills-demo/statusline/2.0.0`).
-
 Restart Claude Code after configuration changes.
+
+## Requirements
+
+- `jq` (without it the statusline degrades to plain text)
+- Powerline-compatible font (recommended)
 
 ## Structure
 
 ```
 statusline/
 ├── .claude-plugin/plugin.json
-├── hooks/
-│   └── hooks.json              # SessionStart auto-configure trigger
+├── hooks/hooks.json              # SessionStart auto-configure (non-destructive)
 ├── scripts/
-│   ├── auto-configure.sh       # Automatic setup
-│   └── statusline-command.sh   # Status bar renderer
-├── agents/
-│   └── statusline-setup.md
-└── skills/
-    └── enable-statusline/
-        └── enable-statusline.md
+│   ├── auto-configure.sh         # Sets statusLine only when absent
+│   └── statusline-command.sh     # Renderer
+└── agents/powerline-setup.md     # Manual/override setup
 ```
 
 ## License

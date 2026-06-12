@@ -12,81 +12,165 @@
     {
       "name": "auto-ralph",
       "source": "./plugins/auto-ralph",
-      "description": "Proactively detects tasks suitable for Ralph Loop iteration. Auto-scores tasks, generates prompts, and executes with configurable iterations.",
-      "version": "2.0.0",
-      "keywords": ["automation", "iteration", "ralph-loop", "task-detection"],
+      "description": "Gates imperative coding tasks (en/ro/ru) into Ralph Loops: a silent-by-default prompt hook flags matches, a deterministic 0-4 scorer routes score >= 3 to /ralph-loop",
+      "version": "3.0.0",
+      "keywords": [
+        "automation",
+        "iteration",
+        "ralph-loop",
+        "task-detection"
+      ],
       "category": "productivity"
     },
     {
       "name": "orchestrator",
       "source": "./plugins/orchestrator",
-      "description": "Multi-agent orchestration with task decomposition, parallel execution, and smart agent routing. Commands: /orchestrate, /parallel, /plan-only",
-      "version": "1.0.0",
-      "keywords": ["orchestration", "parallel", "multi-agent", "decomposition", "workflow"],
+      "description": "Decompose a task into parallel subagent workstreams via /orchestrate, /parallel, /plan-only",
+      "version": "2.0.0",
+      "keywords": [
+        "orchestration",
+        "parallel",
+        "multi-agent",
+        "decomposition",
+        "workflow"
+      ],
       "category": "productivity"
     },
     {
       "name": "audit-agent",
       "source": "./plugins/audit-agent",
-      "description": "Multi-framework audit agent: Jobs (design simplification), Carlin (BS detection), Vibe (engineering quality). Auto-detects contexts. Commands: /jobs-audit, /carlin-audit, /vibe-audit, /multi-audit",
-      "version": "1.0.0",
-      "keywords": ["audit", "design", "engineering", "bs-detector", "code-review"],
+      "description": "Audit commands: /jobs-audit (design simplification), /carlin-audit (BS detection), /vibe-audit (engineering quality), /multi-audit (parallel run + synthesis).",
+      "version": "2.1.0",
+      "keywords": [
+        "audit",
+        "design",
+        "engineering",
+        "bs-detector",
+        "code-review"
+      ],
       "category": "productivity"
     },
     {
       "name": "debate",
       "source": "./plugins/debate",
-      "description": "Multi-model adversarial debate. Claude defends positions against external CLI models (Gemini, Codex, Qwen). Requires at least 1 external CLI. Produces tradeoff documents exposing hidden assumptions. Commands: /debate, /debate:doctor, /debate:adr",
-      "version": "1.0.0",
-      "keywords": ["debate", "multi-model", "adversarial", "decision-support", "tradeoffs", "gemini", "codex", "qwen"],
+      "description": "Multi-model adversarial debate. Claude defends positions against external CLI models (agy/Gemini, Codex, Qwen) in parallel rounds. Refuses to run Claude-only; outputs consensus, tradeoff documents, or ADRs.",
+      "version": "2.0.0",
+      "keywords": [
+        "debate",
+        "multi-model",
+        "adversarial",
+        "decision-support",
+        "tradeoffs",
+        "agy",
+        "codex",
+        "qwen"
+      ],
       "category": "productivity"
     },
     {
       "name": "statusline",
       "source": "./plugins/statusline",
-      "description": "Premium powerline-style statusline for Claude Code with git status, context window, and model info",
-      "version": "2.0.0",
-      "keywords": ["statusline", "powerline", "ui", "display", "git-status", "context-window"],
+      "description": "Powerline statusline renderer for Claude Code. Auto-configures only when no statusLine is set; never overwrites an existing one.",
+      "version": "3.0.0",
+      "keywords": [
+        "statusline",
+        "powerline",
+        "ui",
+        "display",
+        "git-status",
+        "context-window"
+      ],
       "category": "ui"
     },
     {
       "name": "openclaw",
       "source": "./plugins/openclaw",
-      "description": "ULTRA deep OpenClaw expertise from all 279 documentation pages. Covers architecture, channels, providers, tools, CLI, multi-agent routing, security, automation, platforms, installation, and troubleshooting.",
-      "version": "1.1.0",
-      "keywords": ["openclaw", "ai-gateway", "whatsapp", "telegram", "discord", "multi-channel", "self-hosted", "agents"],
+      "description": "OpenClaw expert skill — self-hosted multi-channel AI agent gateway. Grep-first retrieval over a chrome-stripped 268-page docs corpus: channels, providers, gateway config, CLI, sandboxing, automation.",
+      "version": "1.2.0",
+      "keywords": [
+        "openclaw",
+        "ai-gateway",
+        "whatsapp",
+        "telegram",
+        "discord",
+        "multi-channel",
+        "self-hosted",
+        "agents"
+      ],
       "category": "knowledge"
     },
     {
       "name": "diagnosticianul",
       "source": "./plugins/diagnosticianul",
-      "description": "Elite Senior Principal Engineer persona (Top 0.01%). Dr. House of IT: cynical code diagnostics with 4 protocols — critic (code autopsy), architect (system design), visual (UI dictatorship), core (algorithmic surgery).",
-      "version": "2026.1.0",
-      "keywords": ["code-review", "architecture", "diagnostics", "persona", "engineering", "critic", "cynical", "senior-engineer"],
+      "description": "Dr. House engineering persona plus four diagnostic protocol skills: critic (code autopsy), architect (system design), visual (UI/CSS/accessibility), core (algorithms/concurrency). Each protocol triggers on its own noun domain.",
+      "version": "2027.0.0",
+      "keywords": [
+        "code-review",
+        "architecture",
+        "diagnostics",
+        "persona",
+        "engineering",
+        "critic",
+        "cynical",
+        "senior-engineer"
+      ],
       "category": "productivity"
     },
     {
       "name": "flutter",
       "source": "./plugins/flutter",
-      "description": "Expert-level Flutter and Dart development — architecture, state management, code templates, quality gates, CI/CD, and deployment",
-      "version": "1.0.0",
-      "keywords": ["flutter", "dart", "mobile", "cross-platform", "riverpod", "bloc", "widgets", "ios", "android"],
+      "description": "Flutter/Dart development skill — architecture scaffolds, Riverpod 3/BLoC state management, GoRouter, Freezed, testing, and CI/CD quality gates. Version-agnostic snippets; triggers only on explicit Flutter/Dart signals.",
+      "version": "2.1.0",
+      "keywords": [
+        "flutter",
+        "dart",
+        "mobile",
+        "cross-platform",
+        "riverpod",
+        "bloc",
+        "widgets",
+        "ios",
+        "android"
+      ],
       "category": "knowledge"
     },
     {
       "name": "organon",
       "source": "./plugins/organon",
-      "description": "Philosophical reasoning engine: 62 principles from 20 philosophers as a live decision engine and code review framework. Auto-detects situations, selects principles, runs structured protocol, produces actionable output. Commands: /organon, /organon:decide, /organon:review",
-      "version": "1.0.0",
-      "keywords": ["philosophy", "decision-making", "reasoning", "code-review", "principles", "aristotle", "kant", "popper", "stoic"],
+      "description": "Philosophical reasoning engine for engineering decisions and code reviews: 63 principles (0-62) from 20 philosophers, via /organon, /organon:decide, /organon:review.",
+      "version": "2.0.0",
+      "keywords": [
+        "philosophy",
+        "decision-making",
+        "reasoning",
+        "code-review",
+        "principles",
+        "aristotle",
+        "kant",
+        "popper",
+        "stoic"
+      ],
       "category": "productivity"
     },
     {
       "name": "seo-skill",
       "source": "./plugins/seo-skill",
-      "description": "Deterministic SEO analysis engine. 98 atomic checks, async multi-page crawler, real CWV via PageSpeed Insights, optional GSC integration, internal link graph with PageRank, auto-fix generation, audit history with regression detection. Commands: /seo audit, /seo fix, /seo technical, /seo content, /seo schema, /seo geo",
-      "version": "2.2.0",
-      "keywords": ["seo", "audit", "deterministic", "crawl", "pagespeed", "gsc", "schema", "eeat", "geo", "core-web-vitals", "link-graph", "pagerank"],
+      "description": "Deterministic SEO analysis: Python engine (98 atomic checks) with multi-page crawler, real CWV via PageSpeed, optional GSC data, link graph/PageRank, auto-fix generation, and audit history with regression detection. One orchestrator skill plus 7 specialist agents.",
+      "version": "3.0.0",
+      "keywords": [
+        "seo",
+        "audit",
+        "deterministic",
+        "crawl",
+        "pagespeed",
+        "gsc",
+        "schema",
+        "eeat",
+        "geo",
+        "core-web-vitals",
+        "link-graph",
+        "pagerank"
+      ],
       "category": "knowledge"
     }
   ]

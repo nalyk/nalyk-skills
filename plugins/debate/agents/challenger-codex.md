@@ -1,88 +1,36 @@
 ---
 name: challenger-codex
-description: Invokes Codex CLI from debate workspace. Persona loaded from AGENTS.md context file.
+description: Invokes Codex CLI from the debate workspace. Persona loaded from the workspace AGENTS.md context file.
 tools: Bash
 ---
 
 # Codex Challenger Agent
 
-Minimal orchestration wrapper. **Persona and critique style defined in workspace/AGENTS.md**.
-
-## Your Role
-
-1. Receive challenge task from orchestrator
-2. Execute Codex CLI from workspace directory (where AGENTS.md exists)
-3. Return raw response - DO NOT interpret or filter
+Minimal orchestration wrapper. **Persona and critique style come from `WORKSPACE_PATH/AGENTS.md`** — Codex reads it from CWD; the invoke script runs from the workspace.
 
 ## Input Expected
 
-- `WORKSPACE_PATH`: Path to debate workspace (contains AGENTS.md)
-- `CLAUDE_POSITION`: The position to challenge
-- `ROUND`: Current debate round
-- `PREVIOUS_CONTEXT`: Prior debate history (if round > 1)
+- `WORKSPACE_PATH`: absolute path to the debate workspace
+- `PROMPT`: the round task (position to critique + previous context). NO persona text — that comes from AGENTS.md.
+- `TIMEOUT_PER_CLI`: seconds (default 120)
+- `ROUND`: current debate round
 
-## Prompt Construction
-
-The prompt contains ONLY the task. Persona comes from AGENTS.md.
-
-```
-## ROUND {{ROUND}} CHALLENGE
-
-### Position to Critique
-{{CLAUDE_POSITION}}
-
-### Previous Debate Context
-{{PREVIOUS_CONTEXT}}
-
-Provide your expert critique following your established methodology.
-```
-
-## CLI Invocation
+## Invocation
 
 ```bash
-WORKSPACE_PATH="{{WORKSPACE_PATH}}"
-PROMPT='{{CONSTRUCTED_PROMPT}}'
-CODEX_OUT="/tmp/codex-debate-$$.txt"
-
-# CRITICAL: Run from workspace so Codex discovers AGENTS.md
-cd "$WORKSPACE_PATH"
-
-timeout 120 codex exec "$PROMPT" --full-auto --skip-git-repo-check > "$CODEX_OUT" 2>&1
-EXIT_CODE=$?
-
-if [ $EXIT_CODE -ne 0 ]; then
-    echo '{"error": "codex_invocation_failed", "model": "codex"}'
-else
-    cat "$CODEX_OUT"
-fi
-rm -f "$CODEX_OUT"
+"${CLAUDE_PLUGIN_ROOT}/scripts/invoke-challenger.sh" codex "$WORKSPACE_PATH" "$PROMPT" "$TIMEOUT_PER_CLI"
 ```
+
+The script handles Codex specifics (`exec` subcommand, `--full-auto`, `--skip-git-repo-check`, file-redirected TUI output).
 
 ## Output
 
-Return raw response from Codex. Do not modify.
+The script prints one JSON envelope: `{model, status, output|error, stderr_tail}`.
+Return it verbatim — DO NOT interpret, filter, or summarize. Status values:
 
-If non-JSON, wrap:
-```json
-{
-  "raw_response": "[response]",
-  "parse_error": true,
-  "model": "codex"
-}
-```
-
-## Error Handling
-
-| Error | Response |
-|-------|----------|
-| Timeout | `{"error": "timeout", "model": "codex"}` |
-| Auth failure | `{"error": "auth_failed", "model": "codex"}` |
-| CLI not found | `{"error": "cli_not_found", "model": "codex"}` |
-| AGENTS.md missing | `{"error": "context_file_missing", "model": "codex"}` |
-
-## Codex-Specific Notes
-
-- Uses `exec` subcommand for non-interactive mode
-- Uses `--full-auto` (not `--yolo`)
-- TUI output requires file redirect
-- Requires ChatGPT Plus subscription
+| status | meaning |
+|--------|---------|
+| `ok` | `output` holds Codex's raw response |
+| `timeout` | CLI exceeded TIMEOUT_PER_CLI |
+| `not_found` | codex binary missing |
+| `error` | non-zero exit; see `stderr_tail` |

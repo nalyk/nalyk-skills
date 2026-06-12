@@ -1,92 +1,50 @@
 # auto-ralph
 
-Deterministic Ralph Loop activation via UserPromptSubmit hook.
+Gates imperative coding tasks into Ralph Loops. A `UserPromptSubmit` hook
+detects imperative verbs (en/ro/ru) and explicit triggers, and — only then —
+emits a one-line nudge to invoke the `auto-ralph` skill. The skill scores the
+task deterministically (0–4) and routes score ≥ 3 to `/ralph-loop`.
+
+Depends on the `ralph-loop` plugin.
 
 ## Installation
 
 ```bash
-/plugin install auto-ralph@nalyk-skills-demo
+/plugin install auto-ralph@nalyk-skills
 ```
 
-## v2.0 Changes
-
-**Problem solved:** In v1.0, skill activation was probabilistic - Claude had to recognize when to invoke the skill, which wasn't guaranteed.
-
-**Solution:** Added a `UserPromptSubmit` hook that injects a scoring reminder into EVERY user prompt, ensuring Claude always evaluates tasks for Ralph Loop suitability.
-
-## Architecture
+## How it works
 
 ```
-User prompt → Hook injects scoring reminder → Claude scores (0-4) →
-  Score >= 3? → Invoke auto-ralph skill → Generate prompt → Execute ralph-loop
-  Score < 3?  → Normal response
+User prompt → hook matches imperative verb / trigger → one-line nudge →
+  skill runs scripts/score-task.sh (0-4) →
+    score >= 3 → detect context → generate prompt → confirm → /ralph-loop
+    score <= 2 → normal response
 ```
 
-## Features
-
-- **Deterministic activation** via UserPromptSubmit hook (NEW in v2.0)
-- Auto-scores tasks (0-4) based on clear criteria
-- Generates optimized prompts for iteration
-- Configurable via `~/.claude/auto-ralph.local.md`
-
-## Configuration
-
-Create `~/.claude/auto-ralph.local.md`:
-
-```yaml
----
-max_iterations: 25       # Max iterations (default: 25)
-score_threshold: 3       # Min score for Ralph mode (default: 3)
-skip_explore_for_score: 4 # Skip explore at this score (default: 4)
-default_language: ro     # Output: ro/en/ru (default: ro)
-auto_execute: false      # Skip confirmation (default: false)
-docker_analysis: true    # Include Docker context (default: true)
----
-
-# Auto-Ralph Settings
-
-Personal configuration for the auto-ralph skill.
-
-## Parameters
-
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| max_iterations | 25 | Maximum Ralph Loop iterations |
-| score_threshold | 3 | Minimum score for Ralph mode activation |
-| skip_explore_for_score | 4 | Score at which to skip Explore phase |
-| default_language | ro | Output language (ro/en/ru) |
-| auto_execute | false | If true, skip confirmation prompt |
-| docker_analysis | true | Include Docker in context detection |
-
-## Learned Patterns
-
-(Will be populated automatically in future versions)
-```
+No verb match, force-off phrase ("just answer", "don't loop", "explain first",
+"one time"), or no match at all → the hook stays silent. If a loop is already
+active (`.claude/ralph-loop.local.md`), the hook warns instead of re-triggering.
 
 ## Triggers
 
-**Explicit:** "ralph this", "auto ralph", "loop it", "iterate"
+- **Explicit (always):** "ralph this", "auto ralph", "loop it", "until done"
+- **Auto (score >= 3):** imperative verb (fix/add/implement/refactor, repară/
+  adaugă, исправь/добавь...) plus defined scope and verifiable completion
+- **Disable:** "just answer", "don't loop", "explain first", "one time"
 
-**Auto-detect (score >= 3):**
-- Bug fixes ("fix", "repair", "repara")
-- Features ("add", "implement", "adauga")
-- Refactoring ("refactor", "clean up")
+## Scoring
 
-**Disable:** "just answer", "don't loop", "explain first"
+`skills/auto-ralph/scripts/score-task.sh "<task>"` → `score=N matched=[...]`
+(+1 each: imperative verb, iteration-friendly, defined scope, verifiable).
+Details: `skills/auto-ralph/references/detection-rules.md`.
 
-## Scoring Criteria
+## Configuration
 
-| +1 point | Description |
-|----------|-------------|
-| Clear criteria | Keywords detected (fix, add, implement, etc.) |
-| Iteration useful | Bug fix, feature, refactor (not questions) |
-| Defined scope | Specific files/functions mentioned |
-| Verifiable | Tests available or concrete error |
-
-Score >= 3 -> Ralph mode | Score < 3 -> Normal response
+`~/.claude/auto-ralph.local.md` (YAML frontmatter): `max_iterations` (25),
+`score_threshold` (3), `skip_explore_for_score` (4), `auto_execute` (false),
+`docker_analysis` (true). Explicit command parameters override settings.
 
 ## Language
 
-- **Output:** Always Romanian
-- **Input:** Accepts ro/en/ru/mixed without questions
-- **Promise:** "GATA" (standard completion signal)
+Output: Romanian. Input: en/ro/ru/mixed. Completion promise: "GATA".

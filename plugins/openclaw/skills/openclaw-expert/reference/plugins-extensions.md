@@ -2,92 +2,11 @@
 
 Plugin development, voice call, Zalo personal, experiments.
 
-
 ---
 ## Plugins > Voice Call
 
 [Source: https://docs.openclaw.ai/plugins/voice-call]
 
-Voice Call Plugin - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Extensions
-Voice Call Plugin
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Tools
-Built-in tools
-Lobster
-LLM Task
-Exec Tool
-Web Tools
-apply_patch Tool
-Elevated Mode
-Thinking Levels
-Reactions
-Browser
-Browser (OpenClaw-managed)
-Browser Login
-Chrome Extension
-Browser Troubleshooting
-Agent coordination
-Agent Send
-Sub-Agents
-Multi-Agent Sandbox &amp; Tools
-Skills
-Slash Commands
-Skills
-Skills Config
-ClawHub
-Plugins
-Extensions
-Voice Call Plugin
-Zalo Personal Plugin
-Automation
-Hooks
-Cron Jobs
-Cron vs Heartbeat
-Automation Troubleshooting
-Webhooks
-Gmail PubSub
-Polls
-Auth Monitoring
-Media and devices
-Nodes
-Node Troubleshooting
-Image and Media Support
-Audio and Voice Notes
-Camera Capture
-Talk Mode
-Voice Wake
-Location Command
-Voice Call (plugin)
-Where it runs (local vs remote)
-Install
-Option A: install from npm (recommended)
-Option B: install from a local folder (dev, no copying)
-Config
-Webhook Security
-TTS for calls
-More examples
-Inbound calls
-CLI
-Agent tool
-Gateway RPC
-Extensions
-Voice Call Plugin
-Voice Call (plugin)
 Voice calls for OpenClaw via a plugin. Supports outbound notifications and
 multi-turn conversations with inbound policies.
 Current providers:
@@ -117,84 +36,81 @@ machine running the Gateway
 , then restart the Gateway to load it.
 Install
 Option A: install from npm (recommended)
-Copy
 openclaw
 plugins
 install
 @openclaw/voice-call
 Restart the Gateway afterwards.
 Option B: install from a local folder (dev, no copying)
-Copy
 openclaw
 plugins
 install
 ./extensions/voice-call
 ./extensions/voice-call
-&amp;&amp;
+&&
 pnpm
 install
 Restart the Gateway afterwards.
 Config
 Set config under
 plugins.entries.voice-call.config
-Copy
 plugins
 entries
-&quot;voice-call&quot;
+"voice-call"
 enabled
 true
 config
 provider
-&quot;twilio&quot;
-// or &quot;telnyx&quot; | &quot;plivo&quot; | &quot;mock&quot;
+"twilio"
+// or "telnyx" | "plivo" | "mock"
 fromNumber
-&quot;+15550001234&quot;
+"+15550001234"
 toNumber
-&quot;+15550005678&quot;
+"+15550005678"
 twilio
 accountSid
-&quot;ACxxxxxxxx&quot;
+"ACxxxxxxxx"
 authToken
-&quot;...&quot;
+"..."
 telnyx
 apiKey
-&quot;...&quot;
+"..."
 connectionId
-&quot;...&quot;
+"..."
 // Telnyx webhook public key from the Telnyx Mission Control Portal
 // (Base64 string; can also be set via TELNYX_PUBLIC_KEY).
 publicKey
-&quot;...&quot;
+"..."
 plivo
 authId
-&quot;MAxxxxxxxxxxxxxxxxxxxx&quot;
+"MAxxxxxxxxxxxxxxxxxxxx"
 authToken
-&quot;...&quot;
+"..."
 // Webhook server
 serve
 port
 3334
 path
-&quot;/voice/webhook&quot;
+"/voice/webhook"
 // Webhook security (recommended for tunnels/proxies)
 webhookSecurity
 allowedHosts
-&quot;voice.example.com&quot;
+"voice.example.com"
 trustedProxyIPs
-&quot;100.64.0.1&quot;
+"100.64.0.1"
 // Public exposure (pick one)
-// publicUrl: &quot;https://example.ngrok.app/voice/webhook&quot;,
-// tunnel: { provider: &quot;ngrok&quot; },
-// tailscale: { mode: &quot;funnel&quot;, path: &quot;/voice/webhook&quot; }
+// publicUrl: "https://example.ngrok.app/voice/webhook",
+// tunnel: { provider: "ngrok" },
+// tailscale: { mode: "funnel", path: "/voice/webhook" }
 outbound
 defaultMode
-&quot;notify&quot;
+"notify"
 // notify | conversation
 streaming
 enabled
 true
 streamPath
-&quot;/voice/stream&quot;
+"/voice/stream"
 Notes:
 Twilio/Telnyx require a
 publicly reachable
@@ -220,7 +136,7 @@ tunnel.allowNgrokFreeTierLoopbackBypass: true
 allows Twilio webhooks with invalid signatures
 only
 when
-tunnel.provider=&quot;ngrok&quot;
+tunnel.provider="ngrok"
 and
 serve.bind
 is loopback (ngrok local agent). Use for local dev only.
@@ -239,16 +155,15 @@ webhookSecurity.trustedProxyIPs
 only trusts forwarded headers when the request
 remote IP matches the list.
 Example with a stable public host:
-Copy
 plugins
 entries
-&quot;voice-call&quot;
+"voice-call"
 config
 publicUrl
-&quot;https://voice.example.com/voice/webhook&quot;
+"https://voice.example.com/voice/webhook"
 webhookSecurity
 allowedHosts
-&quot;voice.example.com&quot;
+"voice.example.com"
 TTS for calls
 Voice Call uses the core
 messages.tts
@@ -257,109 +172,103 @@ streaming speech on calls. You can override it under the plugin config with the
 same shape
 — it deep‑merges with
 messages.tts
-Copy
 tts
 provider
-&quot;elevenlabs&quot;
+"elevenlabs"
 elevenlabs
 voiceId
-&quot;pMsXgVXv3BLzUgSXRplE&quot;
+"pMsXgVXv3BLzUgSXRplE"
 modelId
-&quot;eleven_multilingual_v2&quot;
+"eleven_multilingual_v2"
 Notes:
 Edge TTS is ignored for voice calls
 (telephony audio needs PCM; Edge output is unreliable).
 Core TTS is used when Twilio media streaming is enabled; otherwise calls fall back to provider native voices.
 More examples
 Use core TTS only (no override):
-Copy
 messages
 tts
 provider
-&quot;openai&quot;
+"openai"
 openai
 voice
-&quot;alloy&quot;
+"alloy"
 Override to ElevenLabs just for calls (keep core default elsewhere):
-Copy
 plugins
 entries
-&quot;voice-call&quot;
+"voice-call"
 config
 tts
 provider
-&quot;elevenlabs&quot;
+"elevenlabs"
 elevenlabs
 apiKey
-&quot;elevenlabs_key&quot;
+"elevenlabs_key"
 voiceId
-&quot;pMsXgVXv3BLzUgSXRplE&quot;
+"pMsXgVXv3BLzUgSXRplE"
 modelId
-&quot;eleven_multilingual_v2&quot;
+"eleven_multilingual_v2"
 Override only the OpenAI model for calls (deep‑merge example):
-Copy
 plugins
 entries
-&quot;voice-call&quot;
+"voice-call"
 config
 tts
 openai
 model
-&quot;gpt-4o-mini-tts&quot;
+"gpt-4o-mini-tts"
 voice
-&quot;marin&quot;
+"marin"
 Inbound calls
 Inbound policy defaults to
 disabled
 . To enable inbound calls, set:
-Copy
 inboundPolicy
-&quot;allowlist&quot;
+"allowlist"
 allowFrom
-&quot;+15550001234&quot;
+"+15550001234"
 inboundGreeting
-&quot;Hello! How can I help?&quot;
+"Hello! How can I help?"
 Auto-responses use the agent system. Tune with:
 responseModel
 responseSystemPrompt
 responseTimeoutMs
 CLI
-Copy
 openclaw
 voicecall
 call
 --to
-&quot;+15555550123&quot;
+"+15555550123"
 --message
-&quot;Hello from OpenClaw&quot;
+"Hello from OpenClaw"
 openclaw
 voicecall
 continue
 --call-id
-&lt;
-&gt;
+<
+>
 --message
-&quot;Any questions?&quot;
+"Any questions?"
 openclaw
 voicecall
 speak
 --call-id
-&lt;
-&gt;
+<
+>
 --message
-&quot;One moment&quot;
+"One moment"
 openclaw
 voicecall
 end
 --call-id
-&lt;
-&gt;
+<
+>
 openclaw
 voicecall
 status
 --call-id
-&lt;
-&gt;
+<
+>
 openclaw
 voicecall
 tail
@@ -407,85 +316,6 @@ Zalo Personal Plugin
 
 [Source: https://docs.openclaw.ai/plugins/zalouser]
 
-Zalo Personal Plugin - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Extensions
-Zalo Personal Plugin
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Tools
-Built-in tools
-Lobster
-LLM Task
-Exec Tool
-Web Tools
-apply_patch Tool
-Elevated Mode
-Thinking Levels
-Reactions
-Browser
-Browser (OpenClaw-managed)
-Browser Login
-Chrome Extension
-Browser Troubleshooting
-Agent coordination
-Agent Send
-Sub-Agents
-Multi-Agent Sandbox &amp; Tools
-Skills
-Slash Commands
-Skills
-Skills Config
-ClawHub
-Plugins
-Extensions
-Voice Call Plugin
-Zalo Personal Plugin
-Automation
-Hooks
-Cron Jobs
-Cron vs Heartbeat
-Automation Troubleshooting
-Webhooks
-Gmail PubSub
-Polls
-Auth Monitoring
-Media and devices
-Nodes
-Node Troubleshooting
-Image and Media Support
-Audio and Voice Notes
-Camera Capture
-Talk Mode
-Voice Wake
-Location Command
-Zalo Personal (plugin)
-Naming
-Where it runs
-Install
-Option A: install from npm
-Option B: install from a local folder (dev)
-Prerequisite: zca-cli
-Config
-CLI
-Agent tool
-Extensions
-Zalo Personal Plugin
-Zalo Personal (plugin)
-Zalo Personal support for OpenClaw via a plugin, using
-zca-cli
 to automate a normal Zalo user account.
 Warning:
 Unofficial automation may lead to account suspension/ban. Use at your own risk.
@@ -505,20 +335,18 @@ machine running the Gateway
 , then restart the Gateway.
 Install
 Option A: install from npm
-Copy
 openclaw
 plugins
 install
 @openclaw/zalouser
 Restart the Gateway afterwards.
 Option B: install from a local folder (dev)
-Copy
 openclaw
 plugins
 install
 ./extensions/zalouser
 ./extensions/zalouser
-&amp;&amp;
+&&
 pnpm
 install
 Restart the Gateway afterwards.
@@ -526,7 +354,6 @@ Prerequisite: zca-cli
 The Gateway machine must have
 zca
 PATH
-Copy
 zca
 --version
 Config
@@ -534,15 +361,13 @@ Channel config lives under
 channels.zalouser
 (not
 plugins.entries.*
-Copy
 channels
 zalouser
 enabled
 true
 dmPolicy
-&quot;pairing&quot;
+"pairing"
 CLI
-Copy
 openclaw
 channels
 login
@@ -563,11 +388,11 @@ send
 --channel
 zalouser
 --target
-&lt;
+<
 threadI
-&gt;
+>
 --message
-&quot;Hello from OpenClaw&quot;
+"Hello from OpenClaw"
 openclaw
 directory
 peers
@@ -575,7 +400,7 @@ list
 --channel
 zalouser
 --query
-&quot;name&quot;
+"name"
 Agent tool
 Tool name:
 zalouser
@@ -594,101 +419,6 @@ Hooks
 
 [Source: https://docs.openclaw.ai/experiments/onboarding-config-protocol]
 
-Onboarding and Config Protocol - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Experiments
-Onboarding and Config Protocol
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-Onboarding + Config Protocol
-Components
-Gateway RPC
-UI Hints
-Notes
-Experiments
-Onboarding and Config Protocol
 Onboarding + Config Protocol
 Purpose: shared onboarding + config surfaces across CLI, macOS app, and Web UI.
 Components
@@ -700,7 +430,7 @@ Web UI renders config forms from JSON Schema + UI hints.
 Gateway RPC
 wizard.start
 params:
-{ mode?: &quot;local&quot;|&quot;remote&quot;, workspace?: string }
+{ mode?: "local"|"remote", workspace?: string }
 wizard.next
 params:
 { sessionId, answer?: { stepId, value? } }
@@ -731,103 +461,6 @@ Tests
 
 [Source: https://docs.openclaw.ai/experiments/proposals/model-config]
 
-Model Config Exploration - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Experiments
-Model Config Exploration
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-Model Config (Exploration)
-Motivation
-Possible direction (high level)
-Open questions
-Experiments
-Model Config Exploration
-Model Config (Exploration)
-This document captures
-ideas
 for future model configuration. It is not a
 shipping spec. For current behavior, see:
 Models
@@ -858,98 +491,6 @@ Workspace Memory Research
 
 [Source: https://docs.openclaw.ai/experiments/research/memory]
 
-Workspace Memory Research - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Experiments
-Workspace Memory Research
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-Workspace Memory v2 (offline): research notes
-Why change?
-Design goals
-North star model (Hindsight × Letta)
 Proposed architecture (Markdown source-of-truth + derived index)
 Canonical store (git-friendly)
 Derived store (machine recall)
@@ -1019,7 +560,6 @@ Keep
 ~/.openclaw/workspace
 as canonical human-readable memory.
 Suggested workspace layout:
-Copy
 ~/.openclaw/workspace/
 memory.md # small: durable facts + preferences (core-ish)
 memory/
@@ -1045,7 +585,6 @@ memory.md
 remains “small + core-ish”: the things you want Clawd to see every session.
 Derived store (machine recall)
 Add a derived index under the workspace (not necessarily git tracked):
-Copy
 ~/.openclaw/workspace/.memory/index.sqlite
 Back it with:
 SQLite schema for facts + entity links + opinion metadata
@@ -1069,11 +608,10 @@ narrative (cross-turn context preserved)
 self-contained (standalone makes sense later)
 tagged with type + entity mentions
 Example:
-Copy
 ## Retain
 - W @Peter: Currently in Marrakech (Nov 27–Dec 1, 2025) for Andy’s birthday.
 - B @warelay: I fixed the Baileys WS crash by wrapping connection.update handlers in try/catch (see memory/2025-11-27.md).
-- O(c=0.95) @Peter: Prefers concise replies (&amp;lt;1500 chars) on WhatsApp; long content goes into files.
+- O(c=0.95) @Peter: Prefers concise replies (<1500 chars) on WhatsApp; long content goes into files.
 Minimal parsing:
 Type prefix:
 (world),
@@ -1107,7 +645,7 @@ world|experience|opinion|observation
 timestamp
 (source day, or extracted time range if present)
 entities
-[&quot;Peter&quot;,&quot;warelay&quot;]
+["Peter","warelay"]
 content
 (the narrative fact)
 source
@@ -1147,7 +685,7 @@ agents.defaults.workspace
 the session model + heartbeats
 logging + troubleshooting patterns
 You want the agent itself to call the tools:
-openclaw memory recall &quot;…&quot; --k 25 --since 30d
+openclaw memory recall "…" --k 25 --since 30d
 openclaw memory reflect --since 7d
 Why still split a library?
 keep memory logic testable without gateway/runtime

@@ -1,21 +1,14 @@
 ---
 name: protocol-visual
 description: >-
-  This skill should be used when the user works on UI, frontend, CSS, design systems,
-  "fix this layout", "make this look better", "responsive design", "component styling",
-  "UX improvement", "design review", "accessibility", "color scheme", "typography",
-  or any request involving visual interface quality.
-  Aesthetic dictatorship against default design and bad UX.
+  Use for visual interface quality: "CSS", "typography", "accessibility",
+  "design system", "color scheme", "responsive design", "component styling".
+  Aesthetic dictatorship against default design.
 ---
 
 # PROTOCOL: VISUAL — Aesthetic Dictatorship
 
-## Header
-
-```
-[PROTOCOL: VISUAL | DISPOSITION: CYNICAL | DATE: 2026]
-[STACK 2026: {verified versions} | FOCUS: UI/UX ENFORCEMENT]
-```
+Persona and optional status header: skill `diagnosticianul`.
 
 ## Procedure
 

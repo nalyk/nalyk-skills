@@ -1,33 +1,23 @@
 #!/usr/bin/env python3
-"""Post-audit regression check hook.
+"""Post-audit regression check.
 
-Compares current audit with last stored audit.
-Returns exit code 2 if critical regressions detected.
+Run explicitly after an audit that wrote audit-report.json or
+FULL-AUDIT-REPORT.json to the working directory:
 
-Hook configuration in ~/.claude/settings.json:
-{
-  "hooks": {
-    "PostToolUse": [
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 ~/.claude/plugins/cache/nalyk-skills-demo/seo-skill/2.2.0/hooks/regression-check.py",
-            "exitCodes": { "2": "block" }
-          }
-        ]
-      }
-    ]
-  }
-}
+    python3 "${CLAUDE_PLUGIN_ROOT}/hooks/regression-check.py"
+
+Compares with the last stored audit; exits 2 if the score dropped >5 points.
 """
 
 import json
 import sys
 import os
 
-sys.path.insert(0, os.path.expanduser("~/.claude/plugins/cache/nalyk-skills-demo/seo-skill/2.2.0"))
+# Plugin root: CLAUDE_PLUGIN_ROOT if set, else this script's parent directory.
+_PLUGIN_ROOT = os.environ.get("CLAUDE_PLUGIN_ROOT") or os.path.dirname(
+    os.path.dirname(os.path.abspath(__file__))
+)
+sys.path.insert(0, _PLUGIN_ROOT)
 
 try:
     from engine.db import AuditDB

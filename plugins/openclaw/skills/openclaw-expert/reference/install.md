@@ -2,82 +2,16 @@
 
 All installation methods, Docker, Nix, Ansible, updating, uninstalling.
 
-
 ---
 ## Install > Ansible
 
 [Source: https://docs.openclaw.ai/install/ansible]
 
-Ansible - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Other install methods
-Ansible
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Install overview
-Install
-Installer Internals
-Other install methods
-Docker
-Podman
-Nix
-Ansible
-Bun (Experimental)
-Maintenance
-Updating
-Migration Guide
-Uninstall
-Hosting and deployment
-Fly.io
-Hetzner
-GCP
-macOS VMs
-exe.dev
-Deploy on Railway
-Deploy on Render
-Deploy on Northflank
-Advanced
-Development Channels
-Ansible Installation
-Quick Start
-What You Get
-Requirements
-What Gets Installed
-Post-Install Setup
-Quick commands
-Security Architecture
-4-Layer Defense
-Verification
-Docker Availability
-Manual Installation
-Updating OpenClaw
-Troubleshooting
-Firewall blocks my connection
-Service won’t start
-Docker sandbox issues
-Provider login fails
-Advanced Configuration
-Related
-Other install methods
-Ansible
-Ansible Installation
 The recommended way to deploy OpenClaw to production servers is via
 openclaw-ansible
 — an automated installer with security-first architecture.
 Quick Start
 One-command install:
-Copy
 curl
 -fsSL
 https://raw.githubusercontent.com/openclaw/openclaw-ansible/main/install.sh
@@ -127,7 +61,6 @@ Sandboxing
 for details.
 Post-Install Setup
 After installation completes, switch to the openclaw user:
-Copy
 sudo
 openclaw
 The post-install script will guide you through:
@@ -140,7 +73,6 @@ Gateway testing
 Tailscale setup
 : Connect to your VPN mesh
 Quick commands
-Copy
 # Check service status
 sudo
 systemctl
@@ -173,7 +105,6 @@ Systemd Hardening
 : NoNewPrivileges, PrivateTmp, unprivileged user
 Verification
 Test external attack surface:
-Copy
 nmap
 -p-
 YOUR_SERVER_IP
@@ -185,16 +116,15 @@ Docker is installed for
 agent sandboxes
 (isolated tool execution), not for running the gateway itself. The gateway binds to localhost only and is accessible via Tailscale VPN.
 See
-Multi-Agent Sandbox &amp; Tools
+Multi-Agent Sandbox & Tools
 for sandbox configuration.
 Manual Installation
 If you prefer manual control over the automation:
-Copy
 # 1. Install prerequisites
 sudo
 apt
 update
-&amp;&amp;
+&&
 sudo
 apt
 install
@@ -219,7 +149,6 @@ The Ansible installer sets up OpenClaw for manual updates. See
 Updating
 for the standard update flow.
 To re-run the Ansible playbook (e.g., for configuration changes):
-Copy
 openclaw-ansible
 ./run-playbook.sh
 Note: This is idempotent and safe to run multiple times.
@@ -232,7 +161,6 @@ The gateway is
 only
 accessible via Tailscale by design
 Service won’t start
-Copy
 # Check logs
 sudo
 journalctl
@@ -249,7 +177,6 @@ openclaw
 pnpm
 start
 Docker sandbox issues
-Copy
 # Verify Docker is running
 sudo
 systemctl
@@ -270,7 +197,6 @@ Provider login fails
 Make sure you’re running as the
 openclaw
 user:
-Copy
 sudo
 openclaw
 openclaw
@@ -288,7 +214,7 @@ Docker
 — containerized gateway setup
 Sandboxing
 — agent sandbox configuration
-Multi-Agent Sandbox &amp; Tools
+Multi-Agent Sandbox & Tools
 — per-agent isolation
 Nix
 Bun (Experimental)
@@ -298,55 +224,6 @@ Bun (Experimental)
 
 [Source: https://docs.openclaw.ai/install/bun]
 
-Bun (Experimental) - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Other install methods
-Bun (Experimental)
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Install overview
-Install
-Installer Internals
-Other install methods
-Docker
-Podman
-Nix
-Ansible
-Bun (Experimental)
-Maintenance
-Updating
-Migration Guide
-Uninstall
-Hosting and deployment
-Fly.io
-Hetzner
-GCP
-macOS VMs
-exe.dev
-Deploy on Railway
-Deploy on Render
-Deploy on Northflank
-Advanced
-Development Channels
-Bun (experimental)
-Status
-Install
-Build / Test (Bun)
-Bun lifecycle scripts (blocked by default)
-Caveats
-Other install methods
-Bun (Experimental)
 Bun (experimental)
 Goal: run this repo with
 Bun
@@ -365,7 +242,6 @@ pnpm-lock.yaml
 and will ignore it.
 Install
 Default:
-Copy
 bun
 install
 Note:
@@ -373,12 +249,10 @@ bun.lock
 bun.lockb
 are gitignored, so there’s no repo churn either way. If you want
 no lockfile writes
-Copy
 bun
 install
 --no-save
 Build / Test (Bun)
-Copy
 bun
 run
 build
@@ -393,12 +267,11 @@ bun pm trust
 For this repo, the commonly blocked scripts are not required:
 @whiskeysockets/baileys
 preinstall
-: checks Node major &gt;= 20 (we run Node 22+).
+: checks Node major >= 20 (we run Node 22+).
 protobufjs
 postinstall
 : emits warnings about incompatible version schemes (no build artifacts).
 If you hit a real runtime issue that requires these scripts, trust them explicitly:
-Copy
 bun
 trust
 @whiskeysockets/baileys
@@ -417,56 +290,6 @@ Updating
 
 [Source: https://docs.openclaw.ai/install/development-channels]
 
-Development Channels - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Advanced
-Development Channels
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Install overview
-Install
-Installer Internals
-Other install methods
-Docker
-Podman
-Nix
-Ansible
-Bun (Experimental)
-Maintenance
-Updating
-Migration Guide
-Uninstall
-Hosting and deployment
-Fly.io
-Hetzner
-GCP
-macOS VMs
-exe.dev
-Deploy on Railway
-Deploy on Render
-Deploy on Northflank
-Advanced
-Development Channels
-Development channels
-Switching channels
-Plugins and channels
-Tagging best practices
-macOS app availability
-Advanced
-Development Channels
-Development channels
-Last updated: 2026-01-21
 OpenClaw ships three update channels:
 stable
 : npm dist-tag
@@ -489,7 +312,6 @@ latest
 without changing the version number — dist-tags are the source of truth for npm installs.
 Switching channels
 Git checkout:
-Copy
 openclaw
 update
 --channel
@@ -510,7 +332,6 @@ switches to
 main
 and rebases on the upstream.
 npm/pnpm global install:
-Copy
 openclaw
 update
 --channel
@@ -556,7 +377,7 @@ restore npm-installed plugin packages.
 Tagging best practices
 Tag releases you want git checkouts to land on (
 vYYYY.M.D
-vYYYY.M.D-&lt;patch&gt;
+vYYYY.M.D-<patch>
 Keep tags immutable: never move or reuse a tag.
 npm dist-tags remain the source of truth for npm installs:
 latest
@@ -578,82 +399,6 @@ Deploy on Northflank
 
 [Source: https://docs.openclaw.ai/install/docker]
 
-Docker - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Other install methods
-Docker
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Install overview
-Install
-Installer Internals
-Other install methods
-Docker
-Podman
-Nix
-Ansible
-Bun (Experimental)
-Maintenance
-Updating
-Migration Guide
-Uninstall
-Hosting and deployment
-Fly.io
-Hetzner
-GCP
-macOS VMs
-exe.dev
-Deploy on Railway
-Deploy on Render
-Deploy on Northflank
-Advanced
-Development Channels
-Docker (optional)
-Is Docker right for me?
-Requirements
-Containerized Gateway (Docker Compose)
-Quick start (recommended)
-Shell Helpers (optional)
-Manual flow (compose)
-Control UI token + pairing (Docker)
-Extra mounts (optional)
-Persist the entire container home (optional)
-Install extra apt packages (optional)
-Power-user / full-featured container (opt-in)
-Permissions + EACCES
-Faster rebuilds (recommended)
-Channel setup (optional)
-OpenAI Codex OAuth (headless Docker)
-Health check
-E2E smoke test (Docker)
-QR import smoke test (Docker)
-Notes
-Agent Sandbox (host gateway + Docker tools)
-What it does
-Per-agent sandbox profiles (multi-agent)
-Default behavior
-Enable sandboxing
-Build the default sandbox image
-Sandbox common image (optional)
-Sandbox browser image
-Custom sandbox image
-Tool policy (allow/deny)
-Pruning strategy
-Security notes
-Troubleshooting
-Other install methods
-Docker
 Docker (optional)
 Docker is
 optional
@@ -678,7 +423,6 @@ Enough disk for images + logs
 Containerized Gateway (Docker Compose)
 Quick start (recommended)
 From repo root:
-Copy
 ./docker-setup.sh
 This script:
 builds the gateway image
@@ -711,21 +455,19 @@ Hetzner (Docker VPS)
 Shell Helpers (optional)
 For easier day-to-day Docker management, install
 ClawDock
-Copy
 mkdir
 ~/.clawdock
-&amp;&amp;
+&&
 curl
 -sL
 https://raw.githubusercontent.com/openclaw/openclaw/main/scripts/shell-helpers/clawdock-helpers.sh
 ~/.clawdock/clawdock-helpers.sh
 Add to your shell config (zsh):
-Copy
 echo
-&#x27;source ~/.clawdock/clawdock-helpers.sh&#x27;
-&gt;&gt;
+'source ~/.clawdock/clawdock-helpers.sh'
+>>
 ~/.zshrc
-&amp;&amp;
+&&
 source
 ~/.zshrc
 Then use
@@ -740,7 +482,6 @@ ClawDock
 Helper README
 for details.
 Manual flow (compose)
-Copy
 docker
 build
 openclaw:local
@@ -762,18 +503,16 @@ OPENCLAW_HOME_VOLUME
 , the setup script writes
 docker-compose.extra.yml
 ; include it when running Compose elsewhere:
-Copy
 docker
 compose
 docker-compose.yml
 docker-compose.extra.yml
-&lt;
+<
 comman
-&gt;
+>
 Control UI token + pairing (Docker)
 If you see “unauthorized” or “disconnected (1008): pairing required”, fetch a
 fresh dashboard link and approve the browser device:
-Copy
 docker
 compose
 run
@@ -795,9 +534,9 @@ run
 openclaw-cli
 devices
 approve
-&lt;
+<
 requestI
-&gt;
+>
 More detail:
 Dashboard
 Devices
@@ -814,10 +553,9 @@ openclaw-cli
 by generating
 docker-compose.extra.yml
 Example:
-Copy
 export
 OPENCLAW_EXTRA_MOUNTS
-&quot;$HOME/.codex:/home/node/.codex:ro,$HOME/github:/home/node/github:rw&quot;
+"$HOME/.codex:/home/node/.codex:ro,$HOME/github:/home/node/github:rw"
 ./docker-setup.sh
 Notes:
 Paths must be shared with Docker Desktop on macOS/Windows.
@@ -841,19 +579,17 @@ OPENCLAW_HOME_VOLUME
 named volume here (not a bind path); for bind mounts, use
 OPENCLAW_EXTRA_MOUNTS
 Example:
-Copy
 export
 OPENCLAW_HOME_VOLUME
-&quot;openclaw_home&quot;
+"openclaw_home"
 ./docker-setup.sh
 You can combine this with extra mounts:
-Copy
 export
 OPENCLAW_HOME_VOLUME
-&quot;openclaw_home&quot;
+"openclaw_home"
 export
 OPENCLAW_EXTRA_MOUNTS
-&quot;$HOME/.codex:/home/node/.codex:ro,$HOME/github:/home/node/github:rw&quot;
+"$HOME/.codex:/home/node/.codex:ro,$HOME/github:/home/node/github:rw"
 ./docker-setup.sh
 Notes:
 If you change
@@ -863,7 +599,7 @@ docker-setup.sh
 to regenerate the
 extra compose file.
 The named volume persists until removed with
-docker volume rm &lt;name&gt;
+docker volume rm <name>
 Install extra apt packages (optional)
 If you need system packages inside the image (for example, build tools or media
 libraries), set
@@ -873,10 +609,9 @@ docker-setup.sh
 This installs the packages during the image build, so they persist even if the
 container is deleted.
 Example:
-Copy
 export
 OPENCLAW_DOCKER_APT_PACKAGES
-&quot;ffmpeg build-essential&quot;
+"ffmpeg build-essential"
 ./docker-setup.sh
 Notes:
 This accepts a space-separated list of apt package names.
@@ -899,22 +634,19 @@ If you want a more full-featured container, use these opt-in knobs:
 Persist
 /home/node
 so browser downloads and tool caches survive:
-Copy
 export
 OPENCLAW_HOME_VOLUME
-&quot;openclaw_home&quot;
+"openclaw_home"
 ./docker-setup.sh
 Bake system deps into the image
 (repeatable + persistent):
-Copy
 export
 OPENCLAW_DOCKER_APT_PACKAGES
-&quot;git curl jq&quot;
+"git curl jq"
 ./docker-setup.sh
 Install Playwright browsers without
 npx
 (avoids npm override conflicts):
-Copy
 docker
 compose
 run
@@ -948,7 +680,6 @@ node
 /home/node/.openclaw
 , make sure your host bind mounts are owned by uid 1000.
 Example (Linux host):
-Copy
 sudo
 chown
 1000:1000
@@ -960,7 +691,6 @@ To speed up rebuilds, order your Dockerfile so dependency layers are cached.
 This avoids re-running
 pnpm install
 unless lockfiles change:
-Copy
 FROM
 node:22-bookworm
 # Install Bun (required for build scripts)
@@ -968,7 +698,7 @@ RUN
 curl -fsSL https://bun.sh/install | bash
 ENV
 PATH=
-&quot;/root/.bun/bin:${PATH}&quot;
+"/root/.bun/bin:${PATH}"
 RUN
 corepack enable
 WORKDIR
@@ -993,12 +723,11 @@ pnpm ui:build
 ENV
 NODE_ENV=production
 CMD
-&quot;node&quot;
-&quot;dist/index.js&quot;
+"node"
+"dist/index.js"
 Channel setup (optional)
 Use the CLI container to configure channels, then restart the gateway if needed.
 WhatsApp (QR):
-Copy
 docker
 compose
 run
@@ -1007,7 +736,6 @@ openclaw-cli
 channels
 login
 Telegram (bot token):
-Copy
 docker
 compose
 run
@@ -1018,9 +746,8 @@ add
 --channel
 telegram
 --token
-&quot;&lt;token&gt;&quot;
+"<token>"
 Discord (bot token):
-Copy
 docker
 compose
 run
@@ -1031,7 +758,7 @@ add
 --channel
 discord
 --token
-&quot;&lt;token&gt;&quot;
+"<token>"
 Docs:
 WhatsApp
 Telegram
@@ -1044,7 +771,6 @@ http://127.0.0.1:1455/auth/callback
 headless setups that callback can show a browser error. Copy the full redirect
 URL you land on and paste it back into the wizard to finish auth.
 Health check
-Copy
 docker
 compose
 exec
@@ -1053,12 +779,10 @@ node
 dist/index.js
 health
 --token
-&quot;$OPENCLAW_GATEWAY_TOKEN&quot;
+"$OPENCLAW_GATEWAY_TOKEN"
 E2E smoke test (Docker)
-Copy
 scripts/e2e/onboard-docker.sh
 QR import smoke test (Docker)
-Copy
 pnpm
 test:docker:qr
 Notes
@@ -1073,7 +797,7 @@ not
 local
 will still start. Override CMD to enforce the guard.
 The gateway container is the source of truth for sessions (
-~/.openclaw/agents/&lt;agentId&gt;/sessions/
+~/.openclaw/agents/<agentId>/sessions/
 Agent Sandbox (host gateway + Docker tools)
 Deep dive:
 Sandboxing
@@ -1085,10 +809,10 @@ non-main sessions
 run tools inside a Docker
 container. The gateway stays on your host, but the tool execution is isolated:
 scope:
-&quot;agent&quot;
+"agent"
 by default (one container + workspace per agent)
 scope:
-&quot;session&quot;
+"session"
 for per-session isolation
 per-scope workspace folder mounted at
 /workspace
@@ -1098,10 +822,10 @@ allow/deny tool policy (deny wins)
 inbound media is copied into the active sandbox workspace (
 media/inbound/*
 ) so tools can read it (with
-workspaceAccess: &quot;rw&quot;
+workspaceAccess: "rw"
 , this lands in the agent workspace)
 Warning:
-scope: &quot;shared&quot;
+scope: "shared"
 disables cross-session isolation. All sessions share
 one container and one workspace.
 Per-agent sandbox profiles (multi-agent)
@@ -1117,7 +841,7 @@ Full access (personal agent)
 Read-only tools + read-only workspace (family/work agent)
 No filesystem/shell tools (public agent)
 See
-Multi-Agent Sandbox &amp; Tools
+Multi-Agent Sandbox & Tools
 for examples,
 precedence, and troubleshooting.
 Default behavior
@@ -1125,10 +849,10 @@ Image:
 openclaw-sandbox:bookworm-slim
 One container per agent
 Agent workspace access:
-workspaceAccess: &quot;none&quot;
+workspaceAccess: "none"
 (default) uses
 ~/.openclaw/sandboxes
-&quot;ro&quot;
+"ro"
 keeps the sandbox workspace at
 /workspace
 and mounts the agent workspace read-only at
@@ -1137,10 +861,10 @@ and mounts the agent workspace read-only at
 write
 edit
 apply_patch
-&quot;rw&quot;
+"rw"
 mounts the agent workspace read/write at
 /workspace
-Auto-prune: idle &gt; 24h OR age &gt; 7d
+Auto-prune: idle > 24h OR age > 7d
 Network:
 none
 by default (explicitly opt-in if you need egress)
@@ -1168,7 +892,7 @@ setupCommand
 , note:
 Default
 docker.network
-&quot;none&quot;
+"none"
 (no egress).
 readOnlyRoot: true
 blocks package installs.
@@ -1178,7 +902,7 @@ apt-get
 (omit
 user
 or set
-user: &quot;0:0&quot;
+user: "0:0"
 OpenClaw auto-recreates containers when
 setupCommand
 (or docker config) changes
@@ -1188,49 +912,48 @@ recently used
 log a warning with the exact
 openclaw sandbox recreate ...
 command.
-Copy
 agents
 defaults
 sandbox
 mode
-&quot;non-main&quot;
+"non-main"
 // off | non-main | all
 scope
-&quot;agent&quot;
+"agent"
 // session | agent | shared (agent is default)
 workspaceAccess
-&quot;none&quot;
+"none"
 // none | ro | rw
 workspaceRoot
-&quot;~/.openclaw/sandboxes&quot;
+"~/.openclaw/sandboxes"
 docker
 image
-&quot;openclaw-sandbox:bookworm-slim&quot;
+"openclaw-sandbox:bookworm-slim"
 workdir
-&quot;/workspace&quot;
+"/workspace"
 readOnlyRoot
 true
 tmpfs
-&quot;/tmp&quot;
-&quot;/var/tmp&quot;
-&quot;/run&quot;
+"/tmp"
+"/var/tmp"
+"/run"
 network
-&quot;none&quot;
+"none"
 user
-&quot;1000:1000&quot;
+"1000:1000"
 capDrop
-&quot;ALL&quot;
+"ALL"
 env
 LANG
-&quot;C.UTF-8&quot;
+"C.UTF-8"
 setupCommand
-&quot;apt-get update &amp;&amp; apt-get install -y git curl jq&quot;
+"apt-get update && apt-get install -y git curl jq"
 pidsLimit
 256
 memory
-&quot;1g&quot;
+"1g"
 memorySwap
-&quot;2g&quot;
+"2g"
 cpus
 ulimits
 nofile
@@ -1241,14 +964,14 @@ hard
 nproc
 256
 seccompProfile
-&quot;/path/to/seccomp.json&quot;
+"/path/to/seccomp.json"
 apparmorProfile
-&quot;openclaw-sandbox&quot;
+"openclaw-sandbox"
 dns
-&quot;1.1.1.1&quot;
-&quot;8.8.8.8&quot;
+"1.1.1.1"
+"8.8.8.8"
 extraHosts
-&quot;internal.service:10.0.0.5&quot;
+"internal.service:10.0.0.5"
 prune
 idleHours
 // 0 disables idle pruning
@@ -1258,23 +981,23 @@ tools
 sandbox
 tools
 allow
-&quot;exec&quot;
-&quot;process&quot;
-&quot;read&quot;
-&quot;write&quot;
-&quot;edit&quot;
-&quot;sessions_list&quot;
-&quot;sessions_history&quot;
-&quot;sessions_send&quot;
-&quot;sessions_spawn&quot;
-&quot;session_status&quot;
+"exec"
+"process"
+"read"
+"write"
+"edit"
+"sessions_list"
+"sessions_history"
+"sessions_send"
+"sessions_spawn"
+"session_status"
 deny
-&quot;browser&quot;
-&quot;canvas&quot;
-&quot;nodes&quot;
-&quot;cron&quot;
-&quot;discord&quot;
-&quot;gateway&quot;
+"browser"
+"canvas"
+"nodes"
+"cron"
+"discord"
+"gateway"
 Hardening knobs live under
 agents.defaults.sandbox.docker
 network
@@ -1295,9 +1018,8 @@ agents.list[].sandbox.{docker,browser,prune}.*
 (ignored when
 agents.defaults.sandbox.scope
 agents.list[].sandbox.scope
-&quot;shared&quot;
+"shared"
 Build the default sandbox image
-Copy
 scripts/sandbox-setup.sh
 This builds
 openclaw-sandbox:bookworm-slim
@@ -1305,22 +1027,19 @@ using
 Dockerfile.sandbox
 Sandbox common image (optional)
 If you want a sandbox image with common build tooling (Node, Go, Rust, etc.), build the common image:
-Copy
 scripts/sandbox-common-setup.sh
 This builds
 openclaw-sandbox-common:bookworm-slim
 . To use it:
-Copy
 agents
 defaults
 sandbox
 docker
 image
-&quot;openclaw-sandbox-common:bookworm-slim&quot;
+"openclaw-sandbox-common:bookworm-slim"
 } }
 Sandbox browser image
 To run the browser tool inside the sandbox, build the browser image:
-Copy
 scripts/sandbox-browser-setup.sh
 This builds
 openclaw-sandbox-browser:bookworm-slim
@@ -1334,7 +1053,6 @@ Headless can still be used by setting
 agents.defaults.sandbox.browser.headless=true
 No full desktop environment (GNOME) is needed; Xvfb provides the display.
 Use config:
-Copy
 agents
 defaults
 sandbox
@@ -1342,13 +1060,12 @@ browser
 enabled
 true
 Custom browser image:
-Copy
 agents
 defaults
 sandbox
 browser
 image
-&quot;my-openclaw-browser&quot;
+"my-openclaw-browser"
 } }
 When enabled, the agent receives:
 a sandbox browser control URL (for the
@@ -1364,18 +1081,16 @@ agents.defaults.sandbox.prune
 ) apply to browser containers too.
 Custom sandbox image
 Build your own image and point config to it:
-Copy
 docker
 build
 my-openclaw-sbx
 Dockerfile.sandbox
-Copy
 agents
 defaults
 sandbox
 docker
 image
-&quot;my-openclaw-sbx&quot;
+"my-openclaw-sbx"
 } }
 Tool policy (allow/deny)
 deny
@@ -1442,64 +1157,8 @@ Podman
 
 [Source: https://docs.openclaw.ai/install/exe-dev]
 
-exe.dev - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Hosting and deployment
-exe.dev
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Install overview
-Install
-Installer Internals
-Other install methods
-Docker
-Podman
-Nix
-Ansible
-Bun (Experimental)
-Maintenance
-Updating
-Migration Guide
-Uninstall
-Hosting and deployment
-Fly.io
-Hetzner
-GCP
-macOS VMs
-exe.dev
-Deploy on Railway
-Deploy on Render
-Deploy on Northflank
-Advanced
-Development Channels
-exe.dev
-Beginner quick path
-What you need
-Automated Install with Shelley
-Manual installation
-1) Create the VM
-2) Install prerequisites (on the VM)
-3) Install OpenClaw
-4) Setup nginx to proxy OpenClaw to port 8000
-5) Access OpenClaw and grant privileges
-Remote Access
-Updating
-Hosting and deployment
-exe.dev
-exe.dev
 Goal: OpenClaw Gateway running on an exe.dev VM, reachable from your laptop via:
-https://&lt;vm-name&gt;.exe.xyz
+https://<vm-name>.exe.xyz
 This page assumes exe.dev’s default
 exeuntu
 image. If you picked a different distro, map packages accordingly.
@@ -1520,21 +1179,18 @@ Shelley,
 exe.dev
 ’s agent, can install OpenClaw instantly with our
 prompt. The prompt used is as below:
-Copy
-Set up OpenClaw (https://docs.openclaw.ai/install) on this VM. Use the non-interactive and accept-risk flags for openclaw onboarding. Add the supplied auth or token as needed. Configure nginx to forward from the default port 18789 to the root location on the default enabled site config, making sure to enable Websocket support. Pairing is done by &quot;openclaw devices list&quot; and &quot;openclaw device approve &lt;request id&gt;&quot;. Make sure the dashboard shows that OpenClaw&#x27;s health is OK. exe.dev handles forwarding from port 8000 to port 80/443 and HTTPS for us, so the final &quot;reachable&quot; should be &lt;vm-name&gt;.exe.xyz, without port specification.
+Set up OpenClaw (https://docs.openclaw.ai/install) on this VM. Use the non-interactive and accept-risk flags for openclaw onboarding. Add the supplied auth or token as needed. Configure nginx to forward from the default port 18789 to the root location on the default enabled site config, making sure to enable Websocket support. Pairing is done by "openclaw devices list" and "openclaw device approve <request id>". Make sure the dashboard shows that OpenClaw's health is OK. exe.dev handles forwarding from port 8000 to port 80/443 and HTTPS for us, so the final "reachable" should be <vm-name>.exe.xyz, without port specification.
 Manual installation
 1) Create the VM
 From your device:
-Copy
 ssh
 exe.dev
 new
 Then connect:
-Copy
 ssh
-&lt;
+<
 vm-nam
-&gt;
+>
 .exe.xyz
 Tip: keep this VM
 stateful
@@ -1543,7 +1199,6 @@ stateful
 and
 ~/.openclaw/workspace/
 2) Install prerequisites (on the VM)
-Copy
 sudo
 apt-get
 update
@@ -1556,7 +1211,6 @@ ca-certificates
 openssl
 3) Install OpenClaw
 Run the OpenClaw install script:
-Copy
 curl
 -fsSL
 https://openclaw.ai/install.sh
@@ -1565,7 +1219,6 @@ bash
 Edit
 /etc/nginx/sites-enabled/default
 with
-Copy
 server {
 listen 80 default_server;
 listen [::]:80 default_server;
@@ -1577,7 +1230,7 @@ proxy_pass http://127.0.0.1:18789;
 proxy_http_version 1.1;
 # WebSocket support
 proxy_set_header Upgrade $http_upgrade;
-proxy_set_header Connection &quot;upgrade&quot;;
+proxy_set_header Connection "upgrade";
 # Standard proxy headers
 proxy_set_header Host $host;
 proxy_set_header X-Real-IP $remote_addr;
@@ -1588,7 +1241,7 @@ proxy_read_timeout 86400s;
 proxy_send_timeout 86400s;
 5) Access OpenClaw and grant privileges
 Access
-https://&lt;vm-name&gt;.exe.xyz/
+https://<vm-name>.exe.xyz/
 (see the Control UI output from onboarding). If it prompts for auth, paste the
 token from
 gateway.auth.token
@@ -1600,17 +1253,16 @@ openclaw doctor --generate-gateway-token
 ). Approve devices with
 openclaw devices list
 and
-openclaw devices approve &lt;requestId&gt;
+openclaw devices approve <requestId>
 . When in doubt, use Shelley from your browser!
 Remote Access
 Remote access is handled by
 exe.dev
 ’s authentication. By
 default, HTTP traffic from port 8000 is forwarded to
-https://&lt;vm-name&gt;.exe.xyz
+https://<vm-name>.exe.xyz
 with email auth.
 Updating
-Copy
 npm
 openclaw@latest
 openclaw
@@ -1630,81 +1282,6 @@ Deploy on Railway
 
 [Source: https://docs.openclaw.ai/install/fly]
 
-Fly.io - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Hosting and deployment
-Fly.io
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Install overview
-Install
-Installer Internals
-Other install methods
-Docker
-Podman
-Nix
-Ansible
-Bun (Experimental)
-Maintenance
-Updating
-Migration Guide
-Uninstall
-Hosting and deployment
-Fly.io
-Hetzner
-GCP
-macOS VMs
-exe.dev
-Deploy on Railway
-Deploy on Render
-Deploy on Northflank
-Advanced
-Development Channels
-Fly.io Deployment
-What you need
-Beginner quick path
-1) Create the Fly app
-2) Configure fly.toml
-3) Set secrets
-4) Deploy
-5) Create config file
-6) Access the Gateway
-Control UI
-Logs
-SSH Console
-Troubleshooting
-”App is not listening on expected address”
-Health checks failing / connection refused
-OOM / Memory Issues
-Gateway Lock Issues
-Config Not Being Read
-Writing Config via SSH
-State Not Persisting
-Updates
-Updating Machine Command
-Private Deployment (Hardened)
-When to use private deployment
-Setup
-Accessing a private deployment
-Webhooks with private deployment
-Security benefits
-Notes
-Cost
-Hosting and deployment
-Fly.io
-Deploy OpenClaw on Fly.io
-Fly.io Deployment
 Goal:
 OpenClaw Gateway running on a
 Fly.io
@@ -1723,7 +1300,6 @@ Deploy with
 fly deploy
 SSH in to create config or use Control UI
 1) Create the Fly app
-Copy
 # Clone the repo
 git
 clone
@@ -1759,27 +1335,26 @@ The default config exposes a public URL. For a hardened deployment with no publi
 Private Deployment
 or use
 fly.private.toml
-Copy
 app
-&quot;my-openclaw&quot;
+"my-openclaw"
 # Your app name
 primary_region
-&quot;iad&quot;
+"iad"
 [build]
 dockerfile
-&quot;Dockerfile&quot;
+"Dockerfile"
 [env]
 NODE_ENV
-&quot;production&quot;
+"production"
 OPENCLAW_PREFER_PNPM
-&quot;1&quot;
+"1"
 OPENCLAW_STATE_DIR
-&quot;/data&quot;
+"/data"
 NODE_OPTIONS
-&quot;--max-old-space-size=1536&quot;
+"--max-old-space-size=1536"
 [processes]
 app
-&quot;node dist/index.js gateway --allow-unconfigured --port 3000 --bind lan&quot;
+"node dist/index.js gateway --allow-unconfigured --port 3000 --bind lan"
 [http_service]
 internal_port
 3000
@@ -1791,17 +1366,17 @@ auto_start_machines
 true
 min_machines_running
 processes
-&quot;app&quot;
+"app"
 [[vm]]
 size
-&quot;shared-cpu-2x&quot;
+"shared-cpu-2x"
 memory
-&quot;2048mb&quot;
+"2048mb"
 [mounts]
 source
-&quot;openclaw_data&quot;
+"openclaw_data"
 destination
-&quot;/data&quot;
+"/data"
 Key settings:
 Setting
 Why
@@ -1817,12 +1392,11 @@ Must match
 (or
 OPENCLAW_GATEWAY_PORT
 ) for Fly health checks
-memory = &quot;2048mb&quot;
+memory = "2048mb"
 512MB is too small; 2GB recommended
-OPENCLAW_STATE_DIR = &quot;/data&quot;
+OPENCLAW_STATE_DIR = "/data"
 Persists state on the volume
 3) Set secrets
-Copy
 # Required: Gateway token (for non-loopback binding)
 fly
 secrets
@@ -1862,64 +1436,59 @@ for all API keys and tokens. This keeps secrets out of
 openclaw.json
 where they could be accidentally exposed or logged.
 4) Deploy
-Copy
 fly
 deploy
 First deploy builds the Docker image (~2-3 minutes). Subsequent deploys are faster.
 After deployment, verify:
-Copy
 fly
 status
 fly
 logs
 You should see:
-Copy
 [gateway] listening on ws://0.0.0.0:3000 (PID xxx)
 [discord] logged in to discord as xxx
 5) Create config file
 SSH into the machine to create a proper config:
-Copy
 fly
 ssh
 console
 Create the config directory and file:
-Copy
 mkdir
 /data
 cat
-&gt;
+>
 /data/openclaw.json
-&lt;&lt;
-&#x27;EOF&#x27;
-&quot;agents&quot;: {
-&quot;defaults&quot;: {
-&quot;model&quot;: {
-&quot;primary&quot;: &quot;anthropic/claude-opus-4-6&quot;,
-&quot;fallbacks&quot;: [&quot;anthropic/claude-sonnet-4-5&quot;, &quot;openai/gpt-4o&quot;]
-&quot;maxConcurrent&quot;: 4
-&quot;list&quot;: [
-&quot;id&quot;: &quot;main&quot;,
-&quot;default&quot;: true
-&quot;auth&quot;: {
-&quot;profiles&quot;: {
-&quot;anthropic:default&quot;: { &quot;mode&quot;: &quot;token&quot;, &quot;provider&quot;: &quot;anthropic&quot; },
-&quot;openai:default&quot;: { &quot;mode&quot;: &quot;token&quot;, &quot;provider&quot;: &quot;openai&quot; }
-&quot;bindings&quot;: [
-&quot;agentId&quot;: &quot;main&quot;,
-&quot;match&quot;: { &quot;channel&quot;: &quot;discord&quot; }
-&quot;channels&quot;: {
-&quot;discord&quot;: {
-&quot;enabled&quot;: true,
-&quot;groupPolicy&quot;: &quot;allowlist&quot;,
-&quot;guilds&quot;: {
-&quot;YOUR_GUILD_ID&quot;: {
-&quot;channels&quot;: { &quot;general&quot;: { &quot;allow&quot;: true } },
-&quot;requireMention&quot;: false
-&quot;gateway&quot;: {
-&quot;mode&quot;: &quot;local&quot;,
-&quot;bind&quot;: &quot;auto&quot;
-&quot;meta&quot;: {
-&quot;lastTouchedVersion&quot;: &quot;2026.1.29&quot;
+<<
+'EOF'
+"agents": {
+"defaults": {
+"model": {
+"primary": "anthropic/claude-opus-4-6",
+"fallbacks": ["anthropic/claude-sonnet-4-5", "openai/gpt-4o"]
+"maxConcurrent": 4
+"list": [
+"id": "main",
+"default": true
+"auth": {
+"profiles": {
+"anthropic:default": { "mode": "token", "provider": "anthropic" },
+"openai:default": { "mode": "token", "provider": "openai" }
+"bindings": [
+"agentId": "main",
+"match": { "channel": "discord" }
+"channels": {
+"discord": {
+"enabled": true,
+"groupPolicy": "allowlist",
+"guilds": {
+"YOUR_GUILD_ID": {
+"channels": { "general": { "allow": true } },
+"requireMention": false
+"gateway": {
+"mode": "local",
+"bind": "auto"
+"meta": {
+"lastTouchedVersion": "2026.1.29"
 EOF
 Note:
 With
@@ -1937,18 +1506,16 @@ If using env var, no need to add token to config. The gateway reads
 DISCORD_BOT_TOKEN
 automatically.
 Restart to apply:
-Copy
 exit
 fly
 machine
 restart
-&lt;
+<
 machine-i
-&gt;
+>
 6) Access the Gateway
 Control UI
 Open in browser:
-Copy
 fly
 open
 Or visit
@@ -1957,7 +1524,6 @@ Paste your gateway token (the one from
 OPENCLAW_GATEWAY_TOKEN
 ) to authenticate.
 Logs
-Copy
 fly
 logs
 # Live logs
@@ -1966,7 +1532,6 @@ logs
 --no-tail
 # Recent logs
 SSH Console
-Copy
 fly
 ssh
 console
@@ -1997,18 +1562,16 @@ v8::internal::Runtime_AllocateInYoungGeneration
 Fix:
 Increase memory in
 fly.toml
-Copy
 [[vm]]
 memory
-&quot;2048mb&quot;
+"2048mb"
 Or update an existing machine:
-Copy
 fly
 machine
 update
-&lt;
+<
 machine-i
-&gt;
+>
 --vm-memory
 2048
 Note:
@@ -2019,18 +1582,17 @@ Gateway refuses to start with “already running” errors.
 This happens when the container restarts but the PID lock file persists on the volume.
 Fix:
 Delete the lock file:
-Copy
 fly
 ssh
 console
 --command
-&quot;rm -f /data/gateway.*.lock&quot;
+"rm -f /data/gateway.*.lock"
 fly
 machine
 restart
-&lt;
+<
 machine-i
-&gt;
+>
 The lock file is at
 /data/gateway.*.lock
 (not in a subdirectory).
@@ -2041,39 +1603,36 @@ If using
 /data/openclaw.json
 should be read on restart.
 Verify the config exists:
-Copy
 fly
 ssh
 console
 --command
-&quot;cat /data/openclaw.json&quot;
+"cat /data/openclaw.json"
 Writing Config via SSH
 The
 fly ssh console -C
 command doesn’t support shell redirection. To write a config file:
-Copy
 # Use echo + tee (pipe from local to remote)
 echo
-&#x27;{&quot;your&quot;:&quot;config&quot;}&#x27;
+'{"your":"config"}'
 fly
 ssh
 console
-&quot;tee /data/openclaw.json&quot;
+"tee /data/openclaw.json"
 # Or use sftp
 fly
 sftp
 shell
-&gt;
+>
 put /local/path/config.json /data/openclaw.json
 Note:
 fly sftp
 may fail if the file already exists. Delete first:
-Copy
 fly
 ssh
 console
 --command
-&quot;rm /data/openclaw.json&quot;
+"rm /data/openclaw.json"
 State Not Persisting
 If you lose credentials or sessions after a restart, the state dir is writing to the container filesystem.
 Fix:
@@ -2083,7 +1642,6 @@ is set in
 fly.toml
 and redeploy.
 Updates
-Copy
 # Pull latest changes
 git
 pull
@@ -2097,7 +1655,6 @@ fly
 logs
 Updating Machine Command
 If you need to change the startup command without a full redeploy:
-Copy
 # Get machine ID
 fly
 machines
@@ -2106,22 +1663,22 @@ list
 fly
 machine
 update
-&lt;
+<
 machine-i
-&gt;
+>
 --command
-&quot;node dist/index.js gateway --port 3000 --bind lan&quot;
+"node dist/index.js gateway --port 3000 --bind lan"
 # Or with memory increase
 fly
 machine
 update
-&lt;
+<
 machine-i
-&gt;
+>
 --vm-memory
 2048
 --command
-&quot;node dist/index.js gateway --port 3000 --bind lan&quot;
+"node dist/index.js gateway --port 3000 --bind lan"
 Note:
 After
 fly deploy
@@ -2151,13 +1708,11 @@ Setup
 Use
 fly.private.toml
 instead of the standard config:
-Copy
 # Deploy with private config
 fly
 deploy
 fly.private.toml
 Or convert an existing deployment:
-Copy
 # List current IPs
 fly
 ips
@@ -2167,18 +1722,18 @@ my-openclaw
 fly
 ips
 release
-&lt;
+<
 public-ipv
-4&gt;
+4>
 my-openclaw
 fly
 ips
 release
-&lt;
+<
 public-ipv
-6&gt;
+6>
 my-openclaw
-# Switch to private config so future deploys don&#x27;t re-allocate public IPs
+# Switch to private config so future deploys don't re-allocate public IPs
 # (remove [http_service] or deploy with the private template)
 fly
 deploy
@@ -2194,13 +1749,11 @@ fly ips list
 should show only a
 private
 type IP:
-Copy
 VERSION IP TYPE REGION
 v6 fdaa:x:x:x:x::x private global
 Accessing a private deployment
 Since there’s no public URL, use one of these methods:
 Option 1: Local proxy (simplest)
-Copy
 # Forward local port 3000 to the app
 fly
 proxy
@@ -2208,7 +1761,6 @@ proxy
 my-openclaw
 # Then open http://localhost:3000 in browser
 Option 2: WireGuard VPN
-Copy
 # Create WireGuard config (one-time)
 fly
 wireguard
@@ -2216,7 +1768,6 @@ create
 # Import to WireGuard client, then access via internal IPv6
 # Example: http://[fdaa:x:x:x:x::x]:3000
 Option 3: SSH only
-Copy
 fly
 ssh
 console
@@ -2230,21 +1781,20 @@ Tailscale Funnel
 Outbound-only
 - Some providers (Twilio) work fine for outbound calls without webhooks
 Example voice-call config with ngrok:
-Copy
-&quot;plugins&quot;
-&quot;entries&quot;
-&quot;voice-call&quot;
-&quot;enabled&quot;
+"plugins"
+"entries"
+"voice-call"
+"enabled"
 true
-&quot;config&quot;
-&quot;provider&quot;
-&quot;twilio&quot;
-&quot;tunnel&quot;
-&quot;provider&quot;
-&quot;ngrok&quot;
-&quot;webhookSecurity&quot;
-&quot;allowedHosts&quot;
-&quot;example.ngrok.app&quot;
+"config"
+"provider"
+"twilio"
+"tunnel"
+"provider"
+"ngrok"
+"webhookSecurity"
+"allowedHosts"
+"example.ngrok.app"
 The ngrok tunnel runs inside the container and provides a public webhook URL without exposing the Fly app itself. Set
 webhookSecurity.allowedHosts
 to the public tunnel hostname so forwarded host headers are accepted.
@@ -2291,47 +1841,6 @@ Hetzner
 
 [Source: https://docs.openclaw.ai/install/gcp]
 
-GCP - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Hosting and deployment
-GCP
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Install overview
-Install
-Installer Internals
-Other install methods
-Docker
-Podman
-Nix
-Ansible
-Bun (Experimental)
-Maintenance
-Updating
-Migration Guide
-Uninstall
-Hosting and deployment
-Fly.io
-Hetzner
-GCP
-macOS VMs
-exe.dev
-Deploy on Railway
-Deploy on Render
-Deploy on Northflank
-Advanced
-Development Channels
 OpenClaw on GCP Compute Engine (Docker, Production VPS Guide)
 Goal
 What are we doing (simple terms)?
@@ -2409,7 +1918,6 @@ Option A: gcloud CLI
 Install from
 https://cloud.google.com/sdk/docs/install
 Initialize and authenticate:
-Copy
 gcloud
 init
 gcloud
@@ -2420,13 +1928,12 @@ All steps can be done via the web UI at
 https://console.cloud.google.com
 2) Create a GCP project
 CLI:
-Copy
 gcloud
 projects
 create
 my-openclaw-project
 --name=
-&quot;OpenClaw Gateway&quot;
+"OpenClaw Gateway"
 gcloud
 config
 set
@@ -2436,16 +1943,15 @@ Enable billing at
 https://console.cloud.google.com/billing
 (required for Compute Engine).
 Enable the Compute Engine API:
-Copy
 gcloud
 services
 enable
 compute.googleapis.com
 Console:
-Go to IAM &amp; Admin &gt; Create Project
+Go to IAM & Admin > Create Project
 Name it and create
 Enable billing for the project
-Navigate to APIs &amp; Services &gt; Enable APIs &gt; search “Compute Engine API” &gt; Enable
+Navigate to APIs & Services > Enable APIs > search “Compute Engine API” > Enable
 3) Create the VM
 Machine types:
 Type
@@ -2461,7 +1967,6 @@ e2-micro
 Free tier eligible
 May OOM under load
 CLI:
-Copy
 gcloud
 compute
 instances
@@ -2473,7 +1978,7 @@ openclaw-gateway
 --image-family=debian-12
 --image-project=debian-cloud
 Console:
-Go to Compute Engine &gt; VM instances &gt; Create instance
+Go to Compute Engine > VM instances > Create instance
 Name:
 openclaw-gateway
 Region:
@@ -2486,7 +1991,6 @@ Boot disk: Debian 12, 20GB
 Create
 4) SSH into the VM
 CLI:
-Copy
 gcloud
 compute
 ssh
@@ -2496,7 +2000,6 @@ Console:
 Click the “SSH” button next to your VM in the Compute Engine dashboard.
 Note: SSH key propagation can take 1-2 minutes after VM creation. If connection is refused, wait and retry.
 5) Install Docker (on the VM)
-Copy
 sudo
 apt-get
 update
@@ -2516,24 +2019,20 @@ usermod
 docker
 $USER
 Log out and back in for the group change to take effect:
-Copy
 exit
 Then SSH back in:
-Copy
 gcloud
 compute
 ssh
 openclaw-gateway
 --zone=us-central1-a
 Verify:
-Copy
 docker
 --version
 docker
 compose
 version
 6) Clone the OpenClaw repository
-Copy
 git
 clone
 https://github.com/openclaw/openclaw.git
@@ -2542,7 +2041,6 @@ This guide assumes you will build a custom image to guarantee binary persistence
 7) Create persistent host directories
 Docker containers are ephemeral.
 All long-lived state must live on the host.
-Copy
 mkdir
 ~/.openclaw
 mkdir
@@ -2551,7 +2049,6 @@ mkdir
 Create
 .env
 in the repository root.
-Copy
 OPENCLAW_IMAGE
 openclaw:latest
 OPENCLAW_GATEWAY_TOKEN
@@ -2573,7 +2070,6 @@ change-me-now
 XDG_CONFIG_HOME
 /home/node/.openclaw
 Generate strong secrets:
-Copy
 openssl
 rand
 -hex
@@ -2581,7 +2077,6 @@ Do not commit this file.
 9) Docker Compose configuration
 Create or update
 docker-compose.yml
-Copy
 services
 openclaw-gateway
 image
@@ -2607,15 +2102,15 @@ ${OPENCLAW_WORKSPACE_DIR}:/home/node/.openclaw/workspace
 ports
 # Recommended: keep the Gateway loopback-only on the VM; access via SSH tunnel.
 # To expose it publicly, remove the `127.0.0.1:` prefix and firewall accordingly.
-&quot;127.0.0.1:${OPENCLAW_GATEWAY_PORT}:18789&quot;
+"127.0.0.1:${OPENCLAW_GATEWAY_PORT}:18789"
 command
-&quot;node&quot;
-&quot;dist/index.js&quot;
-&quot;gateway&quot;
-&quot;--bind&quot;
-&quot;${OPENCLAW_GATEWAY_BIND}&quot;
-&quot;--port&quot;
-&quot;${OPENCLAW_GATEWAY_PORT}&quot;
+"node"
+"dist/index.js"
+"gateway"
+"--bind"
+"${OPENCLAW_GATEWAY_BIND}"
+"--port"
+"${OPENCLAW_GATEWAY_PORT}"
 10) Bake required binaries into the image (critical)
 Installing binaries inside a running container is a trap.
 Anything installed at runtime will be lost on restart.
@@ -2634,23 +2129,22 @@ Update the Dockerfile
 Rebuild the image
 Restart the containers
 Example Dockerfile
-Copy
 FROM
 node:22-bookworm
 RUN
-apt-get update &amp;&amp; apt-get install -y socat &amp;&amp; rm -rf /var/lib/apt/lists/*
+apt-get update && apt-get install -y socat && rm -rf /var/lib/apt/lists/*
 # Example binary 1: Gmail CLI
 RUN
 curl -L https://github.com/steipete/gog/releases/latest/download/gog_Linux_x86_64.tar.gz \
-| tar -xz -C /usr/local/bin &amp;&amp; chmod +x /usr/local/bin/gog
+| tar -xz -C /usr/local/bin && chmod +x /usr/local/bin/gog
 # Example binary 2: Google Places CLI
 RUN
 curl -L https://github.com/steipete/goplaces/releases/latest/download/goplaces_Linux_x86_64.tar.gz \
-| tar -xz -C /usr/local/bin &amp;&amp; chmod +x /usr/local/bin/goplaces
+| tar -xz -C /usr/local/bin && chmod +x /usr/local/bin/goplaces
 # Example binary 3: WhatsApp CLI
 RUN
 curl -L https://github.com/steipete/wacli/releases/latest/download/wacli_Linux_x86_64.tar.gz \
-| tar -xz -C /usr/local/bin &amp;&amp; chmod +x /usr/local/bin/wacli
+| tar -xz -C /usr/local/bin && chmod +x /usr/local/bin/wacli
 # Add more binaries below using the same pattern
 WORKDIR
 /app
@@ -2675,10 +2169,9 @@ pnpm ui:build
 ENV
 NODE_ENV=production
 CMD
-&quot;node&quot;
-&quot;dist/index.js&quot;
+"node"
+"dist/index.js"
 11) Build and launch
-Copy
 docker
 compose
 build
@@ -2686,7 +2179,6 @@ docker
 compose
 openclaw-gateway
 Verify binaries:
-Copy
 docker
 compose
 exec
@@ -2706,22 +2198,18 @@ openclaw-gateway
 which
 wacli
 Expected output:
-Copy
 /usr/local/bin/gog
 /usr/local/bin/goplaces
 /usr/local/bin/wacli
 12) Verify Gateway
-Copy
 docker
 compose
 logs
 openclaw-gateway
 Success:
-Copy
 [gateway] listening on ws://0.0.0.0:18789
 13) Access from your laptop
 Create an SSH tunnel to forward the Gateway port:
-Copy
 gcloud
 compute
 ssh
@@ -2783,7 +2271,6 @@ Restartable
 Safe to destroy
 Updates
 To update OpenClaw on the VM:
-Copy
 ~/openclaw
 git
 pull
@@ -2797,7 +2284,6 @@ SSH connection refused
 SSH key propagation can take 1-2 minutes after VM creation. Wait and retry.
 OS Login issues
 Check your OS Login profile:
-Copy
 gcloud
 compute
 os-login
@@ -2805,7 +2291,6 @@ describe-profile
 Ensure your account has the required IAM permissions (Compute OS Login or Compute OS Admin Login).
 Out of memory (OOM)
 If using e2-micro and hitting OOM, upgrade to e2-small or e2-medium:
-Copy
 # Stop the VM first
 gcloud
 compute
@@ -2832,26 +2317,24 @@ Service accounts (security best practice)
 For personal use, your default user account works fine.
 For automation or CI/CD pipelines, create a dedicated service account with minimal permissions:
 Create a service account:
-Copy
 gcloud
 iam
 service-accounts
 create
 openclaw-deploy
 --display-name=
-&quot;OpenClaw Deployment&quot;
+"OpenClaw Deployment"
 Grant Compute Instance Admin role (or narrower custom role):
-Copy
 gcloud
 projects
 add-iam-policy-binding
 my-openclaw-project
 --member=
-&quot;serviceAccount:
-[email&#160;protected]
-&quot;
+"serviceAccount:
+[email protected]
+"
 --role=
-&quot;roles/compute.instanceAdmin.v1&quot;
+"roles/compute.instanceAdmin.v1"
 Avoid using the Owner role for automation. Use the principle of least privilege.
 See
 https://cloud.google.com/iam/docs/understanding-roles
@@ -2871,65 +2354,6 @@ macOS VMs
 
 [Source: https://docs.openclaw.ai/install/hetzner]
 
-Hetzner - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Hosting and deployment
-Hetzner
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Install overview
-Install
-Installer Internals
-Other install methods
-Docker
-Podman
-Nix
-Ansible
-Bun (Experimental)
-Maintenance
-Updating
-Migration Guide
-Uninstall
-Hosting and deployment
-Fly.io
-Hetzner
-GCP
-macOS VMs
-exe.dev
-Deploy on Railway
-Deploy on Render
-Deploy on Northflank
-Advanced
-Development Channels
-OpenClaw on Hetzner (Docker, Production VPS Guide)
-Goal
-What are we doing (simple terms)?
-Quick path (experienced operators)
-What you need
-1) Provision the VPS
-2) Install Docker (on the VPS)
-3) Clone the OpenClaw repository
-4) Create persistent host directories
-5) Configure environment variables
-6) Docker Compose configuration
-7) Bake required binaries into the image (critical)
-8) Build and launch
-9) Verify Gateway
-What persists where (source of truth)
-Infrastructure as Code (Terraform)
-Hosting and deployment
-Hetzner
 OpenClaw on Hetzner (Docker, Production VPS Guide)
 Goal
 Run a persistent OpenClaw Gateway on a Hetzner VPS using Docker, with durable state, baked-in binaries, and safe restart behavior.
@@ -2977,13 +2401,11 @@ Gmail OAuth
 1) Provision the VPS
 Create an Ubuntu or Debian VPS in Hetzner.
 Connect as root:
-Copy
 ssh
 root@YOUR_VPS_IP
 This guide assumes the VPS is stateful.
 Do not treat it as disposable infrastructure.
 2) Install Docker (on the VPS)
-Copy
 apt-get
 update
 apt-get
@@ -2995,14 +2417,12 @@ curl
 -fsSL
 https://get.docker.com
 Verify:
-Copy
 docker
 --version
 docker
 compose
 version
 3) Clone the OpenClaw repository
-Copy
 git
 clone
 https://github.com/openclaw/openclaw.git
@@ -3011,7 +2431,6 @@ This guide assumes you will build a custom image to guarantee binary persistence
 4) Create persistent host directories
 Docker containers are ephemeral.
 All long-lived state must live on the host.
-Copy
 mkdir
 /root/.openclaw/workspace
 # Set ownership to the container user (uid 1000):
@@ -3022,7 +2441,6 @@ chown
 Create
 .env
 in the repository root.
-Copy
 OPENCLAW_IMAGE
 openclaw:latest
 OPENCLAW_GATEWAY_TOKEN
@@ -3040,7 +2458,6 @@ change-me-now
 XDG_CONFIG_HOME
 /home/node/.openclaw
 Generate strong secrets:
-Copy
 openssl
 rand
 -hex
@@ -3048,7 +2465,6 @@ Do not commit this file.
 6) Docker Compose configuration
 Create or update
 docker-compose.yml
-Copy
 services
 openclaw-gateway
 image
@@ -3074,16 +2490,16 @@ ${OPENCLAW_WORKSPACE_DIR}:/home/node/.openclaw/workspace
 ports
 # Recommended: keep the Gateway loopback-only on the VPS; access via SSH tunnel.
 # To expose it publicly, remove the `127.0.0.1:` prefix and firewall accordingly.
-&quot;127.0.0.1:${OPENCLAW_GATEWAY_PORT}:18789&quot;
+"127.0.0.1:${OPENCLAW_GATEWAY_PORT}:18789"
 command
-&quot;node&quot;
-&quot;dist/index.js&quot;
-&quot;gateway&quot;
-&quot;--bind&quot;
-&quot;${OPENCLAW_GATEWAY_BIND}&quot;
-&quot;--port&quot;
-&quot;${OPENCLAW_GATEWAY_PORT}&quot;
-&quot;--allow-unconfigured&quot;
+"node"
+"dist/index.js"
+"gateway"
+"--bind"
+"${OPENCLAW_GATEWAY_BIND}"
+"--port"
+"${OPENCLAW_GATEWAY_PORT}"
+"--allow-unconfigured"
 --allow-unconfigured
 is only for bootstrap convenience, it is not a replacement for a proper gateway configuration. Still set auth (
 gateway.auth.token
@@ -3106,23 +2522,22 @@ Update the Dockerfile
 Rebuild the image
 Restart the containers
 Example Dockerfile
-Copy
 FROM
 node:22-bookworm
 RUN
-apt-get update &amp;&amp; apt-get install -y socat &amp;&amp; rm -rf /var/lib/apt/lists/*
+apt-get update && apt-get install -y socat && rm -rf /var/lib/apt/lists/*
 # Example binary 1: Gmail CLI
 RUN
 curl -L https://github.com/steipete/gog/releases/latest/download/gog_Linux_x86_64.tar.gz \
-| tar -xz -C /usr/local/bin &amp;&amp; chmod +x /usr/local/bin/gog
+| tar -xz -C /usr/local/bin && chmod +x /usr/local/bin/gog
 # Example binary 2: Google Places CLI
 RUN
 curl -L https://github.com/steipete/goplaces/releases/latest/download/goplaces_Linux_x86_64.tar.gz \
-| tar -xz -C /usr/local/bin &amp;&amp; chmod +x /usr/local/bin/goplaces
+| tar -xz -C /usr/local/bin && chmod +x /usr/local/bin/goplaces
 # Example binary 3: WhatsApp CLI
 RUN
 curl -L https://github.com/steipete/wacli/releases/latest/download/wacli_Linux_x86_64.tar.gz \
-| tar -xz -C /usr/local/bin &amp;&amp; chmod +x /usr/local/bin/wacli
+| tar -xz -C /usr/local/bin && chmod +x /usr/local/bin/wacli
 # Add more binaries below using the same pattern
 WORKDIR
 /app
@@ -3147,10 +2562,9 @@ pnpm ui:build
 ENV
 NODE_ENV=production
 CMD
-&quot;node&quot;
-&quot;dist/index.js&quot;
+"node"
+"dist/index.js"
 8) Build and launch
-Copy
 docker
 compose
 build
@@ -3158,7 +2572,6 @@ docker
 compose
 openclaw-gateway
 Verify binaries:
-Copy
 docker
 compose
 exec
@@ -3178,21 +2591,17 @@ openclaw-gateway
 which
 wacli
 Expected output:
-Copy
 /usr/local/bin/gog
 /usr/local/bin/goplaces
 /usr/local/bin/wacli
 9) Verify Gateway
-Copy
 docker
 compose
 logs
 openclaw-gateway
 Success:
-Copy
 [gateway] listening on ws://0.0.0.0:18789
 From your laptop:
-Copy
 ssh
 18789:127.0.0.1:18789
 root@YOUR_VPS_IP
@@ -3272,71 +2681,6 @@ GCP
 
 [Source: https://docs.openclaw.ai/install/installer]
 
-Installer Internals - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Install overview
-Installer Internals
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Install overview
-Install
-Installer Internals
-Other install methods
-Docker
-Podman
-Nix
-Ansible
-Bun (Experimental)
-Maintenance
-Updating
-Migration Guide
-Uninstall
-Hosting and deployment
-Fly.io
-Hetzner
-GCP
-macOS VMs
-exe.dev
-Deploy on Railway
-Deploy on Render
-Deploy on Northflank
-Advanced
-Development Channels
-Installer internals
-Quick commands
-install.sh
-Flow (install.sh)
-Source checkout detection
-Examples (install.sh)
-install-cli.sh
-Flow (install-cli.sh)
-Examples (install-cli.sh)
-install.ps1
-Flow (install.ps1)
-Examples (install.ps1)
-CI and automation
-Troubleshooting
-Install overview
-Installer Internals
-Installer internals
-OpenClaw ships three installer scripts, served from
-openclaw.ai
-Script
-Platform
-What it does
-install.sh
-macOS / Linux / WSL
 Installs Node if needed, installs OpenClaw via npm (default) or git, and can run onboarding.
 install-cli.sh
 macOS / Linux / WSL
@@ -3350,48 +2694,42 @@ Quick commands
 install.sh
 install-cli.sh
 install.ps1
-Copy
 curl
 -fsSL
 --proto
-&#x27;=https&#x27;
+'=https'
 --tlsv1.2
 https://openclaw.ai/install.sh
 bash
-Copy
 curl
 -fsSL
 --proto
-&#x27;=https&#x27;
+'=https'
 --tlsv1.2
 https://openclaw.ai/install.sh
 bash
 --help
-Copy
 curl
 -fsSL
 --proto
-&#x27;=https&#x27;
+'=https'
 --tlsv1.2
 https://openclaw.ai/install-cli.sh
 bash
-Copy
 curl
 -fsSL
 --proto
-&#x27;=https&#x27;
+'=https'
 --tlsv1.2
 https://openclaw.ai/install-cli.sh
 bash
 --help
-Copy
 iwr
 useb https:
 openclaw.ai
 install.ps1
 iex
-Copy
-&amp;
+&
 scriptblock
 ]::Create((iwr
 useb https:
@@ -3448,38 +2786,34 @@ Default
 Skip onboarding
 Git install
 Dry run
-Copy
 curl
 -fsSL
 --proto
-&#x27;=https&#x27;
+'=https'
 --tlsv1.2
 https://openclaw.ai/install.sh
 bash
-Copy
 curl
 -fsSL
 --proto
-&#x27;=https&#x27;
+'=https'
 --tlsv1.2
 https://openclaw.ai/install.sh
 bash
 --no-onboard
-Copy
 curl
 -fsSL
 --proto
-&#x27;=https&#x27;
+'=https'
 --tlsv1.2
 https://openclaw.ai/install.sh
 bash
 --install-method
 git
-Copy
 curl
 -fsSL
 --proto
-&#x27;=https&#x27;
+'=https'
 --tlsv1.2
 https://openclaw.ai/install.sh
 bash
@@ -3497,13 +2831,13 @@ Shortcut for npm method
 --git
 Shortcut for git method. Alias:
 --github
---version &lt;version|dist-tag&gt;
+--version <version|dist-tag>
 npm version or dist-tag (default:
 latest
 --beta
 Use beta dist-tag if available, else fallback to
 latest
---git-dir &lt;path&gt;
+--git-dir <path>
 Checkout directory (default:
 ~/openclaw
 ). Alias:
@@ -3531,11 +2865,11 @@ Variable
 Description
 OPENCLAW_INSTALL_METHOD=git|npm
 Install method
-OPENCLAW_VERSION=latest|next|&lt;semver&gt;
+OPENCLAW_VERSION=latest|next|<semver>
 npm version or dist-tag
 OPENCLAW_BETA=0|1
 Use beta if available
-OPENCLAW_GIT_DIR=&lt;path&gt;
+OPENCLAW_GIT_DIR=<path>
 Checkout directory
 OPENCLAW_GIT_UPDATE=0|1
 Toggle git updates
@@ -3560,33 +2894,31 @@ Install local Node runtime
 Downloads Node tarball (default
 22.22.0
 ) to
-&lt;prefix&gt;/tools/node-v&lt;version&gt;
+<prefix>/tools/node-v<version>
 and verifies SHA-256.
 Ensure Git
 If Git is missing, attempts install via apt/dnf/yum on Linux or Homebrew on macOS.
 Install OpenClaw under prefix
 Installs with npm using
---prefix &lt;prefix&gt;
+--prefix <prefix>
 , then writes wrapper to
-&lt;prefix&gt;/bin/openclaw
+<prefix>/bin/openclaw
 Examples (install-cli.sh)
 Default
 Custom prefix + version
 Automation JSON output
 Run onboarding
-Copy
 curl
 -fsSL
 --proto
-&#x27;=https&#x27;
+'=https'
 --tlsv1.2
 https://openclaw.ai/install-cli.sh
 bash
-Copy
 curl
 -fsSL
 --proto
-&#x27;=https&#x27;
+'=https'
 --tlsv1.2
 https://openclaw.ai/install-cli.sh
 bash
@@ -3594,22 +2926,20 @@ bash
 /opt/openclaw
 --version
 latest
-Copy
 curl
 -fsSL
 --proto
-&#x27;=https&#x27;
+'=https'
 --tlsv1.2
 https://openclaw.ai/install-cli.sh
 bash
 --json
 --prefix
 /opt/openclaw
-Copy
 curl
 -fsSL
 --proto
-&#x27;=https&#x27;
+'=https'
 --tlsv1.2
 https://openclaw.ai/install-cli.sh
 bash
@@ -3617,13 +2947,13 @@ bash
 Flags reference
 Flag
 Description
---prefix &lt;path&gt;
+--prefix <path>
 Install prefix (default:
 ~/.openclaw
---version &lt;ver&gt;
+--version <ver>
 OpenClaw version or dist-tag (default:
 latest
---node-version &lt;ver&gt;
+--node-version <ver>
 Node version (default:
 22.22.0
 --json
@@ -3643,17 +2973,17 @@ Show usage (
 Environment variables reference
 Variable
 Description
-OPENCLAW_PREFIX=&lt;path&gt;
+OPENCLAW_PREFIX=<path>
 Install prefix
-OPENCLAW_VERSION=&lt;ver&gt;
+OPENCLAW_VERSION=<ver>
 OpenClaw version or dist-tag
-OPENCLAW_NODE_VERSION=&lt;ver&gt;
+OPENCLAW_NODE_VERSION=<ver>
 Node version
 OPENCLAW_NO_ONBOARD=1
 Skip onboarding
 OPENCLAW_NPM_LOGLEVEL=error|warn|notice
 npm log level
-OPENCLAW_GIT_DIR=&lt;path&gt;
+OPENCLAW_GIT_DIR=<path>
 Legacy cleanup lookup path (used when removing old
 Peekaboo
 submodule checkout)
@@ -3682,22 +3012,19 @@ Git install
 Custom git directory
 Dry run
 Debug trace
-Copy
 iwr
 useb https:
 openclaw.ai
 install.ps1
 iex
-Copy
-&amp;
+&
 scriptblock
 ]::Create((iwr
 useb https:
 openclaw.ai
 install.ps1)))
 InstallMethod git
-Copy
-&amp;
+&
 scriptblock
 ]::Create((iwr
 useb https:
@@ -3705,20 +3032,18 @@ openclaw.ai
 install.ps1)))
 InstallMethod git
 GitDir
-&quot;C:\openclaw&quot;
-Copy
-&amp;
+"C:\openclaw"
+&
 scriptblock
 ]::Create((iwr
 useb https:
 openclaw.ai
 install.ps1)))
 DryRun
-Copy
 # install.ps1 has no dedicated -Verbose flag yet.
 Set-PSDebug
 Trace
-&amp;
+&
 scriptblock
 ]::Create((iwr
 useb https:
@@ -3733,10 +3058,10 @@ Description
 -InstallMethod npm|git
 Install method (default:
 npm
--Tag &lt;tag&gt;
+-Tag <tag>
 npm dist-tag (default:
 latest
--GitDir &lt;path&gt;
+-GitDir <path>
 Checkout directory (default:
 %USERPROFILE%\openclaw
 -NoOnboard
@@ -3751,7 +3076,7 @@ Variable
 Description
 OPENCLAW_INSTALL_METHOD=git|npm
 Install method
-OPENCLAW_GIT_DIR=&lt;path&gt;
+OPENCLAW_GIT_DIR=<path>
 Checkout directory
 OPENCLAW_NO_ONBOARD=1
 Skip onboarding
@@ -3767,40 +3092,36 @@ install.sh (non-interactive npm)
 install.sh (non-interactive git)
 install-cli.sh (JSON)
 install.ps1 (skip onboarding)
-Copy
 curl
 -fsSL
 --proto
-&#x27;=https&#x27;
+'=https'
 --tlsv1.2
 https://openclaw.ai/install.sh
 bash
 --no-prompt
 --no-onboard
-Copy
 OPENCLAW_INSTALL_METHOD
 git
 OPENCLAW_NO_PROMPT
 curl
 -fsSL
 --proto
-&#x27;=https&#x27;
+'=https'
 --tlsv1.2
 https://openclaw.ai/install.sh
 bash
-Copy
 curl
 -fsSL
 --proto
-&#x27;=https&#x27;
+'=https'
 --tlsv1.2
 https://openclaw.ai/install-cli.sh
 bash
 --json
 --prefix
 /opt/openclaw
-Copy
-&amp;
+&
 scriptblock
 ]::Create((iwr
 useb https:
@@ -3826,18 +3147,17 @@ sharp/libvips issues
 The scripts default
 SHARP_IGNORE_GLOBAL_LIBVIPS=1
 to avoid sharp building against system libvips. To override:
-Copy
 SHARP_IGNORE_GLOBAL_LIBVIPS
 curl
 -fsSL
 --proto
-&#x27;=https&#x27;
+'=https'
 --tlsv1.2
 https://openclaw.ai/install.sh
 bash
-Windows: &quot;npm error spawn git / ENOENT&quot;
+Windows: "npm error spawn git / ENOENT"
 Install Git for Windows, reopen PowerShell, rerun installer.
-Windows: &quot;openclaw is not recognized&quot;
+Windows: "openclaw is not recognized"
 Run
 npm config get prefix
 , append
@@ -3849,10 +3169,9 @@ does not currently expose a
 -Verbose
 switch.
 Use PowerShell tracing for script-level diagnostics:
-Copy
 Set-PSDebug
 Trace
-&amp;
+&
 scriptblock
 ]::Create((iwr
 useb https:
@@ -3872,72 +3191,6 @@ Docker
 
 [Source: https://docs.openclaw.ai/install/macos-vm]
 
-macOS VMs - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Hosting and deployment
-macOS VMs
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Install overview
-Install
-Installer Internals
-Other install methods
-Docker
-Podman
-Nix
-Ansible
-Bun (Experimental)
-Maintenance
-Updating
-Migration Guide
-Uninstall
-Hosting and deployment
-Fly.io
-Hetzner
-GCP
-macOS VMs
-exe.dev
-Deploy on Railway
-Deploy on Render
-Deploy on Northflank
-Advanced
-Development Channels
-OpenClaw on macOS VMs (Sandboxing)
-Recommended default (most users)
-macOS VM options
-Local VM on your Apple Silicon Mac (Lume)
-Hosted Mac providers (cloud)
-Quick path (Lume, experienced users)
-What you need (Lume)
-1) Install Lume
-2) Create the macOS VM
-3) Complete Setup Assistant
-4) Get the VM’s IP address
-5) SSH into the VM
-6) Install OpenClaw
-7) Configure channels
-8) Run the VM headlessly
-Bonus: iMessage integration
-Save a golden image
-Running 24/7
-Troubleshooting
-Related docs
-Hosting and deployment
-macOS VMs
-OpenClaw on macOS VMs (Sandboxing)
-Recommended default (most users)
-Small Linux VPS
 for an always-on Gateway and low cost. See
 VPS hosting
 Dedicated hardware
@@ -3980,31 +3233,27 @@ macOS Sequoia or later on the host
 ~60 GB free disk space per VM
 ~20 minutes
 1) Install Lume
-Copy
 /bin/bash
-&quot;$(
+"$(
 curl
 -fsSL
 https://raw.githubusercontent.com/trycua/cua/main/libs/lume/scripts/install.sh
-)&quot;
+)"
 ~/.local/bin
 isn’t in your PATH:
-Copy
 echo
-&#x27;export PATH=&quot;$PATH:$HOME/.local/bin&quot;&#x27;
-&gt;&gt;
+'export PATH="$PATH:$HOME/.local/bin"'
+>>
 ~/.zshrc
-&amp;&amp;
+&&
 source
 ~/.zshrc
 Verify:
-Copy
 lume
 --version
 Docs:
 Lume Installation
 2) Create the macOS VM
-Copy
 lume
 create
 openclaw
@@ -4024,22 +3273,19 @@ After setup completes, enable SSH:
 Open System Settings → General → Sharing
 Enable “Remote Login”
 4) Get the VM’s IP address
-Copy
 lume
 get
 openclaw
 Look for the IP address (usually
 192.168.64.x
 5) SSH into the VM
-Copy
 ssh
-[email&#160;protected]
+[email protected]
 Replace
 youruser
 with the account you created, and the IP with your VM’s IP.
 6) Install OpenClaw
 Inside the VM:
-Copy
 npm
 install
 openclaw@latest
@@ -4049,28 +3295,24 @@ onboard
 Follow the onboarding prompts to set up your model provider (Anthropic, OpenAI, etc.).
 7) Configure channels
 Edit the config file:
-Copy
 nano
 ~/.openclaw/openclaw.json
 Add your channels:
-Copy
-&quot;channels&quot;
-&quot;whatsapp&quot;
-&quot;dmPolicy&quot;
-&quot;allowlist&quot;
-&quot;allowFrom&quot;
-&quot;+15551234567&quot;
-&quot;telegram&quot;
-&quot;botToken&quot;
-&quot;YOUR_BOT_TOKEN&quot;
+"channels"
+"whatsapp"
+"dmPolicy"
+"allowlist"
+"allowFrom"
+"+15551234567"
+"telegram"
+"botToken"
+"YOUR_BOT_TOKEN"
 Then login to WhatsApp (scan QR):
-Copy
 openclaw
 channels
 login
 8) Run the VM headlessly
 Stop the VM and restart without display:
-Copy
 lume
 stop
 openclaw
@@ -4080,10 +3322,9 @@ openclaw
 --no-display
 The VM runs in the background. OpenClaw’s daemon keeps the gateway running.
 To check status:
-Copy
 ssh
-[email&#160;protected]
-&quot;openclaw status&quot;
+[email protected]
+"openclaw status"
 Bonus: iMessage integration
 This is the killer feature of running on macOS. Use
 BlueBubbles
@@ -4093,23 +3334,21 @@ Download BlueBubbles from bluebubbles.app
 Sign in with your Apple ID
 Enable the Web API and set a password
 Point BlueBubbles webhooks at your gateway (example:
-https://your-gateway-host:3000/bluebubbles-webhook?password=&lt;password&gt;
+https://your-gateway-host:3000/bluebubbles-webhook?password=<password>
 Add to your OpenClaw config:
-Copy
-&quot;channels&quot;
-&quot;bluebubbles&quot;
-&quot;serverUrl&quot;
-&quot;http://localhost:1234&quot;
-&quot;password&quot;
-&quot;your-api-password&quot;
-&quot;webhookPath&quot;
-&quot;/bluebubbles-webhook&quot;
+"channels"
+"bluebubbles"
+"serverUrl"
+"http://localhost:1234"
+"password"
+"your-api-password"
+"webhookPath"
+"/bluebubbles-webhook"
 Restart the gateway. Now your agent can send and receive iMessages.
 Full setup details:
 BlueBubbles channel
 Save a golden image
 Before customizing further, snapshot your clean state:
-Copy
 lume
 stop
 openclaw
@@ -4118,11 +3357,10 @@ clone
 openclaw
 openclaw-golden
 Reset anytime:
-Copy
 lume
 stop
 openclaw
-&amp;&amp;
+&&
 lume
 delete
 openclaw
@@ -4178,68 +3416,6 @@ exe.dev
 
 [Source: https://docs.openclaw.ai/install/migrating]
 
-Migration Guide - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Maintenance
-Migration Guide
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Install overview
-Install
-Installer Internals
-Other install methods
-Docker
-Podman
-Nix
-Ansible
-Bun (Experimental)
-Maintenance
-Updating
-Migration Guide
-Uninstall
-Hosting and deployment
-Fly.io
-Hetzner
-GCP
-macOS VMs
-exe.dev
-Deploy on Railway
-Deploy on Render
-Deploy on Northflank
-Advanced
-Development Channels
-Migrating OpenClaw to a new machine
-Before you start (what you are migrating)
-1) Identify your state directory
-2) Identify your workspace
-3) Understand what you will preserve
-Migration steps (recommended)
-Step 0 — Make a backup (old machine)
-Step 1 — Install OpenClaw on the new machine
-Step 2 — Copy the state dir + workspace to the new machine
-Step 3 — Run Doctor (migrations + service repair)
-Common footguns (and how to avoid them)
-Footgun: profile / state-dir mismatch
-Footgun: copying only openclaw.json
-Footgun: permissions / ownership
-Footgun: migrating between remote/local modes
-Footgun: secrets in backups
-Verification checklist
-Related
-Maintenance
-Migration Guide
-Migrating OpenClaw to a new machine
 This guide migrates a OpenClaw Gateway from one machine to another
 without redoing onboarding
 The migration is simple conceptually:
@@ -4264,14 +3440,13 @@ Most installs use the default:
 State dir:
 ~/.openclaw/
 But it may be different if you use:
---profile &lt;name&gt;
+--profile <name>
 (often becomes
-~/.openclaw-&lt;profile&gt;/
+~/.openclaw-<profile>/
 OPENCLAW_STATE_DIR=/some/path
 If you’re not sure, run on the
 old
 machine:
-Copy
 openclaw
 status
 Look for mentions of
@@ -4313,12 +3488,10 @@ Step 0 — Make a backup (old machine)
 On the
 old
 machine, stop the gateway first so files aren’t changing mid-copy:
-Copy
 openclaw
 gateway
 stop
 (Optional but recommended) archive the state dir and workspace:
-Copy
 # Adjust paths if you use a profile or custom locations
 tar
 -czf
@@ -4342,7 +3515,6 @@ At this stage, it’s OK if onboarding creates a fresh
 ~/.openclaw/
 — you will overwrite it in the next step.
 Step 2 — Copy the state dir + workspace to the new machine
-Copy
 both
 $OPENCLAW_STATE_DIR
 (default
@@ -4363,12 +3535,10 @@ Step 3 — Run Doctor (migrations + service repair)
 On the
 new
 machine:
-Copy
 openclaw
 doctor
 Doctor is the “safe boring” command. It repairs services, applies config migrations, and warns about mismatches.
 Then:
-Copy
 openclaw
 gateway
 restart
@@ -4385,7 +3555,6 @@ empty session history
 Fix: run the gateway/service using the
 same
 profile/state dir you migrated, then rerun:
-Copy
 openclaw
 doctor
 Footgun: copying only
@@ -4393,7 +3562,7 @@ openclaw.json
 openclaw.json
 is not enough. Many providers store state under:
 $OPENCLAW_STATE_DIR/credentials/
-$OPENCLAW_STATE_DIR/agents/&lt;agentId&gt;/...
+$OPENCLAW_STATE_DIR/agents/<agentId>/...
 Always migrate the entire
 $OPENCLAW_STATE_DIR
 folder.
@@ -4432,64 +3601,9 @@ Uninstall
 
 [Source: https://docs.openclaw.ai/install/nix]
 
-Nix - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Other install methods
-Nix
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Install overview
-Install
-Installer Internals
-Other install methods
-Docker
-Podman
-Nix
-Ansible
-Bun (Experimental)
-Maintenance
-Updating
-Migration Guide
-Uninstall
-Hosting and deployment
-Fly.io
-Hetzner
-GCP
-macOS VMs
-exe.dev
-Deploy on Railway
-Deploy on Render
-Deploy on Northflank
-Advanced
-Development Channels
-Nix Installation
-Quick Start
-What you get
-Nix Mode Runtime Behavior
-Config + state paths
-Runtime behavior in Nix mode
-Packaging note (macOS)
-Related
-Other install methods
-Nix
-Nix Installation
-The recommended way to run OpenClaw with Nix is via
-nix-openclaw
 — a batteries-included Home Manager module.
 Quick Start
 Paste this to your AI agent (Claude, Cursor, etc.):
-Copy
 I want to set up nix-openclaw on my Mac.
 Repository: github:openclaw/nix-openclaw
 What I need you to do:
@@ -4517,11 +3631,9 @@ OpenClaw supports a
 Nix mode
 that makes configuration deterministic and disables auto-install flows.
 Enable it by exporting:
-Copy
 OPENCLAW_NIX_MODE
 On macOS, the GUI app does not automatically inherit shell env vars. You can
 also enable Nix mode via defaults:
-Copy
 defaults
 write
 bot.molt.mac
@@ -4555,7 +3667,6 @@ Missing dependencies surface Nix-specific remediation messages
 UI surfaces a read-only Nix mode banner when present
 Packaging note (macOS)
 The macOS packaging flow expects a stable Info.plist template at:
-Copy
 apps/macos/Sources/OpenClaw/Resources/Info.plist
 scripts/package-mac-app.sh
 copies this template into the app bundle and patches dynamic fields
@@ -4576,61 +3687,10 @@ Ansible
 
 [Source: https://docs.openclaw.ai/install/node]
 
-Node.js - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Node runtime
-Node.js
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Help
-Help
-Troubleshooting
-FAQ
-Community
-OpenClaw Lore
-Environment and debugging
-Environment Variables
-Debugging
-Testing
-Scripts
-Node runtime
-Node.js
-Compaction internals
-Session Management Deep Dive
-Developer setup
-Setup
-Contributing
-CI Pipeline
-Docs meta
-Docs Hubs
-Docs directory
-Node.js
-Check your version
-Install Node
-Troubleshooting
-openclaw: command not found
-Permission errors on npm install -g (Linux)
-Node runtime
-Node.js
-Node.js
-OpenClaw requires
-Node 22 or newer
 . The
 installer script
 will detect and install Node automatically — this page is for when you want to set up Node yourself and make sure everything is wired up correctly (versions, PATH, global installs).
 Check your version
-Copy
 node
 If this prints
 v22.x.x
@@ -4641,14 +3701,12 @@ Linux
 Windows
 Homebrew
 (recommended):
-Copy
 brew
 install
 node
 Or download the macOS installer from
 nodejs.org
 Ubuntu / Debian:
-Copy
 curl
 -fsSL
 https://deb.nodesource.com/setup_22.x
@@ -4659,7 +3717,6 @@ apt-get
 install
 nodejs
 Fedora / RHEL:
-Copy
 sudo
 dnf
 install
@@ -4667,10 +3724,8 @@ nodejs
 Or use a version manager (see below).
 winget
 (recommended):
-Copy
 winget install OpenJS.NodeJS.LTS
 Chocolatey:
-Copy
 choco install nodejs
 lts
 Or download the Windows installer from
@@ -4684,7 +3739,6 @@ nvm
 mise
 — polyglot (Node, Python, Ruby, etc.)
 Example with fnm:
-Copy
 fnm
 install
 fnm
@@ -4699,17 +3753,15 @@ Troubleshooting
 openclaw: command not found
 This almost always means npm’s global bin directory isn’t on your PATH.
 Find your global npm prefix
-Copy
 npm
 prefix
-Check if it&#x27;s on your PATH
-Copy
+Check if it's on your PATH
 echo
-&quot;$PATH&quot;
+"$PATH"
 Look for
-&lt;npm-prefix&gt;/bin
+<npm-prefix>/bin
 (macOS/Linux) or
-&lt;npm-prefix&gt;
+<npm-prefix>
 (Windows) in the output.
 Add it to your shell startup file
 macOS / Linux
@@ -4717,13 +3769,12 @@ Windows
 Add to
 ~/.zshrc
 ~/.bashrc
-Copy
 export
 PATH
-&quot;$(
+"$(
 npm
 prefix
-)/bin:$PATH&quot;
+)/bin:$PATH"
 Then open a new terminal (or run
 rehash
 in zsh /
@@ -4738,17 +3789,16 @@ npm install -g
 If you see
 EACCES
 errors, switch npm’s global prefix to a user-writable directory:
-Copy
 mkdir
-&quot;$HOME/.npm-global&quot;
+"$HOME/.npm-global"
 npm
 config
 set
 prefix
-&quot;$HOME/.npm-global&quot;
+"$HOME/.npm-global"
 export
 PATH
-&quot;$HOME/.npm-global/bin:$PATH&quot;
+"$HOME/.npm-global/bin:$PATH"
 Add the
 export PATH=...
 line to your
@@ -4763,55 +3813,6 @@ Session Management Deep Dive
 
 [Source: https://docs.openclaw.ai/install/northflank]
 
-Deploy on Northflank - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Hosting and deployment
-Deploy on Northflank
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Install overview
-Install
-Installer Internals
-Other install methods
-Docker
-Podman
-Nix
-Ansible
-Bun (Experimental)
-Maintenance
-Updating
-Migration Guide
-Uninstall
-Hosting and deployment
-Fly.io
-Hetzner
-GCP
-macOS VMs
-exe.dev
-Deploy on Railway
-Deploy on Render
-Deploy on Northflank
-Advanced
-Development Channels
-How to get started
-What you get
-Setup flow
-Getting chat tokens
-Telegram bot token
-Discord bot token
-Hosting and deployment
-Deploy on Northflank
 Deploy OpenClaw on Northflank with a one-click template and finish setup in your browser.
 This is the easiest “no terminal on the server” path: Northflank runs the Gateway for you,
 and you configure everything via the
@@ -4848,7 +3849,7 @@ Persistent storage via Northflank Volume (
 ) so config/credentials/workspace survive redeploys
 Setup flow
 Visit
-https://&lt;your-northflank-domain&gt;/setup
+https://<your-northflank-domain>/setup
 and enter your
 SETUP_PASSWORD
 Choose a model/auth provider and paste your key.
@@ -4856,7 +3857,7 @@ Choose a model/auth provider and paste your key.
 Click
 Run setup
 Open the Control UI at
-https://&lt;your-northflank-domain&gt;/openclaw
+https://<your-northflank-domain>/openclaw
 If Telegram DMs are set to pairing, the setup wizard can approve the pairing code.
 Getting chat tokens
 Telegram bot token
@@ -4893,59 +3894,6 @@ Development Channels
 
 [Source: https://docs.openclaw.ai/install/podman]
 
-Podman - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Other install methods
-Podman
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Install overview
-Install
-Installer Internals
-Other install methods
-Docker
-Podman
-Nix
-Ansible
-Bun (Experimental)
-Maintenance
-Updating
-Migration Guide
-Uninstall
-Hosting and deployment
-Fly.io
-Hetzner
-GCP
-macOS VMs
-exe.dev
-Deploy on Railway
-Deploy on Render
-Deploy on Northflank
-Advanced
-Development Channels
-Podman
-Requirements
-Quick start
-Systemd (Quadlet, optional)
-The openclaw user (non-login)
-Environment and config
-Useful commands
-Troubleshooting
-Optional: run as your own user
-Other install methods
-Podman
-Podman
 Run the OpenClaw gateway in a
 rootless
 Podman container. Uses the same image as Docker (build from the repo
@@ -4956,17 +3904,15 @@ Sudo for one-time setup (create user, build image)
 Quick start
 1. One-time setup
 (from repo root; creates user, builds image, installs launch script):
-Copy
 ./setup-podman.sh
 This also creates a minimal
 ~openclaw/.openclaw/openclaw.json
 (sets
-gateway.mode=&quot;local&quot;
+gateway.mode="local"
 ) so the gateway can start without running the wizard.
 By default the container is
 not
 installed as a systemd service, you start it manually (see below). For a production-style setup with auto-start and restarts, install it as a systemd Quadlet user service instead:
-Copy
 ./setup-podman.sh
 --quadlet
 (Or set
@@ -4976,12 +3922,10 @@ OPENCLAW_PODMAN_QUADLET=1
 to install only the container and launch script.)
 2. Start gateway
 (manual, for quick smoke testing):
-Copy
 ./scripts/run-openclaw-podman.sh
 launch
 3. Onboarding wizard
 (e.g. to add channels or providers):
-Copy
 ./scripts/run-openclaw-podman.sh
 launch
 setup
@@ -5040,10 +3984,8 @@ range. Many distros assign these automatically when the user is created. If setu
 /etc/subuid
 and
 /etc/subgid
-Copy
 openclaw:100000:65536
 Then start the gateway as that user (e.g. from cron or systemd):
-Copy
 sudo
 openclaw
 /home/openclaw/run-openclaw-podman.sh
@@ -5131,7 +4073,7 @@ gateway.mode=local
 Ensure
 ~openclaw/.openclaw/openclaw.json
 exists and sets
-gateway.mode=&quot;local&quot;
+gateway.mode="local"
 setup-podman.sh
 creates this file if missing.
 Rootless Podman fails for user openclaw:
@@ -5162,7 +4104,7 @@ sudo systemctl --machine openclaw@ --user daemon-reload
 after editing the
 .container
 file. Quadlet requires cgroups v2:
-podman info --format &#x27;{{.Host.CgroupsVersion}}&#x27;
+podman info --format '{{.Host.CgroupsVersion}}'
 should show
 Optional: run as your own user
 To run the gateway as your normal user (no dedicated openclaw user): build the image, create
@@ -5186,61 +4128,6 @@ Nix
 
 [Source: https://docs.openclaw.ai/install/railway]
 
-Deploy on Railway - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Hosting and deployment
-Deploy on Railway
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Install overview
-Install
-Installer Internals
-Other install methods
-Docker
-Podman
-Nix
-Ansible
-Bun (Experimental)
-Maintenance
-Updating
-Migration Guide
-Uninstall
-Hosting and deployment
-Fly.io
-Hetzner
-GCP
-macOS VMs
-exe.dev
-Deploy on Railway
-Deploy on Render
-Deploy on Northflank
-Advanced
-Development Channels
-Quick checklist (new users)
-One-click deploy
-What you get
-Required Railway settings
-Public Networking
-Volume (required)
-Variables
-Setup flow
-Getting chat tokens
-Telegram bot token
-Discord bot token
-Backups &amp; migration
-Hosting and deployment
-Deploy on Railway
 Deploy OpenClaw on Railway with a one-click template and finish setup in your browser.
 This is the easiest “no terminal on the server” path: Railway runs the Gateway for you,
 and you configure everything via the
@@ -5263,7 +4150,7 @@ HTTP Proxy
 on port
 8080
 Open
-https://&lt;your-railway-domain&gt;/setup
+https://<your-railway-domain>/setup
 and finish the wizard.
 One-click deploy
 Deploy on Railway
@@ -5271,13 +4158,13 @@ After deploy, find your public URL in
 Railway → your service → Settings → Domains
 Railway will either:
 give you a generated domain (often
-https://&lt;something&gt;.up.railway.app
+https://<something>.up.railway.app
 ), or
 use your custom domain if you attached one.
 Then open:
-https://&lt;your-railway-domain&gt;/setup
+https://<your-railway-domain>/setup
 — setup wizard (password protected)
-https://&lt;your-railway-domain&gt;/openclaw
+https://<your-railway-domain>/openclaw
 — Control UI
 What you get
 Hosted OpenClaw Gateway + Control UI
@@ -5314,7 +4201,7 @@ OPENCLAW_GATEWAY_TOKEN
 (recommended; treat as an admin secret)
 Setup flow
 Visit
-https://&lt;your-railway-domain&gt;/setup
+https://<your-railway-domain>/setup
 and enter your
 SETUP_PASSWORD
 Choose a model/auth provider and paste your key.
@@ -5349,9 +4236,9 @@ and paste into
 Invite the bot to your server (OAuth2 URL Generator; scopes:
 bot
 applications.commands
-Backups &amp; migration
+Backups & migration
 Download a backup at:
-https://&lt;your-railway-domain&gt;/setup/export
+https://<your-railway-domain>/setup/export
 This exports your OpenClaw state + workspace so you can migrate to another host without losing config or memory.
 exe.dev
 Deploy on Render
@@ -5361,69 +4248,6 @@ Deploy on Render
 
 [Source: https://docs.openclaw.ai/install/render]
 
-Deploy on Render - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Hosting and deployment
-Deploy on Render
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Install overview
-Install
-Installer Internals
-Other install methods
-Docker
-Podman
-Nix
-Ansible
-Bun (Experimental)
-Maintenance
-Updating
-Migration Guide
-Uninstall
-Hosting and deployment
-Fly.io
-Hetzner
-GCP
-macOS VMs
-exe.dev
-Deploy on Railway
-Deploy on Render
-Deploy on Northflank
-Advanced
-Development Channels
-Prerequisites
-Deploy with a Render Blueprint
-Understanding the Blueprint
-Choosing a plan
-After deployment
-Complete the setup wizard
-Access the Control UI
-Render Dashboard features
-Logs
-Shell access
-Environment variables
-Auto-deploy
-Custom domain
-Scaling
-Backups and migration
-Troubleshooting
-Service won’t start
-Slow cold starts (free tier)
-Data loss after redeploy
-Health check failures
-Hosting and deployment
-Deploy on Render
 Deploy OpenClaw on Render using Infrastructure as Code. The included
 render.yaml
 Blueprint defines your entire stack declaratively, service, disk, environment variables, so you can deploy with a single click and version your infrastructure alongside your code.
@@ -5442,13 +4266,12 @@ Prompt you to set
 SETUP_PASSWORD
 Build the Docker image and deploy
 Once deployed, your service URL follows the pattern
-https://&lt;service-name&gt;.onrender.com
+https://<service-name>.onrender.com
 Understanding the Blueprint
 Render Blueprints are YAML files that define your infrastructure. The
 render.yaml
 in this
 repository configures everything needed to run OpenClaw:
-Copy
 services
 type
 web
@@ -5464,7 +4287,7 @@ envVars
 key
 PORT
 value
-&quot;8080&quot;
+"8080"
 key
 SETUP_PASSWORD
 sync
@@ -5531,7 +4354,7 @@ render.yaml
 After deployment
 Complete the setup wizard
 Navigate to
-https://&lt;your-service&gt;.onrender.com/setup
+https://<your-service>.onrender.com/setup
 Enter your
 SETUP_PASSWORD
 Select a model provider and paste your API key
@@ -5540,7 +4363,7 @@ Click
 Run setup
 Access the Control UI
 The web dashboard is available at
-https://&lt;your-service&gt;.onrender.com/openclaw
+https://<your-service>.onrender.com/openclaw
 Render Dashboard features
 Logs
 View real-time logs in
@@ -5576,8 +4399,7 @@ Horizontal
 For OpenClaw, vertical scaling is usually sufficient. Horizontal scaling requires sticky sessions or external state management.
 Backups and migration
 Export your configuration and workspace at any time:
-Copy
-https://&lt;your-service&gt;.onrender.com/setup/export
+https://<your-service>.onrender.com/setup/export
 This downloads a portable backup you can restore on any OpenClaw host.
 Troubleshooting
 Service won’t start
@@ -5600,7 +4422,7 @@ Render expects a 200 response from
 within 30 seconds. If builds succeed but deploys fail, the service may be taking too long to start. Check:
 Build logs for errors
 Whether the container runs locally with
-docker build &amp;&amp; docker run
+docker build && docker run
 Deploy on Railway
 Deploy on Northflank
 
@@ -5609,59 +4431,6 @@ Deploy on Northflank
 
 [Source: https://docs.openclaw.ai/install/uninstall]
 
-Uninstall - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Maintenance
-Uninstall
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Install overview
-Install
-Installer Internals
-Other install methods
-Docker
-Podman
-Nix
-Ansible
-Bun (Experimental)
-Maintenance
-Updating
-Migration Guide
-Uninstall
-Hosting and deployment
-Fly.io
-Hetzner
-GCP
-macOS VMs
-exe.dev
-Deploy on Railway
-Deploy on Render
-Deploy on Northflank
-Advanced
-Development Channels
-Uninstall
-Easy path (CLI still installed)
-Manual service removal (CLI not installed)
-macOS (launchd)
-Linux (systemd user unit)
-Windows (Scheduled Task)
-Normal install vs source checkout
-Normal install (install.sh / npm / pnpm / bun)
-Source checkout (git clone)
-Maintenance
-Uninstall
-Uninstall
 Two paths:
 Easy path
 openclaw
@@ -5670,11 +4439,9 @@ Manual service removal
 if the CLI is gone but the service is still running.
 Easy path (CLI still installed)
 Recommended: use the built-in uninstaller:
-Copy
 openclaw
 uninstall
 Non-interactive (automation / npx):
-Copy
 openclaw
 uninstall
 --all
@@ -5688,30 +4455,25 @@ uninstall
 --non-interactive
 Manual steps (same result):
 Stop the gateway service:
-Copy
 openclaw
 gateway
 stop
 Uninstall the gateway service (launchd/systemd/schtasks):
-Copy
 openclaw
 gateway
 uninstall
 Delete state + config:
-Copy
 -rf
-&quot;${OPENCLAW_STATE_DIR
+"${OPENCLAW_STATE_DIR
 $HOME
-.openclaw}&quot;
+.openclaw}"
 If you set
 OPENCLAW_CONFIG_PATH
 to a custom location outside the state dir, delete that file too.
 Delete your workspace (optional, removes agent files):
-Copy
 -rf
 ~/.openclaw/workspace
 Remove the CLI install (pick the one you used):
-Copy
 npm
 openclaw
 pnpm
@@ -5721,7 +4483,6 @@ bun
 remove
 openclaw
 If you installed the macOS app:
-Copy
 -rf
 /Applications/OpenClaw.app
 Notes:
@@ -5729,7 +4490,7 @@ If you used profiles (
 --profile
 OPENCLAW_PROFILE
 ), repeat step 3 for each state dir (defaults are
-~/.openclaw-&lt;profile&gt;
+~/.openclaw-<profile>
 In remote mode, the state dir lives on the
 gateway host
 , so run steps 1-4 there too.
@@ -5741,11 +4502,10 @@ macOS (launchd)
 Default label is
 bot.molt.gateway
 (or
-bot.molt.&lt;profile&gt;
+bot.molt.<profile>
 ; legacy
 com.openclaw.*
 may still exist):
-Copy
 launchctl
 bootout
 gui/
@@ -5753,7 +4513,7 @@ $UID
 /bot.molt.gateway
 ~/Library/LaunchAgents/bot.molt.gateway.plist
 If you used a profile, replace the label and plist name with
-bot.molt.&lt;profile&gt;
+bot.molt.<profile>
 . Remove any legacy
 com.openclaw.*
 plists if present.
@@ -5761,8 +4521,7 @@ Linux (systemd user unit)
 Default unit name is
 openclaw-gateway.service
 (or
-openclaw-gateway-&lt;profile&gt;.service
-Copy
+openclaw-gateway-<profile>.service
 systemctl
 --user
 disable
@@ -5776,19 +4535,18 @@ Windows (Scheduled Task)
 Default task name is
 OpenClaw Gateway
 (or
-OpenClaw Gateway (&lt;profile&gt;)
+OpenClaw Gateway (<profile>)
 The task script lives under your state dir.
-Copy
 schtasks
 Delete
-&quot;OpenClaw Gateway&quot;
+"OpenClaw Gateway"
 Remove-Item
 Force
-&quot;$
+"$
 env:
-USERPROFILE\.openclaw\gateway.cmd&quot;
+USERPROFILE\.openclaw\gateway.cmd"
 If you used a profile, delete the matching task name and
-~\.openclaw-&lt;profile&gt;\gateway.cmd
+~\.openclaw-<profile>\gateway.cmd
 Normal install vs source checkout
 Normal install (install.sh / npm / pnpm / bun)
 If you used
@@ -5820,63 +4578,6 @@ Fly.io
 
 [Source: https://docs.openclaw.ai/install/updating]
 
-Updating - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Maintenance
-Updating
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Install overview
-Install
-Installer Internals
-Other install methods
-Docker
-Podman
-Nix
-Ansible
-Bun (Experimental)
-Maintenance
-Updating
-Migration Guide
-Uninstall
-Hosting and deployment
-Fly.io
-Hetzner
-GCP
-macOS VMs
-exe.dev
-Deploy on Railway
-Deploy on Render
-Deploy on Northflank
-Advanced
-Development Channels
-Updating
-Recommended: re-run the website installer (upgrade in place)
-Before you update
-Update (global install)
-Update (openclaw update)
-Update (Control UI / RPC)
-Update (from source)
-Always Run: openclaw doctor
-Start / stop / restart the Gateway
-Rollback / pinning (when something breaks)
-Pin (global install)
-Pin (source) by date
-If you’re stuck
-Maintenance
-Updating
-Updating
 OpenClaw is moving fast (pre “1.0”). Treat updates like shipping infra: update → run checks → restart (or use
 openclaw update
 , which restarts) → verify.
@@ -5888,7 +4589,6 @@ detects existing installs, upgrades in place, and runs
 openclaw doctor
 when
 needed.
-Copy
 curl
 -fsSL
 https://openclaw.ai/install.sh
@@ -5900,7 +4600,6 @@ if you don’t want the onboarding wizard to run again.
 For
 source installs
 , use:
-Copy
 curl
 -fsSL
 https://openclaw.ai/install.sh
@@ -5939,10 +4638,8 @@ Workspace:
 ~/.openclaw/workspace
 Update (global install)
 Global install (pick one):
-Copy
 npm
 openclaw@latest
-Copy
 pnpm
 add
 openclaw@latest
@@ -5950,7 +4647,6 @@ We do
 not
 recommend Bun for the Gateway runtime (WhatsApp/Telegram bugs).
 To switch update channels (git + npm installs):
-Copy
 openclaw
 update
 --channel
@@ -5964,7 +4660,7 @@ update
 --channel
 stable
 Use
---tag &lt;dist-tag|version&gt;
+--tag <dist-tag|version>
 for a one-off install tag/version.
 See
 Development channels
@@ -5972,7 +4668,6 @@ for channel semantics and release notes.
 Note: on npm installs, the gateway logs an update hint on startup (checks the current channel tag). Disable via
 update.checkOnStart: false
 Then:
-Copy
 openclaw
 doctor
 openclaw
@@ -5990,7 +4685,6 @@ openclaw update
 For
 source installs
 (git checkout), prefer:
-Copy
 openclaw
 update
 It runs a safe-ish update flow:
@@ -6009,7 +4703,7 @@ openclaw update
 will try to update via your package manager. If it can’t detect the install, use “Update (global install)” instead.
 Update (Control UI / RPC)
 The Control UI has
-Update &amp; Restart
+Update & Restart
 (RPC:
 update.run
 ). It:
@@ -6022,11 +4716,9 @@ If the rebase fails, the gateway aborts and restarts without applying the update
 Update (from source)
 From the repo checkout:
 Preferred:
-Copy
 openclaw
 update
 Manual (equivalent-ish):
-Copy
 git
 pull
 pnpm
@@ -6079,7 +4771,6 @@ Details:
 Doctor
 Start / stop / restart the Gateway
 CLI (works regardless of OS):
-Copy
 openclaw
 gateway
 status
@@ -6100,14 +4791,14 @@ If you’re supervised:
 macOS launchd (app-bundled LaunchAgent):
 launchctl kickstart -k gui/$UID/bot.molt.gateway
 (use
-bot.molt.&lt;profile&gt;
+bot.molt.<profile>
 ; legacy
 com.openclaw.*
 still works)
 Linux systemd user service:
-systemctl --user restart openclaw-gateway[-&lt;profile&gt;].service
+systemctl --user restart openclaw-gateway[-<profile>].service
 Windows (WSL2):
-systemctl --user restart openclaw-gateway[-&lt;profile&gt;].service
+systemctl --user restart openclaw-gateway[-<profile>].service
 launchctl
 systemctl
 only work if the service is installed; otherwise run
@@ -6117,25 +4808,22 @@ Gateway runbook
 Rollback / pinning (when something breaks)
 Pin (global install)
 Install a known-good version (replace
-&lt;version&gt;
+<version>
 with the last working one):
-Copy
 npm
 openclaw@
-&lt;
+<
 versio
-&gt;
-Copy
+>
 pnpm
 add
 openclaw@
-&lt;
+<
 versio
-&gt;
+>
 Tip: to see the current published version, run
 npm view openclaw version
 Then restart + re-run doctor:
-Copy
 openclaw
 doctor
 openclaw
@@ -6143,20 +4831,18 @@ gateway
 restart
 Pin (source) by date
 Pick a commit from a date (example: “state of main as of 2026-01-01”):
-Copy
 git
 fetch
 origin
 git
 checkout
-&quot;$(
+"$(
 git
 rev-list
---before=\&quot;2026-01-01\&quot;
+--before=\"2026-01-01\"
 origin/main
-)&quot;
+)"
 Then reinstall deps + restart:
-Copy
 pnpm
 install
 pnpm
@@ -6165,7 +4851,6 @@ openclaw
 gateway
 restart
 If you want to go back to latest later:
-Copy
 git
 checkout
 main

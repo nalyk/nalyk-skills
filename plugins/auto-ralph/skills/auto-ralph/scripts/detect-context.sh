@@ -42,26 +42,20 @@ check_dependencies
 # ============================================================================
 read_settings() {
     local settings_file="$HOME/.claude/auto-ralph.local.md"
-    if [[ -f "$settings_file" ]]; then
-        # Extract YAML frontmatter and output as key=value
-        sed -n '/^---$/,/^---$/p' "$settings_file" | grep -v '^---$' | grep -v '^#'
-    else
-        # Default settings
-        echo "max_iterations: 25"
-        echo "score_threshold: 3"
-        echo "skip_explore_for_score: 4"
-        echo "default_language: ro"
-        echo "auto_execute: false"
-        echo "docker_analysis: true"
+    # Require a complete frontmatter block (at least two '---' lines);
+    # otherwise the sed range would slurp the file to EOF.
+    if [[ -f "$settings_file" ]] && \
+       [[ "$(grep -c '^---$' "$settings_file" || true)" -ge 2 ]]; then
+        sed -n '/^---$/,/^---$/p' "$settings_file" | grep -v '^---$' | grep -v '^#' || true
     fi
 }
 
-# Get a specific setting value
+# Get a specific setting value (falls back to default when unset/invalid)
 get_setting() {
     local key="$1"
     local default="$2"
     local value
-    value=$(read_settings | grep "^${key}:" | head -1 | cut -d':' -f2 | tr -d ' ')
+    value=$(read_settings | grep "^${key}:" | head -1 | sed 's/^[^:]*: *//' | tr -d ' ' || true)
     echo "${value:-$default}"
 }
 
@@ -86,30 +80,38 @@ output_json() {
     local error_logs="$5"
     local file_structure="$6"
     local docker_status="$7"
-    local settings="$8"
 
-    cat <<EOF
-{
-  "git": {
-    "status": $(echo "$git_status" | jq -Rs .),
-    "modified_files": $(echo "$git_diff_files" | jq -Rs .),
-    "recent_commits": $(echo "$recent_commits" | jq -Rs .)
-  },
-  "tests": {
-    "status": $(echo "$test_status" | jq -Rs .)
-  },
-  "errors": $(echo "$error_logs" | jq -Rs .),
-  "structure": $(echo "$file_structure" | jq -Rs .),
-  "docker": $(echo "$docker_status" | jq -Rs .),
-  "settings": {
-    "max_iterations": $(get_setting "max_iterations" "25"),
-    "score_threshold": $(get_setting "score_threshold" "3"),
-    "skip_explore_for_score": $(get_setting "skip_explore_for_score" "4"),
-    "auto_execute": $(get_setting "auto_execute" "false"),
-    "docker_analysis": $(get_setting "docker_analysis" "true")
-  }
-}
-EOF
+    jq -n \
+        --arg git_status "$git_status" \
+        --arg modified_files "$git_diff_files" \
+        --arg recent_commits "$recent_commits" \
+        --arg test_status "$test_status" \
+        --arg errors "$error_logs" \
+        --arg structure "$file_structure" \
+        --arg docker "$docker_status" \
+        --arg max_iterations "$(get_setting "max_iterations" "25")" \
+        --arg score_threshold "$(get_setting "score_threshold" "3")" \
+        --arg skip_explore_for_score "$(get_setting "skip_explore_for_score" "4")" \
+        --arg auto_execute "$(get_setting "auto_execute" "false")" \
+        --arg docker_analysis "$(get_setting "docker_analysis" "true")" \
+        '{
+          git: {
+            status: $git_status,
+            modified_files: $modified_files,
+            recent_commits: $recent_commits
+          },
+          tests: { status: $test_status },
+          errors: $errors,
+          structure: $structure,
+          docker: $docker,
+          settings: {
+            max_iterations: (($max_iterations | tonumber?) // 25),
+            score_threshold: (($score_threshold | tonumber?) // 3),
+            skip_explore_for_score: (($skip_explore_for_score | tonumber?) // 4),
+            auto_execute: ($auto_execute == "true"),
+            docker_analysis: ($docker_analysis != "false")
+          }
+        }'
 }
 
 # ============================================================================
@@ -229,16 +231,18 @@ detect_docker() {
     if [[ -f "docker-compose.yml" ]] || [[ -f "docker-compose.yaml" ]]; then
         docker_status="docker-compose found; "
 
-        # Try to get running containers
+        # Try to get running containers (bounded: docker can hang on a dead daemon)
         if command -v docker &>/dev/null; then
-            local running=$(docker ps --format "{{.Names}}" 2>/dev/null | head -5 | tr '\n' ', ')
+            local running
+            running=$(timeout 3 docker ps --format "{{.Names}}" 2>/dev/null | head -5 | tr '\n' ', ' || true)
             if [[ -n "$running" ]]; then
                 docker_status="${docker_status}running: ${running}; "
             fi
 
             # Try to get recent logs from compose services (limit output)
             if command -v docker-compose &>/dev/null; then
-                local logs=$(docker-compose logs --tail=20 2>/dev/null | tail -30)
+                local logs
+                logs=$(timeout 3 docker-compose logs --tail=20 2>/dev/null | tail -30 || true)
                 if [[ -n "$logs" ]]; then
                     docker_status="${docker_status}\n=== docker-compose logs (last 20) ===\n${logs}"
                 fi

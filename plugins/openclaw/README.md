@@ -1,69 +1,41 @@
 # openclaw
 
-Deep expertise plugin for OpenClaw -- the self-hosted, open-source multi-channel AI gateway. Knowledge extracted from all 279 documentation pages at docs.openclaw.ai.
+Expert plugin for OpenClaw — the self-hosted, open-source multi-channel AI gateway. Reference corpus scraped from docs.openclaw.ai (268 pages), chrome-stripped, organized into 14 topic files.
 
 ## Installation
 
 ```bash
-/plugin install openclaw@nalyk-skills-demo
+/plugin install openclaw@nalyk-skills
 ```
 
-No external dependencies. This is a pure knowledge plugin.
-
-## What It Knows
-
-Complete coverage of the OpenClaw system:
-
-| Topic | Reference File | Content |
-|-------|---------------|---------|
-| Channels | `channels.md` | WhatsApp, Telegram, Discord, Slack, Signal, iMessage, Google Chat, MS Teams, Matrix, Mattermost, Line, Zalo, IRC, Feishu, BlueBubbles, Nextcloud Talk, Nostr, Synology Chat, Tlon, Twitch |
-| Architecture | `concepts.md` | Agent runtime, agent loop, sessions, memory, compaction, multi-agent, streaming, retry, queue |
-| Gateway & Ops | `gateway-ops.md` | Configuration, authentication, security, sandboxing, networking, remote access, Tailscale, WebChat |
-| Tools | `tools.md` | Lobster tool, LLM task, exec, browser, agent send, sub-agents, skills, ClawHub, plugins |
-| CLI | `cli.md` | All 44 CLI commands |
-| Installation | `install.md` | npm, curl, Docker, Nix, Ansible, Bun |
-| Platforms | `platforms.md` | macOS, Linux, Windows/WSL2, iOS, Android, Hetzner, GCP, Fly |
-| Templates | `templates-reference.md` | AGENTS.md, BOOT, BOOTSTRAP, HEARTBEAT, IDENTITY, SOUL, TOOLS, USER templates |
-| Automation | `automation.md` | Cron, hooks, webhooks, Gmail PubSub |
-| Providers | `providers.md` | Anthropic, OpenAI, OpenRouter, Bedrock, Mistral, LiteLLM, local models |
-| Getting Started | `getting-started.md` | Onboarding, CLI wizard, setup |
-| Nodes & Media | `nodes-media.md` | Audio, voice, camera, images, talk mode |
-| Troubleshooting | `troubleshooting.md` | FAQ, common fixes, debug workflows |
-| Plugins | `plugins-extensions.md` | Voice call, community plugins, experiments |
-
-Total: ~1.4MB of reference content across 14 files.
+Pure knowledge plugin; no hooks, no external dependencies.
 
 ## How It Works
 
-The skill reads the relevant reference file based on the user's question, then answers with specific configuration patterns, CLI commands, and concrete details. No guessing.
+The `openclaw-expert` skill is a router: it greps the relevant `reference/*.md` file for keywords and `[Source: <url>]` page anchors, then Reads only the matching section (offset/limit). It never reads whole reference files. `reference/INDEX.md` maps every file to its page anchors. Topic routing table lives in `SKILL.md`.
 
-## Auto-activation
+Auto-activates on: OpenClaw, `openclaw.json`, ClawHub, pi-mono, gateway/channel setup for messaging-platform agent bots.
 
-Triggers on: OpenClaw, `openclaw.json`, gateway setup, WhatsApp/Telegram/Discord bot integration, pi-mono, ClawHub, multi-channel AI agent configuration.
+## Maintenance
+
+```bash
+scripts/strip-chrome.py [--check] [--index]   # strip scraped-site chrome, regen reference/INDEX.md
+scripts/sync-docs.sh [--fetch]                # strip + index + print sizes; --fetch re-scrape is a documented stub
+```
+
+`strip-chrome.py` removes nav/sidebar/TOC blocks after each `[Source:]` anchor (corpus-frequency + TOC-repeat heuristics), drops `Copy` button artifacts, and unescapes HTML entities. It verifies the `[Source:]` anchor count per file is unchanged and fails otherwise. After a re-sync, update the size table in `skills/openclaw-expert/SKILL.md` from the printed sizes.
 
 ## Structure
 
 ```
 openclaw/
 ├── .claude-plugin/plugin.json
-└── skills/
-    └── openclaw-expert/
-        ├── SKILL.md
-        └── reference/
-            ├── automation.md
-            ├── channels.md
-            ├── cli.md
-            ├── concepts.md
-            ├── gateway-ops.md
-            ├── getting-started.md
-            ├── install.md
-            ├── nodes-media.md
-            ├── platforms.md
-            ├── plugins-extensions.md
-            ├── providers.md
-            ├── templates-reference.md
-            ├── tools.md
-            └── troubleshooting.md
+├── scripts/
+│   ├── strip-chrome.py
+│   └── sync-docs.sh
+└── skills/openclaw-expert/
+    ├── SKILL.md                 # router: topic table + retrieval protocol + quick reference
+    └── reference/               # 14 topic files (~1.2MB) + INDEX.md
 ```
 
 ## License

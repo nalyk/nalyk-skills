@@ -42,7 +42,7 @@ Claude initially proposed:
 
 ### Challenges Raised
 
-**From Gemini:**
+**From agy (Gemini):**
 - {key critique point}
 - Verdict: {agree/partial/disagree}
 - Strength: {strong/moderate/minor}
@@ -180,7 +180,7 @@ Revisit this decision if:
 
 ### Phase 2: Parallel Challenges
 
-**Gemini:**
+**agy (Gemini):**
 {full JSON response}
 
 **Codex:**

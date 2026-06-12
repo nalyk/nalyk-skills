@@ -1,7 +1,7 @@
 {
   "name": "debate",
-  "description": "Multi-model adversarial debate system. Claude defends positions against external CLI models (Gemini, Codex, Qwen). Requires at least 1 external CLI - refuses to run with Claude-only. Produces tradeoff documents when models disagree, exposing hidden assumptions.",
-  "version": "1.0.0",
+  "description": "Multi-model adversarial debate. Claude defends positions against external CLI models (agy/Gemini, Codex, Qwen) in parallel rounds. Refuses to run Claude-only; outputs consensus, tradeoff documents, or ADRs.",
+  "version": "2.0.0",
   "author": {
     "name": "nalyk"
   },
@@ -12,8 +12,7 @@
     "adversarial",
     "decision-support",
     "tradeoffs",
-    "blind-spots",
-    "gemini",
+    "agy",
     "codex",
     "qwen",
     "consensus"

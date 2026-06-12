@@ -2,97 +2,11 @@
 
 Complete configuration and setup for every supported messaging channel.
 
-
 ---
 ## Channels > Broadcast Groups
 
 [Source: https://docs.openclaw.ai/channels/broadcast-groups]
 
-Broadcast Groups - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Configuration
-Broadcast Groups
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Chat Channels
-Messaging platforms
-WhatsApp
-Telegram
-Discord
-IRC
-Slack
-Feishu
-Google Chat
-Mattermost
-Signal
-iMessage
-Microsoft Teams
-LINE
-Matrix
-Zalo
-Zalo Personal
-Configuration
-Pairing
-Group Messages
-Groups
-Broadcast Groups
-Channel Routing
-Channel Location Parsing
-Channel Troubleshooting
-Broadcast Groups
-Overview
-Use Cases
-1. Specialized Agent Teams
-2. Multi-Language Support
-3. Quality Assurance Workflows
-4. Task Automation
-Configuration
-Basic Setup
-Processing Strategy
-Parallel (Default)
-Sequential
-Complete Example
-How It Works
-Message Flow
-Session Isolation
-Example: Isolated Sessions
-Best Practices
-1. Keep Agents Focused
-2. Use Descriptive Names
-3. Configure Different Tool Access
-4. Monitor Performance
-5. Handle Failures Gracefully
-Compatibility
-Providers
-Routing
-Troubleshooting
-Agents Not Responding
-Only One Agent Responding
-Performance Issues
-Examples
-Example 1: Code Review Team
-Example 2: Multi-Language Support
-API Reference
-Config Schema
-Fields
-Limitations
-Future Enhancements
-See Also
-Configuration
-Broadcast Groups
-Broadcast Groups
 Status:
 Experimental
 Version:
@@ -106,8 +20,7 @@ Broadcast groups are evaluated after channel allowlists and group activation rul
 Use Cases
 1. Specialized Agent Teams
 Deploy multiple agents with atomic, focused responsibilities:
-Copy
-Group: &quot;Development Team&quot;
+Group: "Development Team"
 Agents:
 - CodeReviewer (reviews code snippets)
 - DocumentationBot (generates docs)
@@ -115,21 +28,18 @@ Agents:
 - TestGenerator (suggests test cases)
 Each agent processes the same message and provides its specialized perspective.
 2. Multi-Language Support
-Copy
-Group: &quot;International Support&quot;
+Group: "International Support"
 Agents:
 - Agent_EN (responds in English)
 - Agent_DE (responds in German)
 - Agent_ES (responds in Spanish)
 3. Quality Assurance Workflows
-Copy
-Group: &quot;Customer Support&quot;
+Group: "Customer Support"
 Agents:
 - SupportAgent (provides answer)
 - QAAgent (reviews quality, only responds if issues found)
 4. Task Automation
-Copy
-Group: &quot;Project Management&quot;
+Group: "Project Management"
 Agents:
 - TaskTracker (updates task database)
 - TimeLogger (logs time spent)
@@ -142,91 +52,87 @@ section (next to
 bindings
 ). Keys are WhatsApp peer ids:
 group chats: group JID (e.g.
-[email&#160;protected]
+[email protected]
 DMs: E.164 phone number (e.g.
 +15551234567
-Copy
-&quot;broadcast&quot;
-&quot;
-[email&#160;protected]
-&quot;
-&quot;alfred&quot;
-&quot;baerbel&quot;
-&quot;assistant3&quot;
+"broadcast"
+"
+[email protected]
+"
+"alfred"
+"baerbel"
+"assistant3"
 Result:
 When OpenClaw would reply in this chat, it will run all three agents.
 Processing Strategy
 Control how agents process messages:
 Parallel (Default)
 All agents process simultaneously:
-Copy
-&quot;broadcast&quot;
-&quot;strategy&quot;
-&quot;parallel&quot;
-&quot;
-[email&#160;protected]
-&quot;
-&quot;alfred&quot;
-&quot;baerbel&quot;
+"broadcast"
+"strategy"
+"parallel"
+"
+[email protected]
+"
+"alfred"
+"baerbel"
 Sequential
 Agents process in order (one waits for previous to finish):
-Copy
-&quot;broadcast&quot;
-&quot;strategy&quot;
-&quot;sequential&quot;
-&quot;
-[email&#160;protected]
-&quot;
-&quot;alfred&quot;
-&quot;baerbel&quot;
+"broadcast"
+"strategy"
+"sequential"
+"
+[email protected]
+"
+"alfred"
+"baerbel"
 Complete Example
-Copy
-&quot;agents&quot;
-&quot;list&quot;
-&quot;id&quot;
-&quot;code-reviewer&quot;
-&quot;name&quot;
-&quot;Code Reviewer&quot;
-&quot;workspace&quot;
-&quot;/path/to/code-reviewer&quot;
-&quot;sandbox&quot;
-&quot;mode&quot;
-&quot;all&quot;
-&quot;id&quot;
-&quot;security-auditor&quot;
-&quot;name&quot;
-&quot;Security Auditor&quot;
-&quot;workspace&quot;
-&quot;/path/to/security-auditor&quot;
-&quot;sandbox&quot;
-&quot;mode&quot;
-&quot;all&quot;
-&quot;id&quot;
-&quot;docs-generator&quot;
-&quot;name&quot;
-&quot;Documentation Generator&quot;
-&quot;workspace&quot;
-&quot;/path/to/docs-generator&quot;
-&quot;sandbox&quot;
-&quot;mode&quot;
-&quot;all&quot;
-&quot;broadcast&quot;
-&quot;strategy&quot;
-&quot;parallel&quot;
-&quot;
-[email&#160;protected]
-&quot;
-&quot;code-reviewer&quot;
-&quot;security-auditor&quot;
-&quot;docs-generator&quot;
-&quot;
-[email&#160;protected]
-&quot;
-&quot;support-en&quot;
-&quot;support-de&quot;
-&quot;+15555550123&quot;
-&quot;assistant&quot;
-&quot;logger&quot;
+"agents"
+"list"
+"id"
+"code-reviewer"
+"name"
+"Code Reviewer"
+"workspace"
+"/path/to/code-reviewer"
+"sandbox"
+"mode"
+"all"
+"id"
+"security-auditor"
+"name"
+"Security Auditor"
+"workspace"
+"/path/to/security-auditor"
+"sandbox"
+"mode"
+"all"
+"id"
+"docs-generator"
+"name"
+"Documentation Generator"
+"workspace"
+"/path/to/docs-generator"
+"sandbox"
+"mode"
+"all"
+"broadcast"
+"strategy"
+"parallel"
+"
+[email protected]
+"
+"code-reviewer"
+"security-auditor"
+"docs-generator"
+"
+[email protected]
+"
+"support-en"
+"support-de"
+"+15555550123"
+"assistant"
+"logger"
 How It Works
 Message Flow
 Incoming message
@@ -265,79 +171,73 @@ Different models (e.g., opus vs. sonnet)
 Different skills installed
 Example: Isolated Sessions
 In group
-[email&#160;protected]
+[email protected]
 with agents
-[&quot;alfred&quot;, &quot;baerbel&quot;]
+["alfred", "baerbel"]
 Alfred’s context:
-Copy
 Session: agent:alfred:whatsapp:group:
-[email&#160;protected]
-History: [user message, alfred&#x27;s previous responses]
+[email protected]
+History: [user message, alfred's previous responses]
 Workspace: /Users/pascal/openclaw-alfred/
 Tools: read, write, exec
 Bärbel’s context:
-Copy
 Session: agent:baerbel:whatsapp:group:
-[email&#160;protected]
-History: [user message, baerbel&#x27;s previous responses]
+[email protected]
+History: [user message, baerbel's previous responses]
 Workspace: /Users/pascal/openclaw-baerbel/
 Tools: read only
 Best Practices
 1. Keep Agents Focused
 Design each agent with a single, clear responsibility:
-Copy
-&quot;broadcast&quot;
-&quot;DEV_GROUP&quot;
-&quot;formatter&quot;
-&quot;linter&quot;
-&quot;tester&quot;
+"broadcast"
+"DEV_GROUP"
+"formatter"
+"linter"
+"tester"
 Good:
 Each agent has one job
 Bad:
 One generic “dev-helper” agent
 2. Use Descriptive Names
 Make it clear what each agent does:
-Copy
-&quot;agents&quot;
-&quot;security-scanner&quot;
-&quot;name&quot;
-&quot;Security Scanner&quot;
-&quot;code-formatter&quot;
-&quot;name&quot;
-&quot;Code Formatter&quot;
-&quot;test-generator&quot;
-&quot;name&quot;
-&quot;Test Generator&quot;
+"agents"
+"security-scanner"
+"name"
+"Security Scanner"
+"code-formatter"
+"name"
+"Code Formatter"
+"test-generator"
+"name"
+"Test Generator"
 3. Configure Different Tool Access
 Give agents only the tools they need:
-Copy
-&quot;agents&quot;
-&quot;reviewer&quot;
-&quot;tools&quot;
-&quot;allow&quot;
-&quot;read&quot;
-&quot;exec&quot;
+"agents"
+"reviewer"
+"tools"
+"allow"
+"read"
+"exec"
 ] }
 // Read-only
-&quot;fixer&quot;
-&quot;tools&quot;
-&quot;allow&quot;
-&quot;read&quot;
-&quot;write&quot;
-&quot;edit&quot;
-&quot;exec&quot;
+"fixer"
+"tools"
+"allow"
+"read"
+"write"
+"edit"
+"exec"
 ] }
 // Read-write
 4. Monitor Performance
 With many agents, consider:
 Using
-&quot;strategy&quot;: &quot;parallel&quot;
+"strategy": "parallel"
 (default) for speed
 Limiting broadcast groups to 5-10 agents
 Using faster models for simpler agents
 5. Handle Failures Gracefully
 Agents fail independently. One agent’s error doesn’t block others:
-Copy
 Message → [Agent A ✓, Agent B ✗ error, Agent C ✓]
 Result: Agent A and C respond, Agent B logs error
 Compatibility
@@ -349,23 +249,22 @@ Broadcast groups currently work with:
 🚧 Slack (planned)
 Routing
 Broadcast groups work alongside existing routing:
-Copy
-&quot;bindings&quot;
-&quot;match&quot;
-&quot;channel&quot;
-&quot;whatsapp&quot;
-&quot;peer&quot;
-&quot;kind&quot;
-&quot;group&quot;
-&quot;id&quot;
-&quot;GROUP_A&quot;
+"bindings"
+"match"
+"channel"
+"whatsapp"
+"peer"
+"kind"
+"group"
+"id"
+"GROUP_A"
 } }
-&quot;agentId&quot;
-&quot;alfred&quot;
-&quot;broadcast&quot;
-&quot;GROUP_B&quot;
-&quot;agent1&quot;
-&quot;agent2&quot;
+"agentId"
+"alfred"
+"broadcast"
+"GROUP_B"
+"agent1"
+"agent2"
 GROUP_A
 : Only alfred responds (normal routing)
 GROUP_B
@@ -380,10 +279,9 @@ Check:
 Agent IDs exist in
 agents.list
 Peer ID format is correct (e.g.,
-[email&#160;protected]
+[email protected]
 Agents are not in deny lists
 Debug:
-Copy
 tail
 ~/.openclaw/logs/gateway.log
 grep
@@ -403,53 +301,52 @@ Use lighter models (sonnet instead of opus)
 Check sandbox startup time
 Examples
 Example 1: Code Review Team
-Copy
-&quot;broadcast&quot;
-&quot;strategy&quot;
-&quot;parallel&quot;
-&quot;
-[email&#160;protected]
-&quot;
-&quot;code-formatter&quot;
-&quot;security-scanner&quot;
-&quot;test-coverage&quot;
-&quot;docs-checker&quot;
-&quot;agents&quot;
-&quot;list&quot;
-&quot;id&quot;
-&quot;code-formatter&quot;
-&quot;workspace&quot;
-&quot;~/agents/formatter&quot;
-&quot;tools&quot;
-&quot;allow&quot;
-&quot;read&quot;
-&quot;write&quot;
+"broadcast"
+"strategy"
+"parallel"
+"
+[email protected]
+"
+"code-formatter"
+"security-scanner"
+"test-coverage"
+"docs-checker"
+"agents"
+"list"
+"id"
+"code-formatter"
+"workspace"
+"~/agents/formatter"
+"tools"
+"allow"
+"read"
+"write"
 ] }
-&quot;id&quot;
-&quot;security-scanner&quot;
-&quot;workspace&quot;
-&quot;~/agents/security&quot;
-&quot;tools&quot;
-&quot;allow&quot;
-&quot;read&quot;
-&quot;exec&quot;
+"id"
+"security-scanner"
+"workspace"
+"~/agents/security"
+"tools"
+"allow"
+"read"
+"exec"
 ] }
-&quot;id&quot;
-&quot;test-coverage&quot;
-&quot;workspace&quot;
-&quot;~/agents/testing&quot;
-&quot;tools&quot;
-&quot;allow&quot;
-&quot;read&quot;
-&quot;exec&quot;
+"id"
+"test-coverage"
+"workspace"
+"~/agents/testing"
+"tools"
+"allow"
+"read"
+"exec"
 ] }
-&quot;id&quot;
-&quot;docs-checker&quot;
-&quot;workspace&quot;
-&quot;~/agents/docs&quot;
-&quot;tools&quot;
-&quot;allow&quot;
-&quot;read&quot;
+"id"
+"docs-checker"
+"workspace"
+"~/agents/docs"
+"tools"
+"allow"
+"read"
 ] } }
 User sends:
 Code snippet
@@ -460,37 +357,35 @@ test-coverage: “Coverage is 45%, missing tests for error cases”
 docs-checker: “Missing docstring for function
 process_data
 Example 2: Multi-Language Support
-Copy
-&quot;broadcast&quot;
-&quot;strategy&quot;
-&quot;sequential&quot;
-&quot;+15555550123&quot;
-&quot;detect-language&quot;
-&quot;translator-en&quot;
-&quot;translator-de&quot;
-&quot;agents&quot;
-&quot;list&quot;
-&quot;id&quot;
-&quot;detect-language&quot;
-&quot;workspace&quot;
-&quot;~/agents/lang-detect&quot;
-&quot;id&quot;
-&quot;translator-en&quot;
-&quot;workspace&quot;
-&quot;~/agents/translate-en&quot;
-&quot;id&quot;
-&quot;translator-de&quot;
-&quot;workspace&quot;
-&quot;~/agents/translate-de&quot;
+"broadcast"
+"strategy"
+"sequential"
+"+15555550123"
+"detect-language"
+"translator-en"
+"translator-de"
+"agents"
+"list"
+"id"
+"detect-language"
+"workspace"
+"~/agents/lang-detect"
+"id"
+"translator-en"
+"workspace"
+"~/agents/translate-en"
+"id"
+"translator-de"
+"workspace"
+"~/agents/translate-de"
 API Reference
 Config Schema
-Copy
 interface
 OpenClawConfig
 broadcast
 strategy
-&quot;parallel&quot;
-&quot;sequential&quot;
+"parallel"
+"sequential"
 [peerId
 string
 string
@@ -498,9 +393,9 @@ string
 Fields
 strategy
 (optional): How to process agents
-&quot;parallel&quot;
+"parallel"
 (default): All agents process simultaneously
-&quot;sequential&quot;
+"sequential"
 : Agents process in array order
 [peerId]
 : WhatsApp group JID, E.164 number, or other peer ID
@@ -532,63 +427,6 @@ Channel Routing
 
 [Source: https://docs.openclaw.ai/channels/channel-routing]
 
-Channel Routing - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Configuration
-Channel Routing
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Chat Channels
-Messaging platforms
-WhatsApp
-Telegram
-Discord
-IRC
-Slack
-Feishu
-Google Chat
-Mattermost
-Signal
-iMessage
-Microsoft Teams
-LINE
-Matrix
-Zalo
-Zalo Personal
-Configuration
-Pairing
-Group Messages
-Groups
-Broadcast Groups
-Channel Routing
-Channel Location Parsing
-Channel Troubleshooting
-Channels &amp; routing
-Key terms
-Session key shapes (examples)
-Routing rules (how an agent is chosen)
-Broadcast groups (run multiple agents)
-Config overview
-Session storage
-WebChat behavior
-Reply context
-Configuration
-Channel Routing
-Channels &amp; routing
-OpenClaw routes replies
-back to the channel where a message came from
 . The
 model does not choose a channel; routing is deterministic and controlled by the
 host configuration.
@@ -611,20 +449,20 @@ Session key shapes (examples)
 Direct messages collapse to the agent’s
 main
 session:
-agent:&lt;agentId&gt;:&lt;mainKey&gt;
+agent:<agentId>:<mainKey>
 (default:
 agent:main:main
 Groups and channels remain isolated per channel:
 Groups:
-agent:&lt;agentId&gt;:&lt;channel&gt;:group:&lt;id&gt;
+agent:<agentId>:<channel>:group:<id>
 Channels/rooms:
-agent:&lt;agentId&gt;:&lt;channel&gt;:channel:&lt;id&gt;
+agent:<agentId>:<channel>:channel:<id>
 Threads:
 Slack/Discord threads append
-:thread:&lt;threadId&gt;
+:thread:<threadId>
 to the base key.
 Telegram forum topics embed
-:topic:&lt;topicId&gt;
+:topic:<topicId>
 in the group key.
 Examples:
 agent:main:telegram:group:-1001234567890:topic:42
@@ -655,7 +493,7 @@ accountId
 on the channel).
 Channel match
 (any account on that channel,
-accountId: &quot;*&quot;
+accountId: "*"
 Default agent
 agents.list[].default
 , else first list entry, fallback to
@@ -675,18 +513,17 @@ for the same peer
 when OpenClaw would normally reply
 (for example: in WhatsApp groups, after mention/activation gating).
 Config:
-Copy
 broadcast
 strategy
-&quot;parallel&quot;
-&quot;
-[email&#160;protected]
-&quot;
-&quot;alfred&quot;
-&quot;baerbel&quot;
-&quot;+15555550123&quot;
-&quot;support&quot;
-&quot;logger&quot;
+"parallel"
+"
+[email protected]
+"
+"alfred"
+"baerbel"
+"+15555550123"
+"support"
+"logger"
 See:
 Broadcast Groups
 Config overview
@@ -695,36 +532,35 @@ agents.list
 bindings
 : map inbound channels/accounts/peers to agents.
 Example:
-Copy
 agents
 list
-&quot;support&quot;
+"support"
 name
-&quot;Support&quot;
+"Support"
 workspace
-&quot;~/.openclaw/workspace-support&quot;
+"~/.openclaw/workspace-support"
 bindings
 match
 channel
-&quot;slack&quot;
+"slack"
 teamId
-&quot;T123&quot;
+"T123"
 agentId
-&quot;support&quot;
+"support"
 match
 channel
-&quot;telegram&quot;
+"telegram"
 peer
 kind
-&quot;group&quot;
-&quot;-100123&quot;
+"group"
+"-100123"
 } }
 agentId
-&quot;support&quot;
+"support"
 Session storage
 Session stores live under the state directory (default
 ~/.openclaw
-~/.openclaw/agents/&lt;agentId&gt;/sessions/sessions.json
+~/.openclaw/agents/<agentId>/sessions/sessions.json
 JSONL transcripts live alongside the store
 You can override the store path via
 session.store
@@ -758,68 +594,6 @@ Channel Location Parsing
 
 [Source: https://docs.openclaw.ai/channels/discord]
 
-Discord - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Messaging platforms
-Discord
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Chat Channels
-Messaging platforms
-WhatsApp
-Telegram
-Discord
-IRC
-Slack
-Feishu
-Google Chat
-Mattermost
-Signal
-iMessage
-Microsoft Teams
-LINE
-Matrix
-Zalo
-Zalo Personal
-Configuration
-Pairing
-Group Messages
-Groups
-Broadcast Groups
-Channel Routing
-Channel Location Parsing
-Channel Troubleshooting
-Discord (Bot API)
-Quick setup
-Runtime model
-Interactive components
-Access control and routing
-Role-based agent routing
-Developer Portal setup
-Native commands and command auth
-Feature details
-Tools and action gates
-Components v2 UI
-Voice messages
-Troubleshooting
-Configuration reference pointers
-Safety and operations
-Related
-Messaging platforms
-Discord
-Discord (Bot API)
 Status: ready for DMs and guild channels via the official Discord gateway.
 Pairing
 Discord DMs default to pairing mode.
@@ -834,24 +608,20 @@ Message Content Intent
 Server Members Intent
 (required for role allowlists and role-based routing; recommended for name-to-ID allowlist matching)
 Configure token
-Copy
 channels
 discord
 enabled
 true
 token
-&quot;YOUR_BOT_TOKEN&quot;
+"YOUR_BOT_TOKEN"
 Env fallback for the default account:
-Copy
 DISCORD_BOT_TOKEN
 ...
 Invite the bot and start gateway
 Invite the bot to your server with message permissions.
-Copy
 openclaw
 gateway
 Approve first DM pairing
-Copy
 openclaw
 pairing
 list
@@ -860,9 +630,9 @@ openclaw
 pairing
 approve
 discord
-&lt;
+<
 COD
-&gt;
+>
 Pairing codes expire after 1 hour.
 Token resolution is account-aware. Config token values win over env fallback.
 DISCORD_BOT_TOKEN
@@ -875,11 +645,11 @@ session.dmScope=main
 ), direct chats share the agent main session (
 agent:main:main
 Guild channels are isolated session keys (
-agent:&lt;agentId&gt;:discord:channel:&lt;channelId&gt;
+agent:<agentId>:discord:channel:<channelId>
 Group DMs are ignored by default (
 channels.discord.dm.groupEnabled=false
 Native slash commands run in isolated command sessions (
-agent:&lt;agentId&gt;:discord:slash:&lt;userId&gt;
+agent:<agentId>:discord:slash:<userId>
 ), while still carrying
 CommandTargetSessionKey
 to the routed conversation session.
@@ -906,7 +676,7 @@ channel
 File attachments:
 file
 blocks must point to an attachment reference (
-attachment://&lt;filename&gt;
+attachment://<filename>
 Provide the attachment via
 media
 path
@@ -930,68 +700,67 @@ role-select
 user-select
 OpenClaw adds a trigger button automatically
 Example:
-Copy
 channel
-&quot;discord&quot;
+"discord"
 action
-&quot;send&quot;
-&quot;channel:123456789012345678&quot;
+"send"
+"channel:123456789012345678"
 message
-&quot;Optional fallback text&quot;
+"Optional fallback text"
 components
 text
-&quot;Choose a path&quot;
+"Choose a path"
 blocks
 type
-&quot;actions&quot;
+"actions"
 buttons
 label
-&quot;Approve&quot;
+"Approve"
 style
-&quot;success&quot;
+"success"
 label
-&quot;Decline&quot;
+"Decline"
 style
-&quot;danger&quot;
+"danger"
 type
-&quot;actions&quot;
+"actions"
 select
 type
-&quot;string&quot;
+"string"
 placeholder
-&quot;Pick an option&quot;
+"Pick an option"
 options
 label
-&quot;Option A&quot;
+"Option A"
 value
-&quot;a&quot;
+"a"
 label
-&quot;Option B&quot;
+"Option B"
 value
-&quot;b&quot;
+"b"
 modal
 title
-&quot;Details&quot;
+"Details"
 triggerLabel
-&quot;Open form&quot;
+"Open form"
 fields
 type
-&quot;text&quot;
+"text"
 label
-&quot;Requester&quot;
+"Requester"
 type
-&quot;select&quot;
+"select"
 label
-&quot;Priority&quot;
+"Priority"
 options
 label
-&quot;Low&quot;
+"Low"
 value
-&quot;low&quot;
+"low"
 label
-&quot;High&quot;
+"High"
 value
-&quot;high&quot;
+"high"
 Access control and routing
 DM policy
 Guild policy
@@ -1006,7 +775,7 @@ open
 (requires
 channels.discord.allowFrom
 to include
-&quot;*&quot;
+"*"
 ; legacy:
 channels.discord.dm.allowFrom
 disabled
@@ -1014,8 +783,8 @@ If DM policy is not open, unknown users are blocked (or prompted for pairing in
 pairing
 mode).
 DM target format for delivery:
-user:&lt;id&gt;
-&lt;@id&gt;
+user:<id>
+<@id>
 mention
 Bare numeric IDs are ambiguous and rejected unless an explicit user/channel target kind is provided.
 Guild handling is controlled by
@@ -1046,19 +815,18 @@ if a guild has no
 channels
 block, all channels in that allowlisted guild are allowed
 Example:
-Copy
 channels
 discord
 groupPolicy
-&quot;allowlist&quot;
+"allowlist"
 guilds
-&quot;123456789012345678&quot;
+"123456789012345678"
 requireMention
 true
 users
-&quot;987654321098765432&quot;
+"987654321098765432"
 roles
-&quot;123456789012345678&quot;
+"123456789012345678"
 channels
 general
 allow
@@ -1073,7 +841,7 @@ DISCORD_BOT_TOKEN
 and do not create a
 channels.discord
 block, runtime fallback is
-groupPolicy=&quot;open&quot;
+groupPolicy="open"
 (with a warning in logs).
 Guild messages are mention-gated by default.
 Mention detection includes:
@@ -1100,36 +868,35 @@ peer
 guildId
 roles
 ), all configured fields must match.
-Copy
 bindings
 agentId
-&quot;opus&quot;
+"opus"
 match
 channel
-&quot;discord&quot;
+"discord"
 guildId
-&quot;123456789012345678&quot;
+"123456789012345678"
 roles
-&quot;111111111111111111&quot;
+"111111111111111111"
 agentId
-&quot;sonnet&quot;
+"sonnet"
 match
 channel
-&quot;discord&quot;
+"discord"
 guildId
-&quot;123456789012345678&quot;
+"123456789012345678"
 Developer Portal setup
 Create app and bot
-Discord Developer Portal -&gt;
+Discord Developer Portal ->
 Applications
--&gt;
+->
 New Application
 Bot
--&gt;
+->
 Add Bot
 Copy bot token
 Privileged intents
-Bot -&gt; Privileged Gateway Intents
+Bot -> Privileged Gateway Intents
 , enable:
 Message Content Intent
 Server Members Intent (recommended)
@@ -1160,7 +927,7 @@ Prefer numeric IDs in OpenClaw config for reliable audits and probes.
 Native commands and command auth
 commands.native
 defaults to
-&quot;auto&quot;
+"auto"
 and is enabled for Discord.
 Per-channel override:
 channels.discord.commands.native
@@ -1175,7 +942,7 @@ Feature details
 Reply tags and native replies
 Discord supports reply tags in agent output:
 [[reply_to_current]]
-[[reply_to:&lt;id&gt;]]
+[[reply_to:<id>]]
 Controlled by
 channels.discord.replyToMode
 off
@@ -1197,7 +964,7 @@ messages.groupChat.historyLimit
 disables
 DM history controls:
 channels.discord.dmHistoryLimit
-channels.discord.dms[&quot;&lt;user_id&gt;&quot;].historyLimit
+channels.discord.dms["<user_id>"].historyLimit
 Thread behavior:
 Discord threads are routed as channel sessions
 parent thread metadata can be used for parent-session linkage
@@ -1213,13 +980,13 @@ own
 all
 allowlist
 (uses
-guilds.&lt;id&gt;.users
+guilds.<id>.users
 Reaction events are turned into system events and attached to the routed Discord session.
 Ack reactions
 ackReaction
 sends an acknowledgement emoji while OpenClaw is processing an inbound message.
 Resolution order:
-channels.discord.accounts.&lt;accountId&gt;.ackReaction
+channels.discord.accounts.<accountId>.ackReaction
 channels.discord.ackReaction
 messages.ackReaction
 agent identity emoji fallback (
@@ -1228,7 +995,7 @@ agents.list[].identity.emoji
 Notes:
 Discord accepts unicode emoji or custom emoji names.
 Use
-&quot;&quot;
+""
 to disable the reaction for a channel or account.
 Config writes
 Channel-initiated config writes are enabled by default.
@@ -1236,7 +1003,6 @@ This affects
 /config set|unset
 flows (when command features are enabled).
 Disable:
-Copy
 channels
 discord
 configWrites
@@ -1244,33 +1010,30 @@ false
 Gateway proxy
 Route Discord gateway WebSocket traffic through an HTTP(S) proxy with
 channels.discord.proxy
-Copy
 channels
 discord
 proxy
-&quot;http://proxy.example:8080&quot;
+"http://proxy.example:8080"
 Per-account override:
-Copy
 channels
 discord
 accounts
 primary
 proxy
-&quot;http://proxy.example:8080&quot;
+"http://proxy.example:8080"
 PluralKit support
 Enable PluralKit resolution to map proxied messages to system member identity:
-Copy
 channels
 discord
 pluralkit
 enabled
 true
 token
-&quot;pk_live_...&quot;
+"pk_live_..."
 // optional; needed for private systems
 Notes:
 allowlists can use
-pk:&lt;memberId&gt;
+pk:<memberId>
 member display names are matched by name/slug
 lookups use original message ID and are time-window constrained
 if lookup fails, proxied messages are treated as bot messages and dropped unless
@@ -1278,27 +1041,24 @@ allowBots=true
 Presence configuration
 Presence updates are applied only when you set a status or activity field.
 Status only example:
-Copy
 channels
 discord
 status
-&quot;idle&quot;
+"idle"
 Activity example (custom status is the default activity type):
-Copy
 channels
 discord
 activity
-&quot;Focus time&quot;
+"Focus time"
 activityType
 Streaming example:
-Copy
 channels
 discord
 activity
-&quot;Live coding&quot;
+"Live coding"
 activityType
 activityUrl
-&quot;https://twitch.tv/openclaw&quot;
+"https://twitch.tv/openclaw"
 Activity type map:
 0: Playing
 1: Streaming (requires
@@ -1368,16 +1128,15 @@ remain available but are not recommended.
 channels.discord.ui.components.accentColor
 sets the accent color used by Discord component containers (hex).
 Set per account with
-channels.discord.accounts.&lt;id&gt;.ui.components.accentColor
+channels.discord.accounts.<id>.ui.components.accentColor
 embeds
 are ignored when components v2 are present.
 Example:
-Copy
 channels
 discord
 components
 accentColor
-&quot;#5865F2&quot;
+"#5865F2"
 Voice messages
 Discord voice messages show a waveform preview and require OGG/Opus audio plus metadata. OpenClaw generates the waveform automatically, but it needs
 ffmpeg
@@ -1391,15 +1150,14 @@ local file path
 Omit text content (Discord does not allow text + voice message in the same payload).
 Any audio format is accepted; OpenClaw converts to OGG/Opus when needed.
 Example:
-Copy
 message(action
-&quot;send&quot;
+"send"
 channel=
-&quot;discord&quot;
+"discord"
 target=
-&quot;channel:123&quot;
+"channel:123"
 path=
-&quot;/path/to/audio.mp3&quot;
+"/path/to/audio.mp3"
 asVoice=
 true
 Troubleshooting
@@ -1419,7 +1177,6 @@ verify
 requireMention
 behavior and mention patterns
 Useful checks:
-Copy
 openclaw
 doctor
 openclaw
@@ -1431,7 +1188,7 @@ logs
 --follow
 Require mention false but still blocked
 Common causes:
-groupPolicy=&quot;allowlist&quot;
+groupPolicy="allowlist"
 without matching guild/channel allowlist
 requireMention
 configured in the wrong place (must be under
@@ -1448,7 +1205,7 @@ DM and pairing issues
 DM disabled:
 channels.discord.dm.enabled=false
 DM policy disabled:
-channels.discord.dmPolicy=&quot;disabled&quot;
+channels.discord.dmPolicy="disabled"
 (legacy:
 channels.discord.dm.policy
 awaiting pairing approval in
@@ -1525,112 +1282,14 @@ IRC
 
 [Source: https://docs.openclaw.ai/channels/feishu]
 
-Feishu - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Messaging platforms
-Feishu
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Chat Channels
-Messaging platforms
-WhatsApp
-Telegram
-Discord
-IRC
-Slack
-Feishu
-Google Chat
-Mattermost
-Signal
-iMessage
-Microsoft Teams
-LINE
-Matrix
-Zalo
-Zalo Personal
-Configuration
-Pairing
-Group Messages
-Groups
-Broadcast Groups
-Channel Routing
-Channel Location Parsing
-Channel Troubleshooting
-Feishu bot
-Plugin required
-Quickstart
-Method 1: onboarding wizard (recommended)
-Method 2: CLI setup
-Step 1: Create a Feishu app
-1. Open Feishu Open Platform
-2. Create an app
-3. Copy credentials
-4. Configure permissions
-5. Enable bot capability
-6. Configure event subscription
-7. Publish the app
-Step 2: Configure OpenClaw
-Configure with the wizard (recommended)
-Configure via config file
-Configure via environment variables
-Lark (global) domain
-Step 3: Start + test
-1. Start the gateway
-2. Send a test message
-3. Approve pairing
-Overview
-Access control
-Direct messages
-Group chats
-Group configuration examples
-Allow all groups, require @mention (default)
-Allow all groups, no @mention required
-Allow specific users in groups only
-Get group/user IDs
-Group IDs (chat_id)
-User IDs (open_id)
-Common commands
-Gateway management commands
-Troubleshooting
-Bot does not respond in group chats
-Bot does not receive messages
-App Secret leak
-Message send failures
-Advanced configuration
-Multiple accounts
-Message limits
-Streaming
-Multi-agent routing
-Configuration reference
-dmPolicy reference
-Supported message types
-Receive
-Send
-Messaging platforms
-Feishu
-Feishu bot
 Feishu (Lark) is a team chat platform used by companies for messaging and collaboration. This plugin connects OpenClaw to a Feishu/Lark bot using the platform’s WebSocket event subscription so messages can be received without exposing a public webhook URL.
 Plugin required
 Install the Feishu plugin:
-Copy
 openclaw
 plugins
 install
 @openclaw/feishu
 Local checkout (when running from a git repo):
-Copy
 openclaw
 plugins
 install
@@ -1639,7 +1298,6 @@ Quickstart
 There are two ways to add the Feishu channel:
 Method 1: onboarding wizard (recommended)
 If you just installed OpenClaw, run the wizard:
-Copy
 openclaw
 onboard
 The wizard guides you through:
@@ -1652,7 +1310,6 @@ openclaw gateway status
 openclaw logs --follow
 Method 2: CLI setup
 If you already completed initial install, add the channel via CLI:
-Copy
 openclaw
 channels
 add
@@ -1672,7 +1329,7 @@ and sign in.
 Lark (global) tenants should use
 https://open.larksuite.com/app
 and set
-domain: &quot;lark&quot;
+domain: "lark"
 in the Feishu config.
 2. Create an app
 Click
@@ -1681,7 +1338,7 @@ Fill in the app name + description
 Choose an app icon
 3. Copy credentials
 From
-Credentials &amp; Basic Info
+Credentials & Basic Info
 , copy:
 App ID
 (format:
@@ -1694,32 +1351,31 @@ Permissions
 , click
 Batch import
 and paste:
-Copy
-&quot;scopes&quot;
-&quot;tenant&quot;
-&quot;aily:file:read&quot;
-&quot;aily:file:write&quot;
-&quot;application:application.app_message_stats.overview:readonly&quot;
-&quot;application:application:self_manage&quot;
-&quot;application:bot.menu:write&quot;
-&quot;contact:user.employee_id:readonly&quot;
-&quot;corehr:file:download&quot;
-&quot;event:ip_list&quot;
-&quot;im:chat.access_event.bot_p2p_chat:read&quot;
-&quot;im:chat.members:bot_access&quot;
-&quot;im:message&quot;
-&quot;im:message.group_at_msg:readonly&quot;
-&quot;im:message.p2p_msg:readonly&quot;
-&quot;im:message:readonly&quot;
-&quot;im:message:send_as_bot&quot;
-&quot;im:resource&quot;
-&quot;user&quot;
-&quot;aily:file:read&quot;
-&quot;aily:file:write&quot;
-&quot;im:chat.access_event.bot_p2p_chat:read&quot;
+"scopes"
+"tenant"
+"aily:file:read"
+"aily:file:write"
+"application:application.app_message_stats.overview:readonly"
+"application:application:self_manage"
+"application:bot.menu:write"
+"contact:user.employee_id:readonly"
+"corehr:file:download"
+"event:ip_list"
+"im:chat.access_event.bot_p2p_chat:read"
+"im:chat.members:bot_access"
+"im:message"
+"im:message.group_at_msg:readonly"
+"im:message.p2p_msg:readonly"
+"im:message:readonly"
+"im:message:send_as_bot"
+"im:resource"
+"user"
+"aily:file:read"
+"aily:file:write"
+"im:chat.access_event.bot_p2p_chat:read"
 5. Enable bot capability
 App Capability
-&gt;
+>
 Bot
 Enable bot capability
 Set the bot name
@@ -1740,12 +1396,11 @@ im.message.receive_v1
 ⚠️ If the gateway is not running, the long-connection setup may fail to save.
 7. Publish the app
 Create a version in
-Version Management &amp; Release
+Version Management & Release
 Submit for review and publish
 Wait for admin approval (enterprise apps usually auto-approve)
 Step 2: Configure OpenClaw
 Configure with the wizard (recommended)
-Copy
 openclaw
 channels
 add
@@ -1755,64 +1410,59 @@ and paste your App ID + App Secret.
 Configure via config file
 Edit
 ~/.openclaw/openclaw.json
-Copy
 channels
 feishu
 enabled
 true
 dmPolicy
-&quot;pairing&quot;
+"pairing"
 accounts
 main
 appId
-&quot;cli_xxx&quot;
+"cli_xxx"
 appSecret
-&quot;xxx&quot;
+"xxx"
 botName
-&quot;My AI assistant&quot;
+"My AI assistant"
 Configure via environment variables
-Copy
 export
 FEISHU_APP_ID
-&quot;cli_xxx&quot;
+"cli_xxx"
 export
 FEISHU_APP_SECRET
-&quot;xxx&quot;
+"xxx"
 Lark (global) domain
 If your tenant is on Lark (international), set the domain to
 lark
 (or a full domain string). You can set it at
 channels.feishu.domain
 or per account (
-channels.feishu.accounts.&lt;id&gt;.domain
-Copy
+channels.feishu.accounts.<id>.domain
 channels
 feishu
 domain
-&quot;lark&quot;
+"lark"
 accounts
 main
 appId
-&quot;cli_xxx&quot;
+"cli_xxx"
 appSecret
-&quot;xxx&quot;
+"xxx"
 Step 3: Start + test
 1. Start the gateway
-Copy
 openclaw
 gateway
 2. Send a test message
 In Feishu, find your bot and send a message.
 3. Approve pairing
 By default, the bot replies with a pairing code. Approve it:
-Copy
 openclaw
 pairing
 approve
 feishu
-&lt;
+<
 COD
-&gt;
+>
 After approval, you can chat normally.
 Overview
 Feishu bot channel
@@ -1826,10 +1476,9 @@ WebSocket connection
 Access control
 Direct messages
 Default
-dmPolicy: &quot;pairing&quot;
+dmPolicy: "pairing"
 (unknown users get a pairing code)
 Approve pairing
-Copy
 openclaw
 pairing
 list
@@ -1838,9 +1487,9 @@ openclaw
 pairing
 approve
 feishu
-&lt;
+<
 COD
-&gt;
+>
 Allowlist mode
 : set
 channels.feishu.allowFrom
@@ -1848,29 +1497,27 @@ with allowed Open IDs
 Group chats
 1. Group policy
 channels.feishu.groupPolicy
-&quot;open&quot;
+"open"
 = allow everyone in groups (default)
-&quot;allowlist&quot;
+"allowlist"
 = only allow
 groupAllowFrom
-&quot;disabled&quot;
+"disabled"
 = disable group messages
 2. Mention requirement
-channels.feishu.groups.&lt;chat_id&gt;.requireMention
+channels.feishu.groups.<chat_id>.requireMention
 true
 = require @mention (default)
 false
 = respond without mentions
 Group configuration examples
 Allow all groups, require @mention (default)
-Copy
 channels
 feishu
 groupPolicy
-&quot;open&quot;
+"open"
 // Default requireMention: true
 Allow all groups, no @mention required
-Copy
 channels
 feishu
 groups
@@ -1878,14 +1525,13 @@ oc_xxx
 requireMention
 false
 Allow specific users in groups only
-Copy
 channels
 feishu
 groupPolicy
-&quot;allowlist&quot;
+"allowlist"
 groupAllowFrom
-&quot;ou_xxx&quot;
-&quot;ou_yyy&quot;
+"ou_xxx"
+"ou_yyy"
 Get group/user IDs
 Group IDs (chat_id)
 Group IDs look like
@@ -1909,7 +1555,6 @@ and look for
 open_id
 Method 2
 Check pairing requests for user Open IDs:
-Copy
 openclaw
 pairing
 list
@@ -1944,7 +1589,7 @@ Ensure you @mention the bot (default behavior)
 Check
 groupPolicy
 is not set to
-&quot;disabled&quot;
+"disabled"
 Check logs:
 openclaw logs --follow
 Bot does not receive messages
@@ -1971,24 +1616,23 @@ Ensure the app is published
 Check logs for detailed errors
 Advanced configuration
 Multiple accounts
-Copy
 channels
 feishu
 accounts
 main
 appId
-&quot;cli_xxx&quot;
+"cli_xxx"
 appSecret
-&quot;xxx&quot;
+"xxx"
 botName
-&quot;Primary bot&quot;
+"Primary bot"
 backup
 appId
-&quot;cli_yyy&quot;
+"cli_yyy"
 appSecret
-&quot;yyy&quot;
+"yyy"
 botName
-&quot;Backup bot&quot;
+"Backup bot"
 enabled
 false
 Message limits
@@ -1998,7 +1642,6 @@ mediaMaxMb
 : media upload/download limit (default: 30MB)
 Streaming
 Feishu supports streaming replies via interactive cards. When enabled, the bot updates a card as it generates text.
-Copy
 channels
 feishu
 streaming
@@ -2014,54 +1657,53 @@ Multi-agent routing
 Use
 bindings
 to route Feishu DMs or groups to different agents.
-Copy
 agents
 list
-&quot;main&quot;
-&quot;clawd-fan&quot;
+"main"
+"clawd-fan"
 workspace
-&quot;/home/user/clawd-fan&quot;
+"/home/user/clawd-fan"
 agentDir
-&quot;/home/user/.openclaw/agents/clawd-fan/agent&quot;
-&quot;clawd-xi&quot;
+"/home/user/.openclaw/agents/clawd-fan/agent"
+"clawd-xi"
 workspace
-&quot;/home/user/clawd-xi&quot;
+"/home/user/clawd-xi"
 agentDir
-&quot;/home/user/.openclaw/agents/clawd-xi/agent&quot;
+"/home/user/.openclaw/agents/clawd-xi/agent"
 bindings
 agentId
-&quot;main&quot;
+"main"
 match
 channel
-&quot;feishu&quot;
+"feishu"
 peer
 kind
-&quot;direct&quot;
-&quot;ou_xxx&quot;
+"direct"
+"ou_xxx"
 agentId
-&quot;clawd-fan&quot;
+"clawd-fan"
 match
 channel
-&quot;feishu&quot;
+"feishu"
 peer
 kind
-&quot;direct&quot;
-&quot;ou_yyy&quot;
+"direct"
+"ou_yyy"
 agentId
-&quot;clawd-xi&quot;
+"clawd-xi"
 match
 channel
-&quot;feishu&quot;
+"feishu"
 peer
 kind
-&quot;group&quot;
-&quot;oc_zzz&quot;
+"group"
+"oc_zzz"
 Routing fields:
 match.channel
-&quot;feishu&quot;
+"feishu"
 match.peer.kind
-&quot;direct&quot;
-&quot;group&quot;
+"direct"
+"group"
 match.peer.id
 : user Open ID (
 ou_xxx
@@ -2085,11 +1727,11 @@ API domain (
 feishu
 lark
 feishu
-channels.feishu.accounts.&lt;id&gt;.appId
+channels.feishu.accounts.<id>.appId
 App ID
-channels.feishu.accounts.&lt;id&gt;.appSecret
+channels.feishu.accounts.<id>.appSecret
 App Secret
-channels.feishu.accounts.&lt;id&gt;.domain
+channels.feishu.accounts.<id>.domain
 Per-account API domain override
 feishu
 channels.feishu.dmPolicy
@@ -2102,10 +1744,10 @@ Group policy
 open
 channels.feishu.groupAllowFrom
 Group allowlist
-channels.feishu.groups.&lt;chat_id&gt;.requireMention
+channels.feishu.groups.<chat_id>.requireMention
 Require @mention
 true
-channels.feishu.groups.&lt;chat_id&gt;.enabled
+channels.feishu.groups.<chat_id>.enabled
 Enable group
 true
 channels.feishu.textChunkLimit
@@ -2122,18 +1764,18 @@ true
 dmPolicy reference
 Value
 Behavior
-&quot;pairing&quot;
+"pairing"
 Default.
 Unknown users get a pairing code; must be approved
-&quot;allowlist&quot;
+"allowlist"
 Only users in
 allowFrom
 can chat
-&quot;open&quot;
+"open"
 Allow all users (requires
-&quot;*&quot;
+"*"
 in allowFrom)
-&quot;disabled&quot;
+"disabled"
 Disable DMs
 Supported message types
 Receive
@@ -2158,64 +1800,6 @@ Google Chat
 
 [Source: https://docs.openclaw.ai/channels/googlechat]
 
-Google Chat - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Messaging platforms
-Google Chat
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Chat Channels
-Messaging platforms
-WhatsApp
-Telegram
-Discord
-IRC
-Slack
-Feishu
-Google Chat
-Mattermost
-Signal
-iMessage
-Microsoft Teams
-LINE
-Matrix
-Zalo
-Zalo Personal
-Configuration
-Pairing
-Group Messages
-Groups
-Broadcast Groups
-Channel Routing
-Channel Location Parsing
-Channel Troubleshooting
-Google Chat (Chat API)
-Quick setup (beginner)
-Add to Google Chat
-Public URL (Webhook-only)
-Option A: Tailscale Funnel (Recommended)
-Option B: Reverse Proxy (Caddy)
-Option C: Cloudflare Tunnel
-How it works
-Targets
-Config highlights
-Troubleshooting
-405 Method Not Allowed
-Other issues
-Messaging platforms
-Google Chat
 Google Chat (Chat API)
 Status: ready for DMs + spaces via Google Chat API webhooks (HTTP only).
 Quick setup (beginner)
@@ -2228,7 +1812,7 @@ Create a
 Service Account
 Press
 Create Credentials
-&gt;
+>
 Service Account
 Name it whatever you want (e.g.,
 openclaw-chat
@@ -2244,7 +1828,7 @@ Keys
 tab.
 Click
 Add Key
-&gt;
+>
 Create new key
 Select
 JSON
@@ -2287,9 +1871,9 @@ to find your gateway’s public URL.
 Under
 Visibility
 , check
-Make this Chat app available to specific people and groups in &lt;Your Domain&gt;
+Make this Chat app available to specific people and groups in <Your Domain>
 Enter your email address (e.g.
-[email&#160;protected]
+[email protected]
 ) in the text box.
 Click
 Save
@@ -2309,7 +1893,7 @@ Configure OpenClaw with the service account path + webhook audience:
 Env:
 GOOGLE_CHAT_SERVICE_ACCOUNT_FILE=/path/to/service-account.json
 Or config:
-channels.googlechat.serviceAccountFile: &quot;/path/to/service-account.json&quot;
+channels.googlechat.serviceAccountFile: "/path/to/service-account.json"
 Set the webhook audience type + value (matches your Chat app config).
 Start the gateway. Google Chat will POST to your webhook path.
 Add to Google Chat
@@ -2343,7 +1927,6 @@ Use Tailscale Serve for the private dashboard and Funnel for the public webhook 
 private while exposing only
 /googlechat
 Check what address your gateway is bound to:
-Copy
 -tlnp
 grep
 18789
@@ -2353,7 +1936,6 @@ Note the IP address (e.g.,
 , or your Tailscale IP like
 100.x.x.x
 Expose the dashboard to the tailnet only (port 8443):
-Copy
 # If bound to localhost (127.0.0.1 or 0.0.0.0):
 tailscale
 serve
@@ -2369,7 +1951,6 @@ serve
 8443
 http://100.106.161.80:18789
 Expose only the webhook path publicly:
-Copy
 # If bound to localhost (127.0.0.1 or 0.0.0.0):
 tailscale
 funnel
@@ -2387,7 +1968,6 @@ http://100.106.161.80:18789/googlechat
 Authorize the node for Funnel access:
 If prompted, visit the authorization URL shown in the output to enable Funnel for this node in your tailnet policy.
 Verify the configuration:
-Copy
 tailscale
 serve
 status
@@ -2395,9 +1975,9 @@ tailscale
 funnel
 status
 Your public webhook URL will be:
-https://&lt;node-name&gt;.&lt;tailnet&gt;.ts.net/googlechat
+https://<node-name>.<tailnet>.ts.net/googlechat
 Your private dashboard stays tailnet-only:
-https://&lt;node-name&gt;.&lt;tailnet&gt;.ts.net:8443/
+https://<node-name>.<tailnet>.ts.net:8443/
 Use the public URL (without
 :8443
 ) in the Google Chat app config.
@@ -2407,7 +1987,6 @@ and
 tailscale serve reset
 Option B: Reverse Proxy (Caddy)
 If you use a reverse proxy like Caddy, only proxy the specific path:
-Copy
 your-domain.com {
 reverse_proxy /googlechat* localhost:18789
 With this config, any request to
@@ -2419,84 +1998,83 @@ Option C: Cloudflare Tunnel
 Configure your tunnel’s ingress rules to only route the webhook path:
 Path
 /googlechat
--&gt;
+->
 http://localhost:18789/googlechat
 Default Rule
 : HTTP 404 (Not Found)
 How it works
 Google Chat sends webhook POSTs to the gateway. Each request includes an
-Authorization: Bearer &lt;token&gt;
+Authorization: Bearer <token>
 header.
 OpenClaw verifies the token against the configured
 audienceType
 audience
-audienceType: &quot;app-url&quot;
+audienceType: "app-url"
 → audience is your HTTPS webhook URL.
-audienceType: &quot;project-number&quot;
+audienceType: "project-number"
 → audience is the Cloud project number.
 Messages are routed by space:
 DMs use session key
-agent:&lt;agentId&gt;:googlechat:dm:&lt;spaceId&gt;
+agent:<agentId>:googlechat:dm:<spaceId>
 Spaces use session key
-agent:&lt;agentId&gt;:googlechat:group:&lt;spaceId&gt;
+agent:<agentId>:googlechat:group:<spaceId>
 DM access is pairing by default. Unknown senders receive a pairing code; approve with:
-openclaw pairing approve googlechat &lt;code&gt;
+openclaw pairing approve googlechat <code>
 Group spaces require @-mention by default. Use
 botUser
 if mention detection needs the app’s user name.
 Targets
 Use these identifiers for delivery and allowlists:
 Direct messages:
-users/&lt;userId&gt;
+users/<userId>
 (recommended) or raw email
-[email&#160;protected]
+[email protected]
 (mutable principal).
 Deprecated:
-users/&lt;email&gt;
+users/<email>
 is treated as a user id, not an email allowlist.
 Spaces:
-spaces/&lt;spaceId&gt;
+spaces/<spaceId>
 Config highlights
-Copy
 channels
 googlechat
 enabled
 true
 serviceAccountFile
-&quot;/path/to/service-account.json&quot;
+"/path/to/service-account.json"
 audienceType
-&quot;app-url&quot;
+"app-url"
 audience
-&quot;https://gateway.example.com/googlechat&quot;
+"https://gateway.example.com/googlechat"
 webhookPath
-&quot;/googlechat&quot;
+"/googlechat"
 botUser
-&quot;users/1234567890&quot;
+"users/1234567890"
 // optional; helps mention detection
 policy
-&quot;pairing&quot;
+"pairing"
 allowFrom
-&quot;users/1234567890&quot;
-&quot;
-[email&#160;protected]
-&quot;
+"users/1234567890"
+"
+[email protected]
+"
 groupPolicy
-&quot;allowlist&quot;
+"allowlist"
 groups
-&quot;spaces/AAAA&quot;
+"spaces/AAAA"
 allow
 true
 requireMention
 true
 users
-&quot;users/1234567890&quot;
+"users/1234567890"
 systemPrompt
-&quot;Short answers only.&quot;
+"Short answers only."
 actions
 reactions
 true
 typingIndicator
-&quot;message&quot;
+"message"
 mediaMaxMb
 Notes:
 Service account credentials can also be passed inline with
@@ -2525,14 +2103,12 @@ mediaMaxMb
 Troubleshooting
 405 Method Not Allowed
 If Google Cloud Logs Explorer shows errors like:
-Copy
 status code: 405, reason phrase: HTTP error response: HTTP/1.1 405 Method Not Allowed
 This means the webhook handler isn’t registered. Common causes:
 Channel not configured
 : The
 channels.googlechat
 section is missing from your config. Verify with:
-Copy
 openclaw
 config
 get
@@ -2541,7 +2117,6 @@ If it returns “Config path not found”, add the configuration (see
 Config highlights
 Plugin not enabled
 : Check plugin status:
-Copy
 openclaw
 plugins
 list
@@ -2552,12 +2127,10 @@ plugins.entries.googlechat.enabled: true
 to your config.
 Gateway not restarted
 : After adding config, restart the gateway:
-Copy
 openclaw
 gateway
 restart
 Verify the channel is running:
-Copy
 openclaw
 channels
 status
@@ -2586,99 +2159,6 @@ Mattermost
 
 [Source: https://docs.openclaw.ai/channels/grammy]
 
-grammY - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Technical reference
-grammY
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-grammY Integration (Telegram Bot API)
-Why grammY
-What we shipped
-Technical reference
-grammY
 grammY Integration (Telegram Bot API)
 Why grammY
 TS-first Bot API client with built-in long-poll + webhook helpers, middleware, error handling, rate limiter.
@@ -2716,9 +2196,9 @@ channels.telegram.webhookSecret
 are set (otherwise it long-polls).
 Sessions:
 direct chats collapse into the agent main session (
-agent:&lt;agentId&gt;:&lt;mainKey&gt;
+agent:<agentId>:<mainKey>
 ); groups use
-agent:&lt;agentId&gt;:telegram:group:&lt;chatId&gt;
+agent:<agentId>:telegram:group:<chatId>
 ; replies route back to the same channel.
 Config knobs:
 channels.telegram.botToken
@@ -2754,59 +2234,6 @@ TypeBox
 
 [Source: https://docs.openclaw.ai/channels/group-messages]
 
-Group Messages - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Configuration
-Group Messages
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Chat Channels
-Messaging platforms
-WhatsApp
-Telegram
-Discord
-IRC
-Slack
-Feishu
-Google Chat
-Mattermost
-Signal
-iMessage
-Microsoft Teams
-LINE
-Matrix
-Zalo
-Zalo Personal
-Configuration
-Pairing
-Group Messages
-Groups
-Broadcast Groups
-Channel Routing
-Channel Location Parsing
-Channel Troubleshooting
-Group messages (WhatsApp web channel)
-What’s implemented (2025-12-03)
-Config example (WhatsApp)
-Activation command (owner-only)
-How to use
-Testing / verification
-Known considerations
-Configuration
-Group Messages
-Group messages (WhatsApp web channel)
 Goal: let Clawd sit in WhatsApp groups, wake up only when pinged, and keep that thread separate from the personal DM session.
 Note:
 agents.list[].groupChat.mentionPatterns
@@ -2834,7 +2261,7 @@ channels.whatsapp.groups
 . When
 channels.whatsapp.groups
 is set, it also acts as a group allowlist (include
-&quot;*&quot;
+"*"
 to allow all).
 Group policy:
 channels.whatsapp.groupPolicy
@@ -2849,7 +2276,7 @@ channels.whatsapp.allowFrom
 allowlist
 (blocked until you add senders).
 Per-group sessions: session keys look like
-agent:&lt;agentId&gt;:whatsapp:group:&lt;jid&gt;
+agent:<agentId>:whatsapp:group:<jid>
 so commands such as
 /verbose on
 /think high
@@ -2870,7 +2297,7 @@ Ephemeral/view-once: we unwrap those before extracting text/mentions, so pings i
 Group system prompt: on the first turn of a group session (and whenever
 /activation
 changes the mode) we inject a short blurb into the system prompt like
-You are replying inside the WhatsApp group &quot;&lt;subject&gt;&quot;. Group members: Alice (+44...), Bob (+43...), … Activation: trigger-only … Address the specific sender noted in the message context.
+You are replying inside the WhatsApp group "<subject>". Group members: Alice (+44...), Bob (+43...), … Activation: trigger-only … Address the specific sender noted in the message context.
 If metadata isn’t available we still tell the agent it’s a group chat.
 Config example (WhatsApp)
 Add a
@@ -2879,21 +2306,20 @@ block to
 ~/.openclaw/openclaw.json
 so display-name pings work even when WhatsApp strips the visual
 in the text body:
-Copy
 channels
 whatsapp
 groups
-&quot;*&quot;
+"*"
 requireMention
 true
 agents
 list
-&quot;main&quot;
+"main"
 groupChat
 historyLimit
 mentionPatterns
-&quot;@?openclaw&quot;
-&quot;\\+?15555550123&quot;
+"@?openclaw"
+"\\+?15555550123"
 Notes:
 The regexes are case-insensitive; they cover a display-name ping like
 @openclaw
@@ -2916,7 +2342,7 @@ Add your WhatsApp account (the one running OpenClaw) to the group.
 Say
 @openclaw …
 (or include the number). Only allowlisted senders can trigger it unless you set
-groupPolicy: &quot;open&quot;
+groupPolicy: "open"
 The agent prompt will include recent group context plus the trailing
 [from: …]
 marker so it can address the right person.
@@ -2938,7 +2364,7 @@ Check gateway logs (run with
 ) to see
 inbound web message
 entries showing
-from: &lt;groupJid&gt;
+from: <groupJid>
 and the
 [from: …]
 suffix.
@@ -2946,9 +2372,9 @@ Known considerations
 Heartbeats are intentionally skipped for groups to avoid noisy broadcasts.
 Echo suppression uses the combined batch string; if you send identical text twice without mentions, only the first will get a response.
 Session store entries will appear as
-agent:&lt;agentId&gt;:whatsapp:group:&lt;jid&gt;
+agent:<agentId>:whatsapp:group:<jid>
 in the session store (
-~/.openclaw/agents/&lt;agentId&gt;/sessions/sessions.json
+~/.openclaw/agents/<agentId>/sessions/sessions.json
 by default); a missing entry just means the group hasn’t triggered a run yet.
 Typing indicators in groups follow
 agents.defaults.typingMode
@@ -2963,65 +2389,6 @@ Groups
 
 [Source: https://docs.openclaw.ai/channels/groups]
 
-Groups - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Configuration
-Groups
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Chat Channels
-Messaging platforms
-WhatsApp
-Telegram
-Discord
-IRC
-Slack
-Feishu
-Google Chat
-Mattermost
-Signal
-iMessage
-Microsoft Teams
-LINE
-Matrix
-Zalo
-Zalo Personal
-Configuration
-Pairing
-Group Messages
-Groups
-Broadcast Groups
-Channel Routing
-Channel Location Parsing
-Channel Troubleshooting
-Groups
-Beginner intro (2 minutes)
-Session keys
-Pattern: personal DMs + public groups (single agent)
-Display labels
-Group policy
-Mention gating (default)
-Group/channel tool restrictions (optional)
-Group allowlists
-Activation (owner-only)
-Context fields
-iMessage specifics
-WhatsApp specifics
-Configuration
-Groups
-Groups
 OpenClaw treats group chats consistently across surfaces: WhatsApp, Telegram, Discord, Slack, Signal, iMessage, Microsoft Teams.
 Beginner intro (2 minutes)
 OpenClaw “lives” on your own messaging accounts. There is no separate WhatsApp bot user.
@@ -3029,7 +2396,7 @@ you
 are in a group, OpenClaw can see that group and respond there.
 Default behavior:
 Groups are restricted (
-groupPolicy: &quot;allowlist&quot;
+groupPolicy: "allowlist"
 Replies require a mention unless you explicitly disable mention gating.
 Translation: allowlisted senders can trigger OpenClaw by mentioning it.
 TL;DR
@@ -3047,33 +2414,32 @@ is controlled by mention gating (
 requireMention
 /activation
 Quick flow (what happens to a group message):
-Copy
-groupPolicy? disabled -&gt; drop
-groupPolicy? allowlist -&gt; group allowed? no -&gt; drop
-requireMention? yes -&gt; mentioned? no -&gt; store for context only
-otherwise -&gt; reply
+groupPolicy? disabled -> drop
+groupPolicy? allowlist -> group allowed? no -> drop
+requireMention? yes -> mentioned? no -> store for context only
+otherwise -> reply
 If you want…
 Goal
 What to set
 Allow all groups but only reply on @mentions
-groups: { &quot;*&quot;: { requireMention: true } }
+groups: { "*": { requireMention: true } }
 Disable all group replies
-groupPolicy: &quot;disabled&quot;
+groupPolicy: "disabled"
 Only specific groups
-groups: { &quot;&lt;group-id&gt;&quot;: { ... } }
+groups: { "<group-id>": { ... } }
 (no
-&quot;*&quot;
+"*"
 key)
 Only you can trigger in groups
-groupPolicy: &quot;allowlist&quot;
-groupAllowFrom: [&quot;+1555...&quot;]
+groupPolicy: "allowlist"
+groupAllowFrom: ["+1555..."]
 Session keys
 Group sessions use
-agent:&lt;agentId&gt;:&lt;channel&gt;:group:&lt;id&gt;
+agent:<agentId>:<channel>:group:<id>
 session keys (rooms/channels use
-agent:&lt;agentId&gt;:&lt;channel&gt;:channel:&lt;id&gt;
+agent:<agentId>:<channel>:channel:<id>
 Telegram forum topics add
-:topic:&lt;threadId&gt;
+:topic:<threadId>
 to the group id so each topic has its own session.
 Direct chats use the main session (or per-sender if configured).
 Heartbeats are skipped for group sessions.
@@ -3089,9 +2455,9 @@ agent:main:main
 ), while groups always use
 non-main
 session keys (
-agent:main:&lt;channel&gt;:group:&lt;id&gt;
+agent:main:<channel>:group:<id>
 ). If you enable sandboxing with
-mode: &quot;non-main&quot;
+mode: "non-main"
 , those group sessions run in Docker while your main DM session stays on-host.
 This gives you one agent “brain” (shared workspace + memory), but two execution postures:
 DMs
@@ -3101,49 +2467,47 @@ Groups
 If you need truly separate workspaces/personas (“personal” and “public” must never mix), use a second agent + bindings. See
 Multi-Agent Routing
 Example (DMs on host, groups sandboxed + messaging-only tools):
-Copy
 agents
 defaults
 sandbox
 mode
-&quot;non-main&quot;
-// groups/channels are non-main -&gt; sandboxed
+"non-main"
+// groups/channels are non-main -> sandboxed
 scope
-&quot;session&quot;
+"session"
 // strongest isolation (one container per group/channel)
 workspaceAccess
-&quot;none&quot;
+"none"
 tools
 sandbox
 tools
 // If allow is non-empty, everything else is blocked (deny still wins).
 allow
-&quot;group:messaging&quot;
-&quot;group:sessions&quot;
+"group:messaging"
+"group:sessions"
 deny
-&quot;group:runtime&quot;
-&quot;group:fs&quot;
-&quot;group:ui&quot;
-&quot;nodes&quot;
-&quot;cron&quot;
-&quot;gateway&quot;
+"group:runtime"
+"group:fs"
+"group:ui"
+"nodes"
+"cron"
+"gateway"
 Want “groups can only see folder X” instead of “no host access”? Keep
-workspaceAccess: &quot;none&quot;
+workspaceAccess: "none"
 and mount only allowlisted paths into the sandbox:
-Copy
 agents
 defaults
 sandbox
 mode
-&quot;non-main&quot;
+"non-main"
 scope
-&quot;session&quot;
+"session"
 workspaceAccess
-&quot;none&quot;
+"none"
 docker
 binds
 // hostPath:containerPath:mode
-&quot;/home/user/FriendsShared:/data:ro&quot;
+"/home/user/FriendsShared:/data:ro"
 Related:
 Configuration keys and defaults:
 Gateway configuration
@@ -3155,49 +2519,48 @@ Display labels
 UI labels use
 displayName
 when available, formatted as
-&lt;channel&gt;:&lt;token&gt;
+<channel>:<token>
 #room
 is reserved for rooms/channels; group chats use
-g-&lt;slug&gt;
-(lowercase, spaces -&gt;
+g-<slug>
+(lowercase, spaces ->
 , keep
 #@+._-
 Group policy
 Control how group/room messages are handled per channel:
-Copy
 channels
 whatsapp
 groupPolicy
-&quot;disabled&quot;
-// &quot;open&quot; | &quot;disabled&quot; | &quot;allowlist&quot;
+"disabled"
+// "open" | "disabled" | "allowlist"
 groupAllowFrom
-&quot;+15551234567&quot;
+"+15551234567"
 telegram
 groupPolicy
-&quot;disabled&quot;
+"disabled"
 groupAllowFrom
-&quot;123456789&quot;
+"123456789"
 // numeric Telegram user id (wizard can resolve @username)
 signal
 groupPolicy
-&quot;disabled&quot;
+"disabled"
 groupAllowFrom
-&quot;+15551234567&quot;
+"+15551234567"
 imessage
 groupPolicy
-&quot;disabled&quot;
+"disabled"
 groupAllowFrom
-&quot;chat_id:123&quot;
+"chat_id:123"
 msteams
 groupPolicy
-&quot;disabled&quot;
+"disabled"
 groupAllowFrom
-&quot;
-[email&#160;protected]
-&quot;
+"
+[email protected]
+"
 discord
 groupPolicy
-&quot;allowlist&quot;
+"allowlist"
 guilds
 GUILD_ID
 channels
@@ -3207,31 +2570,31 @@ true
 } } }
 slack
 groupPolicy
-&quot;allowlist&quot;
+"allowlist"
 channels
-&quot;#general&quot;
+"#general"
 allow
 true
 } }
 matrix
 groupPolicy
-&quot;allowlist&quot;
+"allowlist"
 groupAllowFrom
-&quot;@owner:example.org&quot;
+"@owner:example.org"
 groups
-&quot;!roomId:example.org&quot;
+"!roomId:example.org"
 allow
 true
-&quot;#alias:example.org&quot;
+"#alias:example.org"
 allow
 true
 Policy
 Behavior
-&quot;open&quot;
+"open"
 Groups bypass allowlists; mention-gating still applies.
-&quot;disabled&quot;
+"disabled"
 Block all group messages entirely.
-&quot;allowlist&quot;
+"allowlist"
 Only allow groups/rooms that match the configured allowlist.
 Notes:
 groupPolicy
@@ -3241,7 +2604,7 @@ groupAllowFrom
 (fallback: explicit
 allowFrom
 Discord: allowlist uses
-channels.discord.guilds.&lt;id&gt;.channels
+channels.discord.guilds.<id>.channels
 Slack: allowlist uses
 channels.slack.channels
 Matrix: allowlist uses
@@ -3255,15 +2618,15 @@ Group DMs are controlled separately (
 channels.discord.dm.*
 channels.slack.dm.*
 Telegram allowlist can match user IDs (
-&quot;123456789&quot;
-&quot;telegram:123456789&quot;
-&quot;tg:123456789&quot;
+"123456789"
+"telegram:123456789"
+"tg:123456789"
 ) or usernames (
-&quot;@alice&quot;
-&quot;alice&quot;
+"@alice"
+"alice"
 ); prefixes are case-insensitive.
 Default is
-groupPolicy: &quot;allowlist&quot;
+groupPolicy: "allowlist"
 ; if your group allowlist is empty, group messages are blocked.
 Quick mental model (evaluation order for group messages):
 groupPolicy
@@ -3277,44 +2640,43 @@ requireMention
 /activation
 Mention gating (default)
 Group messages require a mention unless overridden per group. Defaults live per subsystem under
-*.groups.&quot;*&quot;
+*.groups."*"
 Replying to a bot message counts as an implicit mention (when the channel supports reply metadata). This applies to Telegram, WhatsApp, Slack, Discord, and Microsoft Teams.
-Copy
 channels
 whatsapp
 groups
-&quot;*&quot;
+"*"
 requireMention
 true
-&quot;
-[email&#160;protected]
-&quot;
+"
+[email protected]
+"
 requireMention
 false
 telegram
 groups
-&quot;*&quot;
+"*"
 requireMention
 true
-&quot;123456789&quot;
+"123456789"
 requireMention
 false
 imessage
 groups
-&quot;*&quot;
+"*"
 requireMention
 true
-&quot;123&quot;
+"123"
 requireMention
 false
 agents
 list
-&quot;main&quot;
+"main"
 groupChat
 mentionPatterns
-&quot;@openclaw&quot;
-&quot;openclaw&quot;
-&quot;\\+15555550123&quot;
+"@openclaw"
+"openclaw"
+"\\+15555550123"
 historyLimit
 Notes:
 mentionPatterns
@@ -3327,16 +2689,16 @@ Mention gating is only enforced when mention detection is possible (native menti
 mentionPatterns
 are configured).
 Discord defaults live in
-channels.discord.guilds.&quot;*&quot;
+channels.discord.guilds."*"
 (overridable per guild/channel).
 Group history context is wrapped uniformly across channels and is
 pending-only
 (messages skipped due to mention gating); use
 messages.groupChat.historyLimit
 for the global default and
-channels.&lt;channel&gt;.historyLimit
+channels.<channel>.historyLimit
 (or
-channels.&lt;channel&gt;.accounts.*.historyLimit
+channels.<channel>.accounts.*.historyLimit
 ) for overrides. Set
 to disable.
 Group/channel tool restrictions (optional)
@@ -3346,7 +2708,7 @@ tools
 : allow/deny tools for the whole group.
 toolsBySender
 : per-sender overrides within the group (keys are sender IDs/usernames/emails/phone numbers depending on the channel). Use
-&quot;*&quot;
+"*"
 as a wildcard.
 Resolution order (most specific wins):
 group/channel
@@ -3355,33 +2717,32 @@ match
 group/channel
 tools
 default (
-&quot;*&quot;
+"*"
 toolsBySender
 match
 default (
-&quot;*&quot;
+"*"
 tools
 Example (Telegram):
-Copy
 channels
 telegram
 groups
-&quot;*&quot;
+"*"
 tools
 deny
-&quot;exec&quot;
+"exec"
 ] } }
-&quot;-1001234567890&quot;
+"-1001234567890"
 tools
 deny
-&quot;exec&quot;
-&quot;read&quot;
-&quot;write&quot;
+"exec"
+"read"
+"write"
 ] }
 toolsBySender
-&quot;123456789&quot;
+"123456789"
 alsoAllow
-&quot;exec&quot;
+"exec"
 ] }
 Notes:
 Group/channel tool restrictions are applied in addition to global/agent tool policy (deny still wins).
@@ -3398,50 +2759,46 @@ channels.telegram.groups
 , or
 channels.imessage.groups
 is configured, the keys act as a group allowlist. Use
-&quot;*&quot;
+"*"
 to allow all groups while still setting default mention behavior.
 Common intents (copy/paste):
 Disable all group replies
-Copy
 channels
 whatsapp
 groupPolicy
-&quot;disabled&quot;
+"disabled"
 } }
 Allow only specific groups (WhatsApp)
-Copy
 channels
 whatsapp
 groups
-&quot;
-[email&#160;protected]
-&quot;
+"
+[email protected]
+"
 requireMention
 true
-&quot;
-[email&#160;protected]
-&quot;
+"
+[email protected]
+"
 requireMention
 false
 Allow all groups but require mention (explicit)
-Copy
 channels
 whatsapp
 groups
-&quot;*&quot;
+"*"
 requireMention
 true
 } }
 Only the owner can trigger in groups (WhatsApp)
-Copy
 channels
 whatsapp
 groupPolicy
-&quot;allowlist&quot;
+"allowlist"
 groupAllowFrom
-&quot;+15551234567&quot;
+"+15551234567"
 groups
-&quot;*&quot;
+"*"
 requireMention
 true
 } }
@@ -3470,7 +2827,7 @@ The agent system prompt includes a group intro on the first turn of a new group 
 sequences.
 iMessage specifics
 Prefer
-chat_id:&lt;id&gt;
+chat_id:<id>
 when routing or allowlisting.
 List chats:
 imsg chats --limit 20
@@ -3488,65 +2845,6 @@ Broadcast Groups
 
 [Source: https://docs.openclaw.ai/channels/imessage]
 
-iMessage - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Messaging platforms
-iMessage
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Chat Channels
-Messaging platforms
-WhatsApp
-Telegram
-Discord
-IRC
-Slack
-Feishu
-Google Chat
-Mattermost
-Signal
-iMessage
-Microsoft Teams
-LINE
-Matrix
-Zalo
-Zalo Personal
-Configuration
-Pairing
-Group Messages
-Groups
-Broadcast Groups
-Channel Routing
-Channel Location Parsing
-Channel Troubleshooting
-iMessage (legacy: imsg)
-Quick setup
-Requirements and permissions (macOS)
-Access control and routing
-Deployment patterns
-Media, chunking, and delivery targets
-Config writes
-Troubleshooting
-Configuration reference pointers
-Messaging platforms
-iMessage
-iMessage (legacy: imsg)
-For new iMessage deployments, use
-BlueBubbles
-The
-imsg
 integration is legacy and may be removed in a future release.
 Status: legacy external CLI integration. Gateway spawns
 imsg rpc
@@ -3561,7 +2859,6 @@ Quick setup
 Local Mac (fast path)
 Remote Mac over SSH
 Install and verify imsg
-Copy
 brew
 install
 steipete/tap/imsg
@@ -3569,21 +2866,18 @@ imsg
 rpc
 --help
 Configure OpenClaw
-Copy
 channels
 imessage
 enabled
 true
 cliPath
-&quot;/usr/local/bin/imsg&quot;
+"/usr/local/bin/imsg"
 dbPath
-&quot;/Users/&lt;you&gt;/Library/Messages/chat.db&quot;
+"/Users/<you>/Library/Messages/chat.db"
 Start gateway
-Copy
 openclaw
 gateway
 Approve first DM pairing (default dmPolicy)
-Copy
 openclaw
 pairing
 list
@@ -3592,9 +2886,9 @@ openclaw
 pairing
 approve
 imessage
-&lt;
+<
 COD
-&gt;
+>
 Pairing requests expire after 1 hour.
 OpenClaw only requires a stdio-compatible
 cliPath
@@ -3602,23 +2896,21 @@ cliPath
 cliPath
 at a wrapper script that SSHes to a remote Mac and runs
 imsg
-Copy
 #!/usr/bin/env bash
 exec
 ssh
 gateway-host
 imsg
-&quot;$@&quot;
+"$@"
 Recommended config when attachments are enabled:
-Copy
 channels
 imessage
 enabled
 true
 cliPath
-&quot;~/.openclaw/scripts/imsg-ssh&quot;
+"~/.openclaw/scripts/imsg-ssh"
 remoteHost
-&quot;user@gateway-host&quot;
+"user@gateway-host"
 // used for SCP attachment fetches
 includeAttachments
 true
@@ -3632,17 +2924,16 @@ imsg
 (Messages DB access).
 Automation permission is required to send messages through Messages.app.
 Permissions are granted per process context. If gateway runs headless (LaunchAgent/SSH), run a one-time interactive command in that same context to trigger prompts:
-Copy
 imsg
 chats
 --limit
 # or
 imsg
 send
-&lt;
+<
 handl
-&gt;
-&quot;test&quot;
+>
+"test"
 Access control and routing
 DM policy
 Group policy + mentions
@@ -3656,7 +2947,7 @@ open
 (requires
 allowFrom
 to include
-&quot;*&quot;
+"*"
 disabled
 Allowlist field:
 channels.imessage.allowFrom
@@ -3690,7 +2981,7 @@ With default
 session.dmScope=main
 , iMessage DMs collapse into the agent main session.
 Group sessions are isolated (
-agent:&lt;agentId&gt;:imessage:group:&lt;chat_id&gt;
+agent:<agentId>:imessage:group:<chat_id>
 Replies route back to iMessage using originating channel/target metadata.
 Group-ish thread behavior:
 Some multi-participant iMessage threads can arrive with
@@ -3713,7 +3004,7 @@ Create SSH wrapper so OpenClaw can run
 imsg
 in that user context.
 Point
-channels.imessage.accounts.&lt;id&gt;.cliPath
+channels.imessage.accounts.<id>.cliPath
 and
 .dbPath
 to that user profile.
@@ -3730,28 +3021,26 @@ imsg
 remoteHost
 enables SCP attachment fetches
 Example:
-Copy
 channels
 imessage
 enabled
 true
 cliPath
-&quot;~/.openclaw/scripts/imsg-ssh&quot;
+"~/.openclaw/scripts/imsg-ssh"
 remoteHost
-&quot;
-[email&#160;protected]
-&quot;
+"
+[email protected]
+"
 includeAttachments
 true
 dbPath
-&quot;/Users/bot/Library/Messages/chat.db&quot;
-Copy
+"/Users/bot/Library/Messages/chat.db"
 #!/usr/bin/env bash
 exec
 ssh
-[email&#160;protected]
+[email protected]
 imsg
-&quot;$@&quot;
+"$@"
 Use SSH keys so both SSH and SCP are non-interactive.
 Multi-account pattern
 iMessage supports per-account config under
@@ -3792,8 +3081,7 @@ chat_identifier:...
 Handle targets are also supported:
 imessage:+1555...
 sms:+1555...
-[email&#160;protected]
-Copy
+[email protected]
 imsg
 chats
 --limit
@@ -3803,7 +3091,6 @@ iMessage allows channel-initiated config writes by default (for
 when
 commands.config: true
 Disable:
-Copy
 channels
 imessage
 configWrites
@@ -3811,7 +3098,6 @@ false
 Troubleshooting
 imsg not found or RPC unsupported
 Validate the binary and RPC support:
-Copy
 imsg
 rpc
 --help
@@ -3842,16 +3128,15 @@ SSH/SCP key auth from the gateway host
 remote path readability on the Mac running Messages
 macOS permission prompts were missed
 Re-run in an interactive GUI terminal in the same user/session context and approve prompts:
-Copy
 imsg
 chats
 --limit
 imsg
 send
-&lt;
+<
 handl
-&gt;
-&quot;test&quot;
+>
+"test"
 Confirm Full Disk Access + Automation are granted for the process context that runs OpenClaw/
 imsg
 Configuration reference pointers
@@ -3867,62 +3152,6 @@ Microsoft Teams
 
 [Source: https://docs.openclaw.ai/channels/irc]
 
-IRC - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Messaging platforms
-IRC
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Chat Channels
-Messaging platforms
-WhatsApp
-Telegram
-Discord
-IRC
-Slack
-Feishu
-Google Chat
-Mattermost
-Signal
-iMessage
-Microsoft Teams
-LINE
-Matrix
-Zalo
-Zalo Personal
-Configuration
-Pairing
-Group Messages
-Groups
-Broadcast Groups
-Channel Routing
-Channel Location Parsing
-Channel Troubleshooting
-Quick start
-Security defaults
-Access control
-Common gotcha: allowFrom is for DMs, not channels
-Reply triggering (mentions)
-Security note (recommended for public channels)
-Same tools for everyone in the channel
-Different tools per sender (owner gets more power)
-NickServ
-Environment variables
-Troubleshooting
-Messaging platforms
-IRC
 Connect OpenClaw to IRC channels and direct messages.
 Use IRC when you want OpenClaw in classic channels (
 #room
@@ -3933,35 +3162,33 @@ Quick start
 Enable IRC config in
 ~/.openclaw/openclaw.json
 Set at least:
-Copy
-&quot;channels&quot;
-&quot;irc&quot;
-&quot;enabled&quot;
+"channels"
+"irc"
+"enabled"
 true
-&quot;host&quot;
-&quot;irc.libera.chat&quot;
-&quot;port&quot;
+"host"
+"irc.libera.chat"
+"port"
 6697
-&quot;tls&quot;
+"tls"
 true
-&quot;nick&quot;
-&quot;openclaw-bot&quot;
-&quot;channels&quot;
-&quot;#openclaw&quot;
+"nick"
+"openclaw-bot"
+"channels"
+"#openclaw"
 Start/restart gateway:
-Copy
 openclaw
 gateway
 run
 Security defaults
 channels.irc.dmPolicy
 defaults to
-&quot;pairing&quot;
+"pairing"
 channels.irc.groupPolicy
 defaults to
-&quot;allowlist&quot;
+"allowlist"
 With
-groupPolicy=&quot;allowlist&quot;
+groupPolicy="allowlist"
 , set
 channels.irc.groups
 to define allowed channels.
@@ -3977,7 +3204,7 @@ groups
 Sender access
 groupAllowFrom
 / per-channel
-groups[&quot;#channel&quot;].allowFrom
+groups["#channel"].allowFrom
 ): who is allowed to trigger the bot inside that channel.
 Config keys:
 DM allowlist (DM sender access):
@@ -3985,8 +3212,8 @@ channels.irc.allowFrom
 Group sender allowlist (channel sender access):
 channels.irc.groupAllowFrom
 Per-channel controls (channel + sender + mention rules):
-channels.irc.groups[&quot;#channel&quot;]
-channels.irc.groupPolicy=&quot;open&quot;
+channels.irc.groups["#channel"]
+channels.irc.groupPolicy="open"
 allows unconfigured channels (
 still mention-gated by default
 Allowlist entries can use nick or
@@ -4004,19 +3231,18 @@ setting
 channels.irc.groupAllowFrom
 (global for all channels), or
 setting per-channel sender allowlists:
-channels.irc.groups[&quot;#channel&quot;].allowFrom
+channels.irc.groups["#channel"].allowFrom
 Example (allow anyone in
 #tuirc-dev
 to talk to the bot):
-Copy
 channels
 irc
 groupPolicy
-&quot;allowlist&quot;
+"allowlist"
 groups
-&quot;#tuirc-dev&quot;
+"#tuirc-dev"
 allowFrom
-&quot;*&quot;
+"*"
 ] }
 Reply triggering (mentions)
 Even if a channel is allowed (via
@@ -4031,117 +3257,111 @@ unless the message includes a mention pattern that matches the bot.
 To make the bot reply in an IRC channel
 without needing a mention
 , disable mention gating for that channel:
-Copy
 channels
 irc
 groupPolicy
-&quot;allowlist&quot;
+"allowlist"
 groups
-&quot;#tuirc-dev&quot;
+"#tuirc-dev"
 requireMention
 false
 allowFrom
-&quot;*&quot;
+"*"
 Or to allow
 all
 IRC channels (no per-channel allowlist) and still reply without mentions:
-Copy
 channels
 irc
 groupPolicy
-&quot;open&quot;
+"open"
 groups
-&quot;*&quot;
+"*"
 requireMention
 false
 allowFrom
-&quot;*&quot;
+"*"
 ] }
 Security note (recommended for public channels)
 If you allow
-allowFrom: [&quot;*&quot;]
+allowFrom: ["*"]
 in a public channel, anyone can prompt the bot.
 To reduce risk, restrict tools for that channel.
 Same tools for everyone in the channel
-Copy
 channels
 irc
 groups
-&quot;#tuirc-dev&quot;
+"#tuirc-dev"
 allowFrom
-&quot;*&quot;
+"*"
 tools
 deny
-&quot;group:runtime&quot;
-&quot;group:fs&quot;
-&quot;gateway&quot;
-&quot;nodes&quot;
-&quot;cron&quot;
-&quot;browser&quot;
+"group:runtime"
+"group:fs"
+"gateway"
+"nodes"
+"cron"
+"browser"
 Different tools per sender (owner gets more power)
 Use
 toolsBySender
 to apply a stricter policy to
-&quot;*&quot;
+"*"
 and a looser one to your nick:
-Copy
 channels
 irc
 groups
-&quot;#tuirc-dev&quot;
+"#tuirc-dev"
 allowFrom
-&quot;*&quot;
+"*"
 toolsBySender
-&quot;*&quot;
+"*"
 deny
-&quot;group:runtime&quot;
-&quot;group:fs&quot;
-&quot;gateway&quot;
-&quot;nodes&quot;
-&quot;cron&quot;
-&quot;browser&quot;
+"group:runtime"
+"group:fs"
+"gateway"
+"nodes"
+"cron"
+"browser"
 eigen
 deny
-&quot;gateway&quot;
-&quot;nodes&quot;
-&quot;cron&quot;
+"gateway"
+"nodes"
+"cron"
 Notes:
 toolsBySender
 keys can be a nick (e.g.
-&quot;eigen&quot;
+"eigen"
 ) or a full hostmask (
-&quot;
-[email&#160;protected]
-&quot;
+"
+[email protected]
+"
 ) for stronger identity matching.
 The first matching sender policy wins;
-&quot;*&quot;
+"*"
 is the wildcard fallback.
 For more on group access vs mention-gating (and how they interact), see:
 /channels/groups
 NickServ
 To identify with NickServ after connect:
-Copy
-&quot;channels&quot;
-&quot;irc&quot;
-&quot;nickserv&quot;
-&quot;enabled&quot;
+"channels"
+"irc"
+"nickserv"
+"enabled"
 true
-&quot;service&quot;
-&quot;NickServ&quot;
-&quot;password&quot;
-&quot;your-nickserv-password&quot;
+"service"
+"NickServ"
+"password"
+"your-nickserv-password"
 Optional one-time registration on connect:
-Copy
-&quot;channels&quot;
-&quot;irc&quot;
-&quot;nickserv&quot;
-&quot;register&quot;
+"channels"
+"irc"
+"nickserv"
+"register"
 true
-&quot;registerEmail&quot;
-&quot;
-[email&#160;protected]
-&quot;
+"registerEmail"
+"
+[email protected]
+"
 Disable
 register
 after the nick is registered to avoid repeated REGISTER attempts.
@@ -4177,59 +3397,6 @@ Slack
 
 [Source: https://docs.openclaw.ai/channels/line]
 
-LINE - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Messaging platforms
-LINE
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Chat Channels
-Messaging platforms
-WhatsApp
-Telegram
-Discord
-IRC
-Slack
-Feishu
-Google Chat
-Mattermost
-Signal
-iMessage
-Microsoft Teams
-LINE
-Matrix
-Zalo
-Zalo Personal
-Configuration
-Pairing
-Group Messages
-Groups
-Broadcast Groups
-Channel Routing
-Channel Location Parsing
-Channel Troubleshooting
-LINE (plugin)
-Plugin required
-Setup
-Configure
-Access control
-Message behavior
-Channel data (rich messages)
-Troubleshooting
-Messaging platforms
-LINE
 LINE (plugin)
 LINE connects to OpenClaw via the LINE Messaging API. The plugin runs as a webhook
 receiver on the gateway and uses your channel access token + channel secret for
@@ -4239,13 +3406,11 @@ messages, template messages, and quick replies are supported. Reactions and thre
 are not supported.
 Plugin required
 Install the LINE plugin:
-Copy
 openclaw
 plugins
 install
 @openclaw/line
 Local checkout (when running from a git repo):
-Copy
 openclaw
 plugins
 install
@@ -4265,53 +3430,48 @@ Enable
 Use webhook
 in the Messaging API settings.
 Set the webhook URL to your gateway endpoint (HTTPS required):
-Copy
 https://gateway-host/line/webhook
 The gateway responds to LINE’s webhook verification (GET) and inbound events (POST).
 If you need a custom path, set
 channels.line.webhookPath
-channels.line.accounts.&lt;id&gt;.webhookPath
+channels.line.accounts.<id>.webhookPath
 and update the URL accordingly.
 Configure
 Minimal config:
-Copy
 channels
 line
 enabled
 true
 channelAccessToken
-&quot;LINE_CHANNEL_ACCESS_TOKEN&quot;
+"LINE_CHANNEL_ACCESS_TOKEN"
 channelSecret
-&quot;LINE_CHANNEL_SECRET&quot;
+"LINE_CHANNEL_SECRET"
 dmPolicy
-&quot;pairing&quot;
+"pairing"
 Env vars (default account only):
 LINE_CHANNEL_ACCESS_TOKEN
 LINE_CHANNEL_SECRET
 Token/secret files:
-Copy
 channels
 line
 tokenFile
-&quot;/path/to/line-token.txt&quot;
+"/path/to/line-token.txt"
 secretFile
-&quot;/path/to/line-secret.txt&quot;
+"/path/to/line-secret.txt"
 Multiple accounts:
-Copy
 channels
 line
 accounts
 marketing
 channelAccessToken
-&quot;...&quot;
+"..."
 channelSecret
-&quot;...&quot;
+"..."
 webhookPath
-&quot;/line/marketing&quot;
+"/line/marketing"
 Access control
 Direct messages default to pairing. Unknown senders get a pairing code and their
 messages are ignored until approved.
-Copy
 openclaw
 pairing
 list
@@ -4320,9 +3480,9 @@ openclaw
 pairing
 approve
 line
-&lt;
+<
 COD
-&gt;
+>
 Allowlists and policies:
 channels.line.dmPolicy
 pairing | allowlist | open | disabled
@@ -4333,7 +3493,7 @@ allowlist | open | disabled
 channels.line.groupAllowFrom
 : allowlisted LINE user IDs for groups
 Per-group overrides:
-channels.line.groups.&lt;groupId&gt;.allowFrom
+channels.line.groups.<groupId>.allowFrom
 LINE IDs are case-sensitive. Valid IDs look like:
 User:
 + 32 hex chars
@@ -4355,46 +3515,44 @@ Use
 channelData.line
 to send quick replies, locations, Flex cards, or template
 messages.
-Copy
 text
-&quot;Here you go&quot;
+"Here you go"
 channelData
 line
 quickReplies
-&quot;Status&quot;
-&quot;Help&quot;
+"Status"
+"Help"
 location
 title
-&quot;Office&quot;
+"Office"
 address
-&quot;123 Main St&quot;
+"123 Main St"
 latitude
 35.681236
 longitude
 139.767125
 flexMessage
 altText
-&quot;Status card&quot;
+"Status card"
 contents
 /* Flex payload */
 templateMessage
 type
-&quot;confirm&quot;
+"confirm"
 text
-&quot;Proceed?&quot;
+"Proceed?"
 confirmLabel
-&quot;Yes&quot;
+"Yes"
 confirmData
-&quot;yes&quot;
+"yes"
 cancelLabel
-&quot;No&quot;
+"No"
 cancelData
-&quot;no&quot;
+"no"
 The LINE plugin also ships a
 /card
 command for Flex message presets:
-Copy
-/card info &quot;Welcome&quot; &quot;Thanks for joining!&quot;
+/card info "Welcome" "Thanks for joining!"
 Troubleshooting
 Webhook verification fails:
 ensure the webhook URL is HTTPS and the
@@ -4417,56 +3575,6 @@ Matrix
 
 [Source: https://docs.openclaw.ai/channels/location]
 
-Channel Location Parsing - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Configuration
-Channel Location Parsing
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Chat Channels
-Messaging platforms
-WhatsApp
-Telegram
-Discord
-IRC
-Slack
-Feishu
-Google Chat
-Mattermost
-Signal
-iMessage
-Microsoft Teams
-LINE
-Matrix
-Zalo
-Zalo Personal
-Configuration
-Pairing
-Group Messages
-Groups
-Broadcast Groups
-Channel Routing
-Channel Location Parsing
-Channel Troubleshooting
-Channel location parsing
-Text formatting
-Context fields
-Channel notes
-Configuration
-Channel Location Parsing
-Channel location parsing
 OpenClaw normalizes shared locations from chat channels into:
 human-readable text appended to the inbound body, and
 structured fields in the auto-reply context payload.
@@ -4488,7 +3596,6 @@ Named place:
 Live share:
 🛰 Live location: 48.858844, 2.294351 ±12m
 If the channel includes a caption/comment, it is appended on the next line:
-Copy
 📍 48.858844, 2.294351 ±12m
 Meet here
 Context fields
@@ -4532,63 +3639,6 @@ Channel Troubleshooting
 
 [Source: https://docs.openclaw.ai/channels/matrix]
 
-Matrix - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Messaging platforms
-Matrix
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Chat Channels
-Messaging platforms
-WhatsApp
-Telegram
-Discord
-IRC
-Slack
-Feishu
-Google Chat
-Mattermost
-Signal
-iMessage
-Microsoft Teams
-LINE
-Matrix
-Zalo
-Zalo Personal
-Configuration
-Pairing
-Group Messages
-Groups
-Broadcast Groups
-Channel Routing
-Channel Location Parsing
-Channel Troubleshooting
-Matrix (plugin)
-Plugin required
-Setup
-Encryption (E2EE)
-Multi-account
-Routing model
-Access control (DMs)
-Rooms (groups)
-Threads
-Capabilities
-Troubleshooting
-Configuration reference (Matrix)
-Messaging platforms
-Matrix
 Matrix (plugin)
 Matrix is an open, decentralized messaging protocol. OpenClaw connects as a Matrix
 user
@@ -4600,13 +3650,11 @@ polls (send + poll-start as text), location, and E2EE (with crypto support).
 Plugin required
 Matrix ships as a plugin and is not bundled with the core install.
 Install via CLI (npm registry):
-Copy
 openclaw
 plugins
 install
 @openclaw/matrix
 Local checkout (when running from a git repo):
-Copy
 openclaw
 plugins
 install
@@ -4629,22 +3677,21 @@ Get an access token for the bot account:
 Use the Matrix login API with
 curl
 at your home server:
-Copy
 curl
 --request
 POST
 --url
 https://matrix.example.org/_matrix/client/v3/login
 --header
-&#x27;Content-Type: application/json&#x27;
+'Content-Type: application/json'
 --data
-&#x27;{
-&quot;type&quot;: &quot;m.login.password&quot;,
-&quot;identifier&quot;: {
-&quot;type&quot;: &quot;m.id.user&quot;,
-&quot;user&quot;: &quot;your-user-name&quot;
-&quot;password&quot;: &quot;your-password&quot;
-}&#x27;
+'{
+"type": "m.login.password",
+"identifier": {
+"type": "m.id.user",
+"user": "your-user-name"
+"password": "your-password"
+}'
 Replace
 matrix.example.org
 with your homeserver URL.
@@ -4680,31 +3727,29 @@ so set
 channels.matrix.encryption: true
 and verify the device.
 Minimal config (access token, user ID auto-fetched):
-Copy
 channels
 matrix
 enabled
 true
 homeserver
-&quot;https://matrix.example.org&quot;
+"https://matrix.example.org"
 accessToken
-&quot;syt_***&quot;
+"syt_***"
 policy
-&quot;pairing&quot;
+"pairing"
 E2EE config (end to end encryption enabled):
-Copy
 channels
 matrix
 enabled
 true
 homeserver
-&quot;https://matrix.example.org&quot;
+"https://matrix.example.org"
 accessToken
-&quot;syt_***&quot;
+"syt_***"
 encryption
 true
 policy
-&quot;pairing&quot;
+"pairing"
 Encryption (E2EE)
 End-to-end encryption is
 supported
@@ -4726,7 +3771,7 @@ pnpm rebuild @matrix-org/matrix-sdk-crypto-nodejs
 or fetch the binary with
 node node_modules/@matrix-org/matrix-sdk-crypto-nodejs/download-lib.js
 Crypto state is stored per account + access token in
-~/.openclaw/matrix/accounts/&lt;account&gt;/&lt;homeserver&gt;__&lt;user&gt;/&lt;token-hash&gt;/crypto/
+~/.openclaw/matrix/accounts/<account>/<homeserver>__<user>/<token-hash>/crypto/
 (SQLite database). Sync state lives alongside it in
 bot-storage.json
 If the access token (device) changes, a new store is created and the bot must be
@@ -4748,34 +3793,33 @@ inherits from the top-level
 channels.matrix
 settings and can override any option
 (DM policy, groups, encryption, etc.).
-Copy
 channels
 matrix
 enabled
 true
 policy
-&quot;pairing&quot;
+"pairing"
 accounts
 assistant
 name
-&quot;Main assistant&quot;
+"Main assistant"
 homeserver
-&quot;https://matrix.example.org&quot;
+"https://matrix.example.org"
 accessToken
-&quot;syt_assistant_***&quot;
+"syt_assistant_***"
 encryption
 true
 alerts
 name
-&quot;Alerts bot&quot;
+"Alerts bot"
 homeserver
-&quot;https://matrix.example.org&quot;
+"https://matrix.example.org"
 accessToken
-&quot;syt_alerts_***&quot;
+"syt_alerts_***"
 policy
-&quot;allowlist&quot;
+"allowlist"
 allowFrom
-&quot;@admin:example.org&quot;
+"@admin:example.org"
 ] }
 Notes:
 Account startup is serialized to avoid race conditions with concurrent module imports.
@@ -4795,51 +3839,50 @@ Replies always go back to Matrix.
 DMs share the agent’s main session; rooms map to group sessions.
 Access control (DMs)
 Default:
-channels.matrix.dm.policy = &quot;pairing&quot;
+channels.matrix.dm.policy = "pairing"
 . Unknown senders get a pairing code.
 Approve via:
 openclaw pairing list matrix
-openclaw pairing approve matrix &lt;CODE&gt;
+openclaw pairing approve matrix <CODE>
 Public DMs:
-channels.matrix.dm.policy=&quot;open&quot;
+channels.matrix.dm.policy="open"
 plus
-channels.matrix.dm.allowFrom=[&quot;*&quot;]
+channels.matrix.dm.allowFrom=["*"]
 channels.matrix.dm.allowFrom
 accepts full Matrix user IDs (example:
 @user:server
 ). The wizard resolves display names to user IDs when directory search finds a single exact match.
 Do not use display names or bare localparts (example:
-&quot;Alice&quot;
-&quot;alice&quot;
+"Alice"
+"alice"
 ). They are ambiguous and are ignored for allowlist matching. Use full
 @user:server
 IDs.
 Rooms (groups)
 Default:
-channels.matrix.groupPolicy = &quot;allowlist&quot;
+channels.matrix.groupPolicy = "allowlist"
 (mention-gated). Use
 channels.defaults.groupPolicy
 to override the default when unset.
 Allowlist rooms with
 channels.matrix.groups
 (room IDs or aliases; names are resolved to IDs when directory search finds a single exact match):
-Copy
 channels
 matrix
 groupPolicy
-&quot;allowlist&quot;
+"allowlist"
 groups
-&quot;!roomId:example.org&quot;
+"!roomId:example.org"
 allow
 true
-&quot;#alias:example.org&quot;
+"#alias:example.org"
 allow
 true
 groupAllowFrom
-&quot;@owner:example.org&quot;
+"@owner:example.org"
 requireMention: false
 enables auto-reply in that room.
-groups.&quot;*&quot;
+groups."*"
 can set defaults for mention gating across rooms.
 groupAllowFrom
 restricts which senders can trigger the bot in rooms (full Matrix user IDs).
@@ -4855,7 +3898,7 @@ channels.matrix.autoJoinAllowlist
 To allow
 no rooms
 , set
-channels.matrix.groupPolicy: &quot;disabled&quot;
+channels.matrix.groupPolicy: "disabled"
 (or keep an empty allowlist).
 Legacy key:
 channels.matrix.rooms
@@ -4898,7 +3941,6 @@ Native commands
 ✅ Supported
 Troubleshooting
 Run this ladder first:
-Copy
 openclaw
 status
 openclaw
@@ -4914,7 +3956,6 @@ channels
 status
 --probe
 Then confirm DM pairing state if needed:
-Copy
 openclaw
 pairing
 list
@@ -4924,7 +3965,7 @@ Logged in but room messages ignored: room blocked by
 groupPolicy
 or room allowlist.
 DMs ignored: sender pending approval when
-channels.matrix.dm.policy=&quot;pairing&quot;
+channels.matrix.dm.policy="pairing"
 Encrypted rooms fail: crypto support or encryption settings mismatch.
 For triage flow:
 /channels/troubleshooting
@@ -4965,7 +4006,7 @@ channels.matrix.dm.allowFrom
 : DM allowlist (full Matrix user IDs).
 open
 requires
-&quot;*&quot;
+"*"
 . The wizard resolves names to IDs when possible.
 channels.matrix.groupPolicy
 allowlist | open | disabled
@@ -5000,62 +4041,6 @@ Zalo
 
 [Source: https://docs.openclaw.ai/channels/mattermost]
 
-Mattermost - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Messaging platforms
-Mattermost
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Chat Channels
-Messaging platforms
-WhatsApp
-Telegram
-Discord
-IRC
-Slack
-Feishu
-Google Chat
-Mattermost
-Signal
-iMessage
-Microsoft Teams
-LINE
-Matrix
-Zalo
-Zalo Personal
-Configuration
-Pairing
-Group Messages
-Groups
-Broadcast Groups
-Channel Routing
-Channel Location Parsing
-Channel Troubleshooting
-Mattermost (plugin)
-Plugin required
-Quick setup
-Environment variables (default account)
-Chat modes
-Access control (DMs)
-Channels (groups)
-Targets for outbound delivery
-Multi-account
-Troubleshooting
-Messaging platforms
-Mattermost
-Mattermost (plugin)
 Status: supported via plugin (bot token + WebSocket events). Channels, groups, and DMs are supported.
 Mattermost is a self-hostable team messaging platform; see the official site at
 mattermost.com
@@ -5063,13 +4048,11 @@ for product details and downloads.
 Plugin required
 Mattermost ships as a plugin and is not bundled with the core install.
 Install via CLI (npm registry):
-Copy
 openclaw
 plugins
 install
 @openclaw/mattermost
 Local checkout (when running from a git repo):
-Copy
 openclaw
 plugins
 install
@@ -5088,17 +4071,16 @@ base URL
 https://chat.example.com
 Configure OpenClaw and start the gateway.
 Minimal config:
-Copy
 channels
 mattermost
 enabled
 true
 botToken
-&quot;mm-token&quot;
+"mm-token"
 baseUrl
-&quot;https://chat.example.com&quot;
+"https://chat.example.com"
 dmPolicy
-&quot;pairing&quot;
+"pairing"
 Environment variables (default account)
 Set these on the gateway host if you prefer env vars:
 MATTERMOST_BOT_TOKEN=...
@@ -5118,14 +4100,13 @@ onmessage
 onchar
 : respond when a message starts with a trigger prefix.
 Config example:
-Copy
 channels
 mattermost
 chatmode
-&quot;onchar&quot;
+"onchar"
 oncharPrefixes
-&quot;&gt;&quot;
-&quot;!&quot;
+">"
+"!"
 Notes:
 onchar
 still responds to explicit @mentions.
@@ -5135,33 +4116,33 @@ chatmode
 is preferred.
 Access control (DMs)
 Default:
-channels.mattermost.dmPolicy = &quot;pairing&quot;
+channels.mattermost.dmPolicy = "pairing"
 (unknown senders get a pairing code).
 Approve via:
 openclaw pairing list mattermost
-openclaw pairing approve mattermost &lt;CODE&gt;
+openclaw pairing approve mattermost <CODE>
 Public DMs:
-channels.mattermost.dmPolicy=&quot;open&quot;
+channels.mattermost.dmPolicy="open"
 plus
-channels.mattermost.allowFrom=[&quot;*&quot;]
+channels.mattermost.allowFrom=["*"]
 Channels (groups)
 Default:
-channels.mattermost.groupPolicy = &quot;allowlist&quot;
+channels.mattermost.groupPolicy = "allowlist"
 (mention-gated).
 Allowlist senders with
 channels.mattermost.groupAllowFrom
 (user IDs or
 @username
 Open channels:
-channels.mattermost.groupPolicy=&quot;open&quot;
+channels.mattermost.groupPolicy="open"
 (mention-gated).
 Targets for outbound delivery
 Use these target formats with
 openclaw message send
 or cron/webhooks:
-channel:&lt;id&gt;
+channel:<id>
 for a channel
-user:&lt;id&gt;
+user:<id>
 for a DM
 @username
 for a DM (resolved via the Mattermost API)
@@ -5169,27 +4150,26 @@ Bare IDs are treated as channels.
 Multi-account
 Mattermost supports multiple accounts under
 channels.mattermost.accounts
-Copy
 channels
 mattermost
 accounts
 default
 name
-&quot;Primary&quot;
+"Primary"
 botToken
-&quot;mm-token&quot;
+"mm-token"
 baseUrl
-&quot;https://chat.example.com&quot;
+"https://chat.example.com"
 alerts
 name
-&quot;Alerts&quot;
+"Alerts"
 botToken
-&quot;mm-token-2&quot;
+"mm-token-2"
 baseUrl
-&quot;https://alerts.example.com&quot;
+"https://alerts.example.com"
 Troubleshooting
 No replies in channels: ensure the bot is in the channel and mention it (oncall), use a trigger prefix (onchar), or set
-chatmode: &quot;onmessage&quot;
+chatmode: "onmessage"
 Auth errors: check the bot token, base URL, and whether the account is enabled.
 Multi-account issues: env vars only apply to the
 default
@@ -5202,71 +4182,6 @@ Signal
 
 [Source: https://docs.openclaw.ai/channels/msteams]
 
-Microsoft Teams - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Messaging platforms
-Microsoft Teams
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Chat Channels
-Messaging platforms
-WhatsApp
-Telegram
-Discord
-IRC
-Slack
-Feishu
-Google Chat
-Mattermost
-Signal
-iMessage
-Microsoft Teams
-LINE
-Matrix
-Zalo
-Zalo Personal
-Configuration
-Pairing
-Group Messages
-Groups
-Broadcast Groups
-Channel Routing
-Channel Location Parsing
-Channel Troubleshooting
-Microsoft Teams (plugin)
-Plugin required
-Quick setup (beginner)
-Goals
-Config writes
-Access control (DMs + groups)
-How it works
-Azure Bot Setup (Prerequisites)
-Step 1: Create Azure Bot
-Step 2: Get Credentials
-Step 3: Configure Messaging Endpoint
-Step 4: Enable Teams Channel
-Local Development (Tunneling)
-Teams Developer Portal (Alternative)
-Testing the Bot
-Setup (minimal text-only)
-History context
-Current Teams RSC Permissions (Manifest)
-Example Teams Manifest (redacted)
-Manifest caveats (must-have fields)
-Updating an existing app
-Capabilities: RSC only vs Graph
 With Teams RSC only (app installed, no Graph API permissions)
 With Teams RSC + Microsoft Graph Application permissions
 RSC vs Graph API
@@ -5275,9 +4190,9 @@ Known Limitations
 Webhook timeouts
 Formatting
 Configuration
-Routing &amp; Sessions
+Routing & Sessions
 Reply Style: Threads vs Posts
-Attachments &amp; Images
+Attachments & Images
 Sending files in group chats
 Why group chats need SharePoint
 Setup
@@ -5311,13 +4226,11 @@ Breaking change (2026.1.15):
 MS Teams moved out of core. If you use it, you must install the plugin.
 Explainable: keeps core installs lighter and lets MS Teams dependencies update independently.
 Install via CLI (npm registry):
-Copy
 openclaw
 plugins
 install
 @openclaw/msteams
 Local checkout (when running from a git repo):
-Copy
 openclaw
 plugins
 install
@@ -5337,28 +4250,27 @@ Expose
 (port 3978 by default) via a public URL or tunnel.
 Install the Teams app package and start the gateway.
 Minimal config:
-Copy
 channels
 msteams
 enabled
 true
 appId
-&quot;&lt;APP_ID&gt;&quot;
+"<APP_ID>"
 appPassword
-&quot;&lt;APP_PASSWORD&gt;&quot;
+"<APP_PASSWORD>"
 tenantId
-&quot;&lt;TENANT_ID&gt;&quot;
+"<TENANT_ID>"
 webhook
 port
 3978
 path
-&quot;/api/messages&quot;
+"/api/messages"
 Note: group chats are blocked by default (
-channels.msteams.groupPolicy: &quot;allowlist&quot;
+channels.msteams.groupPolicy: "allowlist"
 ). To allow group replies, set
 channels.msteams.groupAllowFrom
 (or use
-groupPolicy: &quot;open&quot;
+groupPolicy: "open"
 to allow any member, mention-gated).
 Goals
 Talk to OpenClaw via Teams DMs, group chats, or channels.
@@ -5370,7 +4282,6 @@ By default, Microsoft Teams is allowed to write config updates triggered by
 (requires
 commands.config: true
 Disable with:
-Copy
 channels
 msteams
 configWrites
@@ -5379,13 +4290,13 @@ false
 Access control (DMs + groups)
 DM access
 Default:
-channels.msteams.dmPolicy = &quot;pairing&quot;
+channels.msteams.dmPolicy = "pairing"
 . Unknown senders are ignored until approved.
 channels.msteams.allowFrom
 accepts AAD object IDs, UPNs, or display names. The wizard resolves names to IDs via Microsoft Graph when credentials allow.
 Group access
 Default:
-channels.msteams.groupPolicy = &quot;allowlist&quot;
+channels.msteams.groupPolicy = "allowlist"
 (blocked unless you add
 groupAllowFrom
 ). Use
@@ -5395,28 +4306,27 @@ channels.msteams.groupAllowFrom
 controls which senders can trigger in group chats/channels (falls back to
 channels.msteams.allowFrom
 Set
-groupPolicy: &quot;open&quot;
+groupPolicy: "open"
 to allow any member (still mention‑gated by default).
 To allow
 no channels
 , set
-channels.msteams.groupPolicy: &quot;disabled&quot;
+channels.msteams.groupPolicy: "disabled"
 Example:
-Copy
 channels
 msteams
 groupPolicy
-&quot;allowlist&quot;
+"allowlist"
 groupAllowFrom
-&quot;
-[email&#160;protected]
-&quot;
+"
+[email protected]
+"
 Teams + channel allowlist
 Scope group/channel replies by listing teams and channels under
 channels.msteams.teams
 Keys can be team IDs or names; channel keys can be conversation IDs or names.
 When
-groupPolicy=&quot;allowlist&quot;
+groupPolicy="allowlist"
 and a teams allowlist is present, only listed teams/channels are accepted (mention‑gated).
 The configure wizard accepts
 Team/Channel
@@ -5424,13 +4334,12 @@ entries and stores them for you.
 On startup, OpenClaw resolves team/channel and user allowlist names to IDs (when Graph permissions allow)
 and logs the mapping; unresolved entries are kept as typed.
 Example:
-Copy
 channels
 msteams
 groupPolicy
-&quot;allowlist&quot;
+"allowlist"
 teams
-&quot;My Team&quot;
+"My Team"
 channels
 General
 requireMention
@@ -5488,7 +4397,6 @@ Create
 Step 2: Get Credentials
 Go to your Azure Bot resource →
 Configuration
-Copy
 Microsoft App ID
 → this is your
 appId
@@ -5496,7 +4404,7 @@ Click
 Manage Password
 → go to the App Registration
 Under
-Certificates &amp; secrets
+Certificates & secrets
 New client secret
 → copy the
 Value
@@ -5531,14 +4439,12 @@ Teams can’t reach
 localhost
 . Use a tunnel for local development:
 Option A: ngrok
-Copy
 ngrok
 http
 3978
 # Copy the https URL, e.g., https://abc123.ngrok.io
 # Set messaging endpoint to: https://abc123.ngrok.io/api/messages
 Option B: Tailscale Funnel
-Copy
 tailscale
 funnel
 3978
@@ -5593,7 +4499,7 @@ Teams app manifest
 Include a
 bot
 entry with
-botId = &lt;App ID&gt;
+botId = <App ID>
 Scopes:
 personal
 team
@@ -5611,28 +4517,27 @@ manifest.json
 outline.png
 color.png
 Configure OpenClaw
-Copy
-&quot;msteams&quot;
-&quot;enabled&quot;
+"msteams"
+"enabled"
 true
-&quot;appId&quot;
-&quot;&lt;APP_ID&gt;&quot;
-&quot;appPassword&quot;
-&quot;&lt;APP_PASSWORD&gt;&quot;
-&quot;tenantId&quot;
-&quot;&lt;TENANT_ID&gt;&quot;
-&quot;webhook&quot;
-&quot;port&quot;
+"appId"
+"<APP_ID>"
+"appPassword"
+"<APP_PASSWORD>"
+"tenantId"
+"<TENANT_ID>"
+"webhook"
+"port"
 3978
-&quot;path&quot;
-&quot;/api/messages&quot;
+"path"
+"/api/messages"
 You can also use environment variables instead of config keys:
 MSTEAMS_APP_ID
 MSTEAMS_APP_PASSWORD
 MSTEAMS_TENANT_ID
 Bot endpoint
 Set the Azure Bot Messaging Endpoint to:
-https://&lt;host&gt;:3978/api/messages
+https://<host>:3978/api/messages
 (or your chosen path/port).
 Run the gateway
 The Teams channel starts automatically when the plugin is installed and
@@ -5648,7 +4553,7 @@ to disable (default 50).
 DM history can be limited with
 channels.msteams.dmHistoryLimit
 (user turns). Per-user overrides:
-channels.msteams.dms[&quot;&lt;user_id&gt;&quot;].historyLimit
+channels.msteams.dms["<user_id>"].historyLimit
 Current Teams RSC Permissions (Manifest)
 These are the
 existing resourceSpecific permissions
@@ -5673,92 +4578,91 @@ ChatMessage.Read.Chat
 (Application) - receive all group chat messages without @mention
 Example Teams Manifest (redacted)
 Minimal, valid example with the required fields. Replace IDs and URLs.
-Copy
-&quot;$schema&quot;
-&quot;https://developer.microsoft.com/en-us/json-schemas/teams/v1.23/MicrosoftTeams.schema.json&quot;
-&quot;manifestVersion&quot;
-&quot;1.23&quot;
-&quot;version&quot;
-&quot;1.0.0&quot;
-&quot;id&quot;
-&quot;00000000-0000-0000-0000-000000000000&quot;
-&quot;name&quot;
-&quot;short&quot;
-&quot;OpenClaw&quot;
-&quot;developer&quot;
-&quot;name&quot;
-&quot;Your Org&quot;
-&quot;websiteUrl&quot;
-&quot;https://example.com&quot;
-&quot;privacyUrl&quot;
-&quot;https://example.com/privacy&quot;
-&quot;termsOfUseUrl&quot;
-&quot;https://example.com/terms&quot;
-&quot;description&quot;
-&quot;short&quot;
-&quot;OpenClaw in Teams&quot;
-&quot;full&quot;
-&quot;OpenClaw in Teams&quot;
-&quot;icons&quot;
-&quot;outline&quot;
-&quot;outline.png&quot;
-&quot;color&quot;
-&quot;color.png&quot;
-&quot;accentColor&quot;
-&quot;#5B6DEF&quot;
-&quot;bots&quot;
-&quot;botId&quot;
-&quot;11111111-1111-1111-1111-111111111111&quot;
-&quot;scopes&quot;
-&quot;personal&quot;
-&quot;team&quot;
-&quot;groupChat&quot;
-&quot;isNotificationOnly&quot;
+"$schema"
+"https://developer.microsoft.com/en-us/json-schemas/teams/v1.23/MicrosoftTeams.schema.json"
+"manifestVersion"
+"1.23"
+"version"
+"1.0.0"
+"id"
+"00000000-0000-0000-0000-000000000000"
+"name"
+"short"
+"OpenClaw"
+"developer"
+"name"
+"Your Org"
+"websiteUrl"
+"https://example.com"
+"privacyUrl"
+"https://example.com/privacy"
+"termsOfUseUrl"
+"https://example.com/terms"
+"description"
+"short"
+"OpenClaw in Teams"
+"full"
+"OpenClaw in Teams"
+"icons"
+"outline"
+"outline.png"
+"color"
+"color.png"
+"accentColor"
+"#5B6DEF"
+"bots"
+"botId"
+"11111111-1111-1111-1111-111111111111"
+"scopes"
+"personal"
+"team"
+"groupChat"
+"isNotificationOnly"
 false
-&quot;supportsCalling&quot;
+"supportsCalling"
 false
-&quot;supportsVideo&quot;
+"supportsVideo"
 false
-&quot;supportsFiles&quot;
+"supportsFiles"
 true
-&quot;webApplicationInfo&quot;
-&quot;id&quot;
-&quot;11111111-1111-1111-1111-111111111111&quot;
-&quot;authorization&quot;
-&quot;permissions&quot;
-&quot;resourceSpecific&quot;
-&quot;name&quot;
-&quot;ChannelMessage.Read.Group&quot;
-&quot;type&quot;
-&quot;Application&quot;
-&quot;name&quot;
-&quot;ChannelMessage.Send.Group&quot;
-&quot;type&quot;
-&quot;Application&quot;
-&quot;name&quot;
-&quot;Member.Read.Group&quot;
-&quot;type&quot;
-&quot;Application&quot;
-&quot;name&quot;
-&quot;Owner.Read.Group&quot;
-&quot;type&quot;
-&quot;Application&quot;
-&quot;name&quot;
-&quot;ChannelSettings.Read.Group&quot;
-&quot;type&quot;
-&quot;Application&quot;
-&quot;name&quot;
-&quot;TeamMember.Read.Group&quot;
-&quot;type&quot;
-&quot;Application&quot;
-&quot;name&quot;
-&quot;TeamSettings.Read.Group&quot;
-&quot;type&quot;
-&quot;Application&quot;
-&quot;name&quot;
-&quot;ChatMessage.Read.Chat&quot;
-&quot;type&quot;
-&quot;Application&quot;
+"webApplicationInfo"
+"id"
+"11111111-1111-1111-1111-111111111111"
+"authorization"
+"permissions"
+"resourceSpecific"
+"name"
+"ChannelMessage.Read.Group"
+"type"
+"Application"
+"name"
+"ChannelMessage.Send.Group"
+"type"
+"Application"
+"name"
+"Member.Read.Group"
+"type"
+"Application"
+"name"
+"Owner.Read.Group"
+"type"
+"Application"
+"name"
+"ChannelSettings.Read.Group"
+"type"
+"Application"
+"name"
+"TeamMember.Read.Group"
+"type"
+"Application"
+"name"
+"TeamSettings.Read.Group"
+"type"
+"Application"
+"name"
+"ChatMessage.Read.Chat"
+"type"
+"Application"
 Manifest caveats (must-have fields)
 bots[].botId
 must
@@ -5928,44 +4832,44 @@ channels.msteams.replyStyle
 thread | top-level
 (see
 Reply Style
-channels.msteams.teams.&lt;teamId&gt;.replyStyle
+channels.msteams.teams.<teamId>.replyStyle
 : per-team override.
-channels.msteams.teams.&lt;teamId&gt;.requireMention
+channels.msteams.teams.<teamId>.requireMention
 : per-team override.
-channels.msteams.teams.&lt;teamId&gt;.tools
+channels.msteams.teams.<teamId>.tools
 : default per-team tool policy overrides (
 allow
 deny
 alsoAllow
 ) used when a channel override is missing.
-channels.msteams.teams.&lt;teamId&gt;.toolsBySender
+channels.msteams.teams.<teamId>.toolsBySender
 : default per-team per-sender tool policy overrides (
-&quot;*&quot;
+"*"
 wildcard supported).
-channels.msteams.teams.&lt;teamId&gt;.channels.&lt;conversationId&gt;.replyStyle
+channels.msteams.teams.<teamId>.channels.<conversationId>.replyStyle
 : per-channel override.
-channels.msteams.teams.&lt;teamId&gt;.channels.&lt;conversationId&gt;.requireMention
+channels.msteams.teams.<teamId>.channels.<conversationId>.requireMention
 : per-channel override.
-channels.msteams.teams.&lt;teamId&gt;.channels.&lt;conversationId&gt;.tools
+channels.msteams.teams.<teamId>.channels.<conversationId>.tools
 : per-channel tool policy overrides (
 allow
 deny
 alsoAllow
-channels.msteams.teams.&lt;teamId&gt;.channels.&lt;conversationId&gt;.toolsBySender
+channels.msteams.teams.<teamId>.channels.<conversationId>.toolsBySender
 : per-channel per-sender tool policy overrides (
-&quot;*&quot;
+"*"
 wildcard supported).
 channels.msteams.sharePointSiteId
 : SharePoint site ID for file uploads in group chats/channels (see
 Sending files in group chats
-Routing &amp; Sessions
+Routing & Sessions
 Session keys follow the standard agent format (see
 /concepts/session
 Direct messages share the main session (
-agent:&lt;agentId&gt;:&lt;mainKey&gt;
+agent:<agentId>:<mainKey>
 Channel/group messages use conversation id:
-agent:&lt;agentId&gt;:msteams:channel:&lt;conversationId&gt;
-agent:&lt;agentId&gt;:msteams:group:&lt;conversationId&gt;
+agent:<agentId>:msteams:channel:<conversationId>
+agent:<agentId>:msteams:group:<conversationId>
 Reply Style: Threads vs Posts
 Teams recently introduced two channel UI styles over the same underlying data model:
 Style
@@ -5992,21 +4896,20 @@ Solution:
 Configure
 replyStyle
 per-channel based on how the channel is set up:
-Copy
-&quot;msteams&quot;
-&quot;replyStyle&quot;
-&quot;thread&quot;
-&quot;teams&quot;
-&quot;19:
-[email&#160;protected]
-&quot;
-&quot;channels&quot;
-&quot;19:
-[email&#160;protected]
-&quot;
-&quot;replyStyle&quot;
-&quot;top-level&quot;
-Attachments &amp; Images
+"msteams"
+"replyStyle"
+"thread"
+"teams"
+"19:
+[email protected]
+"
+"channels"
+"19:
+[email protected]
+"
+"replyStyle"
+"top-level"
+Attachments & Images
 Current limitations:
 DMs:
 Images and file attachments work via Teams bot file APIs.
@@ -6018,7 +4921,7 @@ Without Graph permissions, channel messages with images will be received as text
 By default, OpenClaw only downloads media from Microsoft/Teams hostnames. Override with
 channels.msteams.mediaAllowHosts
 (use
-[&quot;*&quot;]
+["*"]
 to allow any host).
 Authorization headers are only attached for hosts in
 channels.msteams.mediaAuthAllowHosts
@@ -6057,23 +4960,21 @@ Chat.Read.All
 Grant admin consent
 for the tenant.
 Get your SharePoint site ID:
-Copy
 # Via Graph Explorer or curl with a valid token:
 curl
-&quot;Authorization: Bearer $TOKEN&quot;
-&quot;https://graph.microsoft.com/v1.0/sites/{hostname}:/{site-path}&quot;
-# Example: for a site at &quot;contoso.sharepoint.com/sites/BotFiles&quot;
+"Authorization: Bearer $TOKEN"
+"https://graph.microsoft.com/v1.0/sites/{hostname}:/{site-path}"
+# Example: for a site at "contoso.sharepoint.com/sites/BotFiles"
 curl
-&quot;Authorization: Bearer $TOKEN&quot;
-&quot;https://graph.microsoft.com/v1.0/sites/contoso.sharepoint.com:/sites/BotFiles&quot;
-# Response includes: &quot;id&quot;: &quot;contoso.sharepoint.com,guid1,guid2&quot;
+"Authorization: Bearer $TOKEN"
+"https://graph.microsoft.com/v1.0/sites/contoso.sharepoint.com:/sites/BotFiles"
+# Response includes: "id": "contoso.sharepoint.com,guid1,guid2"
 Configure OpenClaw:
-Copy
 channels
 msteams
 // ... other config ...
 sharePointSiteId
-&quot;contoso.sharepoint.com,guid1,guid2&quot;
+"contoso.sharepoint.com,guid1,guid2"
 Sharing behavior
 Permission
 Sharing behavior
@@ -6107,7 +5008,7 @@ folder in the configured SharePoint site’s default document library.
 Polls (Adaptive Cards)
 OpenClaw sends Teams polls as Adaptive Cards (there is no native Teams poll API).
 CLI:
-openclaw message poll --channel msteams --target conversation:&lt;id&gt; ...
+openclaw message poll --channel msteams --target conversation:<id> ...
 Votes are recorded by the gateway in
 ~/.openclaw/msteams-polls.json
 The gateway must stay online to record votes.
@@ -6122,36 +5023,34 @@ parameter accepts an Adaptive Card JSON object. When
 card
 is provided, the message text is optional.
 Agent tool:
-Copy
-&quot;action&quot;
-&quot;send&quot;
-&quot;channel&quot;
-&quot;msteams&quot;
-&quot;target&quot;
-&quot;user:&lt;id&gt;&quot;
-&quot;card&quot;
-&quot;type&quot;
-&quot;AdaptiveCard&quot;
-&quot;version&quot;
-&quot;1.5&quot;
-&quot;body&quot;
-&quot;type&quot;
-&quot;TextBlock&quot;
-&quot;text&quot;
-&quot;Hello!&quot;
+"action"
+"send"
+"channel"
+"msteams"
+"target"
+"user:<id>"
+"card"
+"type"
+"AdaptiveCard"
+"version"
+"1.5"
+"body"
+"type"
+"TextBlock"
+"text"
+"Hello!"
 CLI:
-Copy
 openclaw
 message
 send
 --channel
 msteams
 --target
-&quot;conversation:19:
-[email&#160;protected]
-&quot;
+"conversation:19:
+[email protected]
+"
 --card
-&#x27;{&quot;type&quot;:&quot;AdaptiveCard&quot;,&quot;version&quot;:&quot;1.5&quot;,&quot;body&quot;:[{&quot;type&quot;:&quot;TextBlock&quot;,&quot;text&quot;:&quot;Hello!&quot;}]}&#x27;
+'{"type":"AdaptiveCard","version":"1.5","body":[{"type":"TextBlock","text":"Hello!"}]}'
 See
 Adaptive Cards documentation
 for card schema and examples. For target format details, see
@@ -6163,24 +5062,23 @@ Target type
 Format
 Example
 User (by ID)
-user:&lt;aad-object-id&gt;
+user:<aad-object-id>
 user:40a1a0ed-4ff2-4164-a219-55518990c197
 User (by name)
-user:&lt;display-name&gt;
+user:<display-name>
 user:John Smith
 (requires Graph API)
 Group/channel
-conversation:&lt;conversation-id&gt;
+conversation:<conversation-id>
 conversation:19:
-[email&#160;protected]
+[email protected]
 Group/channel (raw)
-&lt;conversation-id&gt;
+<conversation-id>
 19:
-[email&#160;protected]
+[email protected]
 (if contains
 @thread
 CLI examples:
-Copy
 # Send to a user by ID
 openclaw
 message
@@ -6188,9 +5086,9 @@ send
 --channel
 msteams
 --target
-&quot;user:40a1a0ed-...&quot;
+"user:40a1a0ed-..."
 --message
-&quot;Hello&quot;
+"Hello"
 # Send to a user by display name (triggers Graph API lookup)
 openclaw
 message
@@ -6198,9 +5096,9 @@ send
 --channel
 msteams
 --target
-&quot;user:John Smith&quot;
+"user:John Smith"
 --message
-&quot;Hello&quot;
+"Hello"
 # Send to a group chat or channel
 openclaw
 message
@@ -6208,11 +5106,11 @@ send
 --channel
 msteams
 --target
-&quot;conversation:19:
-[email&#160;protected]
-&quot;
+"conversation:19:
+[email protected]
+"
 --message
-&quot;Hello&quot;
+"Hello"
 # Send an Adaptive Card to a conversation
 openclaw
 message
@@ -6220,40 +5118,38 @@ send
 --channel
 msteams
 --target
-&quot;conversation:19:
-[email&#160;protected]
-&quot;
+"conversation:19:
+[email protected]
+"
 --card
-&#x27;{&quot;type&quot;:&quot;AdaptiveCard&quot;,&quot;version&quot;:&quot;1.5&quot;,&quot;body&quot;:[{&quot;type&quot;:&quot;TextBlock&quot;,&quot;text&quot;:&quot;Hello&quot;}]}&#x27;
+'{"type":"AdaptiveCard","version":"1.5","body":[{"type":"TextBlock","text":"Hello"}]}'
 Agent tool examples:
-Copy
-&quot;action&quot;
-&quot;send&quot;
-&quot;channel&quot;
-&quot;msteams&quot;
-&quot;target&quot;
-&quot;user:John Smith&quot;
-&quot;message&quot;
-&quot;Hello!&quot;
-Copy
-&quot;action&quot;
-&quot;send&quot;
-&quot;channel&quot;
-&quot;msteams&quot;
-&quot;target&quot;
-&quot;conversation:19:
-[email&#160;protected]
-&quot;
-&quot;card&quot;
-&quot;type&quot;
-&quot;AdaptiveCard&quot;
-&quot;version&quot;
-&quot;1.5&quot;
-&quot;body&quot;
-&quot;type&quot;
-&quot;TextBlock&quot;
-&quot;text&quot;
-&quot;Hello&quot;
+"action"
+"send"
+"channel"
+"msteams"
+"target"
+"user:John Smith"
+"message"
+"Hello!"
+"action"
+"send"
+"channel"
+"msteams"
+"target"
+"conversation:19:
+[email protected]
+"
+"card"
+"type"
+"AdaptiveCard"
+"version"
+"1.5"
+"body"
+"type"
+"TextBlock"
+"text"
+"Hello"
 Note: Without the
 user:
 prefix, names default to group/team resolution. Always use
@@ -6275,12 +5171,10 @@ query parameter in Teams URLs is
 NOT
 the team ID used for configuration. Extract IDs from the URL path instead:
 Team URL:
-Copy
 https://teams.microsoft.com/l/team/19%3ABk4j...%40thread.tacv2/conversations?groupId=...
 └────────────────────────────┘
 Team ID (URL-decode this)
 Channel URL:
-Copy
 https://teams.microsoft.com/l/channel/19%3A15bc...%40thread.tacv2/ChannelName?groupId=...
 └─────────────────────────┘
 Channel ID (URL-decode this)
@@ -6289,7 +5183,7 @@ Team ID = path segment after
 /team/
 (URL-decoded, e.g.,
 19:
-[email&#160;protected]
+[email protected]
 Channel ID = path segment after
 /channel/
 (URL-decoded)
@@ -6378,62 +5272,6 @@ LINE
 
 [Source: https://docs.openclaw.ai/channels/pairing]
 
-Pairing - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Configuration
-Pairing
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Chat Channels
-Messaging platforms
-WhatsApp
-Telegram
-Discord
-IRC
-Slack
-Feishu
-Google Chat
-Mattermost
-Signal
-iMessage
-Microsoft Teams
-LINE
-Matrix
-Zalo
-Zalo Personal
-Configuration
-Pairing
-Group Messages
-Groups
-Broadcast Groups
-Channel Routing
-Channel Location Parsing
-Channel Troubleshooting
-Pairing
-1) DM pairing (inbound chat access)
-Approve a sender
-Where the state lives
-2) Node device pairing (iOS/Android/macOS/headless nodes)
-Pair via Telegram (recommended for iOS)
-Approve a node device
-Node pairing state storage
-Notes
-Related docs
-Configuration
-Pairing
-Pairing
 “Pairing” is OpenClaw’s explicit
 owner approval
 step.
@@ -6461,7 +5299,6 @@ Pending DM pairing requests are capped at
 3 per channel
 by default; additional requests are ignored until one expires or is approved.
 Approve a sender
-Copy
 openclaw
 pairing
 list
@@ -6470,9 +5307,9 @@ openclaw
 pairing
 approve
 telegram
-&lt;
+<
 COD
-&gt;
+>
 Supported channels:
 telegram
 whatsapp
@@ -6485,9 +5322,9 @@ Where the state lives
 Stored under
 ~/.openclaw/credentials/
 Pending requests:
-&lt;channel&gt;-pairing.json
+<channel>-pairing.json
 Approved allowlist store:
-&lt;channel&gt;-allowFrom.json
+<channel>-allowFrom.json
 Treat these as sensitive (they gate access to your assistant).
 2) Node device pairing (iOS/Android/macOS/headless nodes)
 Nodes connect to the Gateway as
@@ -6518,22 +5355,21 @@ token
 : a short-lived pairing token
 Treat the setup code like a password while it is valid.
 Approve a node device
-Copy
 openclaw
 devices
 list
 openclaw
 devices
 approve
-&lt;
+<
 requestI
-&gt;
+>
 openclaw
 devices
 reject
-&lt;
+<
 requestI
-&gt;
+>
 Node pairing state storage
 Stored under
 ~/.openclaw/devices/
@@ -6576,70 +5412,6 @@ Group Messages
 
 [Source: https://docs.openclaw.ai/channels/signal]
 
-Signal - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Messaging platforms
-Signal
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Chat Channels
-Messaging platforms
-WhatsApp
-Telegram
-Discord
-IRC
-Slack
-Feishu
-Google Chat
-Mattermost
-Signal
-iMessage
-Microsoft Teams
-LINE
-Matrix
-Zalo
-Zalo Personal
-Configuration
-Pairing
-Group Messages
-Groups
-Broadcast Groups
-Channel Routing
-Channel Location Parsing
-Channel Troubleshooting
-Signal (signal-cli)
-Prerequisites
-Quick setup (beginner)
-What it is
-Config writes
-The number model (important)
-Setup path A: link existing Signal account (QR)
-Setup path B: register dedicated bot number (SMS, Linux)
-External daemon mode (httpUrl)
-Access control (DMs + groups)
-How it works (behavior)
-Media + limits
-Typing + read receipts
-Reactions (message tool)
-Delivery targets (CLI/cron)
-Troubleshooting
-Security notes
-Configuration reference (Signal)
-Messaging platforms
-Signal
-Signal (signal-cli)
 Status: external CLI integration. Gateway talks to
 signal-cli
 over HTTP JSON-RPC + SSE.
@@ -6660,27 +5432,26 @@ signal-cli
 (Java required if you use the JVM build).
 Choose one setup path:
 Path A (QR link):
-signal-cli link -n &quot;OpenClaw&quot;
+signal-cli link -n "OpenClaw"
 and scan with Signal.
 Path B (SMS register):
 register a dedicated number with captcha + SMS verification.
 Configure OpenClaw and restart the gateway.
 Send a first DM and approve pairing (
-openclaw pairing approve signal &lt;CODE&gt;
+openclaw pairing approve signal <CODE>
 Minimal config:
-Copy
 channels
 signal
 enabled
 true
 account
-&quot;+15551234567&quot;
+"+15551234567"
 cliPath
-&quot;signal-cli&quot;
+"signal-cli"
 dmPolicy
-&quot;pairing&quot;
+"pairing"
 allowFrom
-&quot;+15557654321&quot;
+"+15557654321"
 Field reference:
 Field
 Description
@@ -6699,7 +5470,7 @@ pairing
 recommended)
 allowFrom
 Phone numbers or
-uuid:&lt;id&gt;
+uuid:<id>
 values allowed to DM
 What it is
 Signal channel via
@@ -6707,14 +5478,13 @@ signal-cli
 (not embedded libsignal).
 Deterministic routing: replies always go back to Signal.
 DMs share the agent’s main session; groups are isolated (
-agent:&lt;agentId&gt;:signal:group:&lt;groupId&gt;
+agent:<agentId>:signal:group:<groupId>
 Config writes
 By default, Signal is allowed to write config updates triggered by
 /config set|unset
 (requires
 commands.config: true
 Disable with:
-Copy
 channels
 signal
 configWrites
@@ -6736,23 +5506,22 @@ Install
 signal-cli
 (JVM or native build).
 Link a bot account:
-signal-cli link -n &quot;OpenClaw&quot;
+signal-cli link -n "OpenClaw"
 then scan the QR in Signal.
 Configure Signal and start the gateway.
 Example:
-Copy
 channels
 signal
 enabled
 true
 account
-&quot;+15551234567&quot;
+"+15551234567"
 cliPath
-&quot;signal-cli&quot;
+"signal-cli"
 dmPolicy
-&quot;pairing&quot;
+"pairing"
 allowFrom
-&quot;+15557654321&quot;
+"+15557654321"
 Multi-account support: use
 channels.signal.accounts
 with per-account config and optional
@@ -6767,7 +5536,6 @@ Use a dedicated bot number to avoid account/session conflicts.
 Install
 signal-cli
 on the gateway host:
-Copy
 VERSION
 curl
 -Ls
@@ -6775,12 +5543,12 @@ curl
 %{url_effective}
 https://github.com/AsamK/signal-cli/releases/latest
 sed
-&#x27;s/^.*\/v//&#x27;
+'s/^.*\/v//'
 curl
-&quot;https://github.com/AsamK/signal-cli/releases/download/v${VERSION}/signal-cli-${VERSION}-Linux-native.tar.gz&quot;
+"https://github.com/AsamK/signal-cli/releases/download/v${VERSION}/signal-cli-${VERSION}-Linux-native.tar.gz"
 sudo
 tar
-&quot;signal-cli-${VERSION}-Linux-native.tar.gz&quot;
+"signal-cli-${VERSION}-Linux-native.tar.gz"
 /opt
 sudo
 -sf
@@ -6795,11 +5563,10 @@ Keep
 signal-cli
 updated; upstream notes that old releases can break as Signal server APIs change.
 Register and verify the number:
-Copy
 signal-cli
-&lt;
+<
 BOT_PHONE_NUMBE
-&gt;
+>
 register
 If captcha is required:
 Open
@@ -6809,24 +5576,22 @@ signalcaptcha://...
 link target from “Open Signal”.
 Run from the same external IP as the browser session when possible.
 Run registration again immediately (captcha tokens expire quickly):
-Copy
 signal-cli
-&lt;
+<
 BOT_PHONE_NUMBE
-&gt;
+>
 register
 --captcha
-&#x27;&lt;SIGNALCAPTCHA_URL&gt;&#x27;
+'<SIGNALCAPTCHA_URL>'
 signal-cli
-&lt;
+<
 BOT_PHONE_NUMBE
-&gt;
+>
 verify
-&lt;
+<
 VERIFICATION_COD
-&gt;
+>
 Configure OpenClaw, restart gateway, verify channel:
-Copy
 # If you run the gateway as a user systemd service:
 systemctl
 --user
@@ -6842,7 +5607,7 @@ status
 Pair your DM sender:
 Send any message to the bot number.
 Approve code on the server:
-openclaw pairing approve signal &lt;PAIRING_CODE&gt;
+openclaw pairing approve signal <PAIRING_CODE>
 Save the bot number as a contact on your phone to avoid “Unknown contact”.
 Important: registering a phone number account with
 signal-cli
@@ -6859,11 +5624,10 @@ External daemon mode (httpUrl)
 If you want to manage
 signal-cli
 yourself (slow JVM cold starts, container init, or shared CPUs), run the daemon separately and point OpenClaw at it:
-Copy
 channels
 signal
 httpUrl
-&quot;http://127.0.0.1:8080&quot;
+"http://127.0.0.1:8080"
 autoStart
 false
 This skips auto-spawn and the startup wait inside OpenClaw. For slow starts when auto-spawning, set
@@ -6871,17 +5635,17 @@ channels.signal.startupTimeoutMs
 Access control (DMs + groups)
 DMs:
 Default:
-channels.signal.dmPolicy = &quot;pairing&quot;
+channels.signal.dmPolicy = "pairing"
 Unknown senders receive a pairing code; messages are ignored until approved (codes expire after 1 hour).
 Approve via:
 openclaw pairing list signal
-openclaw pairing approve signal &lt;CODE&gt;
+openclaw pairing approve signal <CODE>
 Pairing is the default token exchange for Signal DMs. Details:
 Pairing
 UUID-only senders (from
 sourceUuid
 ) are stored as
-uuid:&lt;id&gt;
+uuid:<id>
 channels.signal.allowFrom
 Groups:
 channels.signal.groupPolicy = open | allowlist | disabled
@@ -6899,7 +5663,7 @@ Outbound text is chunked to
 channels.signal.textChunkLimit
 (default 4000).
 Optional newline chunking: set
-channels.signal.chunkMode=&quot;newline&quot;
+channels.signal.chunkMode="newline"
 to split on blank lines (paragraph boundaries) before length chunking.
 Attachments supported (base64 fetched from
 signal-cli
@@ -6933,7 +5697,7 @@ message action=react
 with
 channel=signal
 Targets: sender E.164 or UUID (use
-uuid:&lt;id&gt;
+uuid:<id>
 from pairing output; bare UUID works too).
 messageId
 is the Signal timestamp for the message you’re reacting to.
@@ -6941,10 +5705,9 @@ Group reactions require
 targetAuthor
 targetAuthorUuid
 Examples:
-Copy
 message action=react channel=signal target=uuid:123e4567-e89b-12d3-a456-426614174000 messageId=1737630212345 emoji=🔥
 message action=react channel=signal target=+15551234567 messageId=1737630212345 emoji=🔥 remove=true
-message action=react channel=signal target=signal:group:&lt;groupId&gt; targetAuthor=uuid:&lt;sender-uuid&gt; messageId=1737630212345 emoji=✅
+message action=react channel=signal target=signal:group:<groupId> targetAuthor=uuid:<sender-uuid> messageId=1737630212345 emoji=✅
 Config:
 channels.signal.actions.reactions
 : enable/disable reaction actions (default true).
@@ -6959,23 +5722,22 @@ minimal
 extensive
 enables agent reactions and sets the guidance level.
 Per-account overrides:
-channels.signal.accounts.&lt;id&gt;.actions.reactions
-channels.signal.accounts.&lt;id&gt;.reactionLevel
+channels.signal.accounts.<id>.actions.reactions
+channels.signal.accounts.<id>.reactionLevel
 Delivery targets (CLI/cron)
 DMs:
 signal:+15551234567
 (or plain E.164).
 UUID DMs:
-uuid:&lt;id&gt;
+uuid:<id>
 (or bare UUID).
 Groups:
-signal:group:&lt;groupId&gt;
+signal:group:<groupId>
 Usernames:
-username:&lt;name&gt;
+username:<name>
 (if supported by your Signal account).
 Troubleshooting
 Run this ladder first:
-Copy
 openclaw
 status
 openclaw
@@ -6991,7 +5753,6 @@ channels
 status
 --probe
 Then confirm DM pairing state if needed:
-Copy
 openclaw
 pairing
 list
@@ -7008,7 +5769,6 @@ openclaw doctor --fix
 Signal missing from diagnostics: confirm
 channels.signal.enabled: true
 Extra checks:
-Copy
 openclaw
 pairing
 list
@@ -7017,11 +5777,11 @@ pgrep
 -af
 signal-cli
 grep
-&quot;signal&quot;
-&quot;/tmp/openclaw/openclaw-$(
+"signal"
+"/tmp/openclaw/openclaw-$(
 date
 +%Y-%m-%d
-).log&quot;
+).log"
 tail
 -20
 For triage flow:
@@ -7032,7 +5792,7 @@ stores account keys locally (typically
 ~/.local/share/signal-cli/data/
 Back up Signal account state before server migration or rebuild.
 Keep
-channels.signal.dmPolicy: &quot;pairing&quot;
+channels.signal.dmPolicy: "pairing"
 unless you explicitly want broader DM access.
 SMS verification is only needed for registration or recovery flows, but losing control of the number/account can complicate re-registration.
 Configuration reference (Signal)
@@ -7070,10 +5830,10 @@ pairing | allowlist | open | disabled
 (default: pairing).
 channels.signal.allowFrom
 : DM allowlist (E.164 or
-uuid:&lt;id&gt;
+uuid:<id>
 open
 requires
-&quot;*&quot;
+"*"
 . Signal has no usernames; use phone/UUID ids.
 channels.signal.groupPolicy
 open | allowlist | disabled
@@ -7084,7 +5844,7 @@ channels.signal.historyLimit
 : max group messages to include as context (0 disables).
 channels.signal.dmHistoryLimit
 : DM history limit in user turns. Per-user overrides:
-channels.signal.dms[&quot;&lt;phone_or_uuid&gt;&quot;].historyLimit
+channels.signal.dms["<phone_or_uuid>"].historyLimit
 channels.signal.textChunkLimit
 : outbound chunk size (chars).
 channels.signal.chunkMode
@@ -7108,66 +5868,6 @@ iMessage
 
 [Source: https://docs.openclaw.ai/channels/slack]
 
-Slack - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Messaging platforms
-Slack
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Chat Channels
-Messaging platforms
-WhatsApp
-Telegram
-Discord
-IRC
-Slack
-Feishu
-Google Chat
-Mattermost
-Signal
-iMessage
-Microsoft Teams
-LINE
-Matrix
-Zalo
-Zalo Personal
-Configuration
-Pairing
-Group Messages
-Groups
-Broadcast Groups
-Channel Routing
-Channel Location Parsing
-Channel Troubleshooting
-Slack
-Quick setup
-Token model
-Access control and routing
-Commands and slash behavior
-Threading, sessions, and reply tags
-Media, chunking, and delivery
-Actions and gates
-Events and operational behavior
-Ack reactions
-Manifest and scope checklist
-Troubleshooting
-Configuration reference pointers
-Related
-Messaging platforms
-Slack
-Slack
 Status: production-ready for DMs + channels via Slack app integrations. Default mode is Socket Mode; HTTP Events API mode is also supported.
 Pairing
 Slack DMs default to pairing mode.
@@ -7191,19 +5891,17 @@ install app and copy
 Bot Token
 xoxb-...
 Configure OpenClaw
-Copy
 channels
 slack
 enabled
 true
 mode
-&quot;socket&quot;
+"socket"
 appToken
-&quot;xapp-...&quot;
+"xapp-..."
 botToken
-&quot;xoxb-...&quot;
+"xoxb-..."
 Env fallback (default account only):
-Copy
 SLACK_APP_TOKEN
 xapp-...
 SLACK_BOT_TOKEN
@@ -7226,30 +5924,28 @@ Also enable App Home
 Messages Tab
 for DMs.
 Start gateway
-Copy
 openclaw
 gateway
 Configure Slack app for HTTP
 set mode to HTTP (
-channels.slack.mode=&quot;http&quot;
+channels.slack.mode="http"
 copy Slack
 Signing Secret
 set Event Subscriptions + Interactivity + Slash command Request URL to the same webhook path (default
 /slack/events
 Configure OpenClaw HTTP mode
-Copy
 channels
 slack
 enabled
 true
 mode
-&quot;http&quot;
+"http"
 botToken
-&quot;xoxb-...&quot;
+"xoxb-..."
 signingSecret
-&quot;your-signing-secret&quot;
+"your-signing-secret"
 webhookPath
-&quot;/slack/events&quot;
+"/slack/events"
 Use unique webhook paths for multi-account HTTP
 Per-account HTTP mode is supported.
 Give each account a distinct
@@ -7296,7 +5992,7 @@ open
 (requires
 channels.slack.allowFrom
 to include
-&quot;*&quot;
+"*"
 ; legacy:
 channels.slack.dm.allowFrom
 disabled
@@ -7312,7 +6008,7 @@ dm.groupEnabled
 dm.groupChannels
 (optional MPIM allowlist)
 Pairing in DMs uses
-openclaw pairing approve slack &lt;code&gt;
+openclaw pairing approve slack <code>
 channels.slack.groupPolicy
 controls channel handling:
 open
@@ -7325,7 +6021,7 @@ channels.slack
 is completely missing (env-only setup) and
 channels.defaults.groupPolicy
 is unset, runtime falls back to
-groupPolicy=&quot;open&quot;
+groupPolicy="open"
 and logs a warning.
 Name/ID resolution:
 channel allowlist entries and DM allowlist entries are resolved at startup when token access allows
@@ -7333,14 +6029,14 @@ unresolved entries are kept as configured
 Channel messages are mention-gated by default.
 Mention sources:
 explicit app mention (
-&lt;@botId&gt;
+<@botId>
 mention regex patterns (
 agents.list[].groupChat.mentionPatterns
 , fallback
 messages.groupChat.mentionPatterns
 implicit reply-to-bot thread behavior
 Per-channel controls (
-channels.slack.channels.&lt;id|name&gt;
+channels.slack.channels.<id|name>
 requireMention
 users
 (allowlist)
@@ -7353,24 +6049,24 @@ Commands and slash behavior
 Native command auto-mode is
 off
 for Slack (
-commands.native: &quot;auto&quot;
+commands.native: "auto"
 does not enable Slack native commands).
 Enable native Slack command handlers with
 channels.slack.commands.native: true
 (or global
 commands.native: true
 When native commands are enabled, register matching slash commands in Slack (
-/&lt;command&gt;
+/<command>
 names).
 If native commands are not enabled, you can run a single configured slash command via
 channels.slack.slashCommand
 Default slash command settings:
 enabled: false
-name: &quot;openclaw&quot;
-sessionPrefix: &quot;slack:slash&quot;
+name: "openclaw"
+sessionPrefix: "slack:slash"
 ephemeral: true
 Slash sessions use isolated keys:
-agent:&lt;agentId&gt;:slack:slash:&lt;userId&gt;
+agent:<agentId>:slack:slash:<userId>
 and still route command execution against the target conversation session (
 CommandTargetSessionKey
 Threading, sessions, and reply tags
@@ -7384,9 +6080,9 @@ With default
 session.dmScope=main
 , Slack DMs collapse to agent main session.
 Channel sessions:
-agent:&lt;agentId&gt;:slack:channel:&lt;channelId&gt;
+agent:<agentId>:slack:channel:<channelId>
 Thread replies can create thread session suffixes (
-:thread:&lt;threadTs&gt;
+:thread:<threadTs>
 ) when applicable.
 channels.slack.thread.historyScope
 default is
@@ -7410,9 +6106,9 @@ legacy fallback for direct chats:
 channels.slack.dm.replyToMode
 Manual reply tags are supported:
 [[reply_to_current]]
-[[reply_to:&lt;id&gt;]]
+[[reply_to:<id>]]
 Note:
-replyToMode=&quot;off&quot;
+replyToMode="off"
 disables implicit reply threading. Explicit
 [[reply_to_*]]
 tags are still honored.
@@ -7427,7 +6123,7 @@ Outbound text and files
 text chunks use
 channels.slack.textChunkLimit
 (default 4000)
-channels.slack.chunkMode=&quot;newline&quot;
+channels.slack.chunkMode="newline"
 enables paragraph-first splitting
 file sends use Slack upload APIs and can include thread replies (
 thread_ts
@@ -7436,9 +6132,9 @@ channels.slack.mediaMaxMb
 when configured; otherwise channel sends use MIME-kind defaults from media pipeline
 Delivery targets
 Preferred explicit targets:
-user:&lt;id&gt;
+user:<id>
 for DMs
-channel:&lt;id&gt;
+channel:<id>
 for channels
 Slack DMs are opened via Slack conversation APIs when sending to user targets.
 Actions and gates
@@ -7470,7 +6166,7 @@ Ack reactions
 ackReaction
 sends an acknowledgement emoji while OpenClaw is processing an inbound message.
 Resolution order:
-channels.slack.accounts.&lt;accountId&gt;.ackReaction
+channels.slack.accounts.<accountId>.ackReaction
 channels.slack.ackReaction
 messages.ackReaction
 agent identity emoji fallback (
@@ -7478,72 +6174,71 @@ agents.list[].identity.emoji
 , else ”👀”)
 Notes:
 Slack expects shortcodes (for example
-&quot;eyes&quot;
+"eyes"
 Use
-&quot;&quot;
+""
 to disable the reaction for a channel or account.
 Manifest and scope checklist
 Slack app manifest example
-Copy
-&quot;display_information&quot;
-&quot;name&quot;
-&quot;OpenClaw&quot;
-&quot;description&quot;
-&quot;Slack connector for OpenClaw&quot;
-&quot;features&quot;
-&quot;bot_user&quot;
-&quot;display_name&quot;
-&quot;OpenClaw&quot;
-&quot;always_online&quot;
+"display_information"
+"name"
+"OpenClaw"
+"description"
+"Slack connector for OpenClaw"
+"features"
+"bot_user"
+"display_name"
+"OpenClaw"
+"always_online"
 false
-&quot;app_home&quot;
-&quot;messages_tab_enabled&quot;
+"app_home"
+"messages_tab_enabled"
 true
-&quot;messages_tab_read_only_enabled&quot;
+"messages_tab_read_only_enabled"
 false
-&quot;slash_commands&quot;
-&quot;command&quot;
-&quot;/openclaw&quot;
-&quot;description&quot;
-&quot;Send a message to OpenClaw&quot;
-&quot;should_escape&quot;
+"slash_commands"
+"command"
+"/openclaw"
+"description"
+"Send a message to OpenClaw"
+"should_escape"
 false
-&quot;oauth_config&quot;
-&quot;scopes&quot;
-&quot;bot&quot;
-&quot;chat:write&quot;
-&quot;channels:history&quot;
-&quot;channels:read&quot;
-&quot;groups:history&quot;
-&quot;im:history&quot;
-&quot;mpim:history&quot;
-&quot;users:read&quot;
-&quot;app_mentions:read&quot;
-&quot;reactions:read&quot;
-&quot;reactions:write&quot;
-&quot;pins:read&quot;
-&quot;pins:write&quot;
-&quot;emoji:read&quot;
-&quot;commands&quot;
-&quot;files:read&quot;
-&quot;files:write&quot;
-&quot;settings&quot;
-&quot;socket_mode_enabled&quot;
+"oauth_config"
+"scopes"
+"bot"
+"chat:write"
+"channels:history"
+"channels:read"
+"groups:history"
+"im:history"
+"mpim:history"
+"users:read"
+"app_mentions:read"
+"reactions:read"
+"reactions:write"
+"pins:read"
+"pins:write"
+"emoji:read"
+"commands"
+"files:read"
+"files:write"
+"settings"
+"socket_mode_enabled"
 true
-&quot;event_subscriptions&quot;
-&quot;bot_events&quot;
-&quot;app_mention&quot;
-&quot;message.channels&quot;
-&quot;message.groups&quot;
-&quot;message.im&quot;
-&quot;message.mpim&quot;
-&quot;reaction_added&quot;
-&quot;reaction_removed&quot;
-&quot;member_joined_channel&quot;
-&quot;member_left_channel&quot;
-&quot;channel_rename&quot;
-&quot;pin_added&quot;
-&quot;pin_removed&quot;
+"event_subscriptions"
+"bot_events"
+"app_mention"
+"message.channels"
+"message.groups"
+"message.im"
+"message.mpim"
+"reaction_added"
+"reaction_removed"
+"member_joined_channel"
+"member_left_channel"
+"channel_rename"
+"pin_added"
+"pin_removed"
 Optional user-token scopes (read operations)
 If you configure
 channels.slack.userToken
@@ -7573,7 +6268,6 @@ per-channel
 users
 allowlist
 Useful commands:
-Copy
 openclaw
 channels
 status
@@ -7590,7 +6284,6 @@ channels.slack.dmPolicy
 (or legacy
 channels.slack.dm.policy
 pairing approvals / allowlist entries
-Copy
 openclaw
 pairing
 list
@@ -7672,61 +6365,6 @@ Feishu
 
 [Source: https://docs.openclaw.ai/channels/telegram]
 
-Telegram - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Messaging platforms
-Telegram
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Chat Channels
-Messaging platforms
-WhatsApp
-Telegram
-Discord
-IRC
-Slack
-Feishu
-Google Chat
-Mattermost
-Signal
-iMessage
-Microsoft Teams
-LINE
-Matrix
-Zalo
-Zalo Personal
-Configuration
-Pairing
-Group Messages
-Groups
-Broadcast Groups
-Channel Routing
-Channel Location Parsing
-Channel Troubleshooting
-Telegram (Bot API)
-Quick setup
-Telegram side settings
-Access control and activation
-Runtime behavior
-Feature reference
-Troubleshooting
-Telegram config reference pointers
-Related
-Messaging platforms
-Telegram
-Telegram (Bot API)
 Status: production-ready for bot DMs + groups via grammY. Long polling is the default mode; webhook mode is optional.
 Pairing
 Default DM policy for Telegram is pairing.
@@ -7744,17 +6382,16 @@ Run
 /newbot
 , follow prompts, and save the token.
 Configure token and DM policy
-Copy
 channels
 telegram
 enabled
 true
 botToken
-&quot;123:abc&quot;
+"123:abc"
 dmPolicy
-&quot;pairing&quot;
+"pairing"
 groups
-&quot;*&quot;
+"*"
 requireMention
 true
 } }
@@ -7762,7 +6399,6 @@ Env fallback:
 TELEGRAM_BOT_TOKEN=...
 (default account only).
 Start gateway and approve first DM
-Copy
 openclaw
 gateway
 openclaw
@@ -7773,9 +6409,9 @@ openclaw
 pairing
 approve
 telegram
-&lt;
+<
 COD
-&gt;
+>
 Pairing codes expire after 1 hour.
 Add the bot to a group
 Add the bot to your group, then set
@@ -7818,7 +6454,7 @@ open
 (requires
 allowFrom
 to include
-&quot;*&quot;
+"*"
 disabled
 channels.telegram.allowFrom
 accepts numeric Telegram user IDs.
@@ -7841,9 +6477,8 @@ openclaw logs --follow
 Read
 from.id
 Official Bot API method:
-Copy
 curl
-&quot;https://api.telegram.org/bot&lt;bot_token&gt;/getUpdates&quot;
+"https://api.telegram.org/bot<bot_token>/getUpdates"
 Third-party method (less private):
 @userinfobot
 @getidsbot
@@ -7854,7 +6489,7 @@ groups
 config: all groups allowed
 groups
 configured: acts as allowlist (explicit IDs or
-&quot;*&quot;
+"*"
 Which senders are allowed in groups
 channels.telegram.groupPolicy
 open
@@ -7867,13 +6502,12 @@ allowFrom
 groupAllowFrom
 entries must be numeric Telegram user IDs.
 Example: allow any member in one specific group:
-Copy
 channels
 telegram
 groups
-&quot;-1001234567890&quot;
+"-1001234567890"
 groupPolicy
-&quot;open&quot;
+"open"
 requireMention
 false
 Group replies require mention by default.
@@ -7889,11 +6523,10 @@ Session-level command toggles:
 /activation mention
 These update session state only. Use config for persistence.
 Persistent config example:
-Copy
 channels
 telegram
 groups
-&quot;*&quot;
+"*"
 requireMention
 false
 Getting the group chat ID:
@@ -7911,7 +6544,7 @@ Telegram is owned by the gateway process.
 Routing is deterministic: Telegram inbound replies back to Telegram (the model does not pick channels).
 Inbound messages normalize into the shared channel envelope with reply metadata and media placeholders.
 Group sessions are isolated by group ID. Forum topics append
-:topic:&lt;threadId&gt;
+:topic:<threadId>
 to keep topics isolated.
 DM messages can carry
 message_thread_id
@@ -7927,9 +6560,9 @@ OpenClaw can stream partial replies by sending a temporary Telegram message and 
 Requirement:
 channels.telegram.streamMode
 is not
-&quot;off&quot;
+"off"
 (default:
-&quot;partial&quot;
+"partial"
 Modes:
 off
 : no live preview
@@ -7940,10 +6573,10 @@ block
 channels.telegram.draftChunk
 draftChunk
 defaults for
-streamMode: &quot;block&quot;
+streamMode: "block"
 minChars: 200
 maxChars: 800
-breakPreference: &quot;paragraph&quot;
+breakPreference: "paragraph"
 maxChars
 is clamped by
 channels.telegram.textChunkLimit
@@ -7958,7 +6591,7 @@ sends reasoning to the live preview while generating
 final answer is sent without reasoning text
 Formatting and HTML fallback
 Outbound text uses Telegram
-parse_mode: &quot;HTML&quot;
+parse_mode: "HTML"
 Markdown-ish text is rendered to Telegram-safe HTML.
 Raw model HTML is escaped to reduce Telegram parse failures.
 If Telegram rejects parsed HTML, OpenClaw retries as plain text.
@@ -7968,21 +6601,20 @@ Native commands and custom commands
 Telegram command menu registration is handled at startup with
 setMyCommands
 Native command defaults:
-commands.native: &quot;auto&quot;
+commands.native: "auto"
 enables native commands for Telegram
 Add custom command menu entries:
-Copy
 channels
 telegram
 customCommands
 command
-&quot;backup&quot;
+"backup"
 description
-&quot;Git backup&quot;
+"Git backup"
 command
-&quot;generate&quot;
+"generate"
 description
-&quot;Create an image&quot;
+"Create an image"
 Rules:
 names are normalized (strip leading
 , lowercase)
@@ -8017,21 +6649,19 @@ More details:
 Pairing
 Inline buttons
 Configure inline keyboard scope:
-Copy
 channels
 telegram
 capabilities
 inlineButtons
-&quot;allowlist&quot;
+"allowlist"
 Per-account override:
-Copy
 channels
 telegram
 accounts
 main
 capabilities
 inlineButtons
-&quot;allowlist&quot;
+"allowlist"
 Scopes:
 off
 group
@@ -8039,33 +6669,32 @@ all
 allowlist
 (default)
 Legacy
-capabilities: [&quot;inlineButtons&quot;]
+capabilities: ["inlineButtons"]
 maps to
-inlineButtons: &quot;all&quot;
+inlineButtons: "all"
 Message action example:
-Copy
 action
-&quot;send&quot;
+"send"
 channel
-&quot;telegram&quot;
-&quot;123456789&quot;
+"telegram"
+"123456789"
 message
-&quot;Choose an option:&quot;
+"Choose an option:"
 buttons
 text
-&quot;Yes&quot;
+"Yes"
 callback_data
-&quot;yes&quot;
+"yes"
 text
-&quot;No&quot;
+"No"
 callback_data
-&quot;no&quot;
+"no"
 text
-&quot;Cancel&quot;
+"Cancel"
 callback_data
-&quot;cancel&quot;
+"cancel"
 Callback clicks are passed to the agent as text:
-callback_data: &lt;value&gt;
+callback_data: <value>
 Telegram message actions for agents and automation
 Telegram tool actions include:
 sendMessage
@@ -8105,7 +6734,7 @@ Reply threading tags
 Telegram supports explicit reply threading tags in generated output:
 [[reply_to_current]]
 replies to the triggering message
-[[reply_to:&lt;id&gt;]]
+[[reply_to:<id>]]
 replies to a specific Telegram message ID
 channels.telegram.replyToMode
 controls handling:
@@ -8121,10 +6750,10 @@ tags are still honored.
 Forum topics and thread behavior
 Forum supergroups:
 topic session keys append
-:topic:&lt;threadId&gt;
+:topic:<threadId>
 replies and typing target the topic thread
 topic config path:
-channels.telegram.groups.&lt;chatId&gt;.topics.&lt;threadId&gt;
+channels.telegram.groups.<chatId>.topics.<threadId>
 General topic (
 threadId=1
 ) special-case:
@@ -8156,34 +6785,32 @@ tag
 [[audio_as_voice]]
 in agent reply to force voice-note send
 Message action example:
-Copy
 action
-&quot;send&quot;
+"send"
 channel
-&quot;telegram&quot;
-&quot;123456789&quot;
+"telegram"
+"123456789"
 media
-&quot;https://example.com/voice.ogg&quot;
+"https://example.com/voice.ogg"
 asVoice
 true
 Video messages
 Telegram distinguishes video files vs video notes.
 Message action example:
-Copy
 action
-&quot;send&quot;
+"send"
 channel
-&quot;telegram&quot;
-&quot;123456789&quot;
+"telegram"
+"123456789"
 media
-&quot;https://example.com/video.mp4&quot;
+"https://example.com/video.mp4"
 asVideoNote
 true
 Video notes do not support captions; provided message text is sent separately.
 Stickers
 Inbound sticker handling:
 static WEBP: downloaded and processed (placeholder
-&lt;media:sticker&gt;
+<media:sticker>
 animated TGS: skipped
 video WEBM: skipped
 Sticker context fields:
@@ -8196,29 +6823,26 @@ Sticker cache file:
 ~/.openclaw/telegram/sticker-cache.json
 Stickers are described once (when possible) and cached to reduce repeated vision calls.
 Enable sticker actions:
-Copy
 channels
 telegram
 actions
 sticker
 true
 Send sticker action:
-Copy
 action
-&quot;sticker&quot;
+"sticker"
 channel
-&quot;telegram&quot;
-&quot;123456789&quot;
+"telegram"
+"123456789"
 fileId
-&quot;CAACAgIAAxkBAAI...&quot;
+"CAACAgIAAxkBAAI..."
 Search cached stickers:
-Copy
 action
-&quot;sticker-search&quot;
+"sticker-search"
 channel
-&quot;telegram&quot;
+"telegram"
 query
-&quot;cat waving&quot;
+"cat waving"
 limit
 Reaction notifications
 Telegram reactions arrive as
@@ -8251,7 +6875,7 @@ Ack reactions
 ackReaction
 sends an acknowledgement emoji while OpenClaw is processing an inbound message.
 Resolution order:
-channels.telegram.accounts.&lt;accountId&gt;.ackReaction
+channels.telegram.accounts.<accountId>.ackReaction
 channels.telegram.ackReaction
 messages.ackReaction
 agent identity emoji fallback (
@@ -8260,7 +6884,7 @@ agents.list[].identity.emoji
 Notes:
 Telegram expects unicode emoji (for example ”👀”).
 Use
-&quot;&quot;
+""
 to disable the reaction for a channel or account.
 Config writes from Telegram events and commands
 Channel config writes are enabled by default (
@@ -8275,7 +6899,6 @@ and
 /config unset
 (requires command enablement)
 Disable:
-Copy
 channels
 telegram
 configWrites
@@ -8309,7 +6932,7 @@ webhookHost
 Limits, retry, and CLI targets
 channels.telegram.textChunkLimit
 default is 4000.
-channels.telegram.chunkMode=&quot;newline&quot;
+channels.telegram.chunkMode="newline"
 prefers paragraph boundaries (blank lines) before length splitting.
 channels.telegram.mediaMaxMb
 (default 5) caps inbound Telegram media download/processing size.
@@ -8322,11 +6945,10 @@ messages.groupChat.historyLimit
 disables.
 DM history controls:
 channels.telegram.dmHistoryLimit
-channels.telegram.dms[&quot;&lt;user_id&gt;&quot;].historyLimit
+channels.telegram.dms["<user_id>"].historyLimit
 outbound Telegram API retries are configurable via
 channels.telegram.retry
 CLI send target can be numeric chat ID or username:
-Copy
 openclaw
 message
 send
@@ -8335,7 +6957,7 @@ telegram
 --target
 123456789
 --message
-&quot;hi&quot;
+"hi"
 openclaw
 message
 send
@@ -8344,20 +6966,20 @@ telegram
 --target
 @name
 --message
-&quot;hi&quot;
+"hi"
 Troubleshooting
 Bot does not respond to non mention group messages
 requireMention=false
 , Telegram privacy mode must allow full visibility.
 BotFather:
 /setprivacy
--&gt; Disable
+-> Disable
 then remove + re-add bot to group
 openclaw channels status
 warns when config expects unmentioned group messages.
 openclaw channels status --probe
 can check explicit numeric group IDs; wildcard
-&quot;*&quot;
+"*"
 cannot be membership-probed.
 quick session test:
 /activation always
@@ -8365,7 +6987,7 @@ Bot not seeing group messages at all
 when
 channels.telegram.groups
 exists, group must be listed (or include
-&quot;*&quot;
+"*"
 verify bot membership in group
 review logs:
 openclaw logs --follow
@@ -8384,7 +7006,6 @@ Some hosts resolve
 api.telegram.org
 to IPv6 first; broken IPv6 egress can cause intermittent Telegram API failures.
 Validate DNS answers:
-Copy
 dig
 +short
 api.telegram.org
@@ -8409,7 +7030,7 @@ channels.telegram.allowFrom
 : DM allowlist (numeric Telegram user IDs).
 open
 requires
-&quot;*&quot;
+"*"
 openclaw doctor --fix
 can resolve legacy
 @username
@@ -8425,33 +7046,33 @@ can resolve legacy
 entries to IDs.
 channels.telegram.groups
 : per-group defaults + allowlist (use
-&quot;*&quot;
+"*"
 for global defaults).
-channels.telegram.groups.&lt;id&gt;.groupPolicy
+channels.telegram.groups.<id>.groupPolicy
 : per-group override for groupPolicy (
 open | allowlist | disabled
-channels.telegram.groups.&lt;id&gt;.requireMention
+channels.telegram.groups.<id>.requireMention
 : mention gating default.
-channels.telegram.groups.&lt;id&gt;.skills
+channels.telegram.groups.<id>.skills
 : skill filter (omit = all skills, empty = none).
-channels.telegram.groups.&lt;id&gt;.allowFrom
+channels.telegram.groups.<id>.allowFrom
 : per-group sender allowlist override.
-channels.telegram.groups.&lt;id&gt;.systemPrompt
+channels.telegram.groups.<id>.systemPrompt
 : extra system prompt for the group.
-channels.telegram.groups.&lt;id&gt;.enabled
+channels.telegram.groups.<id>.enabled
 : disable the group when
 false
-channels.telegram.groups.&lt;id&gt;.topics.&lt;threadId&gt;.*
+channels.telegram.groups.<id>.topics.<threadId>.*
 : per-topic overrides (same fields as group).
-channels.telegram.groups.&lt;id&gt;.topics.&lt;threadId&gt;.groupPolicy
+channels.telegram.groups.<id>.topics.<threadId>.groupPolicy
 : per-topic override for groupPolicy (
 open | allowlist | disabled
-channels.telegram.groups.&lt;id&gt;.topics.&lt;threadId&gt;.requireMention
+channels.telegram.groups.<id>.topics.<threadId>.requireMention
 : per-topic mention gating override.
 channels.telegram.capabilities.inlineButtons
 off | dm | group | all | allowlist
 (default: allowlist).
-channels.telegram.accounts.&lt;account&gt;.capabilities.inlineButtons
+channels.telegram.accounts.<account>.capabilities.inlineButtons
 : per-account override.
 channels.telegram.replyToMode
 off | first | all
@@ -8569,72 +7190,9 @@ Discord
 
 [Source: https://docs.openclaw.ai/channels/troubleshooting]
 
-Channel Troubleshooting - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Configuration
-Channel Troubleshooting
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Chat Channels
-Messaging platforms
-WhatsApp
-Telegram
-Discord
-IRC
-Slack
-Feishu
-Google Chat
-Mattermost
-Signal
-iMessage
-Microsoft Teams
-LINE
-Matrix
-Zalo
-Zalo Personal
-Configuration
-Pairing
-Group Messages
-Groups
-Broadcast Groups
-Channel Routing
-Channel Location Parsing
-Channel Troubleshooting
-Channel troubleshooting
-Command ladder
-WhatsApp
-WhatsApp failure signatures
-Telegram
-Telegram failure signatures
-Discord
-Discord failure signatures
-Slack
-Slack failure signatures
-iMessage and BlueBubbles
-iMessage and BlueBubbles failure signatures
-Signal
-Signal failure signatures
-Matrix
-Matrix failure signatures
-Configuration
-Channel Troubleshooting
-Channel troubleshooting
 Use this page when a channel connects but behavior is wrong.
 Command ladder
 Run these in order first:
-Copy
 openclaw
 status
 openclaw
@@ -8795,66 +7353,6 @@ Channel Location Parsing
 
 [Source: https://docs.openclaw.ai/channels/whatsapp]
 
-WhatsApp - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Messaging platforms
-WhatsApp
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Chat Channels
-Messaging platforms
-WhatsApp
-Telegram
-Discord
-IRC
-Slack
-Feishu
-Google Chat
-Mattermost
-Signal
-iMessage
-Microsoft Teams
-LINE
-Matrix
-Zalo
-Zalo Personal
-Configuration
-Pairing
-Group Messages
-Groups
-Broadcast Groups
-Channel Routing
-Channel Location Parsing
-Channel Troubleshooting
-WhatsApp (Web channel)
-Quick setup
-Deployment patterns
-Runtime model
-Access control and activation
-Personal-number and self-chat behavior
-Message normalization and context
-Delivery, chunking, and media
-Acknowledgment reactions
-Multi-account and credentials
-Tools, actions, and config writes
-Troubleshooting
-Configuration reference pointers
-Related
-Messaging platforms
-WhatsApp
-WhatsApp (Web channel)
 Status: production-ready via WhatsApp Web (Baileys). Gateway owns linked session(s).
 Pairing
 Default DM policy is pairing for unknown senders.
@@ -8864,26 +7362,23 @@ Gateway configuration
 Full channel config patterns and examples.
 Quick setup
 Configure WhatsApp access policy
-Copy
 channels
 whatsapp
 dmPolicy
-&quot;pairing&quot;
+"pairing"
 allowFrom
-&quot;+15551234567&quot;
+"+15551234567"
 groupPolicy
-&quot;allowlist&quot;
+"allowlist"
 groupAllowFrom
-&quot;+15551234567&quot;
+"+15551234567"
 Link WhatsApp (QR)
-Copy
 openclaw
 channels
 login
 --channel
 whatsapp
 For a specific account:
-Copy
 openclaw
 channels
 login
@@ -8892,11 +7387,9 @@ whatsapp
 --account
 work
 Start the gateway
-Copy
 openclaw
 gateway
 Approve first pairing request (if using pairing mode)
-Copy
 openclaw
 pairing
 list
@@ -8905,9 +7398,9 @@ openclaw
 pairing
 approve
 whatsapp
-&lt;
+<
 COD
-&gt;
+>
 Pairing requests expire after 1 hour. Pending requests are capped at 3 per channel.
 OpenClaw recommends running WhatsApp on a separate number when possible. (The channel metadata and onboarding flow are optimized for that setup, but personal-number setups are also supported.)
 Deployment patterns
@@ -8917,16 +7410,15 @@ separate WhatsApp identity for OpenClaw
 clearer DM allowlists and routing boundaries
 lower chance of self-chat confusion
 Minimal policy pattern:
-Copy
 channels
 whatsapp
 dmPolicy
-&quot;allowlist&quot;
+"allowlist"
 allowFrom
-&quot;+15551234567&quot;
+"+15551234567"
 Personal-number fallback
 Onboarding supports personal-number mode and writes a self-chat-friendly baseline:
-dmPolicy: &quot;allowlist&quot;
+dmPolicy: "allowlist"
 allowFrom
 includes your personal number
 selfChatMode: true
@@ -8949,7 +7441,7 @@ session.dmScope
 main
 collapses DMs to the agent main session).
 Group sessions are isolated (
-agent:&lt;agentId&gt;:whatsapp:group:&lt;jid&gt;
+agent:<agentId>:whatsapp:group:<jid>
 Access control and activation
 DM policy
 Group policy + allowlists
@@ -8963,12 +7455,12 @@ open
 (requires
 allowFrom
 to include
-&quot;*&quot;
+"*"
 disabled
 allowFrom
 accepts E.164-style numbers (normalized internally).
 Multi-account override:
-channels.whatsapp.accounts.&lt;id&gt;.dmPolicy
+channels.whatsapp.accounts.<id>.dmPolicy
 (and
 allowFrom
 ) take precedence over channel-level defaults for that account.
@@ -8986,7 +7478,7 @@ groups
 is omitted, all groups are eligible
 groups
 is present, it acts as a group allowlist (
-&quot;*&quot;
+"*"
 allowed)
 Group sender policy
 channels.whatsapp.groupPolicy
@@ -9035,9 +7527,8 @@ Message normalization and context
 Inbound envelope + reply context
 Incoming WhatsApp messages are wrapped in the shared inbound envelope.
 If a quoted reply exists, context is appended in this form:
-Copy
-[Replying to &lt;sender&gt; id:&lt;stanzaId&gt;]
-&lt;quoted body or media placeholder&gt;
+[Replying to <sender> id:<stanzaId>]
+<quoted body or media placeholder>
 [/Replying]
 Reply metadata fields are also populated when available (
 ReplyToId
@@ -9046,11 +7537,11 @@ ReplyToSender
 , sender JID/E.164).
 Media placeholders and location/contact extraction
 Media-only inbound messages are normalized with placeholders such as:
-&lt;media:image&gt;
-&lt;media:video&gt;
-&lt;media:audio&gt;
-&lt;media:document&gt;
-&lt;media:sticker&gt;
+<media:image>
+<media:video>
+<media:audio>
+<media:document>
+<media:sticker>
 Location and contact payloads are normalized into textual context before routing.
 Pending group history injection
 For groups, unprocessed messages can be buffered and injected as context when the bot is finally triggered.
@@ -9066,13 +7557,11 @@ Injection markers:
 Read receipts
 Read receipts are enabled by default for accepted inbound WhatsApp messages.
 Disable globally:
-Copy
 channels
 whatsapp
 sendReadReceipts
 false
 Per-account override:
-Copy
 channels
 whatsapp
 accounts
@@ -9084,7 +7573,7 @@ Delivery, chunking, and media
 Text chunking
 default chunk limit:
 channels.whatsapp.textChunkLimit = 4000
-channels.whatsapp.chunkMode = &quot;length&quot; | &quot;newline&quot;
+channels.whatsapp.chunkMode = "length" | "newline"
 newline
 mode prefers paragraph boundaries (blank lines), then falls back to length-safe chunking
 Outbound media behavior
@@ -9113,16 +7602,15 @@ on media send failure, first-item fallback sends text warning instead of droppin
 Acknowledgment reactions
 WhatsApp supports immediate ack reactions on inbound receipt via
 channels.whatsapp.ackReaction
-Copy
 channels
 whatsapp
 ackReaction
 emoji
-&quot;👀&quot;
+"👀"
 direct
 true
 group
-&quot;mentions&quot;
+"mentions"
 // always | mentions | never
 Behavior notes:
 sent immediately after inbound is accepted (pre-reply)
@@ -9147,14 +7635,14 @@ if present, otherwise first configured account id (sorted)
 account ids are normalized internally for lookup
 Credential paths and legacy compatibility
 current auth path:
-~/.openclaw/credentials/whatsapp/&lt;accountId&gt;/creds.json
+~/.openclaw/credentials/whatsapp/<accountId>/creds.json
 backup file:
 creds.json.bak
 legacy default auth in
 ~/.openclaw/credentials/
 is still recognized/migrated for default-account flows
 Logout behavior
-openclaw channels logout --channel whatsapp [--account &lt;id&gt;]
+openclaw channels logout --channel whatsapp [--account <id>]
 clears WhatsApp auth state for that account.
 In legacy auth directories,
 oauth.json
@@ -9171,7 +7659,6 @@ Troubleshooting
 Not linked (QR required)
 Symptom: channel status reports not linked.
 Fix:
-Copy
 openclaw
 channels
 login
@@ -9183,7 +7670,6 @@ status
 Linked but disconnected / reconnect loop
 Symptom: linked account with repeated disconnects or reconnect attempts.
 Fix:
-Copy
 openclaw
 doctor
 openclaw
@@ -9223,8 +7709,8 @@ mediaMaxMb
 sendReadReceipts
 ackReaction
 multi-account:
-accounts.&lt;id&gt;.enabled
-accounts.&lt;id&gt;.authDir
+accounts.<id>.enabled
+accounts.<id>.authDir
 , account-level overrides
 operations:
 configWrites
@@ -9236,7 +7722,7 @@ session behavior:
 session.dmScope
 historyLimit
 dmHistoryLimit
-dms.&lt;id&gt;.historyLimit
+dms.<id>.historyLimit
 Related
 Pairing
 Channel routing
@@ -9249,69 +7735,6 @@ Telegram
 
 [Source: https://docs.openclaw.ai/channels/zalo]
 
-Zalo - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Messaging platforms
-Zalo
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Chat Channels
-Messaging platforms
-WhatsApp
-Telegram
-Discord
-IRC
-Slack
-Feishu
-Google Chat
-Mattermost
-Signal
-iMessage
-Microsoft Teams
-LINE
-Matrix
-Zalo
-Zalo Personal
-Configuration
-Pairing
-Group Messages
-Groups
-Broadcast Groups
-Channel Routing
-Channel Location Parsing
-Channel Troubleshooting
-Zalo (Bot API)
-Plugin required
-Quick setup (beginner)
-What it is
-Setup (fast path)
-1) Create a bot token (Zalo Bot Platform)
-2) Configure the token (env or config)
-How it works (behavior)
-Limits
-Access control (DMs)
-DM access
-Long-polling vs webhook
-Supported message types
-Capabilities
-Delivery targets (CLI/cron)
-Troubleshooting
-Configuration reference (Zalo)
-Messaging platforms
-Zalo
-Zalo (Bot API)
 Status: experimental. Direct messages only; groups coming soon per Zalo docs.
 Plugin required
 Zalo ships as a plugin and is not bundled with the core install.
@@ -9335,19 +7758,18 @@ Set the token:
 Env:
 ZALO_BOT_TOKEN=...
 Or config:
-channels.zalo.botToken: &quot;...&quot;
+channels.zalo.botToken: "..."
 Restart the gateway (or finish onboarding).
 DM access is pairing by default; approve the pairing code on first contact.
 Minimal config:
-Copy
 channels
 zalo
 enabled
 true
 botToken
-&quot;12345689:abc-xyz&quot;
+"12345689:abc-xyz"
 dmPolicy
-&quot;pairing&quot;
+"pairing"
 What it is
 Zalo is a Vietnam-focused messaging app; its Bot API lets the Gateway run a bot for 1:1 conversations.
 It is a good fit for support or notifications where you want deterministic routing back to Zalo.
@@ -9365,15 +7787,14 @@ Copy the bot token (format:
 12345689:abc-xyz
 2) Configure the token (env or config)
 Example:
-Copy
 channels
 zalo
 enabled
 true
 botToken
-&quot;12345689:abc-xyz&quot;
+"12345689:abc-xyz"
 dmPolicy
-&quot;pairing&quot;
+"pairing"
 Env option:
 ZALO_BOT_TOKEN=...
 (works for the default account only).
@@ -9397,11 +7818,11 @@ Streaming is blocked by default due to the 2000 char limit making streaming less
 Access control (DMs)
 DM access
 Default:
-channels.zalo.dmPolicy = &quot;pairing&quot;
+channels.zalo.dmPolicy = "pairing"
 . Unknown senders receive a pairing code; messages are ignored until approved (codes expire after 1 hour).
 Approve via:
 openclaw pairing list zalo
-openclaw pairing approve zalo &lt;CODE&gt;
+openclaw pairing approve zalo <CODE>
 Pairing is the default token exchange. Details:
 Pairing
 channels.zalo.allowFrom
@@ -9454,7 +7875,7 @@ Streaming
 Delivery targets (CLI/cron)
 Use a chat id as the target.
 Example:
-openclaw message send --channel zalo --target 123456789 --message &quot;hi&quot;
+openclaw message send --channel zalo --target 123456789 --message "hi"
 Troubleshooting
 Bot doesn’t respond:
 Check that the token is valid:
@@ -9484,7 +7905,7 @@ channels.zalo.allowFrom
 : DM allowlist (user IDs).
 open
 requires
-&quot;*&quot;
+"*"
 . The wizard will ask for numeric IDs.
 channels.zalo.mediaMaxMb
 : inbound/outbound media cap (MB, default 5).
@@ -9497,25 +7918,25 @@ channels.zalo.webhookPath
 channels.zalo.proxy
 : proxy URL for API requests.
 Multi-account options:
-channels.zalo.accounts.&lt;id&gt;.botToken
+channels.zalo.accounts.<id>.botToken
 : per-account token.
-channels.zalo.accounts.&lt;id&gt;.tokenFile
+channels.zalo.accounts.<id>.tokenFile
 : per-account token file.
-channels.zalo.accounts.&lt;id&gt;.name
+channels.zalo.accounts.<id>.name
 : display name.
-channels.zalo.accounts.&lt;id&gt;.enabled
+channels.zalo.accounts.<id>.enabled
 : enable/disable account.
-channels.zalo.accounts.&lt;id&gt;.dmPolicy
+channels.zalo.accounts.<id>.dmPolicy
 : per-account DM policy.
-channels.zalo.accounts.&lt;id&gt;.allowFrom
+channels.zalo.accounts.<id>.allowFrom
 : per-account allowlist.
-channels.zalo.accounts.&lt;id&gt;.webhookUrl
+channels.zalo.accounts.<id>.webhookUrl
 : per-account webhook URL.
-channels.zalo.accounts.&lt;id&gt;.webhookSecret
+channels.zalo.accounts.<id>.webhookSecret
 : per-account webhook secret.
-channels.zalo.accounts.&lt;id&gt;.webhookPath
+channels.zalo.accounts.<id>.webhookPath
 : per-account webhook path.
-channels.zalo.accounts.&lt;id&gt;.proxy
+channels.zalo.accounts.<id>.proxy
 : per-account proxy URL.
 Matrix
 Zalo Personal
@@ -9525,63 +7946,6 @@ Zalo Personal
 
 [Source: https://docs.openclaw.ai/channels/zalouser]
 
-Zalo Personal - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Messaging platforms
-Zalo Personal
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Chat Channels
-Messaging platforms
-WhatsApp
-Telegram
-Discord
-IRC
-Slack
-Feishu
-Google Chat
-Mattermost
-Signal
-iMessage
-Microsoft Teams
-LINE
-Matrix
-Zalo
-Zalo Personal
-Configuration
-Pairing
-Group Messages
-Groups
-Broadcast Groups
-Channel Routing
-Channel Location Parsing
-Channel Troubleshooting
-Zalo Personal (unofficial)
-Plugin required
-Prerequisite: zca-cli
-Quick setup (beginner)
-What it is
-Naming
-Finding IDs (directory)
-Limits
-Access control (DMs)
-Group access (optional)
-Multi-account
-Troubleshooting
-Messaging platforms
-Zalo Personal
 Zalo Personal (unofficial)
 Status: experimental. This integration automates a
 personal Zalo account
@@ -9613,13 +7977,12 @@ Login (QR, on the Gateway machine):
 openclaw channels login --channel zalouser
 Scan the QR code in the terminal with the Zalo mobile app.
 Enable the channel:
-Copy
 channels
 zalouser
 enabled
 true
 dmPolicy
-&quot;pairing&quot;
+"pairing"
 Restart the Gateway (or finish onboarding).
 DM access defaults to pairing; approve the pairing code on first contact.
 What it is
@@ -9640,7 +8003,6 @@ zalo
 reserved for a potential future official Zalo API integration.
 Finding IDs (directory)
 Use the directory CLI to discover peers/groups and their IDs:
-Copy
 openclaw
 directory
 self
@@ -9653,7 +8015,7 @@ list
 --channel
 zalouser
 --query
-&quot;name&quot;
+"name"
 openclaw
 directory
 groups
@@ -9661,7 +8023,7 @@ list
 --channel
 zalouser
 --query
-&quot;work&quot;
+"work"
 Limits
 Outbound text is chunked to ~2000 characters (Zalo client limits).
 Streaming is blocked by default.
@@ -9677,49 +8039,47 @@ zca friend find
 when available.
 Approve via:
 openclaw pairing list zalouser
-openclaw pairing approve zalouser &lt;code&gt;
+openclaw pairing approve zalouser <code>
 Group access (optional)
 Default:
-channels.zalouser.groupPolicy = &quot;open&quot;
+channels.zalouser.groupPolicy = "open"
 (groups allowed). Use
 channels.defaults.groupPolicy
 to override the default when unset.
 Restrict to an allowlist with:
-channels.zalouser.groupPolicy = &quot;allowlist&quot;
+channels.zalouser.groupPolicy = "allowlist"
 channels.zalouser.groups
 (keys are group IDs or names)
 Block all groups:
-channels.zalouser.groupPolicy = &quot;disabled&quot;
+channels.zalouser.groupPolicy = "disabled"
 The configure wizard can prompt for group allowlists.
 On startup, OpenClaw resolves group/user names in allowlists to IDs and logs the mapping; unresolved entries are kept as typed.
 Example:
-Copy
 channels
 zalouser
 groupPolicy
-&quot;allowlist&quot;
+"allowlist"
 groups
-&quot;123456789&quot;
+"123456789"
 allow
 true
-&quot;Work Chat&quot;
+"Work Chat"
 allow
 true
 Multi-account
 Accounts map to zca profiles. Example:
-Copy
 channels
 zalouser
 enabled
 true
 defaultAccount
-&quot;default&quot;
+"default"
 accounts
 work
 enabled
 true
 profile
-&quot;work&quot;
+"work"
 Troubleshooting
 zca
 not found:
@@ -9729,7 +8089,7 @@ for the Gateway process.
 Login doesn’t stick:
 openclaw channels status --probe
 Re-login:
-openclaw channels logout --channel zalouser &amp;&amp; openclaw channels login --channel zalouser
+openclaw channels logout --channel zalouser && openclaw channels login --channel zalouser
 Zalo
 Pairing---
 ## Channels > BlueBubbles

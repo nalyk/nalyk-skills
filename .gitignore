@@ -3,6 +3,12 @@
 *.local.md
 .credentials.json
 
+# Build/packaging artifacts
+__pycache__/
+*.pyc
+*.zip
+*.tar.gz
+
 # OS
 .DS_Store
 Thumbs.db

@@ -1,352 +1,98 @@
 ---
 name: auto-ralph
 description: >-
-  Score-and-gate decision skill that decides whether an imperative coding task
-  should run as a Ralph Loop (iterative agent run with promise-based completion
-  via the /ralph-loop command). MUST be invoked BEFORE composing any response
-  when the user's prompt contains an imperative coding verb (fix, repair, add,
-  implement, create, build, test, refactor — or ro/ru equivalents: repară,
-  fixează, adaugă, implementează, creează, testează, refactorizează, исправь,
-  добавь, создай, сделай, протестируй). Emits the (AUTONALYK) banner with the
-  computed 0–4 score, then either invokes /ralph-loop (score ≥ 3) or returns
-  control for a normal response (score ≤ 2). ALWAYS invoke on explicit triggers
-  regardless of score: "ralph this", "auto ralph", "loop it", "iterate", "keep
-  trying", "until done". NEVER invoke on questions, explanations, or when the
-  user says "just answer", "don't loop", "explain first". Wraps and depends on
-  the ralph-loop plugin — they are complementary, not alternatives.
-  Output: Romanian. Input: en/ro/ru/mixed.
+  Decides whether an imperative coding task (fix/add/implement/refactor —
+  en/ro/ru) should run as a Ralph Loop via /ralph-loop. Invoke when the prompt
+  has an imperative verb PLUS multi-step or verifiable scope (tests, concrete
+  error, named files), or on explicit triggers "ralph this", "auto ralph",
+  "loop it", "until done". Never on questions or "just answer"/"don't loop".
 ---
 
 # auto-ralph
 
-Skill proactiv care detectează automat task-uri potrivite pentru Ralph Loop și le execută.
+Gate skill: scores imperative coding tasks and routes score ≥ 3 to a Ralph Loop.
+Output: MEREU română. Input: en/ro/ru/mixed, fără întrebări despre limbă.
 
-## Prefix de Activare (OBLIGATORIU)
+## Contract de activare
 
-**Când skill-ul activează, PRIMUL lucru afișat trebuie să fie:**
+Primul output, mereu:
 
 ```
 (AUTONALYK) ═══════════════════════════════════
-  Task detectat: [tip task]
+  Task detectat: [tip]
   Scor: [X]/4 → [Ralph mode / Normal mode]
 ═══════════════════════════════════════════════
 ```
 
-**Exemple:**
-```
-(AUTONALYK) ═══════════════════════════════════
-  Task detectat: bug fix
-  Scor: 4/4 → Ralph mode
-═══════════════════════════════════════════════
-```
+## Faza 0 — Loop activ (OBLIGATORIU)
 
-```
-(AUTONALYK) ═══════════════════════════════════
-  Task detectat: întrebare
-  Scor: 1/4 → Normal mode
-═══════════════════════════════════════════════
-```
+Dacă există `.claude/ralph-loop.local.md`: avertizează (loop deja activ, opțiuni:
+așteaptă / `/cancel-ralph` / adaugă manual la loop-ul curent) și **STOP** — al
+doilea loop corupe starea.
 
-**De ce prefix:**
-- Utilizatorul știe imediat că skill-ul a activat
-- Transparență totală despre decizia scoring
-- Debugging ușor dacă ceva merge prost
-
-## Faza 0: Verificare Loop Activ (OBLIGATORIU - P0 FIX)
-
-**ÎNAINTE de orice scoring, verifică dacă Ralph Loop e deja activ:**
+## Faza 1 — Scoring determinist
 
 ```bash
-if [[ -f ".claude/ralph-loop.local.md" ]]; then
-    # STOP - nu porni alt loop!
-fi
+bash "${CLAUDE_PLUGIN_ROOT}/skills/auto-ralph/scripts/score-task.sh" "<promptul userului>"
 ```
 
-**Dacă loop activ:**
-```
-(AUTONALYK) ═══════════════════════════════════
-  ⚠️  Ralph Loop DEJA ACTIV!
-  Iterația curentă: [citește din fișier]
+Output: `score=N matched=[...]`. Decizie: **score ≥ 3 → Ralph mode**; score ≤ 2 →
+afișează bannerul și răspunde normal (fără celelalte faze). Override-uri
+explicite (force-on/force-off) bat scorul — vezi `references/detection-rules.md`.
 
-  Opțiuni:
-  1. Așteaptă să termine
-  2. /cancel-ralph pentru a opri
-  3. Adaugă cerința la loop-ul curent (manual)
-═══════════════════════════════════════════════
-```
+## Faza 1.5 — Explore (opțional)
 
-**NU încerca să pornești al doilea loop - va corupe starea!**
+Refactor mare sau cod necunoscut la scor 3–4 → rulează întâi un subagent
+Explore (Task tool, `subagent_type: "Explore"`). Template-uri de prompt:
+`references/explore-patterns.md`.
 
-## Workflow Automat
+## Faza 2 — Context
 
-```
-USER INPUT → CHECK ACTIVE LOOP → SCORING → (>= 3?) → CONTEXT → PROMPT → CONFIRM → EXECUTE
-                    ↓                         ↓
-              (loop activ?)              (< 3?) → RĂSPUNS NORMAL
-                    ↓
-              AVERTIZARE + STOP
+```bash
+bash "${CLAUDE_PLUGIN_ROOT}/skills/auto-ralph/scripts/detect-context.sh" [dir]
 ```
 
-**ZERO întrebări până la confirmarea finală.**
+JSON cu: git, tests (posibil `NO_TESTS_DETECTED`), errors, structure, docker,
+settings (din `~/.claude/auto-ralph.local.md`; parametrii expliciți din comandă
+au prioritate).
 
-## Faza 1: Scoring Automat
+## Faza 3 — Generare prompt
 
-Calculează scor 0-4 pentru fiecare task:
+Alege template din `references/prompt-patterns.md` (bug-fix / feature / test /
+refactor / general; varianta NO_TESTS când nu există teste). Include mereu
+promise `<promise>GATA</promise>` și reminder `/cancel-ralph`.
 
-| Criteriu | +1 punct dacă |
-|----------|---------------|
-| Criterii clare | Keywords pozitive detectate (vezi tabel mai jos) |
-| Iterație utilă | Bug fix, feature, refactor (nu întrebări) |
-| Scop definit | Fișiere/funcții specificate |
-| Verificabil | Teste disponibile sau eroare concretă |
+## Faza 4 — Confirmare (SINGURA întrebare)
 
-### Keywords Multilingve (P1 FIX)
+Arată preview-ul prompt-ului și întreabă:
+`Execut? (max 25 iterații) [Da - Recomandat] [Modifică prompt] [Nu]`
+(sare peste dacă `auto_execute: true` în settings).
 
-**IMPORTANT:** Recunoaște keywords în TOATE limbile:
+## Faza 5 — Execuție (prompt-file, OBLIGATORIU)
 
-| Limba | Keywords Pozitive (+1) | Keywords Negative (0) |
-|-------|------------------------|----------------------|
-| **EN** | fix, repair, add, implement, create, build, test, refactor | explain, help, what, why, how, understand |
-| **RO** | repară, fixează, adaugă, implementează, creează, fă, fă-mi, testează, refactorizează | explică, ce face, cum, de ce, ajută-mă |
-| **RU** | исправь, добавь, создай, сделай, протестируй, рефактор | объясни, что, как, почему, помоги |
-
-**Exemple:**
-- "fă-mi un API" → "fă-mi" = RO pentru "make me" → +1 criteriu clar
-- "repară bug-ul" → "repară" = RO pentru "fix" → +1 criteriu clar
-- "ce face funcția?" → "ce face" = întrebare → 0 puncte
-
-**Decizie:**
-- Scor >= 3 → AUTO-RALPH
-- Scor < 3 → Răspuns normal Claude
-
-## Faza 1.5: Pre-Analiză cu Explore Agent (OPȚIONAL)
-
-**Când să folosești Explore ÎNAINTE de Ralph Loop:**
-
-| Scor | Task Type | Explore? | Motiv |
-|------|-----------|----------|-------|
-| 4/4 | Bug fix cu stack trace clar | NU | Direct Ralph - context evident |
-| 4/4 | Refactor >500 linii | DA | Mapează dependențe înainte |
-| 3/4 | Feature în cod necunoscut | DA | Înțelege arhitectura |
-| 3/4 | Test funcție izolată | NU | Scop mic, direct Ralph |
-
-**Regula simplă:** Explore când ai nevoie să înțelegi structura ÎNAINTE de a modifica.
-
-### Template-uri Explore
-
-**Bug Fix Explore:**
-```
-Task(subagent_type="Explore", prompt="Investigate [ERROR]: 1) Find source file, 2) Map call chain, 3) Identify related tests, 4) Find similar patterns")
-```
-
-**Feature Explore:**
-```
-Task(subagent_type="Explore", prompt="Plan feature [NAME]: 1) Find similar implementations, 2) Map integration points, 3) Identify test patterns, 4) Check config files")
-```
-
-**Refactor Explore:**
-```
-Task(subagent_type="Explore", prompt="Analyze [TARGET]: 1) Find all usages, 2) Map dependencies, 3) Assess test coverage, 4) Identify risk areas")
-```
-
-Vezi `references/explore-patterns.md` pentru template-uri complete și exemple.
-
-## Faza 2: Detecție Context
-
-Rulează `${CLAUDE_SKILL_DIR}/scripts/detect-context.sh [directory]` pentru:
-- Git status (fișiere modificate)
-- Framework test disponibil (sau `NO_TESTS_DETECTED`)
-- Erori recente (npm, yarn, pytest, generic logs)
-- Structură proiect
-- **Docker status** (P2 FIX) - docker-compose, containere, logs
-
-**Notă:** Scriptul verifică automat dacă `jq` e instalat și afișează instrucțiuni dacă lipsește.
-
-## Faza 3: Generare Prompt
-
-Selectează template din `references/prompt-patterns.md`:
-- Bug fix → Pattern bug-fix
-- Feature → Pattern feature
-- Test → Pattern test
-- Refactor → Pattern refactor
-- Generic → Template general
-
-Template include:
-- Task-ul original (în limba userului)
-- Context detectat
-- Criterii de succes auto-inferate
-- Promise: `<promise>GATA</promise>`
-- Reminder: `/cancel-ralph` pentru anulare
-
-## Faza 4: Confirmare (SINGURA ÎNTREBARE)
-
-Prezintă prompt-ul generat și întreabă:
-
-```
-Prompt generat pentru Ralph Loop:
-────────────────────────────────
-[preview prompt]
-────────────────────────────────
-
-Execut? (max 25 iterații)
-[Da - Recomandat] [Modifică prompt] [Nu]
-```
-
-## Faza 5: Execuție
-
-Dacă "Da", folosește metoda **prompt-file** (OBLIGATORIU pentru a evita eroarea de newline în Bash):
-
-1. **Scrie prompt-ul** într-un fișier temporar cu Write tool:
-   ```
-   Write tool → /tmp/ralph-prompt.txt cu conținutul complet al prompt-ului generat
-   ```
-
-2. **Invocă ralph-loop** cu `--prompt-file` (comanda rămâne single-line):
+1. **Scrie prompt-ul** cu Write tool în `/tmp/ralph-prompt.txt`.
+2. **Invocă** (comandă single-line):
    ```bash
    /ralph-loop --prompt-file /tmp/ralph-prompt.txt --max-iterations 25 --completion-promise "GATA"
    ```
 
-**DE CE:** Claude Code Bash tool respinge comenzi cu newline-uri. Trecând prompt-ul multi-line
-ca argument inline cauzează `Bash command permission check failed`. Scrierea în fișier + `--prompt-file`
-rezolvă complet problema.
+**DE CE:** Claude Code Bash tool respinge comenzi cu newline-uri. Prompt-ul
+multi-line inline cauzează `Bash command permission check failed`.
 
-**NU FOLOSI NICIODATĂ** această formă (va eșua):
+**NU FOLOSI NICIODATĂ** forma inline (va eșua):
 ```bash
 # BROKEN - newlines in $ARGUMENTS cause Bash rejection
 /ralph-loop "multi\nline\nprompt" --max-iterations 25 --completion-promise "GATA"
 ```
 
-## Reguli Limbă
-
-- **Output:** MEREU Română
-- **Input:** Acceptă orice (ro/en/ru/mixed) fără întrebări
-- **Promise:** "GATA" (standard)
-
-Exemplu:
-```
-User: "fix the auth bug, нужно чтобы работал login"
-
-(AUTONALYK) ═══════════════════════════════════
-  Task detectat: bug fix
-  Scor: 4/4 → Ralph mode
-═══════════════════════════════════════════════
-
-Generez prompt...
-```
-
-## Triggers Explicite (override scoring)
-
-Activare forțată Ralph:
-- "ralph this", "auto ralph", "loop it"
-- "iterate", "keep trying", "until done"
-
-Dezactivare forțată:
-- "just answer", "don't loop"
-- "explain first", "one time"
-
-## Resurse
-
-- **`references/detection-rules.md`** - Reguli complete scoring
-- **`references/prompt-patterns.md`** - Template-uri prompt
-- **`scripts/detect-context.sh`** - Script detecție context
-- **`examples/`** - Exemple prompt-uri generate
-
-## Exemple Rapide
-
-### Task potrivit (scor 4)
-```
-User: "fix the failing tests in auth module"
-
-(AUTONALYK) ═══════════════════════════════════
-  Task detectat: bug fix (teste)
-  Scor: 4/4 → Ralph mode
-═══════════════════════════════════════════════
-
-Detectez context... [git, teste, erori]
-Generez prompt...
-
-Prompt generat pentru Ralph Loop:
-────────────────────────────────
-[preview]
-────────────────────────────────
-
-Execut? (max 25 iterații) [Da/Modifică/Nu]
-```
-
-### Task nepotrivit (scor 1)
-```
-User: "ce face funcția asta?"
-
-(AUTONALYK) ═══════════════════════════════════
-  Task detectat: întrebare/explicație
-  Scor: 1/4 → Normal mode
-═══════════════════════════════════════════════
-
-[Răspuns normal Claude, fără Ralph]
-```
-
 ## Safety
 
-1. **Max iterations** - Default 25, MEREU setat
-2. **Confirmare** - Un click "Da" înainte de execuție
-3. **Escape** - `/cancel-ralph` menționat în fiecare prompt
-4. **Promise onestă** - Instrucțiuni clare să NU mintă
+- Max iterations mereu setat (default 25).
+- Nu executa fără confirmare; nu cere clarificări inutile.
+- Promise onestă: instruiește explicit să NU emită `GATA` neverificat.
 
-## Anti-Patterns (CE NU FACE)
+## Referințe
 
-- NU întreabă despre limbă
-- NU întreabă "quick sau thorough"
-- NU cere clarificări inutile
-- NU execută fără confirmare finală
-- NU ignoră scor < 3 (răspunde normal)
-
-## Settings Persistence
-
-Auto-ralph citește configurația din `~/.claude/auto-ralph.local.md`:
-
-### Structură Settings File
-
-```yaml
----
-max_iterations: 25
-score_threshold: 3
-skip_explore_for_score: 4
-default_language: ro
-auto_execute: false
-docker_analysis: true
----
-
-# Notes
-Any markdown notes here.
-```
-
-### Parametri Disponibili
-
-| Parametru | Default | Descriere |
-|-----------|---------|-----------|
-| `max_iterations` | 25 | Iterații maxime Ralph Loop |
-| `score_threshold` | 3 | Scor minim pentru Ralph mode |
-| `skip_explore_for_score` | 4 | Scor la care se sare peste Explore |
-| `default_language` | ro | Limba output (ro/en/ru) |
-| `auto_execute` | false | true = fără confirmare finală |
-| `docker_analysis` | true | Include Docker în context detection |
-
-### Override
-
-Parametrii expliciți din comandă au prioritate peste settings:
-```
-User: "ralph this cu max 50 iterații"
-→ Override max_iterations=50, ignoră settings
-```
-
-### Citire Settings
-
-Script-ul `detect-context.sh` include funcție `read_settings()`:
-```bash
-read_settings() {
-    local sf="$HOME/.claude/auto-ralph.local.md"
-    if [[ -f "$sf" ]]; then
-        sed -n '/^---$/,/^---$/p' "$sf" | grep -v '^---$'
-    fi
-}
-```
+- `references/detection-rules.md` — criterii scoring + override-uri + settings
+- `references/explore-patterns.md` — template-uri Explore
+- `references/prompt-patterns.md` — template-uri prompt + exemplu complet

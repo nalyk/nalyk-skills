@@ -1,200 +1,94 @@
 ---
 name: openclaw-expert
-description: ULTRA deep expertise in OpenClaw — complete knowledge from ALL 279 documentation pages. Covers architecture, configuration, every channel, every provider, every tool, every CLI command, multi-agent routing, sessions, memory, security, sandboxing, plugins, skills, automation, platforms, installation, troubleshooting, and templates. Auto-activates on any mention of OpenClaw, openclaw.json, gateway setup, WhatsApp/Telegram/Discord bot integration, pi-mono, ClawHub, or multi-channel AI agent configuration.
+description: OpenClaw expert — self-hosted multi-channel AI agent gateway. Activates on any mention of OpenClaw, openclaw.json, ClawHub, pi-mono, or gateway/channel setup for WhatsApp/Telegram/Discord/Signal-style agent bots. Covers config, channels, providers, tools, CLI, sandboxing, automation.
 ---
 
-# OpenClaw ULTRA Expert Skill
+# OpenClaw Expert
 
-You are the world's foremost OpenClaw expert — a senior developer and infrastructure architect with complete knowledge of the entire OpenClaw system. This skill contains the FULL content from all 279 documentation pages at docs.openclaw.ai, organized into 14 topic-specific reference files. Updated Feb 2026 with new channels (BlueBubbles, Nextcloud Talk, Nostr, Synology Chat, Tlon, Twitch), new CLI commands (acp, clawbot, completion, config, daemon, devices, node, qr, webhooks), Mistral provider, prompt caching reference, and community plugins.
+OpenClaw is a self-hosted, open-source (MIT) multi-channel gateway for AI agents: one Gateway process connects messaging surfaces (WhatsApp, Telegram, Discord, Slack, Signal, iMessage, Matrix, MS Teams, and ~20 more) to model providers (Anthropic, OpenAI, OpenRouter, Bedrock, Mistral, local models).
 
-## What is OpenClaw
-
-OpenClaw is a self-hosted, open-source (MIT) multi-channel gateway for AI agents. A single Gateway process connects messaging surfaces (WhatsApp, Telegram, Discord, Slack, Signal, iMessage, Google Chat, MS Teams, Matrix, Mattermost, WebChat, Line, Zalo, IRC, Feishu, Nostr, BlueBubbles, Nextcloud Talk, Synology Chat, Tlon, Twitch, and more) to AI model providers (Anthropic, OpenAI, OpenRouter, Bedrock, Mistral, local models via LM Studio/Ollama, and others).
-
-- **Repo**: https://github.com/openclaw/openclaw
-- **Docs**: https://docs.openclaw.ai (279 pages)
-- **ClawHub** (skills registry): https://clawhub.com
-- **Stack**: TypeScript, Node 22+, pnpm, pi-mono agent runtime, Baileys (WhatsApp), grammY (Telegram)
+- **Repo**: https://github.com/openclaw/openclaw — **Docs**: https://docs.openclaw.ai
+- **Stack**: TypeScript, Node 22+, pnpm, pi-mono agent runtime
 - **Config**: JSON5 at `~/.openclaw/openclaw.json` (strict validation, hot-reload)
 - **Default port**: 18789 (WS + HTTP), Canvas: 18793
-- **License**: MIT
 
-## Reference File Index
+## Retrieval Protocol (grep-first, NEVER whole-file Read)
 
-**ALWAYS read the relevant reference file before answering.** Each file contains the COMPLETE documentation for its domain, extracted from every relevant page.
+Reference files are large (19K–201K). Do NOT Read a whole file.
 
-| # | Topic | File | Size | Covers |
-|---|---|---|---|---|
-| 1 | **Channels** | `reference/channels.md` | 224K | WhatsApp, Telegram, Discord, Slack, Signal, iMessage, Google Chat, MS Teams, Matrix, Mattermost, Line, Zalo, IRC, Feishu, BlueBubbles, Nextcloud Talk, Nostr, Synology Chat, Tlon, Twitch, pairing, groups, broadcast, routing, location, troubleshooting |
-| 2 | **Concepts** | `reference/concepts.md` | 135K | Architecture, agent runtime, agent loop, system prompt, context, workspace, OAuth, sessions, memory, compaction, multi-agent, presence, messages, streaming, retry, queue, models, features, TypeBox, markdown, typing, usage tracking, timezones |
-| 3 | **Gateway & Ops** | `reference/gateway-ops.md` | 168K | Configuration, config reference, config examples, authentication, trusted proxy, health, heartbeat, doctor, logging, gateway lock, background process, multiple gateways, security, sandboxing, sandbox vs tool policy, protocols, bridge protocol, CLI backends, networking, discovery, Bonjour, pairing, remote access, Tailscale, tools invoke API, OpenAI HTTP API, troubleshooting, web UI, Control UI, dashboard, WebChat, TUI, formal verification |
-| 4 | **Tools** | `reference/tools.md` | 99K | Lobster tool, LLM task, exec, web search, apply_patch, elevated mode, thinking levels, reactions, browser, browser login, Chrome extension, browser troubleshooting, agent send, sub-agents, multi-agent sandbox tools, skills, skills config, ClawHub, plugins, slash commands |
-| 5 | **CLI** | `reference/cli.md` | 108K | ALL 44 CLI commands: acp, agent, agents, approvals, browser, channels, clawbot, completion, config, configure, cron, daemon, dashboard, devices, directory, dns, docs, doctor, gateway, health, hooks, logs, memory, message, models, node, nodes, onboard, pairing, plugins, qr, reset, sandbox, security, sessions, setup, skills, status, system, tui, uninstall, update, voicecall, webhooks |
-| 6 | **Install** | `reference/install.md` | 91K | npm install, curl installer, Docker, Nix, Ansible, Bun, development channels, installer flags, updating, uninstalling |
-| 7 | **Platforms** | `reference/platforms.md` | 81K | macOS (bundled gateway, canvas, child process, dev setup, health, icon, logging, menu bar, peekaboo, permissions, release, remote, signing, skills, voice overlay, voicewake, webchat, XPC), macOS VM, Linux, Windows/WSL2, iOS, Android, Hetzner, GCP, Fly, exe dev |
-| 8 | **Templates** | `reference/templates-reference.md` | 76K | Default AGENTS.md, AGENTS template, BOOT template, BOOTSTRAP template, HEARTBEAT template, IDENTITY template, SOUL template, TOOLS template, USER template, RPC adapters, device models, session management compaction, releasing, tests, prompt caching |
-| 9 | **Automation** | `reference/automation.md` | 41K | Cron jobs, cron vs heartbeat, hooks, webhooks, Gmail PubSub, polls, auth monitoring, automation troubleshooting |
-| 10 | **Providers** | `reference/providers.md` | 40K | Anthropic, OpenAI, OpenRouter, Bedrock, GLM, LiteLLM, MiniMax, Mistral, Moonshot, OpenCode, Qianfan, Synthetic, Vercel AI Gateway, ZAI, models overview |
-| 11 | **Getting Started** | `reference/getting-started.md` | 40K | Getting started, onboarding overview, CLI wizard, macOS onboarding, personal assistant setup, showcase, hubs, lore, pairing, setup |
-| 12 | **Nodes & Media** | `reference/nodes-media.md` | 31K | Node management, audio/voice notes, camera capture, images/media, talk mode, voice wake, location command, node troubleshooting |
-| 13 | **Troubleshooting** | `reference/troubleshooting.md` | 27K | FAQ, common fixes, help entry point, debug workflows, channel troubleshooting, gateway troubleshooting |
-| 14 | **Plugins** | `reference/plugins-extensions.md` | 28K | Voice call plugin, Zalo personal plugin, community plugins, experiments (onboarding config protocol, memory research, model config exploration) |
+1. Pick the file from the routing table below (or check `reference/INDEX.md` — it maps every file to its `[Source: <url>]` page anchors).
+2. **Grep the file** for keywords and/or the `[Source:` anchor URL to get line numbers: `grep -n 'dmPolicy\|\[Source:' reference/channels.md`
+3. **Read with offset/limit** around the hits (sections run from one `[Source:` anchor to the next `---`).
+4. Answer with concrete config patterns and CLI commands.
+5. Bleeding-edge gaps: fetch `https://docs.openclaw.ai/<path>` or `https://docs.openclaw.ai/sitemap.xml`.
 
-**Total: ~1.4MB of reference content from all 279 doc pages.**
+## File Routing
 
-## How to Use This Skill
-
-1. **Identify the topic** from the user's question
-2. **Read the relevant reference file(s)** — use the Read tool on `reference/<file>.md` relative to this skill's directory
-3. **Answer with specific config patterns, CLI commands, and concrete details**
-4. **For bleeding-edge updates**, fetch the live page: `https://docs.openclaw.ai/<path>`
-
-### Topic → File Routing
-
-- Channel setup/config → `reference/channels.md`
-- Model providers, API keys → `reference/providers.md`
-- Any tool question → `reference/tools.md`
-- Architecture, sessions, memory, agent loop → `reference/concepts.md`
-- Gateway config, security, sandboxing, remote access → `reference/gateway-ops.md`
-- CLI commands → `reference/cli.md`
-- Installation methods → `reference/install.md`
-- OS-specific guides → `reference/platforms.md`
-- Cron, hooks, webhooks → `reference/automation.md`
-- Node/device management → `reference/nodes-media.md`
-- Bootstrap templates → `reference/templates-reference.md`
-- First-time setup → `reference/getting-started.md`
-- Debugging/fixing issues → `reference/troubleshooting.md`
-- Writing plugins → `reference/plugins-extensions.md`
+| File | Size | Covers |
+|---|---|---|
+| `reference/gateway-ops.md` | 201K | Gateway config + reference, auth, security, sandboxing, networking, remote access, Tailscale, web UI/dashboard/TUI, protocols, health/doctor |
+| `reference/channels.md` | 192K | Every channel (WhatsApp, Telegram, Discord, Slack, Signal, iMessage, Matrix, Teams, BlueBubbles, Nostr, Twitch...), pairing, groups, broadcast, routing |
+| `reference/concepts.md` | 134K | Architecture, agent runtime/loop, system prompt, sessions, memory, compaction, multi-agent, streaming, retry, queue, models |
+| `reference/troubleshooting.md` | 134K | FAQ, triage, debug workflows, channel/gateway troubleshooting |
+| `reference/tools.md` | 128K | Lobster, LLM task, exec, web search, browser, sub-agents, skills, ClawHub, plugins, slash commands, elevated mode |
+| `reference/install.md` | 100K | npm/curl/Docker/Nix/Ansible/Bun install, updating, uninstalling |
+| `reference/cli.md` | 65K | All 44 CLI commands (gateway, configure, doctor, channels, agents, devices, cron, sessions, webhooks...) |
+| `reference/platforms.md` | 59K | macOS app internals, Linux, Windows/WSL2, iOS, Android, Hetzner, GCP, Fly |
+| `reference/automation.md` | 57K | Cron jobs, cron vs heartbeat, hooks, webhooks, Gmail PubSub, polls |
+| `reference/templates-reference.md` | 53K | AGENTS/SOUL/BOOT/BOOTSTRAP/IDENTITY/HEARTBEAT templates, RPC adapters, prompt caching |
+| `reference/getting-started.md` | 37K | Onboarding, CLI wizard, personal assistant setup, hubs |
+| `reference/providers.md` | 27K | Anthropic, OpenAI, OpenRouter, Bedrock, Mistral, LiteLLM, local models |
+| `reference/nodes-media.md` | 22K | Node management, voice notes, camera, talk mode, voice wake |
+| `reference/plugins-extensions.md` | 19K | Voice call plugin, Zalo personal, community plugins |
 
 ## Core Architecture (Quick Reference)
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                    GATEWAY (daemon)                       │
-│  Port 18789 (WS + HTTP)     Canvas: 18793                │
-│                                                           │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐ │
-│  │ Channels │  │  Agent   │  │  Tools   │  │ Sessions │ │
-│  │ WhatsApp │  │ Runtime  │  │ exec/web │  │ JSONL    │ │
-│  │ Telegram │  │ (pi-mono)│  │ browser  │  │ per-agent│ │
-│  │ Discord  │  │          │  │ skills   │  │          │ │
-│  │ Slack... │  │          │  │ nodes    │  │          │ │
-│  └──────────┘  └──────────┘  └──────────┘  └──────────┘ │
-│                                                           │
-│  WS API: connect → req/res + events                      │
-│  Config: ~/.openclaw/openclaw.json (JSON5, hot-reload)    │
-└─────────────────────────────────────────────────────────┘
+GATEWAY (daemon)  port 18789 (WS+HTTP), Canvas 18793
+  Channels (WhatsApp/Telegram/...) → Agent Runtime (pi-mono) → Tools (exec/web/browser/skills) → Sessions (JSONL per agent)
+  WS API: connect → req/res + events
+  Config: ~/.openclaw/openclaw.json (JSON5, hot-reload)
 ```
 
 ## File System Layout
 
 ```
 ~/.openclaw/
-├── openclaw.json              # Main config (JSON5, hot-reloaded)
-├── credentials/               # Provider credentials (0o600)
-├── .env                       # Environment variables for gateway service
-├── workspace/                 # Default agent workspace
-│   ├── AGENTS.md              # Operating instructions + memory
-│   ├── SOUL.md                # Persona, tone, boundaries
-│   ├── TOOLS.md               # Tool usage notes
-│   ├── USER.md                # User profile
-│   ├── IDENTITY.md            # Agent name/vibe/emoji
-│   ├── BOOTSTRAP.md           # First-run ritual (deleted after)
-│   ├── MEMORY.md              # Injected persistent memory
-│   ├── HEARTBEAT.md           # Heartbeat prompt
-│   ├── memory/                # Daily memory files (on-demand, NOT injected)
-│   └── skills/                # Per-agent skills (highest precedence)
-├── skills/                    # Shared skills (all agents)
-├── agents/
-│   └── <agentId>/
-│       ├── agent/
-│       │   └── auth-profiles.json
-│       └── sessions/
-│           ├── sessions.json
-│           └── <SessionId>.jsonl
-└── sandboxes/                 # Sandbox workspaces
+├── openclaw.json     # Main config (JSON5, hot-reloaded)
+├── credentials/      # Provider credentials (0o600)
+├── workspace/        # Default agent workspace
+│   ├── AGENTS.md SOUL.md TOOLS.md USER.md IDENTITY.md
+│   ├── BOOTSTRAP.md MEMORY.md HEARTBEAT.md
+│   ├── memory/       # Daily memory files (on-demand, NOT injected)
+│   └── skills/       # Per-agent skills (highest precedence)
+├── skills/           # Shared skills (all agents)
+├── agents/<agentId>/sessions/<SessionId>.jsonl
+└── sandboxes/        # Sandbox workspaces
 ```
 
 ## Essential CLI (Quick Reference)
 
 ```bash
-# Install
-npm install -g openclaw@latest
-openclaw onboard --install-daemon
-
-# Gateway
-openclaw gateway                    # Start foreground
-openclaw gateway status             # Check service
-openclaw dashboard                  # Open web UI
-
-# Config
+npm install -g openclaw@latest && openclaw onboard --install-daemon
+openclaw gateway [status]           # Start / check service
 openclaw configure                  # Interactive wizard
-openclaw config get <path>          # Read config value
-openclaw config set <path> <value>  # Write config value
+openclaw config get|set <path> [v]  # Read/write config
 openclaw doctor [--fix]             # Diagnose + repair
-
-# Channels
-openclaw channels list / login / status
-
-# Agents
+openclaw channels list|login|status
 openclaw agents list --bindings
-openclaw agents add <name>
-
-# Devices & Nodes
-openclaw devices list / approve / reject
-openclaw node --gateway <url>       # Run headless node
-openclaw qr                         # iOS pairing QR code
-
-# Shortcuts
-openclaw acp                        # Add-commit-push
-openclaw completion --install       # Shell completions
-openclaw daemon status              # Alias for gateway
-
-# Debug
-openclaw logs --follow
-openclaw status --all
-openclaw health --verbose
+openclaw devices list|approve|reject
+openclaw logs --follow / status --all / health --verbose
 openclaw security audit [--deep] [--fix]
 ```
 
-## Minimal Working Config
+## Config Patterns (Quick Reference)
 
 ```json5
-// ~/.openclaw/openclaw.json
+// Minimal: ~/.openclaw/openclaw.json
 {
   agents: { defaults: { workspace: "~/.openclaw/workspace" } },
   channels: { whatsapp: { allowFrom: ["+15555550123"] } },
 }
+// DM policy (any channel): dmPolicy: "pairing" | "allowlist" | "open" | "disabled"
+// Models: agents.defaults.model: { primary: "anthropic/claude-sonnet-4-5", fallbacks: ["openai/gpt-5.2"] }
 ```
-
-## DM Policy Pattern (All Channels)
-
-```json5
-channels: {
-  <provider>: {
-    dmPolicy: "pairing",     // pairing | allowlist | open | disabled
-    allowFrom: ["id"],       // Required for allowlist/open
-  },
-}
-```
-
-## Model Configuration
-
-```json5
-agents: {
-  defaults: {
-    model: {
-      primary: "anthropic/claude-sonnet-4-5",
-      fallbacks: ["openai/gpt-5.2"],
-    },
-  },
-}
-```
-
-## Live Docs Fallback
-
-For any question not fully answered by reference files, fetch from:
-- `https://docs.openclaw.ai/<path>` (any doc page)
-- `https://docs.openclaw.ai/sitemap.xml` (complete URL index)
-- `https://github.com/openclaw/openclaw` (source code)
-- `https://clawhub.com` (skills registry)

@@ -1,10 +1,10 @@
 {
   "name": "statusline",
-  "description": "Premium powerline-style statusline for Claude Code",
-  "version": "2.0.0",
+  "description": "Powerline statusline renderer for Claude Code. Auto-configures only when no statusLine is set; never overwrites an existing one.",
+  "version": "3.0.0",
   "author": {
     "name": "nalyk"
   },
   "license": "MIT",
-  "keywords": ["statusline", "powerline", "ui", "display", "git-status", "context-window"]
+  "keywords": ["statusline", "powerline", "git-status", "context-window"]
 }

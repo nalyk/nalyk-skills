@@ -17,12 +17,10 @@ When working with sitemaps:
 
 ## Quality Gates
 
-### Location Page Thresholds
+Read `${CLAUDE_PLUGIN_ROOT}/skills/seo/references/quality-gates.md` (single
+source of truth). Key thresholds:
 - ⚠️ **WARNING** at 30+ location pages: require 60%+ unique content per page
 - 🛑 **HARD STOP** at 50+ location pages: require explicit user justification
-
-### Why This Matters
-Google's doorway page algorithm penalizes programmatic location pages with thin/duplicate content.
 
 ## Validation Checks
 
@@ -35,18 +33,6 @@ Google's doorway page algorithm penalizes programmatic location pages with thin/
 | Redirected URLs | Medium | Update to final URL |
 | All identical lastmod | Low | Use real dates |
 | priority/changefreq | Info | Can remove |
-
-## Safe vs Risky Pages
-
-### Safe at Scale ✅
-- Integration pages (with real setup docs)
-- Glossary pages (200+ word definitions)
-- Product pages (unique specs, reviews)
-
-### Penalty Risk ❌
-- Location pages with only city swapped
-- "Best [tool] for [industry]" without real value
-- AI-generated mass content
 
 ## Sitemap Format
 

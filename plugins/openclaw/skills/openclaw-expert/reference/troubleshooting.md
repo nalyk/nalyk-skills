@@ -2,61 +2,11 @@
 
 FAQ, common fixes, debug workflows.
 
-
 ---
 ## Help > Debugging
 
 [Source: https://docs.openclaw.ai/help/debugging]
 
-Debugging - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Environment and debugging
-Debugging
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Help
-Help
-Troubleshooting
-FAQ
-Community
-OpenClaw Lore
-Environment and debugging
-Environment Variables
-Debugging
-Testing
-Scripts
-Node runtime
-Node.js
-Compaction internals
-Session Management Deep Dive
-Developer setup
-Setup
-Contributing
-CI Pipeline
-Docs meta
-Docs Hubs
-Docs directory
-Debugging
-Runtime debug overrides
-Gateway watch mode
-Dev profile + dev gateway (—dev)
-Raw stream logging (OpenClaw)
-Raw chunk logging (pi-mono)
-Safety notes
-Environment and debugging
-Debugging
-Debugging
 This page covers debugging helpers for streaming output, especially when a
 provider mixes reasoning into normal text.
 Runtime debug overrides
@@ -71,21 +21,18 @@ commands.debug: true
 This is handy when you need to toggle obscure settings without editing
 openclaw.json
 Examples:
-Copy
 /debug show
-/debug set messages.responsePrefix=&quot;[openclaw]&quot;
+/debug set messages.responsePrefix="[openclaw]"
 /debug unset messages.responsePrefix
 /debug reset
 /debug reset
 clears all overrides and returns to the on-disk config.
 Gateway watch mode
 For fast iteration, run the gateway under the file watcher:
-Copy
 pnpm
 gateway:watch
 --force
 This maps to:
-Copy
 tsx
 watch
 src/entry.ts
@@ -115,7 +62,6 @@ gateway --dev
 workspace
 when missing (and skip BOOTSTRAP.md).
 Recommended flow (dev profile + dev bootstrap):
-Copy
 pnpm
 gateway:dev
 OPENCLAW_PROFILE
@@ -157,7 +103,6 @@ C3‑PO
 Skips channel providers in dev mode (
 OPENCLAW_SKIP_CHANNELS=1
 Reset flow (fresh start):
-Copy
 pnpm
 gateway:dev:reset
 Note:
@@ -166,7 +111,6 @@ is a
 global
 profile flag and gets eaten by some runners.
 If you need to spell it out, use the env var form:
-Copy
 OPENCLAW_PROFILE
 dev
 openclaw
@@ -179,7 +123,6 @@ trash
 , not
 ), then recreates the default dev setup.
 Tip: if a non‑dev gateway is already running (launchd/systemd), stop it first:
-Copy
 openclaw
 gateway
 stop
@@ -190,13 +133,11 @@ before any filtering/formatting.
 This is the best way to see whether reasoning is arriving as plain text deltas
 (or as separate thinking blocks).
 Enable it via CLI:
-Copy
 pnpm
 gateway:watch
 --force
 --raw-stream
 Optional path override:
-Copy
 pnpm
 gateway:watch
 --force
@@ -204,7 +145,6 @@ gateway:watch
 --raw-stream-path
 ~/.openclaw/logs/raw-stream.jsonl
 Equivalent env vars:
-Copy
 OPENCLAW_RAW_STREAM
 OPENCLAW_RAW_STREAM_PATH
 ~/.openclaw/logs/raw-stream.jsonl
@@ -215,10 +155,8 @@ To capture
 raw OpenAI-compat chunks
 before they are parsed into blocks,
 pi-mono exposes a separate logger:
-Copy
 PI_RAW_STREAM
 Optional path:
-Copy
 PI_RAW_STREAM_PATH
 ~/.pi-mono/logs/raw-openai-completions.jsonl
 Default file:
@@ -238,56 +176,6 @@ Testing
 
 [Source: https://docs.openclaw.ai/help/environment]
 
-Environment Variables - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Environment and debugging
-Environment Variables
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Help
-Help
-Troubleshooting
-FAQ
-Community
-OpenClaw Lore
-Environment and debugging
-Environment Variables
-Debugging
-Testing
-Scripts
-Node runtime
-Node.js
-Compaction internals
-Session Management Deep Dive
-Developer setup
-Setup
-Contributing
-CI Pipeline
-Docs meta
-Docs Hubs
-Docs directory
-Environment variables
-Precedence (highest → lowest)
-Config env block
-Shell env import
-Env var substitution in config
-Path-related env vars
-OPENCLAW_HOME
-Related
-Environment and debugging
-Environment Variables
-Environment variables
 OpenClaw pulls environment variables from multiple sources. The rule is
 never override existing values
 Precedence (highest → lowest)
@@ -316,19 +204,17 @@ Config
 env
 block
 Two equivalent ways to set inline env vars (both are non-overriding):
-Copy
 env
 OPENROUTER_API_KEY
-&quot;sk-or-...&quot;
+"sk-or-..."
 vars
 GROQ_API_KEY
-&quot;gsk-...&quot;
+"gsk-..."
 Shell env import
 env.shellEnv
 runs your login shell and imports only
 missing
 expected keys:
-Copy
 env
 shellEnv
 enabled
@@ -342,12 +228,11 @@ Env var substitution in config
 You can reference env vars directly in config string values using
 ${VAR_NAME}
 syntax:
-Copy
 models
 providers
-&quot;vercel-gateway&quot;
+"vercel-gateway"
 apiKey
-&quot;${VERCEL_GATEWAY_API_KEY}&quot;
+"${VERCEL_GATEWAY_API_KEY}"
 See
 Configuration: Env var substitution
 for full details.
@@ -373,36 +258,35 @@ os.homedir()
 ) for all internal path resolution. This enables full filesystem isolation for headless service accounts.
 Precedence:
 OPENCLAW_HOME
-&gt;
+>
 $HOME
-&gt;
+>
 USERPROFILE
-&gt;
+>
 os.homedir()
 Example
 (macOS LaunchDaemon):
-Copy
-&lt;
+<
 key
-&gt;EnvironmentVariables&lt;/
+>EnvironmentVariables</
 key
-&gt;
-&lt;
+>
+<
 dict
-&gt;
-&lt;
+>
+<
 key
-&gt;OPENCLAW_HOME&lt;/
+>OPENCLAW_HOME</
 key
-&gt;
-&lt;
+>
+<
 string
-&gt;/Users/kira&lt;/
+>/Users/kira</
 string
-&gt;
-&lt;/
+>
+</
 dict
-&gt;
+>
 OPENCLAW_HOME
 can also be set to a tilde path (e.g.
 ~/svc
@@ -421,52 +305,6 @@ Debugging
 
 [Source: https://docs.openclaw.ai/help/faq]
 
-FAQ - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Help
-FAQ
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Help
-Help
-Troubleshooting
-FAQ
-Community
-OpenClaw Lore
-Environment and debugging
-Environment Variables
-Debugging
-Testing
-Scripts
-Node runtime
-Node.js
-Compaction internals
-Session Management Deep Dive
-Developer setup
-Setup
-Contributing
-CI Pipeline
-Docs meta
-Docs Hubs
-Docs directory
-FAQ
-Table of contents
-First 60 seconds if something’s broken
-Quick start and first-run setup
-Im stuck whats the fastest way to get unstuck
-What’s the recommended way to install and set up OpenClaw
-How do I open the dashboard after onboarding
 How do I authenticate the dashboard token on localhost vs remote
 What runtime do I need
 Does it run on Raspberry Pi
@@ -747,9 +585,9 @@ I’m in remote mode - where is the session store?
 Config basics
 What format is the config? Where is it?
 I set
-gateway.bind: &quot;lan&quot;
+gateway.bind: "lan"
 (or
-&quot;tailnet&quot;
+"tailnet"
 ) and now nothing listens / the UI says unauthorized
 Why do I need a token on localhost now?
 Do I have to restart after changing config?
@@ -811,7 +649,7 @@ Model failover and “All models failed”
 How does failover work?
 What does this error mean?
 Fix checklist for
-No credentials found for profile &quot;anthropic:default&quot;
+No credentials found for profile "anthropic:default"
 Why did it also try Google Gemini and fail?
 Auth profiles: what they are and how to manage them
 What is an auth profile?
@@ -837,7 +675,7 @@ What does “another gateway instance is already listening” mean?
 How do I run OpenClaw in remote mode (client connects to a Gateway elsewhere)?
 The Control UI says “unauthorized” (or keeps reconnecting). What now?
 I set
-gateway.bind: &quot;tailnet&quot;
+gateway.bind: "tailnet"
 but it can’t bind / nothing listens
 Can I run multiple Gateways on the same host?
 What does “invalid handshake” / code 1008 mean?
@@ -873,53 +711,45 @@ How do I send a Discord message from Telegram? (“Cross-context messaging denie
 Why does it feel like the bot “ignores” rapid-fire messages?
 First 60 seconds if something’s broken
 Quick status (first check)
-Copy
 openclaw
 status
 Fast local summary: OS + update, gateway/service reachability, agents/sessions, provider config + runtime issues (when gateway is reachable).
 Pasteable report (safe to share)
-Copy
 openclaw
 status
 --all
 Read-only diagnosis with log tail (tokens redacted).
 Daemon + port state
-Copy
 openclaw
 gateway
 status
 Shows supervisor runtime vs RPC reachability, the probe target URL, and which config the service likely used.
 Deep probes
-Copy
 openclaw
 status
 --deep
 Runs gateway health checks + provider probes (requires a reachable gateway). See
 Health
 Tail the latest log
-Copy
 openclaw
 logs
 --follow
 If RPC is down, fall back to:
-Copy
 tail
-&quot;$(
+"$(
 /tmp/openclaw/openclaw-*.log
 head
-)&quot;
+)"
 File logs are separate from service logs; see
 Logging
 and
 Troubleshooting
 Run the doctor (repairs)
-Copy
 openclaw
 doctor
 Repairs/migrates config/state + runs health checks. See
 Doctor
 Gateway snapshot
-Copy
 openclaw
 health
 --json
@@ -947,7 +777,6 @@ setup (PATH, services, permissions, auth files). Give them the
 full source checkout
 via
 the hackable (git) install:
-Copy
 curl
 -fsSL
 https://openclaw.ai/install.sh
@@ -968,7 +797,6 @@ If you discover a real bug or fix, please file a GitHub issue or send a PR:
 https://github.com/openclaw/openclaw/issues
 https://github.com/openclaw/openclaw/pulls
 Start with these commands (share outputs when asking for help):
-Copy
 openclaw
 status
 openclaw
@@ -996,7 +824,6 @@ Installer flags
 Updating
 What’s the recommended way to install and set up OpenClaw
 The repo recommends running from source and using the onboarding wizard:
-Copy
 curl
 -fsSL
 https://openclaw.ai/install.sh
@@ -1007,7 +834,6 @@ onboard
 The wizard can also build UI assets automatically. After onboarding, you typically run the Gateway on port
 18789
 From source (contributors/dev):
-Copy
 git
 clone
 https://github.com/openclaw/openclaw.git
@@ -1043,16 +869,16 @@ Tailscale Serve
 (recommended): keep bind loopback, run
 openclaw gateway --tailscale serve
 , open
-https://&lt;magicdns&gt;/
+https://<magicdns>/
 . If
 gateway.auth.allowTailscale
 true
 , identity headers satisfy auth (no token).
 Tailnet bind
 : run
-openclaw gateway --bind tailnet --token &quot;&lt;token&gt;&quot;
+openclaw gateway --bind tailnet --token "<token>"
 , open
-http://&lt;tailscale-ip&gt;:18789/
+http://<tailscale-ip>:18789/
 , paste token in dashboard settings.
 SSH tunnel
 ssh -N -L 18789:127.0.0.1:18789 user@host
@@ -1066,7 +892,7 @@ Web surfaces
 for bind modes and auth details.
 What runtime do I need
 Node
-&gt;= 22
+>= 22
 is required.
 pnpm
 is recommended. Bun is
@@ -1093,7 +919,7 @@ Any tips for Raspberry Pi installs
 Short version: it works, but expect rough edges.
 Use a
 64-bit
-OS and keep Node &gt;= 22.
+OS and keep Node >= 22.
 Prefer the
 hackable (git) install
 so you can see logs and update fast.
@@ -1110,12 +936,10 @@ That screen depends on the Gateway being reachable and authenticated. The TUI al
 no reply
 and tokens stay at 0, the agent never ran.
 Restart the Gateway:
-Copy
 openclaw
 gateway
 restart
 Check status + auth:
-Copy
 openclaw
 status
 openclaw
@@ -1125,7 +949,6 @@ openclaw
 logs
 --follow
 If it still hangs, run:
-Copy
 openclaw
 doctor
 If the Gateway is remote, ensure the tunnel/Tailscale connection is up and that the UI
@@ -1142,7 +965,6 @@ state) as long as you copy
 both
 locations:
 Install OpenClaw on the new machine.
-Copy
 $OPENCLAW_STATE_DIR
 (default:
 ~/.openclaw
@@ -1163,7 +985,7 @@ session history or auth. Those live
 under
 ~/.openclaw/
 (for example
-~/.openclaw/agents/&lt;agentId&gt;/sessions/
+~/.openclaw/agents/<agentId>/sessions/
 Related:
 Migrating
 Where things live on disk
@@ -1228,20 +1050,18 @@ main
 (git); when published, it uses the npm dist-tag
 dev
 One-liners (macOS/Linux):
-Copy
 curl
 -fsSL
 --proto
-&#x27;=https&#x27;
+'=https'
 --tlsv1.2
 https://openclaw.ai/install.sh
 bash
 --beta
-Copy
 curl
 -fsSL
 --proto
-&#x27;=https&#x27;
+'=https'
 --tlsv1.2
 https://openclaw.ai/install.sh
 bash
@@ -1266,7 +1086,6 @@ Im stuck
 How do I try the latest bits
 Two options:
 Dev channel (git checkout):
-Copy
 openclaw
 update
 --channel
@@ -1275,7 +1094,6 @@ This switches to the
 main
 branch and updates from source.
 Hackable install (from the installer site):
-Copy
 curl
 -fsSL
 https://openclaw.ai/install.sh
@@ -1284,7 +1102,6 @@ bash
 git
 That gives you a local repo you can edit, then update via git.
 If you prefer a clean clone manually, use:
-Copy
 git
 clone
 https://github.com/openclaw/openclaw.git
@@ -1300,14 +1117,12 @@ Install
 Installer stuck How do I get more feedback
 Re-run the installer with
 verbose output
-Copy
 curl
 -fsSL
 https://openclaw.ai/install.sh
 bash
 --verbose
 Beta install with verbose:
-Copy
 curl
 -fsSL
 https://openclaw.ai/install.sh
@@ -1315,7 +1130,6 @@ bash
 --beta
 --verbose
 For a hackable (git) install:
-Copy
 curl
 -fsSL
 https://openclaw.ai/install.sh
@@ -1324,11 +1138,10 @@ bash
 git
 --verbose
 Windows (PowerShell) equivalent:
-Copy
 # install.ps1 has no dedicated -Verbose flag yet.
 Set-PSDebug
 Trace
-&amp;
+&
 scriptblock
 ]::Create((iwr
 useb https:
@@ -1351,10 +1164,9 @@ Close and reopen PowerShell, then re-run the installer.
 2) openclaw is not recognized after install
 Your npm global bin folder is not on PATH.
 Check the path:
-Copy
 npm config get prefix
 Ensure
-&lt;prefix&gt;\\bin
+<prefix>\\bin
 is on PATH (on most systems it is
 %AppData%\\npm
 Close and reopen PowerShell after updating PATH.
@@ -1370,7 +1182,6 @@ so you have the full source and docs locally, then ask
 your bot (or Claude/Codex)
 from that folder
 so it can read the repo and answer precisely.
-Copy
 curl
 -fsSL
 https://openclaw.ai/install.sh
@@ -1388,7 +1199,7 @@ Linux
 Full walkthrough:
 Getting Started
 Installer + updates:
-Install &amp; updates
+Install & updates
 How do I install OpenClaw on a VPS
 Any Linux VPS works. Install on the server, then use SSH/Tailscale to reach the Gateway.
 Guides:
@@ -1430,7 +1241,6 @@ possible, not recommended
 Gateway (which drops the active session), may need a clean git checkout, and
 can prompt for confirmation. Safer: run updates from a shell as the operator.
 Use the CLI:
-Copy
 openclaw
 update
 openclaw
@@ -1445,15 +1255,14 @@ dev
 openclaw
 update
 --tag
-&lt;
+<
 dist-tag
 version
-&gt;
+>
 openclaw
 update
 --no-restart
 If you must automate from an agent:
-Copy
 openclaw
 update
 --yes
@@ -1528,7 +1337,6 @@ not
 in the Anthropic Console. The setup-token is generated by the
 Claude Code CLI
 any machine
-Copy
 claude
 setup-token
 Copy the token it prints, then choose
@@ -1617,7 +1425,7 @@ MiniMax M2.1 build you can locally (LM Studio) and see
 Security
 How do I keep hosted model traffic in a specific region
 Pick region-pinned endpoints. OpenRouter exposes US-hosted options for MiniMax, Kimi, and GLM; choose the US-hosted variant to keep data in-region. You can still list Anthropic/OpenAI alongside these by using
-models.mode: &quot;merge&quot;
+models.mode: "merge"
 so fallbacks stay available while respecting the regioned provider you select.
 Do I have to buy a Mac Mini to install this
 No. OpenClaw runs on macOS or Linux (Windows via WSL2). A Mac mini is optional - some people
@@ -1690,7 +1498,7 @@ and read
 from.id
 Official Bot API:
 DM your bot, then call
-https://api.telegram.org/bot&lt;bot_token&gt;/getUpdates
+https://api.telegram.org/bot<bot_token>/getUpdates
 and read
 message.from.id
 Third-party (less private):
@@ -1703,7 +1511,7 @@ Yes, via
 multi-agent routing
 . Bind each sender’s WhatsApp
 (peer
-kind: &quot;direct&quot;
+kind: "direct"
 , sender E.164 like
 +15551234567
 ) to a different
@@ -1726,27 +1534,26 @@ and
 Configuration
 Does Homebrew work on Linux
 Yes. Homebrew supports Linux (Linuxbrew). Quick setup:
-Copy
 /bin/bash
-&quot;$(
+"$(
 curl
 -fsSL
 https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh
-)&quot;
+)"
 echo
-&#x27;eval &quot;$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)&quot;&#x27;
-&gt;&gt;
+'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"'
+>>
 ~/.profile
 eval
-&quot;$(
+"$(
 /home/linuxbrew/.linuxbrew/bin/brew
 shellenv
-)&quot;
+)"
 brew
 install
-&lt;
+<
 formul
-&gt;
+>
 If you run OpenClaw via systemd, ensure the service PATH includes
 /home/linuxbrew/.linuxbrew/bin
 (or your brew prefix) so
@@ -1787,7 +1594,6 @@ does not delete your data
 ~/.openclaw/workspace
 ) stay untouched.
 From npm → git:
-Copy
 git
 clone
 https://github.com/openclaw/openclaw.git
@@ -1802,7 +1608,6 @@ openclaw
 gateway
 restart
 From git → npm:
-Copy
 npm
 install
 openclaw@latest
@@ -1973,21 +1778,21 @@ https://openclaw.ai/showcase
 Skills and automation
 How do I customize skills without keeping the repo dirty
 Use managed overrides instead of editing the repo copy. Put your changes in
-~/.openclaw/skills/&lt;name&gt;/SKILL.md
+~/.openclaw/skills/<name>/SKILL.md
 (or add a folder via
 skills.load.extraDirs
 ~/.openclaw/openclaw.json
 ). Precedence is
-&lt;workspace&gt;/skills
-&gt;
+<workspace>/skills
+>
 ~/.openclaw/skills
-&gt; bundled, so managed overrides win without touching git. Only upstream-worthy edits should live in the repo and go out as PRs.
+> bundled, so managed overrides win without touching git. Only upstream-worthy edits should live in the repo and go out as PRs.
 Can I load skills from a custom folder
 Yes. Add extra directories via
 skills.load.extraDirs
 ~/.openclaw/openclaw.json
 (lowest precedence). Default precedence remains:
-&lt;workspace&gt;/skills
+<workspace>/skills
 ~/.openclaw/skills
 → bundled →
 skills.load.extraDirs
@@ -1995,7 +1800,7 @@ clawhub
 installs into
 ./skills
 by default, which OpenClaw treats as
-&lt;workspace&gt;/skills
+<workspace>/skills
 How can I use different models for different tasks
 Today the supported patterns are:
 Cron jobs
@@ -2042,21 +1847,20 @@ Verify timezone settings for the job (
 --tz
 vs host timezone).
 Debug:
-Copy
 openclaw
 cron
 run
-&lt;
+<
 jobI
-&gt;
+>
 --force
 openclaw
 cron
 runs
 --id
-&lt;
+<
 jobI
-&gt;
+>
 --limit
 Docs:
 Cron jobs
@@ -2068,10 +1872,8 @@ ClawHub
 Browse skills at
 https://clawhub.com
 Install the ClawHub CLI (pick one package manager):
-Copy
 npm
 clawhub
-Copy
 pnpm
 add
 clawhub
@@ -2115,7 +1917,6 @@ Keep the Gateway on Linux, but make the required CLI binaries resolve to SSH wra
 Create an SSH wrapper for the binary (example:
 memo
 for Apple Notes):
-Copy
 #!/usr/bin/env bash
 set
 -euo
@@ -2124,7 +1925,7 @@ exec
 ssh
 user@mac-host
 /opt/homebrew/bin/memo
-&quot;$@&quot;
+"$@"
 Put the wrapper on
 PATH
 on the Linux host (for example
@@ -2132,20 +1933,19 @@ on the Linux host (for example
 Override the skill metadata (workspace or
 ~/.openclaw/skills
 ) to allow Linux:
-Copy
 ---
 name
 apple-notes
 description
 Manage Apple Notes via the memo CLI on macOS.
 metadata
-&quot;openclaw&quot;
-&quot;os&quot;
-&quot;darwin&quot;
-&quot;linux&quot;
-&quot;requires&quot;
-&quot;bins&quot;
-&quot;memo&quot;
+"openclaw"
+"os"
+"darwin"
+"linux"
+"requires"
+"bins"
+"memo"
 ] } } }
 ---
 Start a new session so the skills snapshot refreshes.
@@ -2162,28 +1962,26 @@ Ask the agent to fetch that page at the start of a session.
 If you want a native integration, open a feature request or build a skill
 targeting those APIs.
 Install skills:
-Copy
 clawhub
 install
-&lt;
+<
 skill-slu
-&gt;
+>
 clawhub
 update
 --all
 ClawHub installs into
 ./skills
 under your current directory (or falls back to your configured OpenClaw workspace); OpenClaw treats that as
-&lt;workspace&gt;/skills
+<workspace>/skills
 on the next session. For shared skills across agents, place them in
-~/.openclaw/skills/&lt;name&gt;/SKILL.md
+~/.openclaw/skills/<name>/SKILL.md
 . Some skills expect binaries installed via Homebrew; on Linux that means Linuxbrew (see the Homebrew Linux FAQ entry above). See
 Skills
 and
 ClawHub
 How do I install the Chrome extension for browser takeover
 Use the built-in installer, then load the unpacked extension in Chrome:
-Copy
 openclaw
 browser
 extension
@@ -2234,7 +2032,7 @@ DMs
 and your public traffic is
 groups
 Use
-agents.defaults.sandbox.mode: &quot;non-main&quot;
+agents.defaults.sandbox.mode: "non-main"
 so group/channel sessions (non-main keys) run in Docker, while the main DM session stays on-host. Then restrict what tools are available in sandboxed sessions via
 tools.sandbox.tools
 Setup walkthrough + example config:
@@ -2244,11 +2042,11 @@ Gateway configuration
 How do I bind a host folder into the sandbox
 Set
 agents.defaults.sandbox.docker.binds
-[&quot;host:path:mode&quot;]
+["host:path:mode"]
 (e.g.,
-&quot;/home/user/src:/src:ro&quot;
+"/home/user/src:/src:ro"
 ). Global + per-agent binds merge; per-agent binds are ignored when
-scope: &quot;shared&quot;
+scope: "shared"
 . Use
 :ro
 for anything sensitive and remember binds bypass the sandbox filesystem walls. See
@@ -2305,11 +2103,11 @@ configure it. If you have a local model path configured and present, OpenClaw
 prefers
 local
 If you’d rather stay local, set
-memorySearch.provider = &quot;local&quot;
+memorySearch.provider = "local"
 (and optionally
-memorySearch.fallback = &quot;none&quot;
+memorySearch.fallback = "none"
 ). If you want Gemini embeddings, set
-memorySearch.provider = &quot;gemini&quot;
+memorySearch.provider = "gemini"
 and provide
 GEMINI_API_KEY
 (or
@@ -2361,18 +2159,18 @@ $OPENCLAW_STATE_DIR/openclaw.json
 Main config (JSON5)
 $OPENCLAW_STATE_DIR/credentials/oauth.json
 Legacy OAuth import (copied into auth profiles on first use)
-$OPENCLAW_STATE_DIR/agents/&lt;agentId&gt;/agent/auth-profiles.json
+$OPENCLAW_STATE_DIR/agents/<agentId>/agent/auth-profiles.json
 Auth profiles (OAuth + API keys)
-$OPENCLAW_STATE_DIR/agents/&lt;agentId&gt;/agent/auth.json
+$OPENCLAW_STATE_DIR/agents/<agentId>/agent/auth.json
 Runtime auth cache (managed automatically)
 $OPENCLAW_STATE_DIR/credentials/
 Provider state (e.g.
-whatsapp/&lt;accountId&gt;/creds.json
+whatsapp/<accountId>/creds.json
 $OPENCLAW_STATE_DIR/agents/
 Per-agent state (agentDir + sessions)
-$OPENCLAW_STATE_DIR/agents/&lt;agentId&gt;/sessions/
-Conversation history &amp; state (per agent)
-$OPENCLAW_STATE_DIR/agents/&lt;agentId&gt;/sessions/sessions.json
+$OPENCLAW_STATE_DIR/agents/<agentId>/sessions/
+Conversation history & state (per agent)
+$OPENCLAW_STATE_DIR/agents/<agentId>/sessions/sessions.json
 Session metadata (per agent)
 Legacy single-agent path:
 ~/.openclaw/agent/*
@@ -2408,11 +2206,10 @@ and shared skills (
 Default workspace is
 ~/.openclaw/workspace
 , configurable via:
-Copy
 agents
 defaults
 workspace
-&quot;~/.openclaw/workspace&quot;
+"~/.openclaw/workspace"
 } }
 If the bot “forgets” after a restart, confirm the Gateway is using the same
 workspace on every launch (and remember: remote mode uses the
@@ -2458,11 +2255,10 @@ workspace
 to the repo root. The OpenClaw repo is just source code; keep the
 workspace separate unless you intentionally want the agent to work inside it.
 Example (repo as default cwd):
-Copy
 agents
 defaults
 workspace
-&quot;~/Projects/my-repo&quot;
+"~/Projects/my-repo"
 Im in remote mode where is the session store
 Session state is owned by the
 gateway host
@@ -2476,7 +2272,6 @@ config from
 $OPENCLAW_CONFIG_PATH
 (default:
 ~/.openclaw/openclaw.json
-Copy
 $OPENCLAW_CONFIG_PATH
 If the file is missing, it uses safe-ish defaults (including a default workspace of
 ~/.openclaw/workspace
@@ -2488,15 +2283,14 @@ gateway.auth.mode
 gateway.auth.token
 (or use
 OPENCLAW_GATEWAY_TOKEN
-Copy
 gateway
 bind
-&quot;lan&quot;
+"lan"
 auth
 mode
-&quot;token&quot;
+"token"
 token
-&quot;replace-me&quot;
+"replace-me"
 Notes:
 gateway.remote.token
 is for
@@ -2517,7 +2311,7 @@ from your config. Doctor can generate a token for you any time:
 openclaw doctor --generate-gateway-token
 Do I have to restart after changing config
 The Gateway watches the config and supports hot-reload:
-gateway.reload.mode: &quot;hybrid&quot;
+gateway.reload.mode: "hybrid"
 (default): hot-apply safe changes, restart for critical ones
 hot
 restart
@@ -2538,14 +2332,13 @@ tools.web.search.apiKey
 BRAVE_API_KEY
 for the
 Gateway process.
-Copy
 tools
 web
 search
 enabled
 true
 apiKey
-&quot;BRAVE_API_KEY_HERE&quot;
+"BRAVE_API_KEY_HERE"
 maxResults
 fetch
 enabled
@@ -2590,7 +2383,6 @@ Sub-agents
 TUI
 Can the OpenClaw browser run headless
 Yes. It’s a config option:
-Copy
 browser
 headless
 true
@@ -2645,16 +2437,15 @@ Remote over SSH
 mode (or direct tailnet)
 so it can register as a node.
 Approve the node on the Gateway:
-Copy
 openclaw
 nodes
 pending
 openclaw
 nodes
 approve
-&lt;
+<
 requestI
-&gt;
+>
 No separate TCP bridge is required; nodes connect over the Gateway WebSocket.
 Security reminder: pairing a macOS node allows
 system.run
@@ -2698,18 +2489,17 @@ listens. If one bot is on a remote VPS, point your CLI at that remote Gateway
 via SSH/Tailscale (see
 Remote access
 Example pattern (run from a machine that can reach the target Gateway):
-Copy
 openclaw
 agent
 --message
-&quot;Hello from local bot&quot;
+"Hello from local bot"
 --deliver
 --channel
 telegram
 --reply-to
-&lt;
+<
 chat-i
-&gt;
+>
 Tip: add a guardrail so the two bots do not loop endlessly (mention-only, channel
 allowlists, or a “do not reply to bot messages” rule).
 Docs:
@@ -2809,22 +2599,20 @@ Config
 Configure
 Doctor
 What’s a minimal sane config for a first install
-Copy
 agents
 defaults
 workspace
-&quot;~/.openclaw/workspace&quot;
+"~/.openclaw/workspace"
 } }
 channels
 whatsapp
 allowFrom
-&quot;+15555550123&quot;
+"+15555550123"
 ] } }
 This sets your workspace and restricts who can trigger the bot.
 How do I set up Tailscale on a VPS and connect from my Mac
 Minimal steps:
 Install + login on the VPS
-Copy
 curl
 -fsSL
 https://tailscale.com/install.sh
@@ -2837,11 +2625,10 @@ In the Tailscale admin console, enable MagicDNS so the VPS has a stable name.
 Use the tailnet hostname
 SSH:
 ssh
-[email&#160;protected]
+[email protected]
 Gateway WS:
 ws://your-vps.tailnet-xxxx.ts.net:18789
 If you want the Control UI without SSH, use Tailscale Serve on the VPS:
-Copy
 openclaw
 gateway
 --tailscale
@@ -2859,16 +2646,15 @@ Use the macOS app in Remote mode
 The app will tunnel the Gateway port and connect as a node.
 Approve the node
 on the gateway:
-Copy
 openclaw
 nodes
 pending
 openclaw
 nodes
 approve
-&lt;
+<
 requestI
-&gt;
+>
 Docs:
 Gateway protocol
 Discovery
@@ -2888,13 +2674,12 @@ Neither
 .env
 file overrides existing env vars.
 You can also define inline env vars in config (applied only if missing from the process env):
-Copy
 env
 OPENROUTER_API_KEY
-&quot;sk-or-...&quot;
+"sk-or-..."
 vars
 GROQ_API_KEY
-&quot;gsk-...&quot;
+"gsk-..."
 See
 /environment
 for full precedence and sources.
@@ -2904,7 +2689,6 @@ Put the missing keys in
 ~/.openclaw/.env
 so they’re picked up even when the service doesn’t inherit your shell env.
 Enable shell import (opt-in convenience):
-Copy
 env
 shellEnv
 enabled
@@ -2927,7 +2711,6 @@ If the Gateway runs as a service (launchd/systemd), it won’t inherit your shel
 environment. Fix by doing one of these:
 Put the token in
 ~/.openclaw/.env
-Copy
 COPILOT_GITHUB_TOKEN=...
 Or enable shell import (
 env.shellEnv.enabled: true
@@ -2935,7 +2718,6 @@ Or add it to your config
 env
 block (applies only if missing).
 Then restart the gateway and recheck:
-Copy
 openclaw
 models
 status
@@ -2963,7 +2745,6 @@ session.idleMinutes
 next
 message starts a fresh session id for that chat key. This does not delete
 transcripts - it just starts a new session.
-Copy
 session
 idleMinutes
 240
@@ -2999,11 +2780,9 @@ Use sub-agents for long or parallel work so the main chat stays smaller.
 Pick a model with a larger context window if this happens often.
 How do I completely reset OpenClaw but keep it installed
 Use the reset command:
-Copy
 openclaw
 reset
 Non-interactive full reset:
-Copy
 openclaw
 reset
 --scope
@@ -3011,7 +2790,6 @@ full
 --yes
 --non-interactive
 Then re-run onboarding:
-Copy
 openclaw
 onboard
 --install-daemon
@@ -3024,7 +2802,7 @@ If you used profiles (
 --profile
 OPENCLAW_PROFILE
 ), reset each state dir (defaults are
-~/.openclaw-&lt;profile&gt;
+~/.openclaw-<profile>
 Dev reset:
 openclaw gateway --dev --reset
 (dev-only; wipes dev config + credentials + sessions + workspace).
@@ -3032,13 +2810,11 @@ Im getting context too large errors how do I reset or compact
 Use one of these:
 Compact
 (keeps the conversation but summarizes older turns):
-Copy
 /compact
-/compact &lt;instructions&gt;
+/compact <instructions>
 to guide the summary.
 Reset
 (fresh session ID for the same chat key):
-Copy
 /new
 /reset
 If it keeps happening:
@@ -3065,13 +2841,12 @@ Why am I getting heartbeat messages every 30 minutes
 Heartbeats run every
 30m
 by default. Tune or disable them:
-Copy
 agents
 defaults
 heartbeat
 every
-&quot;2h&quot;
-// or &quot;0m&quot; to disable
+"2h"
+// or "0m" to disable
 HEARTBEAT.md
 exists but is effectively empty (only blank lines and markdown
 headers like
@@ -3087,20 +2862,18 @@ No. OpenClaw runs on
 your own account
 , so if you’re in the group, OpenClaw can see it.
 By default, group replies are blocked until you allow senders (
-groupPolicy: &quot;allowlist&quot;
+groupPolicy: "allowlist"
 If you want only
 you
 to be able to trigger group replies:
-Copy
 channels
 whatsapp
 groupPolicy
-&quot;allowlist&quot;
+"allowlist"
 groupAllowFrom
-&quot;+15551234567&quot;
+"+15551234567"
 How do I get the JID of a WhatsApp group
 Option 1 (fastest): tail logs and send a test message in the group:
-Copy
 openclaw
 logs
 --follow
@@ -3112,9 +2885,8 @@ from
 ) ending in
 @g.us
 , like:
-[email&#160;protected]
+[email protected]
 Option 2 (if already configured/allowlisted): list groups from config:
-Copy
 openclaw
 directory
 groups
@@ -3132,7 +2904,7 @@ mentionPatterns
 You configured
 channels.whatsapp.groups
 without
-&quot;*&quot;
+"*"
 and the group isn’t allowlisted.
 See
 Groups
@@ -3147,7 +2919,7 @@ How many workspaces and agents can I create
 No hard limits. Dozens (even hundreds) are fine, but watch for:
 Disk growth:
 sessions + transcripts live under
-~/.openclaw/agents/&lt;agentId&gt;/sessions/
+~/.openclaw/agents/<agentId>/sessions/
 Token cost:
 more agents means more concurrent model usage.
 Ops overhead:
@@ -3183,7 +2955,6 @@ Nodes
 Models: defaults, selection, aliases, switching
 What is the default model
 OpenClaw’s default model is whatever you set as:
-Copy
 agents.defaults.model.primary
 Models are referenced as
 provider/model
@@ -3278,7 +3049,6 @@ How do I switch models on the fly without restarting
 Use the
 /model
 command as a standalone message:
-Copy
 /model sonnet
 /model haiku
 /model opus
@@ -3295,10 +3065,8 @@ You can list available models with
 (and
 /model list
 ) shows a compact, numbered picker. Select by number:
-Copy
 /model 3
 You can also force a specific auth profile for the provider (per session):
-Copy
 /model opus@anthropic:default
 /model opus@anthropic:work
 Tip:
@@ -3318,12 +3086,11 @@ without
 the
 @profile
 suffix:
-Copy
 /model anthropic/claude-opus-4-6
 If you want to return to the default, pick it from
 /model
 (or send
-/model &lt;default provider/model&gt;
+/model <default provider/model>
 Use
 /model status
 to confirm which auth profile is active.
@@ -3355,8 +3122,7 @@ for
 /model
 and any
 session overrides. Choosing a model that isn’t in that list returns:
-Copy
-Model &quot;provider/model&quot; is not allowed. Use /model to list available models.
+Model "provider/model" is not allowed. Use /model to list available models.
 That error is returned
 instead of
 a normal reply. Fix: add the model to
@@ -3382,7 +3148,6 @@ Use the exact model id (case-sensitive):
 minimax/MiniMax-M2.1
 minimax/MiniMax-M2.1-lightning
 Run:
-Copy
 openclaw
 models
 list
@@ -3405,26 +3170,24 @@ errors
 /model
 or a separate agent.
 Option A: switch per session
-Copy
 env
 MINIMAX_API_KEY
-&quot;sk-...&quot;
+"sk-..."
 OPENAI_API_KEY
-&quot;sk-...&quot;
+"sk-..."
 agents
 defaults
 model
 primary
-&quot;minimax/MiniMax-M2.1&quot;
+"minimax/MiniMax-M2.1"
 models
-&quot;minimax/MiniMax-M2.1&quot;
+"minimax/MiniMax-M2.1"
 alias
-&quot;minimax&quot;
-&quot;openai/gpt-5.2&quot;
+"minimax"
+"openai/gpt-5.2"
 alias
-&quot;gpt&quot;
+"gpt"
 Then:
-Copy
 /model gpt
 Option B: separate agents
 Agent A default: MiniMax
@@ -3455,68 +3218,64 @@ google/gemini-3-flash-preview
 If you set your own alias with the same name, your value wins.
 How do I defineoverride model shortcuts aliases
 Aliases come from
-agents.defaults.models.&lt;modelId&gt;.alias
+agents.defaults.models.<modelId>.alias
 . Example:
-Copy
 agents
 defaults
 model
 primary
-&quot;anthropic/claude-opus-4-6&quot;
+"anthropic/claude-opus-4-6"
 models
-&quot;anthropic/claude-opus-4-6&quot;
+"anthropic/claude-opus-4-6"
 alias
-&quot;opus&quot;
-&quot;anthropic/claude-sonnet-4-5&quot;
+"opus"
+"anthropic/claude-sonnet-4-5"
 alias
-&quot;sonnet&quot;
-&quot;anthropic/claude-haiku-4-5&quot;
+"sonnet"
+"anthropic/claude-haiku-4-5"
 alias
-&quot;haiku&quot;
+"haiku"
 Then
 /model sonnet
 (or
-/&lt;alias&gt;
+/<alias>
 when supported) resolves to that model ID.
 How do I add models from other providers like OpenRouter or ZAI
 OpenRouter (pay-per-token; many models):
-Copy
 agents
 defaults
 model
 primary
-&quot;openrouter/anthropic/claude-sonnet-4-5&quot;
+"openrouter/anthropic/claude-sonnet-4-5"
 models
-&quot;openrouter/anthropic/claude-sonnet-4-5&quot;
+"openrouter/anthropic/claude-sonnet-4-5"
 {} }
 env
 OPENROUTER_API_KEY
-&quot;sk-or-...&quot;
+"sk-or-..."
 Z.AI (GLM models):
-Copy
 agents
 defaults
 model
 primary
-&quot;zai/glm-4.7&quot;
+"zai/glm-4.7"
 models
-&quot;zai/glm-4.7&quot;
+"zai/glm-4.7"
 {} }
 env
 ZAI_API_KEY
-&quot;...&quot;
+"..."
 If you reference a provider/model but the required provider key is missing, you’ll get a runtime auth error (e.g.
-No API key found for provider &quot;zai&quot;
+No API key found for provider "zai"
 No API key found for provider after adding a new agent
 This usually means the
 new agent
 has an empty auth store. Auth is per-agent and
 stored in:
-Copy
-~/.openclaw/agents/&lt;agentId&gt;/agent/auth-profiles.json
+~/.openclaw/agents/<agentId>/agent/auth-profiles.json
 Fix options:
 Run
-openclaw agents add &lt;id&gt;
+openclaw agents add <id>
 and configure auth during the wizard.
 Or copy
 auth-profiles.json
@@ -3538,8 +3297,7 @@ to the next model in
 agents.defaults.model.fallbacks
 Cooldowns apply to failing profiles (exponential backoff), so OpenClaw can keep responding even when a provider is rate-limited or temporarily failing.
 What does this error mean
-Copy
-No credentials found for profile &quot;anthropic:default&quot;
+No credentials found for profile "anthropic:default"
 It means the system attempted to use the auth profile ID
 anthropic:default
 , but could not find credentials for it in the expected auth store.
@@ -3547,7 +3305,7 @@ Fix checklist for No credentials found for profile anthropicdefault
 Confirm where auth profiles live
 (new vs legacy paths)
 Current:
-~/.openclaw/agents/&lt;agentId&gt;/agent/auth-profiles.json
+~/.openclaw/agents/<agentId>/agent/auth-profiles.json
 Legacy:
 ~/.openclaw/agent/*
 (migrated by
@@ -3584,7 +3342,6 @@ ANTHROPIC_API_KEY
 on the
 gateway host
 Clear any pinned order that forces a missing profile:
-Copy
 openclaw
 models
 auth
@@ -3596,7 +3353,7 @@ Confirm you’re running commands on the gateway host
 In remote mode, auth profiles live on the gateway machine, not your laptop.
 Why did it also try Google Gemini and fail
 If your model config includes Google Gemini as a fallback (or you switched to a Gemini shorthand), OpenClaw will try it during model fallback. If you haven’t configured Google credentials, you’ll see
-No API key found for provider &quot;google&quot;
+No API key found for provider "google"
 Fix: either provide Google auth, or remove/avoid Google models in
 agents.defaults.model.fallbacks
 / aliases so fallback doesn’t route there.
@@ -3616,19 +3373,18 @@ Related:
 (OAuth flows, token storage, multi-account patterns)
 What is an auth profile
 An auth profile is a named credential record (OAuth or API key) tied to a provider. Profiles live in:
-Copy
-~/.openclaw/agents/&lt;agentId&gt;/agent/auth-profiles.json
+~/.openclaw/agents/<agentId>/agent/auth-profiles.json
 What are typical profile IDs
 OpenClaw uses provider-prefixed IDs like:
 anthropic:default
 (common when no email identity exists)
-anthropic:&lt;email&gt;
+anthropic:<email>
 for OAuth identities
 custom IDs you choose (e.g.
 anthropic:work
 Can I control which auth profile is tried first
 Yes. Config supports optional metadata for profiles and an ordering per provider (
-auth.order.&lt;provider&gt;
+auth.order.<provider>
 ). This does
 not
 store secrets; it maps IDs to provider/mode and sets rotation order.
@@ -3647,7 +3403,6 @@ per-agent
 order override (stored in that agent’s
 auth-profiles.json
 ) via the CLI:
-Copy
 # Defaults to the configured default agent (omit --agent)
 openclaw
 models
@@ -3684,7 +3439,6 @@ clear
 --provider
 anthropic
 To target a specific agent:
-Copy
 openclaw
 models
 auth
@@ -3707,8 +3461,7 @@ What port does the Gateway use
 gateway.port
 controls the single multiplexed port for WebSocket + HTTP (Control UI, hooks, etc.).
 Precedence:
-Copy
---port &gt; OPENCLAW_GATEWAY_PORT &gt; gateway.port &gt; default 18789
+--port > OPENCLAW_GATEWAY_PORT > gateway.port > default 18789
 Why does openclaw gateway status say Runtime running but RPC probe failed
 Because “running” is the
 supervisor’s
@@ -3729,7 +3482,6 @@ You’re editing one config file while the service is running another (often a
 OPENCLAW_STATE_DIR
 mismatch).
 Fix:
-Copy
 openclaw
 gateway
 install
@@ -3746,22 +3498,21 @@ EADDRINUSE
 GatewayLockError
 indicating another instance is already listening.
 Fix: stop the other instance, free the port, or run with
-openclaw gateway --port &lt;port&gt;
+openclaw gateway --port <port>
 How do I run OpenClaw in remote mode client connects to a Gateway elsewhere
 Set
-gateway.mode: &quot;remote&quot;
+gateway.mode: "remote"
 and point to a remote WebSocket URL, optionally with a token/password:
-Copy
 gateway
 mode
-&quot;remote&quot;
+"remote"
 remote
 url
-&quot;ws://gateway.tailnet:18789&quot;
+"ws://gateway.tailnet:18789"
 token
-&quot;your-token&quot;
+"your-token"
 password
-&quot;your-password&quot;
+"your-password"
 Notes:
 openclaw gateway
 only starts when
@@ -3805,14 +3556,14 @@ bind picks a Tailscale IP from your network interfaces (100.64.0.0/10). If the m
 Fix:
 Start Tailscale on that host (so it has a 100.x address), or
 Switch to
-gateway.bind: &quot;loopback&quot;
-&quot;lan&quot;
+gateway.bind: "loopback"
+"lan"
 Note:
 tailnet
 is explicit.
 auto
 prefers loopback; use
-gateway.bind: &quot;tailnet&quot;
+gateway.bind: "tailnet"
 when you want a tailnet-only bind.
 Can I run multiple Gateways on the same host
 Usually no - one Gateway can run multiple messaging channels and agents. Use multiple Gateways only when you need redundancy (ex: rescue bot) or hard isolation.
@@ -3827,22 +3578,22 @@ gateway.port
 (unique ports)
 Quick setup (recommended):
 Use
-openclaw --profile &lt;name&gt; …
+openclaw --profile <name> …
 per instance (auto-creates
-~/.openclaw-&lt;name&gt;
+~/.openclaw-<name>
 Set a unique
 gateway.port
 in each profile config (or pass
 --port
 for manual runs).
 Install a per-profile service:
-openclaw --profile &lt;name&gt; gateway install
+openclaw --profile <name> gateway install
 Profiles also suffix service names (
-bot.molt.&lt;profile&gt;
+bot.molt.<profile>
 ; legacy
 com.openclaw.*
-openclaw-gateway-&lt;profile&gt;.service
-OpenClaw Gateway (&lt;profile&gt;)
+openclaw-gateway-<profile>.service
+OpenClaw Gateway (<profile>)
 Full guide:
 Multiple gateways
 What does invalid handshake code 1008 mean
@@ -3865,7 +3616,7 @@ You used the wrong port or path.
 A proxy or tunnel stripped auth headers or sent a non-Gateway request.
 Quick fixes:
 Use the WS URL:
-ws://&lt;host&gt;:18789
+ws://<host>:18789
 (or
 wss://...
 if HTTPS).
@@ -3874,14 +3625,12 @@ If auth is on, include the token/password in the
 connect
 frame.
 If you’re using the CLI or TUI, the URL should look like:
-Copy
-openclaw tui --url ws://&lt;host&gt;:18789 --token &lt;token&gt;
+openclaw tui --url ws://<host>:18789 --token <token>
 Protocol details:
 Gateway protocol
 Logging and debugging
 Where are logs
 File logs (structured):
-Copy
 /tmp/openclaw/openclaw-YYYY-MM-DD.log
 You can set a stable path via
 logging.file
@@ -3892,7 +3641,6 @@ logging.level
 and
 logging.consoleLevel
 Fastest log tail:
-Copy
 openclaw
 logs
 --follow
@@ -3904,17 +3652,16 @@ gateway.err.log
 (default:
 ~/.openclaw/logs/...
 ; profiles use
-~/.openclaw-&lt;profile&gt;/logs/...
+~/.openclaw-<profile>/logs/...
 Linux:
-journalctl --user -u openclaw-gateway[-&lt;profile&gt;].service -n 200 --no-pager
+journalctl --user -u openclaw-gateway[-<profile>].service -n 200 --no-pager
 Windows:
-schtasks /Query /TN &quot;OpenClaw Gateway (&lt;profile&gt;)&quot; /V /FO LIST
+schtasks /Query /TN "OpenClaw Gateway (<profile>)" /V /FO LIST
 See
 Troubleshooting
 for more.
 How do I startstoprestart the Gateway service
 Use the gateway helpers:
-Copy
 openclaw
 gateway
 status
@@ -3931,30 +3678,25 @@ two Windows install modes
 1) WSL2 (recommended):
 the Gateway runs inside Linux.
 Open PowerShell, enter WSL, then restart:
-Copy
 wsl
 openclaw gateway status
 openclaw gateway restart
 If you never installed the service, start it in the foreground:
-Copy
 openclaw
 gateway
 run
 2) Native Windows (not recommended):
 the Gateway runs directly in Windows.
 Open PowerShell and run:
-Copy
 openclaw gateway status
 openclaw gateway restart
 If you run it manually (no service), use:
-Copy
 openclaw gateway run
 Docs:
 Windows (WSL2)
 Gateway service runbook
 The Gateway is up but replies never arrive What should I check
 Start with a quick health sweep:
-Copy
 openclaw
 status
 openclaw
@@ -3989,7 +3731,6 @@ Does the UI have the right token?
 openclaw dashboard
 If remote, is the tunnel/Tailscale link up?
 Then tail logs:
-Copy
 openclaw
 logs
 --follow
@@ -3999,7 +3740,6 @@ Remote access
 Troubleshooting
 Telegram setMyCommands fails with network errors What should I check
 Start with logs and channel status:
-Copy
 openclaw
 channels
 status
@@ -4015,7 +3755,6 @@ Telegram
 Channel troubleshooting
 TUI shows no output What should I check
 First confirm the Gateway is reachable and the agent can run:
-Copy
 openclaw
 status
 openclaw
@@ -4034,7 +3773,6 @@ TUI
 Slash commands
 How do I completely stop then start the Gateway
 If you installed the service:
-Copy
 openclaw
 gateway
 stop
@@ -4046,7 +3784,6 @@ supervised service
 (launchd on macOS, systemd on Linux).
 Use this when the Gateway runs in the background as a daemon.
 If you’re running in the foreground, stop with Ctrl-C, then:
-Copy
 openclaw
 gateway
 run
@@ -4072,20 +3809,19 @@ to get more console detail. Then inspect the log file for channel auth, model ro
 Media and attachments
 My skill generated an imagePDF but nothing was sent
 Outbound attachments from the agent must include a
-MEDIA:&lt;path-or-url&gt;
+MEDIA:<path-or-url>
 line (on its own line). See
 OpenClaw assistant setup
 and
 Agent send
 CLI sending:
-Copy
 openclaw
 message
 send
 --target
 +15555550123
 --message
-&quot;Here you go&quot;
+"Here you go"
 --media
 /path/to/file.png
 Also check:
@@ -4100,16 +3836,16 @@ Default behavior on DM-capable channels is
 pairing
 Unknown senders receive a pairing code; the bot does not process their message.
 Approve with:
-openclaw pairing approve &lt;channel&gt; &lt;code&gt;
+openclaw pairing approve <channel> <code>
 Pending requests are capped at
 3 per channel
 ; check
-openclaw pairing list &lt;channel&gt;
+openclaw pairing list <channel>
 if a code didn’t arrive.
 Opening DMs publicly requires explicit opt-in (
-dmPolicy: &quot;open&quot;
+dmPolicy: "open"
 and allowlist
-&quot;*&quot;
+"*"
 Run
 openclaw doctor
 to surface risky DM policies.
@@ -4166,18 +3902,17 @@ I ran start in Telegram but didnt get a pairing code
 Pairing codes are sent
 only
 when an unknown sender messages the bot and
-dmPolicy: &quot;pairing&quot;
+dmPolicy: "pairing"
 is enabled.
 /start
 by itself doesn’t generate a code.
 Check pending requests:
-Copy
 openclaw
 pairing
 list
 telegram
 If you want immediate access, allowlist your sender id or set
-dmPolicy: &quot;open&quot;
+dmPolicy: "open"
 for that account.
 WhatsApp will it message my contacts How does pairing work
 No. Default WhatsApp DM policy is
@@ -4186,16 +3921,14 @@ pairing
 not processed
 . OpenClaw only replies to chats it receives or to explicit sends you trigger.
 Approve pairing with:
-Copy
 openclaw
 pairing
 approve
 whatsapp
-&lt;
+<
 cod
-&gt;
+>
 List pending requests:
-Copy
 openclaw
 pairing
 list
@@ -4212,7 +3945,6 @@ reasoning
 is enabled
 for that session.
 Fix in the chat where you see it:
-Copy
 /verbose off
 /reasoning off
 If it is still noisy, check the session settings in the Control UI and set verbose
@@ -4228,7 +3960,6 @@ How do I stopcancel a running task
 Send any of these
 as a standalone message
 (no slash):
-Copy
 stop
 abort
 esc
@@ -4237,7 +3968,6 @@ exit
 interrupt
 These are abort triggers (not slash commands).
 For background processes (from the exec tool), you can ask the agent to run:
-Copy
 process action:kill sessionId:XXX
 Slash commands overview: see
 Slash commands
@@ -4253,7 +3983,6 @@ cross-provider
 messaging by default. If a tool call is bound
 to Telegram, it won’t send to Discord unless you explicitly allow it.
 Enable cross-provider messaging for the agent:
-Copy
 agents
 defaults
 tools
@@ -4265,7 +3994,7 @@ marker
 enabled
 true
 prefix
-&quot;[from {channel}] &quot;
+"[from {channel}] "
 Restart the gateway after editing config. If you only want this for a single
 agent, set it under
 agents.list[].tools.message
@@ -4297,7 +4026,7 @@ agents.defaults.model.primary
 anthropic/claude-sonnet-4-5
 anthropic/claude-opus-4-6
 ). If you see
-No credentials found for profile &quot;anthropic:default&quot;
+No credentials found for profile "anthropic:default"
 , it means the Gateway couldn’t find Anthropic credentials in the expected
 auth-profiles.json
 for the agent that’s running.
@@ -4313,52 +4042,6 @@ OpenClaw Lore
 
 [Source: https://docs.openclaw.ai/help/scripts]
 
-Scripts - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Environment and debugging
-Scripts
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Help
-Help
-Troubleshooting
-FAQ
-Community
-OpenClaw Lore
-Environment and debugging
-Environment Variables
-Debugging
-Testing
-Scripts
-Node runtime
-Node.js
-Compaction internals
-Session Management Deep Dive
-Developer setup
-Setup
-Contributing
-CI Pipeline
-Docs meta
-Docs Hubs
-Docs directory
-Scripts
-Conventions
-Auth monitoring scripts
-When adding scripts
-Environment and debugging
-Scripts
-Scripts
 The
 scripts/
 directory contains helper scripts for local workflows and ops tasks.
@@ -4384,54 +4067,6 @@ Node.js
 
 [Source: https://docs.openclaw.ai/help/testing]
 
-Testing - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Environment and debugging
-Testing
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Help
-Help
-Troubleshooting
-FAQ
-Community
-OpenClaw Lore
-Environment and debugging
-Environment Variables
-Debugging
-Testing
-Scripts
-Node runtime
-Node.js
-Compaction internals
-Session Management Deep Dive
-Developer setup
-Setup
-Contributing
-CI Pipeline
-Docs meta
-Docs Hubs
-Docs directory
-Testing
-Quick start
-Test suites (what runs where)
-Unit / integration (default)
-E2E (gateway smoke)
-Live (real providers + real models)
-Which suite should I run?
-Live: model smoke (profile keys)
-Layer 1: Direct model completion (no gateway)
 Layer 2: Gateway + dev agent smoke (what “@openclaw” actually does)
 Live: Anthropic setup-token smoke
 Live: CLI backend smoke (Claude Code CLI or other local CLIs)
@@ -4462,7 +4097,7 @@ How to add regressions for real-world model/provider issues
 Quick start
 Most days:
 Full gate (expected before push):
-pnpm build &amp;&amp; pnpm check &amp;&amp; pnpm test
+pnpm build && pnpm check && pnpm test
 When you touch tests or want extra confidence:
 Coverage gate:
 pnpm test:coverage
@@ -4525,7 +4160,7 @@ for faster file startup.
 Uses adaptive workers (CI: 2-4, local: 4-8).
 Runs in silent mode by default to reduce console I/O overhead.
 Useful overrides:
-OPENCLAW_E2E_WORKERS=&lt;n&gt;
+OPENCLAW_E2E_WORKERS=<n>
 to force worker count (capped at 16).
 OPENCLAW_E2E_VERBOSE=1
 to re-enable verbose console output.
@@ -4561,7 +4196,7 @@ Live runs will source
 ~/.profile
 to pick up missing API keys
 Anthropic key rotation: set
-OPENCLAW_LIVE_ANTHROPIC_KEYS=&quot;sk-...,sk-...&quot;
+OPENCLAW_LIVE_ANTHROPIC_KEYS="sk-...,sk-..."
 (or
 OPENCLAW_LIVE_ANTHROPIC_KEY=sk-...
 ) or multiple
@@ -4608,10 +4243,10 @@ OPENCLAW_LIVE_MODELS=modern
 to run the modern allowlist (Opus/Sonnet/Haiku 4.5, GPT-5.x + Codex, Gemini 3, GLM 4.7, MiniMax M2.1, Grok 4)
 OPENCLAW_LIVE_MODELS=all
 is an alias for the modern allowlist
-OPENCLAW_LIVE_MODELS=&quot;openai/gpt-5.2,anthropic/claude-opus-4-6,...&quot;
+OPENCLAW_LIVE_MODELS="openai/gpt-5.2,anthropic/claude-opus-4-6,..."
 (comma allowlist)
 How to select providers:
-OPENCLAW_LIVE_PROVIDERS=&quot;google,google-antigravity,google-gemini-cli&quot;
+OPENCLAW_LIVE_PROVIDERS="google,google-antigravity,google-gemini-cli"
 (comma allowlist)
 Where keys come from:
 By default: profile store and env fallbacks
@@ -4648,7 +4283,7 @@ exec
 read
 it back.
 image probe: the test attaches a generated PNG (cat + randomized code) and expects the model to return
-cat &lt;CODE&gt;
+cat <CODE>
 Implementation reference:
 src/gateway/gateway-models.profiles.live.test.ts
 and
@@ -4663,10 +4298,10 @@ Default: modern allowlist (Opus/Sonnet/Haiku 4.5, GPT-5.x + Codex, Gemini 3, GLM
 OPENCLAW_LIVE_GATEWAY_MODELS=all
 is an alias for the modern allowlist
 Or set
-OPENCLAW_LIVE_GATEWAY_MODELS=&quot;provider/model&quot;
+OPENCLAW_LIVE_GATEWAY_MODELS="provider/model"
 (or comma list) to narrow
 How to select providers (avoid “OpenRouter everything”):
-OPENCLAW_LIVE_GATEWAY_PROVIDERS=&quot;google,google-antigravity,google-gemini-cli,openai,anthropic,zai,minimax&quot;
+OPENCLAW_LIVE_GATEWAY_PROVIDERS="google,google-antigravity,google-gemini-cli,openai,anthropic,zai,minimax"
 (comma allowlist)
 Tool + image probes are always on in this live test:
 read
@@ -4679,7 +4314,7 @@ Test generates a tiny PNG with “CAT” + random code (
 src/gateway/live-image-probe.ts
 Sends it via
 agent
-attachments: [{ mimeType: &quot;image/png&quot;, content: &quot;&lt;base64&gt;&quot; }]
+attachments: [{ mimeType: "image/png", content: "<base64>" }]
 Gateway parses attachments into
 images[]
 src/gateway/server-methods/agent.ts
@@ -4691,7 +4326,6 @@ cat
 Tip: to see what you can test on your machine (and the exact
 provider/model
 ids), run:
-Copy
 openclaw
 models
 list
@@ -4717,7 +4351,6 @@ OPENCLAW_LIVE_SETUP_TOKEN_VALUE=sk-ant-oat01-...
 Model override (optional):
 OPENCLAW_LIVE_SETUP_TOKEN_MODEL=anthropic/claude-opus-4-6
 Setup example:
-Copy
 openclaw
 models
 auth
@@ -4748,20 +4381,20 @@ claude-cli/claude-sonnet-4-5
 Command:
 claude
 Args:
-[&quot;-p&quot;,&quot;--output-format&quot;,&quot;json&quot;,&quot;--dangerously-skip-permissions&quot;]
+["-p","--output-format","json","--dangerously-skip-permissions"]
 Overrides (optional):
-OPENCLAW_LIVE_CLI_BACKEND_MODEL=&quot;claude-cli/claude-opus-4-6&quot;
-OPENCLAW_LIVE_CLI_BACKEND_MODEL=&quot;codex-cli/gpt-5.3-codex&quot;
-OPENCLAW_LIVE_CLI_BACKEND_COMMAND=&quot;/full/path/to/claude&quot;
-OPENCLAW_LIVE_CLI_BACKEND_ARGS=&#x27;[&quot;-p&quot;,&quot;--output-format&quot;,&quot;json&quot;,&quot;--permission-mode&quot;,&quot;bypassPermissions&quot;]&#x27;
-OPENCLAW_LIVE_CLI_BACKEND_CLEAR_ENV=&#x27;[&quot;ANTHROPIC_API_KEY&quot;,&quot;ANTHROPIC_API_KEY_OLD&quot;]&#x27;
+OPENCLAW_LIVE_CLI_BACKEND_MODEL="claude-cli/claude-opus-4-6"
+OPENCLAW_LIVE_CLI_BACKEND_MODEL="codex-cli/gpt-5.3-codex"
+OPENCLAW_LIVE_CLI_BACKEND_COMMAND="/full/path/to/claude"
+OPENCLAW_LIVE_CLI_BACKEND_ARGS='["-p","--output-format","json","--permission-mode","bypassPermissions"]'
+OPENCLAW_LIVE_CLI_BACKEND_CLEAR_ENV='["ANTHROPIC_API_KEY","ANTHROPIC_API_KEY_OLD"]'
 OPENCLAW_LIVE_CLI_BACKEND_IMAGE_PROBE=1
 to send a real image attachment (paths are injected into the prompt).
-OPENCLAW_LIVE_CLI_BACKEND_IMAGE_ARG=&quot;--image&quot;
+OPENCLAW_LIVE_CLI_BACKEND_IMAGE_ARG="--image"
 to pass image file paths as CLI args instead of prompt injection.
-OPENCLAW_LIVE_CLI_BACKEND_IMAGE_MODE=&quot;repeat&quot;
+OPENCLAW_LIVE_CLI_BACKEND_IMAGE_MODE="repeat"
 (or
-&quot;list&quot;
+"list"
 ) to control how image args are passed when
 IMAGE_ARG
 is set.
@@ -4770,26 +4403,25 @@ to send a second turn and validate resume flow.
 OPENCLAW_LIVE_CLI_BACKEND_DISABLE_MCP_CONFIG=0
 to keep Claude Code CLI MCP config enabled (default disables MCP config with a temporary empty file).
 Example:
-Copy
 OPENCLAW_LIVE_CLI_BACKEND
 OPENCLAW_LIVE_CLI_BACKEND_MODEL=
-&quot;claude-cli/claude-sonnet-4-5&quot;
+"claude-cli/claude-sonnet-4-5"
 pnpm
 test:live
 src/gateway/gateway-cli-backend.live.test.ts
 Recommended live recipes
 Narrow, explicit allowlists are fastest and least flaky:
 Single model, direct (no gateway):
-OPENCLAW_LIVE_MODELS=&quot;openai/gpt-5.2&quot; pnpm test:live src/agents/models.profiles.live.test.ts
+OPENCLAW_LIVE_MODELS="openai/gpt-5.2" pnpm test:live src/agents/models.profiles.live.test.ts
 Single model, gateway smoke:
-OPENCLAW_LIVE_GATEWAY_MODELS=&quot;openai/gpt-5.2&quot; pnpm test:live src/gateway/gateway-models.profiles.live.test.ts
+OPENCLAW_LIVE_GATEWAY_MODELS="openai/gpt-5.2" pnpm test:live src/gateway/gateway-models.profiles.live.test.ts
 Tool calling across several providers:
-OPENCLAW_LIVE_GATEWAY_MODELS=&quot;openai/gpt-5.2,anthropic/claude-opus-4-6,google/gemini-3-flash-preview,zai/glm-4.7,minimax/minimax-m2.1&quot; pnpm test:live src/gateway/gateway-models.profiles.live.test.ts
+OPENCLAW_LIVE_GATEWAY_MODELS="openai/gpt-5.2,anthropic/claude-opus-4-6,google/gemini-3-flash-preview,zai/glm-4.7,minimax/minimax-m2.1" pnpm test:live src/gateway/gateway-models.profiles.live.test.ts
 Google focus (Gemini API key + Antigravity):
 Gemini (API key):
-OPENCLAW_LIVE_GATEWAY_MODELS=&quot;google/gemini-3-flash-preview&quot; pnpm test:live src/gateway/gateway-models.profiles.live.test.ts
+OPENCLAW_LIVE_GATEWAY_MODELS="google/gemini-3-flash-preview" pnpm test:live src/gateway/gateway-models.profiles.live.test.ts
 Antigravity (OAuth):
-OPENCLAW_LIVE_GATEWAY_MODELS=&quot;google-antigravity/claude-opus-4-6-thinking,google-antigravity/gemini-3-pro-high&quot; pnpm test:live src/gateway/gateway-models.profiles.live.test.ts
+OPENCLAW_LIVE_GATEWAY_MODELS="google-antigravity/claude-opus-4-6-thinking,google-antigravity/gemini-3-pro-high" pnpm test:live src/gateway/gateway-models.profiles.live.test.ts
 Notes:
 google/...
 uses the Gemini API (API key).
@@ -4834,7 +4466,7 @@ zai/glm-4.7
 MiniMax:
 minimax/minimax-m2.1
 Run gateway smoke with tools + image:
-OPENCLAW_LIVE_GATEWAY_MODELS=&quot;openai/gpt-5.2,openai-codex/gpt-5.3-codex,anthropic/claude-opus-4-6,google/gemini-3-pro-preview,google/gemini-3-flash-preview,google-antigravity/claude-opus-4-6-thinking,google-antigravity/gemini-3-flash,zai/glm-4.7,minimax/minimax-m2.1&quot; pnpm test:live src/gateway/gateway-models.profiles.live.test.ts
+OPENCLAW_LIVE_GATEWAY_MODELS="openai/gpt-5.2,openai-codex/gpt-5.3-codex,anthropic/claude-opus-4-6,google/gemini-3-pro-preview,google/gemini-3-flash-preview,google-antigravity/claude-opus-4-6-thinking,google-antigravity/gemini-3-flash,zai/glm-4.7,minimax/minimax-m2.1" pnpm test:live src/gateway/gateway-models.profiles.live.test.ts
 Baseline: tool calling (Read + optional Exec)
 Pick at least one per provider family:
 OpenAI:
@@ -5027,55 +4659,9 @@ Scripts
 
 [Source: https://docs.openclaw.ai/help/troubleshooting]
 
-Troubleshooting - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Help
-Troubleshooting
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Help
-Help
-Troubleshooting
-FAQ
-Community
-OpenClaw Lore
-Environment and debugging
-Environment Variables
-Debugging
-Testing
-Scripts
-Node runtime
-Node.js
-Compaction internals
-Session Management Deep Dive
-Developer setup
-Setup
-Contributing
-CI Pipeline
-Docs meta
-Docs Hubs
-Docs directory
-Troubleshooting
-First 60 seconds
-Decision tree
-Help
-Troubleshooting
-Troubleshooting
 If you only have 2 minutes, use this page as a triage front door.
 First 60 seconds
 Run this exact ladder in order:
-Copy
 openclaw
 status
 openclaw
@@ -5117,7 +4703,6 @@ openclaw logs --follow
 → steady activity, no repeating fatal errors.
 Decision tree
 No replies
-Copy
 openclaw
 status
 openclaw
@@ -5130,9 +4715,9 @@ status
 openclaw
 pairing
 list
-&lt;
+<
 channe
-&gt;
+>
 openclaw
 logs
 --follow
@@ -5155,7 +4740,6 @@ Deep pages:
 /channels/troubleshooting
 /channels/pairing
 Dashboard or Control UI will not connect
-Copy
 openclaw
 status
 openclaw
@@ -5188,7 +4772,6 @@ Deep pages:
 /web/control-ui
 /gateway/authentication
 Gateway will not start or service installed but not running
-Copy
 openclaw
 status
 openclaw
@@ -5220,7 +4803,6 @@ Deep pages:
 /gateway/background-process
 /gateway/configuration
 Channel connects but messages do not flow
-Copy
 openclaw
 status
 openclaw
@@ -5254,7 +4836,6 @@ Deep pages:
 /gateway/troubleshooting#channel-connected-messages-not-flowing
 /channels/troubleshooting
 Cron or heartbeat did not fire or did not deliver
-Copy
 openclaw
 status
 openclaw
@@ -5270,9 +4851,9 @@ openclaw
 cron
 runs
 --id
-&lt;
+<
 jobI
-&gt;
+>
 --limit
 openclaw
 logs
@@ -5300,7 +4881,6 @@ Deep pages:
 /automation/troubleshooting
 /gateway/heartbeat
 Node is paired but tool fails camera canvas screen exec
-Copy
 openclaw
 status
 openclaw
@@ -5313,9 +4893,9 @@ openclaw
 nodes
 describe
 --node
-&lt;
+<
 idOrNameOrI
-&gt;
+>
 openclaw
 logs
 --follow
@@ -5338,7 +4918,6 @@ Deep pages:
 /nodes/troubleshooting
 /tools/exec-approvals
 Browser tool fails
-Copy
 openclaw
 status
 openclaw

@@ -1,7 +1,7 @@
 {
   "name": "organon",
-  "version": "1.0.0",
-  "description": "Philosophical reasoning engine for engineering decisions. 62 principles from 20 philosophers, applied as a live decision engine and code review framework.",
+  "version": "2.0.0",
+  "description": "Philosophical reasoning engine for engineering decisions and code reviews: 63 principles (0-62) from 20 philosophers, via /organon, /organon:decide, /organon:review.",
   "author": {
     "name": "Lightcyphers SRL",
     "url": "https://lightcyphers.com"

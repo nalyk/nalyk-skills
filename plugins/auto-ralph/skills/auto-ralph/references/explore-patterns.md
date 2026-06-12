@@ -1,6 +1,7 @@
 # Explore Patterns pentru Auto-Ralph
 
 Template-uri complete pentru utilizarea Explore Agent înainte de Ralph Loop.
+Fiecare prompt de mai jos se trimite ca subagent prin Task tool cu `subagent_type: "Explore"`.
 
 ## Când să folosești Explore
 
@@ -26,7 +27,7 @@ Template-uri complete pentru utilizarea Explore Agent înainte de Ralph Loop.
 
 ### Prompt
 ```
-Task(subagent_type="Explore", prompt="Investigate bug: [DESCRIERE ERROR]
+Investigate bug: [DESCRIERE ERROR]
 
 Find:
 1. Source file containing the error
@@ -35,19 +36,19 @@ Find:
 4. Similar error handling patterns in codebase
 5. Recent changes in affected area (git log)
 
-Return: File paths, function names, risk assessment")
+Return: File paths, function names, risk assessment
 ```
 
 ### Exemplu
 ```
-Task(subagent_type="Explore", prompt="Investigate bug: TypeError in auth.js when refreshing token
+Investigate bug: TypeError in auth.js when refreshing token
 
 Find:
 1. Source file containing token refresh logic
 2. Call chain from login to token refresh
 3. Test files for auth module
 4. Error handling patterns for API calls
-5. Recent commits touching auth files")
+5. Recent commits touching auth files
 ```
 
 ---
@@ -61,7 +62,7 @@ Find:
 
 ### Prompt
 ```
-Task(subagent_type="Explore", prompt="Plan feature: [FEATURE NAME]
+Plan feature: [FEATURE NAME]
 
 Find:
 1. Similar implementations in codebase
@@ -70,19 +71,19 @@ Find:
 4. Config files that might need updates
 5. Documentation patterns
 
-Return: Architecture overview, key files, integration points")
+Return: Architecture overview, key files, integration points
 ```
 
 ### Exemplu
 ```
-Task(subagent_type="Explore", prompt="Plan feature: User notifications system
+Plan feature: User notifications system
 
 Find:
 1. Existing notification or messaging code
 2. User service integration points
 3. How similar features are tested
 4. Environment config for external services
-5. How other features document their APIs")
+5. How other features document their APIs
 ```
 
 ---
@@ -96,7 +97,7 @@ Find:
 
 ### Prompt
 ```
-Task(subagent_type="Explore", prompt="Analyze refactor target: [FILE/MODULE]
+Analyze refactor target: [FILE/MODULE]
 
 Find:
 1. ALL usages across codebase (imports, calls)
@@ -105,19 +106,19 @@ Find:
 4. Risk areas (no tests, complex logic)
 5. Safe refactoring order
 
-Return: Dependency map, risk assessment, recommended approach")
+Return: Dependency map, risk assessment, recommended approach
 ```
 
 ### Exemplu
 ```
-Task(subagent_type="Explore", prompt="Analyze refactor target: src/utils/helpers.js
+Analyze refactor target: src/utils/helpers.js
 
 Find:
 1. All files importing from helpers.js
 2. Functions most frequently used
 3. Which helpers have tests
 4. Complex helpers that need careful attention
-5. Order to refactor without breaking builds")
+5. Order to refactor without breaking builds
 ```
 
 ---
@@ -131,7 +132,7 @@ Find:
 
 ### Prompt
 ```
-Task(subagent_type="Explore", prompt="Design API: [ENDPOINT]
+Design API: [ENDPOINT]
 
 Find:
 1. Existing API patterns (routing, controllers)
@@ -140,19 +141,19 @@ Find:
 4. Error response format
 5. Test patterns for APIs
 
-Return: Pattern guide, middleware to use, test template")
+Return: Pattern guide, middleware to use, test template
 ```
 
 ### Exemplu
 ```
-Task(subagent_type="Explore", prompt="Design API: POST /api/orders
+Design API: POST /api/orders
 
 Find:
 1. How other POST endpoints are structured
 2. Auth middleware for protected routes
 3. Request validation approach
 4. Standard error responses
-5. API test examples")
+5. API test examples
 ```
 
 ---
@@ -166,7 +167,7 @@ Find:
 
 ### Prompt
 ```
-Task(subagent_type="Explore", prompt="Plan tests for: [MODULE/FUNCTION]
+Plan tests for: [MODULE/FUNCTION]
 
 Find:
 1. Test framework and patterns used
@@ -175,7 +176,7 @@ Find:
 4. Coverage gaps
 5. Test utilities available
 
-Return: Test strategy, mock templates, coverage targets")
+Return: Test strategy, mock templates, coverage targets
 ```
 
 ---

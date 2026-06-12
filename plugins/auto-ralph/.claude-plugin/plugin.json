@@ -1,7 +1,7 @@
 {
   "name": "auto-ralph",
-  "description": "Deterministic Ralph Loop activation via SessionStart priming + UserPromptSubmit context injection - scores every imperative coding task and routes to /ralph-loop when suitable",
-  "version": "2.1.0",
+  "description": "Gates imperative coding tasks (en/ro/ru) into Ralph Loops: a silent-by-default prompt hook flags matches, a deterministic 0-4 scorer routes score >= 3 to /ralph-loop",
+  "version": "3.0.0",
   "author": {
     "name": "nalyk"
   },

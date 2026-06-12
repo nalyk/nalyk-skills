@@ -1,66 +1,42 @@
 #!/bin/bash
-# auto-ralph v2.1 — UserPromptSubmit hook
-#
-# v2.0 BUG: emitted `{"systemMessage": "..."}` which Claude Code routes as a
-#           user-visible banner, NOT as model-visible context injection.
-#           Empirical proof: in-session system-reminder showed claudeception
-#           hook output verbatim but contained zero "AUTO-RALPH CHECK" text,
-#           even though this hook fired (exit 0, valid JSON).
-#
-# v2.1 FIX: emit plain stdout. Claude Code injects plain stdout from
-#           UserPromptSubmit hooks into the model context as
-#           <user-prompt-submit-hook> — the model SEES this.
-#
-# Side benefits:
-#   • Adds /tmp/auto-ralph-hook.log observability (timestamp + prompt length).
-#   • Banner is short, cache-friendly (no volatile content in payload).
-#   • Reinforces the (AUTONALYK) scoring contract from SKILL.md.
+# auto-ralph — UserPromptSubmit hook
+# Parses the prompt; emits ONE line only when an imperative coding verb or an
+# explicit force-on trigger is present. Silent otherwise (exit 0, no output).
 
 set -u
 
-# Consume stdin (UserPromptSubmit payload — JSON with .prompt). We don't need
-# to parse it, but consuming prevents SIGPIPE for the parent.
-STDIN_PAYLOAD="$(cat 2>/dev/null || true)"
+command -v jq >/dev/null 2>&1 || exit 0
 
-# --- Observability: log every invocation (best-effort, never fails the hook)
-LOG_FILE="${AUTO_RALPH_LOG:-/tmp/auto-ralph-hook.log}"
-{
-    PROMPT_LEN=$(printf '%s' "$STDIN_PAYLOAD" | wc -c)
-    printf '[%s] userpromptsubmit fired (payload=%s bytes)\n' \
-        "$(date -Iseconds 2>/dev/null || date)" "$PROMPT_LEN"
-} >> "$LOG_FILE" 2>/dev/null || true
+PAYLOAD="$(cat 2>/dev/null || true)"
+PROMPT="$(printf '%s' "$PAYLOAD" | jq -r '.prompt // empty' 2>/dev/null || true)"
+[ -n "$PROMPT" ] || exit 0
 
-# --- Context injection (plain stdout → model-visible)
-cat << 'EOF'
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🔁 AUTO-RALPH GATE — evaluate BEFORE composing any response
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Plugin auto-ralph@nalyk-skills is ACTIVE. For the current user prompt:
+# Lowercase for matching (UTF-8 aware for ro/ru).
+LOWER="$(printf '%s' "$PROMPT" | tr '[:upper:]' '[:lower:]')"
 
-SCORE (0–4):
-  +1  clear success criteria — verbs: fix/repair/add/implement/create/build/
-      test/refactor and ro/ru equivalents (repară, fixează, adaugă,
-      implementează, creează, testează, refactorizează, исправь, добавь,
-      создай, сделай, протестируй)
-  +1  iteration-friendly (not a question, explanation, or one-shot lookup)
-  +1  defined scope (specific files, functions, modules, or concrete errors)
-  +1  verifiable completion (tests, error to remove, observable behaviour)
+# Force-off phrases always win: stay silent.
+if printf '%s' "$LOWER" | grep -qiE "just answer|don'?t loop|explain first|one time"; then
+    exit 0
+fi
 
-DECISION (no exceptions):
-  • Score ≥ 3  → invoke Skill(auto-ralph:auto-ralph) IMMEDIATELY,
-                 BEFORE answering. The skill emits its own (AUTONALYK)
-                 banner and runs Faza 0–5.
-  • Score ≤ 2  → respond normally. NO banner required.
+# Explicit force-on triggers (bare "iterate" intentionally excluded — too common).
+FORCE_ON='ralph this|auto ralph|loop it|until done'
+# Imperative verbs en/ro/ru.
+VERBS='fix|repair|add|implement|create|build|test|refactor|repară|fixează|adaugă|implementează|creează|testează|refactorizează|исправь|добавь|создай|сделай|протестируй'
 
-OVERRIDES (always win over score):
-  • Force ON  : "ralph this", "auto ralph", "loop it", "iterate",
-                "keep trying", "until done"
-  • Force OFF : "just answer", "don't loop", "explain first", "one time"
+MATCH="$(printf '%s' "$LOWER" | grep -oiE "$FORCE_ON" | head -1)"
+if [ -z "$MATCH" ]; then
+    MATCH="$(printf '%s' "$LOWER" | grep -oiE "\b($VERBS)\b" | head -1)"
+fi
+[ -n "$MATCH" ] || exit 0
 
-ACTIVE-LOOP GUARD:
-  Before activating, the skill checks for ".claude/ralph-loop.local.md".
-  If present, it MUST warn and stop — never start a second loop.
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-EOF
+# Active loop guard: warn instead of re-triggering.
+CWD="$(printf '%s' "$PAYLOAD" | jq -r '.cwd // empty' 2>/dev/null || true)"
+LOOP_FILE="${CWD:-$PWD}/.claude/ralph-loop.local.md"
+if [ -f "$LOOP_FILE" ]; then
+    echo "auto-ralph: Ralph Loop already active (.claude/ralph-loop.local.md) — do NOT start another; use /cancel-ralph to stop it."
+    exit 0
+fi
 
+echo "auto-ralph: imperative \"$MATCH\" detected — invoke Skill(auto-ralph:auto-ralph) before answering."
 exit 0

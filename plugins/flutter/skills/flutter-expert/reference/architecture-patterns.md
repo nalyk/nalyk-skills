@@ -1,5 +1,7 @@
 # Architecture Patterns Reference
 
+> Verify versions against the live project before copying any snippet. Add packages with `flutter pub add <pkg>` and verify current majors on pub.dev.
+
 ## Table of Contents
 1. [Small Project Scaffold](#small-project)
 2. [Medium Project Scaffold](#medium-project)
@@ -275,7 +277,7 @@ extension StringExtensions on String {
   String get capitalize =>
       isEmpty ? '' : '${this[0].toUpperCase()}${substring(1)}';
   bool get isValidEmail =>
-      RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(this);
+      RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,}$').hasMatch(this);
 }
 DART
 
@@ -324,14 +326,9 @@ lib/
 
 ### Dependency Injection (get_it + injectable)
 
-```yaml
-dependencies:
-  get_it: ^7.7.0
-  injectable: ^2.4.1
-
-dev_dependencies:
-  injectable_generator: ^2.6.1
-  build_runner: ^2.4.8
+```bash
+flutter pub add get_it injectable
+flutter pub add -d injectable_generator build_runner
 ```
 
 ```dart

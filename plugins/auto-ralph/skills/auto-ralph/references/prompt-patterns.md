@@ -334,3 +334,41 @@ Adaugă întotdeauna:
 3. **Framework/stack** - pentru instrucțiuni relevante
 4. **/cancel-ralph** - reminder pentru escape
 5. **(P1 FIX) Test status** - dacă NO_TESTS_DETECTED, folosește criterii alternative
+
+---
+
+## Exemplu complet end-to-end (bug fix)
+
+**Input:** "fix the auth bug, testele failează pe login"
+**Scor:** `score=4 matched=[verb,iteration,scope,verify]` → Ralph mode
+**Context detectat:** modified: src/auth/login.ts, tests/auth.test.ts; npm test
+disponibil; eroare: `TypeError: Cannot read property 'token' of undefined`
+
+**Prompt generat** (scris cu Write tool în `/tmp/ralph-prompt.txt`):
+
+```markdown
+## Task
+Repară bug-ul de autentificare: testele failează pe login.
+
+## Context Detectat
+- Fișiere modificate: src/auth/login.ts, tests/auth.test.ts
+- Framework test: npm test disponibil
+- Eroare: TypeError: Cannot read property 'token' of undefined
+
+## Criterii de Succes
+1. Eroarea "Cannot read property 'token'" nu mai apare
+2. Toate testele din tests/auth.test.ts trec
+3. Nu s-au introdus regresii în alte teste
+
+## Completion
+Când bug-ul e COMPLET REZOLVAT și `npm test` trece:
+<promise>GATA</promise>
+
+Pentru a anula loop-ul: /cancel-ralph
+```
+
+**Execuție** (mereu prin prompt-file, niciodată prompt inline):
+
+```bash
+/ralph-loop --prompt-file /tmp/ralph-prompt.txt --max-iterations 25 --completion-promise "GATA"
+```

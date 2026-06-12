@@ -1,83 +1,36 @@
 ---
 name: challenger-qwen
-description: Invokes Qwen CLI from debate workspace. Persona loaded from QWEN.md context file.
+description: Invokes Qwen CLI from the debate workspace. Persona loaded from the workspace QWEN.md context file.
 tools: Bash
 ---
 
 # Qwen Challenger Agent
 
-Minimal orchestration wrapper. **Persona and critique style defined in workspace/QWEN.md**.
-
-## Your Role
-
-1. Receive challenge task from orchestrator
-2. Execute Qwen CLI from workspace directory (where QWEN.md exists)
-3. Return raw response - DO NOT interpret or filter
+Minimal orchestration wrapper. **Persona and critique style come from `WORKSPACE_PATH/QWEN.md`** — Qwen reads it from CWD; the invoke script runs from the workspace.
 
 ## Input Expected
 
-- `WORKSPACE_PATH`: Path to debate workspace (contains QWEN.md)
-- `CLAUDE_POSITION`: The position to challenge
-- `ROUND`: Current debate round
-- `PREVIOUS_CONTEXT`: Prior debate history (if round > 1)
+- `WORKSPACE_PATH`: absolute path to the debate workspace
+- `PROMPT`: the round task (position to critique + previous context). NO persona text — that comes from QWEN.md.
+- `TIMEOUT_PER_CLI`: seconds (default 120)
+- `ROUND`: current debate round
 
-## Prompt Construction
-
-The prompt contains ONLY the task. Persona comes from QWEN.md.
-
-```
-## ROUND {{ROUND}} CHALLENGE
-
-### Position to Critique
-{{CLAUDE_POSITION}}
-
-### Previous Debate Context
-{{PREVIOUS_CONTEXT}}
-
-Provide your expert critique following your established methodology.
-```
-
-## CLI Invocation
+## Invocation
 
 ```bash
-WORKSPACE_PATH="{{WORKSPACE_PATH}}"
-PROMPT='{{CONSTRUCTED_PROMPT}}'
-
-# CRITICAL: Run from workspace so Qwen discovers QWEN.md
-cd "$WORKSPACE_PATH"
-
-timeout 120 qwen -p "$PROMPT" --yolo 2>/dev/null
-
-if [ $? -ne 0 ]; then
-    echo '{"error": "qwen_invocation_failed", "model": "qwen"}'
-fi
+"${CLAUDE_PLUGIN_ROOT}/scripts/invoke-challenger.sh" qwen "$WORKSPACE_PATH" "$PROMPT" "$TIMEOUT_PER_CLI"
 ```
+
+The script handles Qwen specifics (`-p` prompt flag, `-y` auto-approval headless mode).
 
 ## Output
 
-Return raw response from Qwen. Do not modify.
+The script prints one JSON envelope: `{model, status, output|error, stderr_tail}`.
+Return it verbatim — DO NOT interpret, filter, or summarize. Status values:
 
-If non-JSON, wrap:
-```json
-{
-  "raw_response": "[response]",
-  "parse_error": true,
-  "model": "qwen"
-}
-```
-
-## Error Handling
-
-| Error | Response |
-|-------|----------|
-| Timeout | `{"error": "timeout", "model": "qwen"}` |
-| Auth failure | `{"error": "auth_failed", "model": "qwen"}` |
-| CLI not found | `{"error": "cli_not_found", "model": "qwen"}` |
-| QWEN.md missing | `{"error": "context_file_missing", "model": "qwen"}` |
-
-## Qwen-Specific Notes
-
-- Forked from Gemini CLI (similar flags)
-- Uses `-p` for prompt (not positional)
-- Uses `--yolo` for non-interactive
-- Free tier: 2000 req/day with Qwen OAuth
+| status | meaning |
+|--------|---------|
+| `ok` | `output` holds Qwen's raw response |
+| `timeout` | CLI exceeded TIMEOUT_PER_CLI |
+| `not_found` | qwen binary missing |
+| `error` | non-zero exit; see `stderr_tail` |

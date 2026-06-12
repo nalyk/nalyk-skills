@@ -1,421 +1,171 @@
 ---
-description: "Multi-model adversarial debate. Claude defends position against external CLI models. Usage: /debate <topic, question, or decision>"
+description: "Multi-model adversarial debate. Claude defends a position against external CLI models (agy/Gemini, Codex, Qwen). Usage: /debate <topic>"
 argument-hint: "<topic to debate - question, decision, code, architecture, anything>"
-allowed-tools: Bash, Task, Read, Write, Glob, Grep, TodoWrite
+allowed-tools: Bash, Task, Read, Write, Glob, Grep, TodoWrite, Skill
 ---
 
 # Multi-Model Adversarial Debate
 
 **TOPIC:** $ARGUMENTS
 
+Full protocol reference: `${CLAUDE_PLUGIN_ROOT}/references/debate-protocol.md`
+CLI details: `${CLAUDE_PLUGIN_ROOT}/references/cli-invocation.md`
+
 ---
 
-## PHASE 0: PREFLIGHT CHECK
+## PHASE 0: PREFLIGHT + WORKSPACE
 
-### Check for available challengers
+Run this single preflight (settings, challenger detection with cache fallback, workspace creation). Replace `topic-slug-here` with a lowercase-hyphen slug of the topic (max 50 chars):
 
 ```bash
-if [ -f /tmp/debate-available-challengers ]; then
-    CHALLENGERS=$(cat /tmp/debate-available-challengers | tr '\n' ' ')
-    COUNT=$(cat /tmp/debate-available-challengers | wc -l)
-    echo "Available challengers: $CHALLENGERS"
-    echo "Count: $COUNT"
-else
-    echo "No challenger cache found. Run /debate:doctor first."
-    echo "COUNT: 0"
+SLUG="topic-slug-here"
+
+# Settings (defaults, overridden by ~/.claude/debate.local.md if present)
+TIMEOUT_PER_CLI=120; MAX_ROUNDS=5
+SETTINGS="$HOME/.claude/debate.local.md"
+if [ -f "$SETTINGS" ]; then
+    v=$(grep -m1 -E '^timeout_per_cli:' "$SETTINGS" | grep -oE '[0-9]+' || true); [ -n "$v" ] && TIMEOUT_PER_CLI="$v"
+    v=$(grep -m1 -E '^max_rounds:' "$SETTINGS" | grep -oE '[0-9]+' || true); [ -n "$v" ] && MAX_ROUNDS="$v"
 fi
+
+# Challengers: doctor cache if fresh (<24h), else fast inline detection
+CACHE=/tmp/debate-available-challengers
+if [ -f "$CACHE" ] && [ -n "$(find "$CACHE" -mmin -1440 2>/dev/null)" ]; then
+    CHALLENGERS=$(tr '\n' ' ' < "$CACHE")
+else
+    CHALLENGERS=""
+    for c in agy codex qwen; do command -v "$c" >/dev/null 2>&1 && CHALLENGERS="$CHALLENGERS$c "; done
+fi
+COUNT=$(echo "$CHALLENGERS" | wc -w)
+
+# Workspace: debates/NNN-slug/ (agy gets its own subdir for persona isolation)
+mkdir -p debates
+LAST=$(ls debates 2>/dev/null | grep -E '^[0-9]{3}-' | sort | tail -1 | cut -c1-3 || true)
+NEXT=$(printf '%03d' $((10#${LAST:-0} + 1)))
+WORKSPACE_PATH="$(pwd)/debates/${NEXT}-${SLUG}"
+mkdir -p "$WORKSPACE_PATH/rounds" "$WORKSPACE_PATH/agy"
+
+echo "CHALLENGERS=$CHALLENGERS"; echo "COUNT=$COUNT"
+echo "TIMEOUT_PER_CLI=$TIMEOUT_PER_CLI"; echo "MAX_ROUNDS=$MAX_ROUNDS"
+echo "WORKSPACE_PATH=$WORKSPACE_PATH"
 ```
 
-### If no challengers available:
+**If COUNT=0: STOP.** Output: "DEBATE ABORTED: no external challengers. Claude debating itself is theater. Run /debate:doctor and install at least one CLI (agy/codex/qwen)." Do not proceed.
 
-```
-+================================================================+
-|  DEBATE ABORTED: No external challengers available               |
-+================================================================+
-|                                                                  |
-|  Claude debating itself provides no genuine diversity.           |
-|                                                                  |
-|  Run: /debate:doctor                                             |
-|  Then install at least ONE external CLI.                         |
-|                                                                  |
-+================================================================+
-```
+Otherwise show a one-line banner: `(DEBATE) topic | challengers: <list> | max rounds: <N>` — then generate personas:
 
-**STOP HERE** if no challengers. Do not proceed.
+**Invoke the `debate-persona-generator` skill** with TOPIC, detected DOMAIN, and WORKSPACE_PATH. It must write three DISTINCT persona files:
+- `$WORKSPACE_PATH/agy/GEMINI.md` (Architect — read by agy)
+- `$WORKSPACE_PATH/AGENTS.md` (Operator — read by codex)
+- `$WORKSPACE_PATH/QWEN.md` (Adversary — read by qwen)
 
-### If challengers available:
-
-Display activation banner:
-
-```
-(DEBATE) ════════════════════════════════════════════════════════
-  Topic: [first 60 chars of $ARGUMENTS]
-  Challengers: [list of available]
-  Protocol: Hybrid (parallel challenge → sequential confrontation)
-  Max rounds: 5
-══════════════════════════════════════════════════════════════════
-```
+Only write files for available challengers. Verify each file exists before Phase 1.
 
 ---
 
 ## PHASE 1: CLAUDE'S OPENING POSITION
 
-Analyze the topic thoroughly. Form your position.
-
-### Your opening must include:
-
-1. **Position statement** - Clear, specific stance on the topic
-2. **Reasoning** - Step-by-step logic for why you hold this position
-3. **Confidence level** - HIGH / MEDIUM / LOW
-4. **Acknowledged weaknesses** - What might be wrong with your position?
-5. **Key assumptions** - What are you assuming to be true?
-
-### Format:
+Analyze the topic. State, in this format:
 
 ```
 ## CLAUDE'S OPENING POSITION
-
-**Topic:** [restate topic]
-
-**My position:** [clear statement]
-
-**Reasoning:**
-1. [point 1]
-2. [point 2]
-3. [point 3]
-
-**Confidence:** [HIGH/MEDIUM/LOW]
-
-**Potential weaknesses I see:**
-- [weakness 1]
-- [weakness 2]
-
-**My assumptions:**
-- [assumption 1]
-- [assumption 2]
+**Position:** [clear, specific stance]
+**Reasoning:** [numbered points]
+**Confidence:** HIGH/MEDIUM/LOW
+**Weaknesses I see:** [list]
+**My assumptions:** [list]
 ```
 
 ---
 
-## PHASE 2: PARALLEL CHALLENGE (Round 1)
+## PHASE 2: PARALLEL CHALLENGE
 
-Launch ALL available challengers simultaneously using Task tool.
+One Bash call launches ALL challengers in parallel (background + wait, same prompt to each — each CLI reads its own persona file):
 
-For EACH challenger in `/tmp/debate-available-challengers`, spawn a Task:
-
-### Challenger prompt template:
-
-```
-You are challenging another AI's position. Your job is to find flaws, not to agree.
-
-## THE POSITION TO CHALLENGE
-
-[INSERT CLAUDE'S OPENING POSITION FROM PHASE 1]
-
-## YOUR TASK
-
-1. What is WRONG with this position? Be specific, not vague.
-2. What edge cases, failure modes, or risks are missed?
-3. What assumptions are unstated or questionable?
-4. What would YOU recommend instead?
-5. Rate your objection: STRONG / MODERATE / MINOR
-
-## REQUIRED RESPONSE FORMAT
-
-{
-  "verdict": "agree | partial | disagree",
-  "critique": "Your specific objections - be concrete",
-  "evidence": "Concrete example or scenario proving your point",
-  "alternative": "What you recommend instead",
-  "confidence": "high | medium | low",
-  "objection_strength": "strong | moderate | minor",
-  "assumptions_challenged": ["assumption 1", "assumption 2"]
-}
-
-IMPORTANT: If you agree too easily, you're not helping. Find problems.
-If you truly agree after honest analysis, explain WHY the position is solid.
-```
-
-### CLI invocation:
-
-For Gemini:
 ```bash
-timeout 120 gemini "[PROMPT]" --yolo 2>/dev/null || echo '{"error":"gemini_timeout"}'
+"${CLAUDE_PLUGIN_ROOT}/scripts/challenge-all.sh" "$WORKSPACE_PATH" "$CHALLENGE_PROMPT" "$TIMEOUT_PER_CLI" "$ROUND_NUMBER"
 ```
 
-For Codex:
-```bash
-timeout 120 codex exec "[PROMPT]" --full-auto 2>/dev/null || echo '{"error":"codex_timeout"}'
-```
-
-For Qwen:
-```bash
-timeout 120 qwen -p "[PROMPT]" --yolo 2>/dev/null || echo '{"error":"qwen_timeout"}'
-```
-
-### Collect all critiques
-
-Parse JSON responses. Handle errors gracefully - if a CLI fails, continue with others.
-
-Display critiques received:
+CHALLENGE_PROMPT = Claude's opening position + the round task:
 
 ```
-## CHALLENGER CRITIQUES (Round 1)
+## ROUND {N} CHALLENGE
+### Position to Critique
+{CLAUDE_POSITION}
+### Your Task
+Find flaws: edge cases, risks, questionable assumptions. Recommend alternatives.
+Respond with valid JSON: {"verdict":"agree|partial|disagree","critique":"...","evidence":"...","alternative":"...","confidence":"high|medium|low","objection_strength":"strong|moderate|minor","assumptions_challenged":[...],"your_perspective":"..."}
+If you agree too easily you are not helping. If you truly agree, explain why the position is solid.
+```
 
-### Gemini says:
-**Verdict:** [agree/partial/disagree]
-**Critique:** [their objection]
-**Evidence:** [their example]
-**Alternative:** [their recommendation]
-**Assumptions challenged:** [list]
+Each result is a JSON envelope `{model, status, output|error, stderr_tail}` (also saved to `$WORKSPACE_PATH/rounds/`). Parse the `output` field for the challenger's JSON; if non-JSON, treat as raw critique. Skip failed challengers (status != ok), note the failure, continue with the rest. Abort only if ALL fail.
 
-### Codex says:
-[same format]
+Display per challenger:
 
-### Qwen says:
-[same format]
+```
+### agy (Gemini) says: / ### codex says: / ### qwen says:
+Verdict / Critique / Evidence / Alternative / Assumptions challenged
 ```
 
 ---
 
 ## PHASE 3: CONSENSUS CHECK
 
-Evaluate the critiques:
+| Challenger | Verdict | Objection strength | Blocking? |
+|------------|---------|--------------------|-----------|
+| agy | | | |
+| codex | | | |
+| qwen | | | |
 
-| Challenger | Verdict | Objection Strength | Blocking? |
-|------------|---------|-------------------|-----------|
-| Gemini | [v] | [s] | [Y/N] |
-| Codex | [v] | [s] | [Y/N] |
-| Qwen | [v] | [s] | [Y/N] |
-
-### CONSENSUS RULES:
-
-- **All AGREE with high confidence** → FAST EXIT (Phase 8)
-- **All PARTIAL with minor objections** → Address briefly, then FAST EXIT
-- **Any DISAGREE with STRONG objection** → Continue to PHASE 4
-- **Mixed verdicts** → Continue to PHASE 4
-
-### Skepticism check:
-
-If ANY challenger agreed in round 1, be skeptical. Ask yourself:
-- Did they engage seriously or rubber-stamp?
-- Is the agreement substantive or superficial?
-
-If suspicious, treat as PARTIAL and continue to confrontation.
+Rules:
+- All AGREE (high confidence) → Phase 8 fast exit
+- All PARTIAL with minor objections → address briefly, Phase 8
+- Any DISAGREE or STRONG objection, or mixed → Phase 4
+- Skepticism: round-1 agreement that looks like rubber-stamping → treat as PARTIAL, continue
 
 ---
 
-## PHASE 4: CLAUDE RESPONDS (Confrontation)
+## PHASE 4: CLAUDE RESPONDS
 
-For EACH critique that requires response:
-
-### Response format:
-
-```
-## CLAUDE'S RESPONSE TO [CHALLENGER]
-
-**Their critique:** [summarize]
-
-**My response:**
-
-[ ] ACCEPT - This critique is valid. Here's how it changes my position:
-    [explain what changed and why]
-
-[ ] PARTIALLY ACCEPT - Valid point, but limited scope:
-    [explain what you accept and what you don't]
-
-[ ] REJECT - This critique is not valid because:
-    [explain why they're wrong with specifics]
-
-**Updated position (if changed):**
-[state new position or "unchanged"]
-```
-
-### Track changes:
-
-```
-## POSITION EVOLUTION
-
-**Original position:** [v1]
-
-**After Round 1:**
-- Accepted from Gemini: [what]
-- Accepted from Codex: [what]
-- Rejected from Qwen: [what, why]
-
-**Current position (v2):** [updated]
-```
+For each blocking critique: ACCEPT (update position, explain) / PARTIALLY ACCEPT (scope it) / REJECT (explain with specifics). Track position evolution v1 → v2 → ...
 
 ---
 
-## PHASE 5: CHALLENGER REBUTTAL
+## PHASE 5: CHALLENGER REBUTTAL (per-challenger prompts)
 
-For each challenger that DISAGREED and whose critique was REJECTED:
+For each challenger whose critique you REJECTED, the prompts now differ — dispatch the challenger agents IN PARALLEL (all Task calls in ONE message):
 
-Send follow-up via CLI:
+- Agents: `challenger-agy`, `challenger-codex`, `challenger-qwen`
+- Pass each: `WORKSPACE_PATH`, `TIMEOUT_PER_CLI`, `ROUND`, and a PROMPT containing their original critique + Claude's response + the question: "ACCEPT / MAINTAIN (why) / ESCALATE (clarify)"
 
-```
-Claude has responded to your critique.
-
-YOUR ORIGINAL CRITIQUE:
-[their critique]
-
-CLAUDE'S RESPONSE:
-[Claude's rejection/partial acceptance with reasoning]
-
-YOUR OPTIONS:
-1. ACCEPT - Claude's response addresses your concern
-2. MAINTAIN - You still disagree, here's why: [explain]
-3. ESCALATE - Claude missed the point entirely, let me clarify: [clarify]
-
-Respond with your choice and reasoning.
-```
-
-### Collect rebuttals
-
-Parse responses. If challenger:
-- **ACCEPTS** → Issue resolved
-- **MAINTAINS** → Log disagreement, continue
-- **ESCALATES** → Return to PHASE 4 with clarified critique
+ACCEPT → resolved. MAINTAIN → log disagreement. ESCALATE → back to Phase 4 with the clarified critique.
 
 ---
 
 ## PHASE 6: ITERATION CHECK
 
-```
-Current round: [N]
-Max rounds: 5
-
-Unresolved disagreements: [count]
-Challengers still objecting: [list]
-```
-
-### Decision:
-
-- **All issues resolved** → PHASE 8 (Consensus)
-- **Round < 5 AND unresolved issues** → Return to PHASE 4
-- **Round = 5 AND unresolved issues** → PHASE 7 (No consensus)
+- All resolved → Phase 8 (consensus)
+- Round < MAX_ROUNDS and unresolved → Phase 4
+- Round = MAX_ROUNDS and unresolved → Phase 7
 
 ---
 
-## PHASE 7: ASSUMPTION EXTRACTION (No Consensus)
+## PHASE 7: ASSUMPTION EXTRACTION (no consensus)
 
-If debate reached max rounds without consensus:
-
-### Ask each party:
-
-```
-The debate has reached maximum rounds without consensus.
-
-YOUR FINAL POSITION: [their position]
-CLAUDE'S FINAL POSITION: [Claude's position]
-
-FINAL QUESTIONS:
-1. WHY do you still disagree? What's the core issue?
-2. What would have to be TRUE for Claude's position to be correct?
-3. What assumption are you making that Claude is not?
-```
-
-### Synthesize assumptions:
-
-```
-## ASSUMPTION EXTRACTION
-
-The disagreement persists because of different assumptions:
-
-| Party | Core Assumption | If True → |
-|-------|-----------------|-----------|
-| Claude | [assumption] | Claude's position correct |
-| Gemini | [assumption] | Gemini's position correct |
-| Codex | [assumption] | Codex's position correct |
-
-**The real question is:** Which assumption matches YOUR reality?
-```
+Dispatch the `assumption-extractor` agent with TOPIC, final positions, and debate history. Output: assumption map (party / core assumption / if-true-then) + "which assumption matches YOUR reality?"
 
 ---
 
 ## PHASE 8: FINAL OUTPUT
 
-### If CONSENSUS reached:
+**Consensus:** final (evolved) position, what Claude learned per challenger, position evolution, rounds used, collapsed audit trail.
 
-```
-## DEBATE OUTCOME: CONSENSUS
-
-**Topic:** $ARGUMENTS
-
-**Final position:** [Claude's position, potentially evolved]
-
-**Confidence:** HIGH
-
-**What Claude learned:**
-- From Gemini: [insight]
-- From Codex: [insight]
-- From Qwen: [insight]
-
-**Position evolution:**
-v1 → v2 → v3 (final)
-
-**Rounds to consensus:** [N]
-
----
-
-### Audit Trail
-
-<details>
-<summary>Full debate history</summary>
-
-[Complete log of all rounds]
-
-</details>
-```
-
-### If NO CONSENSUS:
-
-Generate tradeoff document using template from `templates/tradeoff-document.md`:
-
-```
-## DEBATE OUTCOME: TRADEOFF IDENTIFIED
-
-**Topic:** $ARGUMENTS
-
-**Rounds:** [N] (max reached)
-
-**Status:** Genuine disagreement - not a failure, but a signal
-
----
-
-[Full tradeoff document with Options A/B/C, assumptions, recommendations]
-```
-
----
-
-## SETTINGS REFERENCE
-
-Check for user settings in `~/.claude/debate.local.md`:
-
-```yaml
----
-max_rounds: 5              # Override max confrontation rounds
-timeout_per_cli: 120       # CLI timeout in seconds
-save_debate_logs: true     # Save to debate_log_path
-debate_log_path: "./debate-logs"
-skeptical_of_early_agreement: true
----
-```
+**No consensus:** fill `${CLAUDE_PLUGIN_ROOT}/templates/tradeoff-document.md` — options, exposed assumptions, common ground, decision checklist. Disagreement is signal, not failure.
 
 ---
 
 ## ERROR HANDLING
 
-### If a CLI fails mid-debate:
-
-1. Log the failure
-2. Continue with remaining challengers
-3. If ALL challengers fail → abort with error
-4. Minimum requirement: Claude + 1 working challenger
-
-### If timeout:
-
-1. Note which CLI timed out
-2. Proceed with available responses
-3. Mention in final output: "[Model] timed out in round [N]"
+- One CLI fails mid-debate → log, continue with the rest
+- ALL challengers fail → abort with error
+- Timeouts are reported in the final output ("[model] timed out in round N")

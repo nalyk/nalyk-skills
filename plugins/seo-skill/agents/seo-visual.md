@@ -24,7 +24,7 @@ pip install playwright && playwright install chromium
 
 ## Screenshot Script
 
-Use `scripts/capture_screenshot.py` for browser automation:
+Write and run an inline Playwright script:
 
 ```python
 from playwright.sync_api import sync_playwright

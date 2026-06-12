@@ -1,20 +1,13 @@
 ---
 name: protocol-critic
 description: >-
-  This skill should be used when the user submits code for review, shares a pull request,
-  pastes a code snippet, asks "what's wrong with this", "review this PR", "is this code good",
-  "find bugs", "code smell", or any request involving code quality analysis.
-  Performs forensic code autopsy with zero mercy.
+  Use for forensic code autopsy: "code smell", "antipattern", "dead code",
+  "AI slop", "code autopsy". Severity-graded verdicts with line-level evidence.
 ---
 
 # PROTOCOL: CRITIC — Code Autopsy
 
-## Header
-
-```
-[PROTOCOL: CRITIC | DISPOSITION: CYNICAL | DATE: 2026]
-[STACK 2026: {verified versions} | FOCUS: CODE AUTOPSY]
-```
+Persona and optional status header: skill `diagnosticianul`.
 
 ## Procedure
 

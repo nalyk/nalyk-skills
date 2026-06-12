@@ -1,16 +1,130 @@
 # Code Templates Reference
 
+> Verify versions against the live project before copying any snippet. Add packages with `flutter pub add <pkg>` and verify current majors on pub.dev.
+
 ## Table of Contents
-1. [Freezed Models](#freezed)
-2. [Repository Pattern](#repository)
-3. [Navigation with GoRouter](#navigation)
-4. [Form Handling](#forms)
-5. [Responsive Layouts](#responsive)
-6. [Custom Widgets](#widgets)
-7. [Animations](#animations)
-8. [Platform Channels](#platform-channels)
-9. [Testing Templates](#testing)
-10. [Localization](#l10n)
+1. [App Entry Point](#entry-point)
+2. [Network Layer (Dio ApiClient)](#network)
+3. [Freezed Models](#freezed)
+4. [Repository Pattern](#repository)
+5. [Navigation with GoRouter](#navigation)
+6. [Form Handling](#forms)
+7. [Responsive Layouts](#responsive)
+8. [Custom Widgets](#widgets)
+9. [Animations](#animations)
+10. [Testing Templates](#testing)
+11. [Localization](#l10n)
+
+---
+
+## App Entry Point {#entry-point}
+
+Medium-project entry (Riverpod + GoRouter):
+
+```dart
+// lib/main.dart
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'routing/app_router.dart';
+import 'core/theme/app_theme.dart';
+
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(const ProviderScope(child: App()));
+}
+
+class App extends ConsumerWidget {
+  const App({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.watch(routerProvider);
+    return MaterialApp.router(
+      title: 'App',
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      routerConfig: router,
+      debugShowCheckedModeBanner: false,
+    );
+  }
+}
+```
+
+---
+
+## Network Layer (Dio ApiClient) {#network}
+
+```bash
+flutter pub add dio connectivity_plus
+```
+
+Logging is gated behind the flavor flag — `LogInterceptor` dumps headers and bodies (auth tokens, PII) and must never run in release. Failure/exception hierarchy: see `architecture-patterns.md` § Medium Project.
+
+```dart
+// lib/core/network/api_client.dart
+import 'package:dio/dio.dart';
+import '../../app/config/flavors.dart';
+
+class ApiClient {
+  ApiClient({
+    required String baseUrl,
+    required FlavorConfig config,
+    String? token,
+    Future<String> Function()? refreshToken,
+  }) : _refreshToken = refreshToken {
+    _dio = Dio(BaseOptions(
+      baseUrl: baseUrl,
+      connectTimeout: const Duration(seconds: 10),
+      receiveTimeout: const Duration(seconds: 15),
+      headers: {
+        'Content-Type': 'application/json',
+        if (token != null) 'Authorization': 'Bearer $token',
+      },
+    ));
+    _dio.interceptors.addAll([
+      // Logs auth headers and bodies — dev/staging only, never release.
+      if (config.enableLogging)
+        LogInterceptor(requestBody: true, responseBody: true),
+      _authRefreshInterceptor(),
+    ]);
+  }
+
+  late final Dio _dio;
+  final Future<String> Function()? _refreshToken;
+
+  /// On 401: refresh the token once, retry the original request.
+  Interceptor _authRefreshInterceptor() => QueuedInterceptorsWrapper(
+        onError: (error, handler) async {
+          final refresh = _refreshToken;
+          if (error.response?.statusCode != 401 || refresh == null) {
+            return handler.next(error);
+          }
+          try {
+            final newToken = await refresh();
+            _dio.options.headers['Authorization'] = 'Bearer $newToken';
+            final retried = await _dio.fetch<dynamic>(
+              error.requestOptions..headers['Authorization'] = 'Bearer $newToken',
+            );
+            handler.resolve(retried);
+          } on DioException {
+            handler.next(error); // refresh failed — surface the original 401
+          }
+        },
+      );
+
+  Future<Response<T>> get<T>(String path, {Map<String, dynamic>? params}) =>
+      _dio.get<T>(path, queryParameters: params);
+
+  Future<Response<T>> post<T>(String path, {Object? data}) =>
+      _dio.post<T>(path, data: data);
+
+  Future<Response<T>> put<T>(String path, {Object? data}) =>
+      _dio.put<T>(path, data: data);
+
+  Future<Response<T>> delete<T>(String path, {Object? data}) =>
+      _dio.delete<T>(path, data: data);
+}
+```
 
 ---
 
@@ -18,16 +132,12 @@
 
 ### Setup
 
-```yaml
-dependencies:
-  freezed_annotation: ^2.4.1
-  json_annotation: ^4.9.0
-
-dev_dependencies:
-  freezed: ^2.5.2
-  json_serializable: ^6.8.0
-  build_runner: ^2.4.8
+```bash
+flutter pub add freezed_annotation json_annotation
+flutter pub add -d freezed json_serializable build_runner
 ```
+
+freezed 3 requires `abstract class` (or `sealed class` for unions) and drops the generated `when`/`map` methods — use Dart 3 switch expressions instead.
 
 ### Model Template
 
@@ -39,7 +149,7 @@ part 'product_model.freezed.dart';
 part 'product_model.g.dart';
 
 @freezed
-class ProductModel with _$ProductModel {
+abstract class ProductModel with _$ProductModel {
   const factory ProductModel({
     required String id,
     required String name,
@@ -102,18 +212,17 @@ extension ProductX on Product {
 ```dart
 @freezed
 sealed class ApiResponse<T> with _$ApiResponse<T> {
-  const factory ApiResponse.success(T data) = _Success<T>;
-  const factory ApiResponse.error(String message, {int? code}) = _Error<T>;
-  const factory ApiResponse.loading() = _Loading<T>;
+  const factory ApiResponse.success(T data) = ApiSuccess<T>;
+  const factory ApiResponse.error(String message, {int? code}) = ApiError<T>;
+  const factory ApiResponse.loading() = ApiLoading<T>;
 }
 
-// Usage
-final response = ApiResponse<List<Product>>.success(products);
-response.when(
-  success: (data) => print('Got ${data.length} products'),
-  error: (msg, code) => print('Error $code: $msg'),
-  loading: () => print('Loading...'),
-);
+// Usage — exhaustive Dart 3 switch (freezed 3 has no when/map)
+final label = switch (response) {
+  ApiSuccess(:final data) => 'Got ${data.length} products',
+  ApiError(:final message, :final code) => 'Error $code: $message',
+  ApiLoading() => 'Loading...',
+};
 ```
 
 Build after creating models:
@@ -192,7 +301,7 @@ class ProductRepositoryImpl implements ProductRepository {
 
   @override
   Future<Product> updateProduct(Product product) async {
-    final response = await _apiClient.post<Map<String, dynamic>>(
+    final response = await _apiClient.put<Map<String, dynamic>>(
       '/products/${product.id}',
       data: product.toModel().toJson(),
     );
@@ -201,13 +310,13 @@ class ProductRepositoryImpl implements ProductRepository {
 
   @override
   Future<void> deleteProduct(String id) async {
-    await _apiClient.get('/products/$id'); // or DELETE
+    await _apiClient.delete<void>('/products/$id');
   }
 }
 
-// Riverpod provider for the repository
+// Riverpod provider for the repository (Riverpod 3 codegen uses plain Ref)
 @riverpod
-ProductRepository productRepository(ProductRepositoryRef ref) {
+ProductRepository productRepository(Ref ref) {
   return ProductRepositoryImpl(
     apiClient: ref.read(apiClientProvider),
     localSource: ref.read(productLocalSourceProvider),
@@ -231,7 +340,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'app_router.g.dart';
 
 @riverpod
-GoRouter router(RouterRef ref) {
+GoRouter router(Ref ref) {
   final isAuth = ref.watch(isAuthenticatedProvider);
 
   return GoRouter(
@@ -775,7 +884,7 @@ void main() {
 dependencies:
   flutter_localizations:
     sdk: flutter
-  intl: ^0.19.0
+  intl: any  # version constrained by flutter_localizations
 
 flutter:
   generate: true

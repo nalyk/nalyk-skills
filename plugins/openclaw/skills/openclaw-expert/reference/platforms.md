@@ -2,7 +2,6 @@
 
 macOS, Linux, Windows, iOS, Android, Hetzner, GCP, Fly, Docker, VPS.
 
-
 ---
 ## Platforms > Android
 
@@ -72,65 +71,6 @@ openclaw gateway call node.list --params "{}"
 
 [Source: https://docs.openclaw.ai/platforms/ios]
 
-iOS App - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Platforms overview
-iOS App
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Platforms overview
-Platforms
-macOS App
-Linux App
-Windows (WSL2)
-Android App
-iOS App
-macOS companion app
-macOS Dev Setup
-Menu Bar
-Voice Wake
-Voice Overlay
-WebChat
-Canvas
-Gateway Lifecycle
-Health Checks
-Menu Bar Icon
-macOS Logging
-macOS Permissions
-Remote Control
-macOS Signing
-macOS Release
-Gateway on macOS
-macOS IPC
-Skills
-Peekaboo Bridge
-iOS App (Node)
-What it does
-Requirements
-Quick start (pair + connect)
-Discovery paths
-Bonjour (LAN)
-Tailnet (cross-network)
-Manual host/port
-Canvas + A2UI
-Canvas eval / snapshot
-Voice wake + talk mode
-Common errors
-Related docs
-Platforms overview
-iOS App
-iOS App (Node)
 Availability: internal preview. The iOS app is not publicly distributed yet.
 What it does
 Connects to a Gateway over WebSocket (LAN or tailnet).
@@ -147,25 +87,22 @@ openclaw.internal.
 Manual host/port (fallback).
 Quick start (pair + connect)
 Start the Gateway:
-Copy
 openclaw
 gateway
 --port
 18789
 In the iOS app, open Settings and pick a discovered gateway (or enable Manual Host and enter host/port).
 Approve the pairing request on the gateway host:
-Copy
 openclaw
 nodes
 pending
 openclaw
 nodes
 approve
-&lt;
+<
 requestI
-&gt;
+>
 Verify connection:
-Copy
 openclaw
 nodes
 status
@@ -174,7 +111,7 @@ gateway
 call
 node.list
 --params
-&quot;{}&quot;
+"{}"
 Discovery paths
 Bonjour (LAN)
 The Gateway advertises
@@ -197,16 +134,15 @@ Canvas + A2UI
 The iOS node renders a WKWebView canvas. Use
 node.invoke
 to drive it:
-Copy
 openclaw
 nodes
 invoke
 --node
-&quot;iOS Node&quot;
+"iOS Node"
 --command
 canvas.navigate
 --params
-&#x27;{&quot;url&quot;:&quot;http://&lt;gateway-host&gt;:18789/__openclaw__/canvas/&quot;}&#x27;
+'{"url":"http://<gateway-host>:18789/__openclaw__/canvas/"}'
 Notes:
 The Gateway canvas host serves
 /__openclaw__/canvas/
@@ -220,28 +156,26 @@ The iOS node auto-navigates to A2UI on connect when a canvas host URL is adverti
 Return to the built-in scaffold with
 canvas.navigate
 and
-{&quot;url&quot;:&quot;&quot;}
+{"url":""}
 Canvas eval / snapshot
-Copy
 openclaw
 nodes
 invoke
 --node
-&quot;iOS Node&quot;
+"iOS Node"
 --command
 canvas.eval
 --params
-&#x27;{&quot;javaScript&quot;:&quot;(() =&gt; { const {ctx} = window.__openclaw; ctx.clearRect(0,0,innerWidth,innerHeight); ctx.lineWidth=6; ctx.strokeStyle=\&quot;#ff2d55\&quot;; ctx.beginPath(); ctx.moveTo(40,40); ctx.lineTo(innerWidth-40, innerHeight-40); ctx.stroke(); return \&quot;ok\&quot;; })()&quot;}&#x27;
-Copy
+'{"javaScript":"(() => { const {ctx} = window.__openclaw; ctx.clearRect(0,0,innerWidth,innerHeight); ctx.lineWidth=6; ctx.strokeStyle=\"#ff2d55\"; ctx.beginPath(); ctx.moveTo(40,40); ctx.lineTo(innerWidth-40, innerHeight-40); ctx.stroke(); return \"ok\"; })()"}'
 openclaw
 nodes
 invoke
 --node
-&quot;iOS Node&quot;
+"iOS Node"
 --command
 canvas.snapshot
 --params
-&#x27;{&quot;maxWidth&quot;:900,&quot;format&quot;:&quot;jpeg&quot;}&#x27;
+'{"maxWidth":900,"format":"jpeg"}'
 Voice wake + talk mode
 Voice wake and talk mode are available in Settings.
 iOS may suspend background audio; treat voice features as best-effort when the app is not active.
@@ -268,58 +202,6 @@ macOS Dev Setup
 
 [Source: https://docs.openclaw.ai/platforms/linux]
 
-Linux App - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Platforms overview
-Linux App
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Platforms overview
-Platforms
-macOS App
-Linux App
-Windows (WSL2)
-Android App
-iOS App
-macOS companion app
-macOS Dev Setup
-Menu Bar
-Voice Wake
-Voice Overlay
-WebChat
-Canvas
-Gateway Lifecycle
-Health Checks
-Menu Bar Icon
-macOS Logging
-macOS Permissions
-Remote Control
-macOS Signing
-macOS Release
-Gateway on macOS
-macOS IPC
-Skills
-Peekaboo Bridge
-Linux App
-Beginner quick path (VPS)
-Install
-Gateway
-Gateway service install (CLI)
-System control (systemd user unit)
-Platforms overview
-Linux App
-Linux App
 The Gateway is fully supported on Linux.
 Node is the recommended runtime
 Bun is not recommended for the Gateway (WhatsApp/Telegram bugs).
@@ -329,7 +211,7 @@ Install Node 22+
 npm i -g openclaw@latest
 openclaw onboard --install-daemon
 From your laptop:
-ssh -N -L 18789:127.0.0.1:18789 &lt;user&gt;@&lt;host&gt;
+ssh -N -L 18789:127.0.0.1:18789 <user>@<host>
 Open
 http://127.0.0.1:18789/
 and paste your token
@@ -337,7 +219,7 @@ Step-by-step VPS guide:
 exe.dev
 Install
 Getting Started
-Install &amp; updates
+Install & updates
 Optional flows:
 Bun (experimental)
 Nix
@@ -347,19 +229,15 @@ Gateway runbook
 Configuration
 Gateway service install (CLI)
 Use one of these:
-Copy
 openclaw onboard --install-daemon
 Or:
-Copy
 openclaw gateway install
 Or:
-Copy
 openclaw configure
 Select
 Gateway service
 when prompted.
 Repair/migrate:
-Copy
 openclaw doctor
 System control (systemd user unit)
 OpenClaw installs a systemd
@@ -371,10 +249,9 @@ live in the
 Gateway runbook
 Minimal setup:
 Create
-~/.config/systemd/user/openclaw-gateway[-&lt;profile&gt;].service
-Copy
+~/.config/systemd/user/openclaw-gateway[-<profile>].service
 [Unit]
-Description=OpenClaw Gateway (profile: &lt;profile&gt;, v&lt;version&gt;)
+Description=OpenClaw Gateway (profile: <profile>, v<version>)
 After=network-online.target
 Wants=network-online.target
 [Service]
@@ -384,8 +261,7 @@ RestartSec=5
 [Install]
 WantedBy=default.target
 Enable it:
-Copy
-systemctl --user enable --now openclaw-gateway[-&lt;profile&gt;].service
+systemctl --user enable --now openclaw-gateway[-<profile>].service
 macOS App
 Windows (WSL2)
 
@@ -394,57 +270,6 @@ Windows (WSL2)
 
 [Source: https://docs.openclaw.ai/platforms/mac/bundled-gateway]
 
-Gateway on macOS - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-macOS companion app
-Gateway on macOS
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Platforms overview
-Platforms
-macOS App
-Linux App
-Windows (WSL2)
-Android App
-iOS App
-macOS companion app
-macOS Dev Setup
-Menu Bar
-Voice Wake
-Voice Overlay
-WebChat
-Canvas
-Gateway Lifecycle
-Health Checks
-Menu Bar Icon
-macOS Logging
-macOS Permissions
-Remote Control
-macOS Signing
-macOS Release
-Gateway on macOS
-macOS IPC
-Skills
-Peekaboo Bridge
-Gateway on macOS (external launchd)
-Install the CLI (required for local mode)
-Launchd (Gateway as LaunchAgent)
-Version compatibility
-Smoke check
-macOS companion app
-Gateway on macOS
-Gateway on macOS (external launchd)
 OpenClaw.app no longer bundles Node/Bun or the Gateway runtime. The macOS app
 expects an
 external
@@ -456,13 +281,12 @@ Install the CLI (required for local mode)
 You need Node 22+ on the Mac, then install
 openclaw
 globally:
-Copy
 npm
 install
 openclaw@
-&lt;
+<
 versio
-&gt;
+>
 The macOS app’s
 Install CLI
 button runs the same flow via npm/pnpm (bun not recommended for Gateway runtime).
@@ -470,14 +294,14 @@ Launchd (Gateway as LaunchAgent)
 Label:
 bot.molt.gateway
 (or
-bot.molt.&lt;profile&gt;
+bot.molt.<profile>
 ; legacy
 com.openclaw.*
 may remain)
 Plist location (per‑user):
 ~/Library/LaunchAgents/bot.molt.gateway.plist
 (or
-~/Library/LaunchAgents/bot.molt.&lt;profile&gt;.plist
+~/Library/LaunchAgents/bot.molt.<profile>.plist
 Manager:
 The macOS app owns LaunchAgent install/update in Local mode.
 The CLI can also install it:
@@ -496,7 +320,6 @@ Version compatibility
 The macOS app checks the gateway version against its own version. If they’re
 incompatible, update the global CLI to match the app version.
 Smoke check
-Copy
 openclaw
 --version
 OPENCLAW_SKIP_CHANNELS
@@ -508,7 +331,6 @@ gateway
 --bind
 loopback
 Then:
-Copy
 openclaw
 gateway
 call
@@ -525,59 +347,6 @@ macOS IPC
 
 [Source: https://docs.openclaw.ai/platforms/mac/canvas]
 
-Canvas - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-macOS companion app
-Canvas
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Platforms overview
-Platforms
-macOS App
-Linux App
-Windows (WSL2)
-Android App
-iOS App
-macOS companion app
-macOS Dev Setup
-Menu Bar
-Voice Wake
-Voice Overlay
-WebChat
-Canvas
-Gateway Lifecycle
-Health Checks
-Menu Bar Icon
-macOS Logging
-macOS Permissions
-Remote Control
-macOS Signing
-macOS Release
-Gateway on macOS
-macOS IPC
-Skills
-Peekaboo Bridge
-Canvas (macOS app)
-Where Canvas lives
-Panel behavior
-Agent API surface
-A2UI in Canvas
-A2UI commands (v0.8)
-Triggering agent runs from Canvas
-Security notes
-macOS companion app
-Canvas
 Canvas (macOS app)
 The macOS app embeds an agent‑controlled
 Canvas panel
@@ -588,17 +357,17 @@ is a lightweight visual workspace for HTML/CSS/JS, A2UI, and small interactive
 UI surfaces.
 Where Canvas lives
 Canvas state is stored under Application Support:
-~/Library/Application Support/OpenClaw/canvas/&lt;session&gt;/...
+~/Library/Application Support/OpenClaw/canvas/<session>/...
 The Canvas panel serves those files via a
 custom URL scheme
-openclaw-canvas://&lt;session&gt;/&lt;path&gt;
+openclaw-canvas://<session>/<path>
 Examples:
 openclaw-canvas://main/
-&lt;canvasRoot&gt;/main/index.html
+<canvasRoot>/main/index.html
 openclaw-canvas://main/assets/app.css
-&lt;canvasRoot&gt;/main/assets/app.css
+<canvasRoot>/main/assets/app.css
 openclaw-canvas://main/widgets/todo/
-&lt;canvasRoot&gt;/main/widgets/todo/index.html
+<canvasRoot>/main/widgets/todo/index.html
 If no
 index.html
 exists at the root, the app shows a
@@ -622,39 +391,38 @@ navigate to a path or URL
 evaluate JavaScript
 capture a snapshot image
 CLI examples:
-Copy
 openclaw
 nodes
 canvas
 present
 --node
-&lt;
-&gt;
+<
+>
 openclaw
 nodes
 canvas
 navigate
 --node
-&lt;
-&gt;
+<
+>
 --url
-&quot;/&quot;
+"/"
 openclaw
 nodes
 canvas
 eval
 --node
-&lt;
-&gt;
+<
+>
 --js
-&quot;document.title&quot;
+"document.title"
 openclaw
 nodes
 canvas
 snapshot
 --node
-&lt;
-&gt;
+<
+>
 Notes:
 canvas.navigate
 accepts
@@ -664,7 +432,7 @@ URLs, and
 file://
 URLs.
 If you pass
-&quot;/&quot;
+"/"
 , the Canvas shows the local scaffold or
 index.html
 A2UI in Canvas
@@ -672,8 +440,7 @@ A2UI is hosted by the Gateway canvas host and rendered inside the Canvas panel.
 When the Gateway advertises a Canvas host, the macOS app auto‑navigates to the
 A2UI host page on first open.
 Default A2UI host URL:
-Copy
-http://&lt;gateway-host&gt;:18789/__openclaw__/a2ui/
+http://<gateway-host>:18789/__openclaw__/a2ui/
 A2UI commands (v0.8)
 Canvas currently accepts
 A2UI v0.8
@@ -685,14 +452,13 @@ deleteSurface
 createSurface
 (v0.9) is not supported.
 CLI example:
-Copy
 cat
-&gt;
+>
 /tmp/a2ui-v0.8.jsonl
-&lt;&lt;
-&#x27;EOFA2&#x27;
-{&quot;surfaceUpdate&quot;:{&quot;surfaceId&quot;:&quot;main&quot;,&quot;components&quot;:[{&quot;id&quot;:&quot;root&quot;,&quot;component&quot;:{&quot;Column&quot;:{&quot;children&quot;:{&quot;explicitList&quot;:[&quot;title&quot;,&quot;content&quot;]}}}},{&quot;id&quot;:&quot;title&quot;,&quot;component&quot;:{&quot;Text&quot;:{&quot;text&quot;:{&quot;literalString&quot;:&quot;Canvas (A2UI v0.8)&quot;},&quot;usageHint&quot;:&quot;h1&quot;}}},{&quot;id&quot;:&quot;content&quot;,&quot;component&quot;:{&quot;Text&quot;:{&quot;text&quot;:{&quot;literalString&quot;:&quot;If you can read this, A2UI push works.&quot;},&quot;usageHint&quot;:&quot;body&quot;}}}]}}
-{&quot;beginRendering&quot;:{&quot;surfaceId&quot;:&quot;main&quot;,&quot;root&quot;:&quot;root&quot;}}
+<<
+'EOFA2'
+{"surfaceUpdate":{"surfaceId":"main","components":[{"id":"root","component":{"Column":{"children":{"explicitList":["title","content"]}}}},{"id":"title","component":{"Text":{"text":{"literalString":"Canvas (A2UI v0.8)"},"usageHint":"h1"}}},{"id":"content","component":{"Text":{"text":{"literalString":"If you can read this, A2UI push works."},"usageHint":"body"}}}]}}
+{"beginRendering":{"surfaceId":"main","root":"root"}}
 EOFA2
 openclaw
 nodes
@@ -702,29 +468,27 @@ push
 --jsonl
 /tmp/a2ui-v0.8.jsonl
 --node
-&lt;
-&gt;
+<
+>
 Quick smoke:
-Copy
 openclaw
 nodes
 canvas
 a2ui
 push
 --node
-&lt;
-&gt;
+<
+>
 --text
-&quot;Hello from A2UI&quot;
+"Hello from A2UI"
 Triggering agent runs from Canvas
 Canvas can trigger new agent runs via deep links:
 openclaw://agent?...
 Example (in JS):
-Copy
 window
 location
 .href
-&quot;openclaw://agent?message=Review%20this%20design&quot;
+"openclaw://agent?message=Review%20this%20design"
 The app prompts for confirmation unless a valid key is provided.
 Security notes
 Canvas scheme blocks directory traversal; files must live under the session root.
@@ -740,61 +504,6 @@ Gateway Lifecycle
 
 [Source: https://docs.openclaw.ai/platforms/mac/child-process]
 
-Gateway Lifecycle - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-macOS companion app
-Gateway Lifecycle
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Platforms overview
-Platforms
-macOS App
-Linux App
-Windows (WSL2)
-Android App
-iOS App
-macOS companion app
-macOS Dev Setup
-Menu Bar
-Voice Wake
-Voice Overlay
-WebChat
-Canvas
-Gateway Lifecycle
-Health Checks
-Menu Bar Icon
-macOS Logging
-macOS Permissions
-Remote Control
-macOS Signing
-macOS Release
-Gateway on macOS
-macOS IPC
-Skills
-Peekaboo Bridge
-Gateway lifecycle on macOS
-Default behavior (launchd)
-Unsigned dev builds
-Attach-only mode
-Remote mode
-Why we prefer launchd
-macOS companion app
-Gateway Lifecycle
-Gateway lifecycle on macOS
-The macOS app
-manages the Gateway via launchd
-by default and does not spawn
 the Gateway as a child process. It first tries to attach to an already‑running
 Gateway on the configured port; if none is reachable, it enables the launchd
 service via the external
@@ -809,7 +518,7 @@ Default behavior (launchd)
 The app installs a per‑user LaunchAgent labeled
 bot.molt.gateway
 (or
-bot.molt.&lt;profile&gt;
+bot.molt.<profile>
 when using
 --profile
 OPENCLAW_PROFILE
@@ -820,7 +529,6 @@ When Local mode is enabled, the app ensures the LaunchAgent is loaded and
 starts the Gateway if needed.
 Logs are written to the launchd gateway log path (visible in Debug Settings).
 Common commands:
-Copy
 launchctl
 kickstart
 gui/
@@ -832,7 +540,7 @@ gui/
 $UID
 /bot.molt.gateway
 Replace the label with
-bot.molt.&lt;profile&gt;
+bot.molt.<profile>
 when running a named profile.
 Unsigned dev builds
 scripts/restart-mac.sh --no-sign
@@ -844,7 +552,6 @@ Signed runs of
 scripts/restart-mac.sh
 clear this override if the marker is
 present. To reset manually:
-Copy
 ~/.openclaw/disable-launchagent
 Attach-only mode
 To force the macOS app to
@@ -874,78 +581,22 @@ Health Checks
 
 [Source: https://docs.openclaw.ai/platforms/mac/dev-setup]
 
-macOS Dev Setup - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-macOS companion app
-macOS Dev Setup
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Platforms overview
-Platforms
-macOS App
-Linux App
-Windows (WSL2)
-Android App
-iOS App
-macOS companion app
-macOS Dev Setup
-Menu Bar
-Voice Wake
-Voice Overlay
-WebChat
-Canvas
-Gateway Lifecycle
-Health Checks
-Menu Bar Icon
-macOS Logging
-macOS Permissions
-Remote Control
-macOS Signing
-macOS Release
-Gateway on macOS
-macOS IPC
-Skills
-Peekaboo Bridge
-macOS Developer Setup
-Prerequisites
-1. Install Dependencies
-2. Build and Package the App
-3. Install the CLI
-Troubleshooting
-Build Fails: Toolchain or SDK Mismatch
-App Crashes on Permission Grant
-Gateway “Starting…” indefinitely
-macOS companion app
-macOS Dev Setup
 macOS Developer Setup
 This guide covers the necessary steps to build and run the OpenClaw macOS application from source.
 Prerequisites
 Before building the app, ensure you have the following installed:
 Xcode 26.2+
 : Required for Swift development.
-Node.js 22+ &amp; pnpm
+Node.js 22+ & pnpm
 : Required for the gateway, CLI, and packaging scripts.
 1. Install Dependencies
 Install the project-wide dependencies:
-Copy
 pnpm
 install
 2. Build and Package the App
 To build the macOS app and package it into
 dist/OpenClaw.app
 , run:
-Copy
 ./scripts/package-mac-app.sh
 If you don’t have an Apple Developer ID certificate, the script will automatically use
 ad-hoc signing
@@ -967,13 +618,12 @@ settings tab.
 Click
 “Install CLI”
 Alternatively, install it manually:
-Copy
 npm
 install
 openclaw@
-&lt;
+<
 versio
-&gt;
+>
 Troubleshooting
 Build Fails: Toolchain or SDK Mismatch
 The macOS app build expects the latest macOS SDK and Swift 6.2 toolchain.
@@ -983,7 +633,6 @@ Latest macOS version available in Software Update
 Xcode 26.2
 (Swift 6.2 toolchain)
 Checks:
-Copy
 xcodebuild
 -version
 xcrun
@@ -997,7 +646,6 @@ Microphone
 access, it may be due to a corrupted TCC cache or signature mismatch.
 Fix:
 Reset the TCC permissions:
-Copy
 tccutil
 reset
 All
@@ -1009,7 +657,6 @@ scripts/package-mac-app.sh
 to force a “clean slate” from macOS.
 Gateway “Starting…” indefinitely
 If the gateway status stays on “Starting…”, check if a zombie process is holding the port:
-Copy
 openclaw
 gateway
 status
@@ -1030,56 +677,6 @@ Menu Bar
 
 [Source: https://docs.openclaw.ai/platforms/mac/health]
 
-Health Checks - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-macOS companion app
-Health Checks
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Platforms overview
-Platforms
-macOS App
-Linux App
-Windows (WSL2)
-Android App
-iOS App
-macOS companion app
-macOS Dev Setup
-Menu Bar
-Voice Wake
-Voice Overlay
-WebChat
-Canvas
-Gateway Lifecycle
-Health Checks
-Menu Bar Icon
-macOS Logging
-macOS Permissions
-Remote Control
-macOS Signing
-macOS Release
-Gateway on macOS
-macOS IPC
-Skills
-Peekaboo Bridge
-Health Checks on macOS
-Menu bar
-Settings
-How the probe works
-When in doubt
-macOS companion app
-Health Checks
 Health Checks on macOS
 How to see whether the linked channel is healthy from the menu bar app.
 Menu bar
@@ -1120,52 +717,6 @@ Menu Bar Icon
 
 [Source: https://docs.openclaw.ai/platforms/mac/icon]
 
-Menu Bar Icon - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-macOS companion app
-Menu Bar Icon
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Platforms overview
-Platforms
-macOS App
-Linux App
-Windows (WSL2)
-Android App
-iOS App
-macOS companion app
-macOS Dev Setup
-Menu Bar
-Voice Wake
-Voice Overlay
-WebChat
-Canvas
-Gateway Lifecycle
-Health Checks
-Menu Bar Icon
-macOS Logging
-macOS Permissions
-Remote Control
-macOS Signing
-macOS Release
-Gateway on macOS
-macOS IPC
-Skills
-Peekaboo Bridge
-Menu Bar Icon States
-macOS companion app
-Menu Bar Icon
 Menu Bar Icon States
 Author: steipete · Updated: 2025-12-06 · Scope: macOS app (
 apps/macos
@@ -1197,7 +748,7 @@ AppStateStore.shared.setWorking(true/false)
 around work spans (already done in WebChat agent call). Keep spans short and reset in
 defer
 blocks to avoid stuck animations.
-Shapes &amp; sizes
+Shapes & sizes
 Base icon drawn in
 CritterIconRenderer.makeIcon(blink:legWiggle:earWiggle:earScale:earHoles:)
 Ear scale defaults to
@@ -1210,7 +761,7 @@ without changing overall frame (18×18 pt template image rendered into a 36×3
 Scurry uses leg wiggle up to ~1.0 with a small horizontal jiggle; it’s additive to any existing idle wiggle.
 Behavioral notes
 No external CLI/broker toggle for ears/working; keep it internal to the app’s own signals to avoid accidental flapping.
-Keep TTLs short (&lt;10s) so the icon returns to baseline quickly if a job hangs.
+Keep TTLs short (<10s) so the icon returns to baseline quickly if a job hangs.
 Health Checks
 macOS Logging
 
@@ -1219,56 +770,6 @@ macOS Logging
 
 [Source: https://docs.openclaw.ai/platforms/mac/logging]
 
-macOS Logging - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-macOS companion app
-macOS Logging
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Platforms overview
-Platforms
-macOS App
-Linux App
-Windows (WSL2)
-Android App
-iOS App
-macOS companion app
-macOS Dev Setup
-Menu Bar
-Voice Wake
-Voice Overlay
-WebChat
-Canvas
-Gateway Lifecycle
-Health Checks
-Menu Bar Icon
-macOS Logging
-macOS Permissions
-Remote Control
-macOS Signing
-macOS Release
-Gateway on macOS
-macOS IPC
-Skills
-Peekaboo Bridge
-Logging (macOS)
-Rolling diagnostics file log (Debug pane)
-Unified logging private data on macOS
-Enable for OpenClaw (bot.molt)
-Disable after debugging
-macOS companion app
-macOS Logging
 Logging (macOS)
 Rolling diagnostics file log (Debug pane)
 OpenClaw routes macOS app logs through swift-log (unified logging by default) and can write a local, rotating file log to disk when you need a durable capture.
@@ -1298,23 +799,22 @@ keyed by the subsystem name. Only new log entries pick up the flag, so enable it
 Enable for OpenClaw (
 bot.molt
 Write the plist to a temp file first, then install it atomically as root:
-Copy
 cat
-&lt;&lt;
-&#x27;EOF&#x27;
-&gt;
+<<
+'EOF'
+>
 /tmp/bot.molt.plist
-&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
-&lt;!DOCTYPE plist PUBLIC &quot;-//Apple//DTD PLIST 1.0//EN&quot; &quot;http://www.apple.com/DTDs/PropertyList-1.0.dtd&quot;&gt;
-&lt;plist version=&quot;1.0&quot;&gt;
-&lt;dict&gt;
-&lt;key&gt;DEFAULT-OPTIONS&lt;/key&gt;
-&lt;dict&gt;
-&lt;key&gt;Enable-Private-Data&lt;/key&gt;
-&lt;true/&gt;
-&lt;/dict&gt;
-&lt;/dict&gt;
-&lt;/plist&gt;
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+<key>DEFAULT-OPTIONS</key>
+<dict>
+<key>Enable-Private-Data</key>
+<true/>
+</dict>
+</dict>
+</plist>
 EOF
 sudo
 install
@@ -1341,61 +841,6 @@ macOS Permissions
 
 [Source: https://docs.openclaw.ai/platforms/mac/menu-bar]
 
-Menu Bar - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-macOS companion app
-Menu Bar
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Platforms overview
-Platforms
-macOS App
-Linux App
-Windows (WSL2)
-Android App
-iOS App
-macOS companion app
-macOS Dev Setup
-Menu Bar
-Voice Wake
-Voice Overlay
-WebChat
-Canvas
-Gateway Lifecycle
-Health Checks
-Menu Bar Icon
-macOS Logging
-macOS Permissions
-Remote Control
-macOS Signing
-macOS Release
-Gateway on macOS
-macOS IPC
-Skills
-Peekaboo Bridge
-Menu Bar Status Logic
-What is shown
-State model
-IconState enum (Swift)
-ActivityKind → glyph
-Visual mapping
-Status row text (menu)
-Event ingestion
-Debug override
-Testing checklist
-macOS companion app
-Menu Bar
 Menu Bar Status Logic
 What is shown
 We surface the current agent work state in the menu bar icon and in the first status row of the menu.
@@ -1454,7 +899,7 @@ overridden
 : uses the chosen glyph/tint regardless of activity.
 Status row text (menu)
 While work is active:
-&lt;Session role&gt; · &lt;activity label&gt;
+<Session role> · <activity label>
 Examples:
 Main · exec: pnpm test
 Other · read: apps/macos/Sources/OpenClaw/AppState.swift
@@ -1465,11 +910,11 @@ agent
 events (
 ControlChannel.handleAgentEvent
 Parsed fields:
-stream: &quot;job&quot;
+stream: "job"
 with
 data.state
 for start/stop.
-stream: &quot;tool&quot;
+stream: "tool"
 with
 data.phase
 name
@@ -1498,7 +943,7 @@ Working: other
 (per tool kind)
 Idle
 Stored via
-@AppStorage(&quot;iconOverride&quot;)
+@AppStorage("iconOverride")
 ; mapped to
 IconState.overridden
 Testing checklist
@@ -1515,62 +960,6 @@ Voice Wake
 
 [Source: https://docs.openclaw.ai/platforms/mac/peekaboo]
 
-Peekaboo Bridge - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-macOS companion app
-Peekaboo Bridge
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Platforms overview
-Platforms
-macOS App
-Linux App
-Windows (WSL2)
-Android App
-iOS App
-macOS companion app
-macOS Dev Setup
-Menu Bar
-Voice Wake
-Voice Overlay
-WebChat
-Canvas
-Gateway Lifecycle
-Health Checks
-Menu Bar Icon
-macOS Logging
-macOS Permissions
-Remote Control
-macOS Signing
-macOS Release
-Gateway on macOS
-macOS IPC
-Skills
-Peekaboo Bridge
-Peekaboo Bridge (macOS UI automation)
-What this is (and isn’t)
-Enable the bridge
-Client discovery order
-Security &amp; permissions
-Snapshot behavior (automation)
-Troubleshooting
-macOS companion app
-Peekaboo Bridge
-Peekaboo Bridge (macOS UI automation)
-OpenClaw can host
-PeekabooBridge
-as a local, permission‑aware UI automation
 broker. This lets the
 peekaboo
 CLI drive UI automation while reusing the
@@ -1602,11 +991,10 @@ Use
 peekaboo bridge status --verbose
 to see which host is active and which
 socket path is in use. You can override with:
-Copy
 export
 PEEKABOO_BRIDGE_SOCKET
 /path/to/bridge.sock
-Security &amp; permissions
+Security & permissions
 The bridge validates
 caller code signatures
 ; an allowlist of TeamIDs is
@@ -1633,55 +1021,6 @@ Skills
 
 [Source: https://docs.openclaw.ai/platforms/mac/permissions]
 
-macOS Permissions - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-macOS companion app
-macOS Permissions
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Platforms overview
-Platforms
-macOS App
-Linux App
-Windows (WSL2)
-Android App
-iOS App
-macOS companion app
-macOS Dev Setup
-Menu Bar
-Voice Wake
-Voice Overlay
-WebChat
-Canvas
-Gateway Lifecycle
-Health Checks
-Menu Bar Icon
-macOS Logging
-macOS Permissions
-Remote Control
-macOS Signing
-macOS Release
-Gateway on macOS
-macOS IPC
-Skills
-Peekaboo Bridge
-macOS permissions (TCC)
-Requirements for stable permissions
-Recovery checklist when prompts disappear
-Files and folders permissions (Desktop/Documents/Downloads)
-macOS companion app
-macOS Permissions
 macOS permissions (TCC)
 macOS permission grants are fragile. TCC associates a permission grant with the
 app’s code signature, bundle identifier, and on-disk path. If any of those change,
@@ -1697,14 +1036,13 @@ Ad-hoc signatures generate a new identity every build. macOS will forget previou
 grants, and prompts can disappear entirely until the stale entries are cleared.
 Recovery checklist when prompts disappear
 Quit the app.
-Remove the app entry in System Settings -&gt; Privacy &amp; Security.
+Remove the app entry in System Settings -> Privacy & Security.
 Relaunch the app from the same path and re-grant permissions.
 If the prompt still does not appear, reset TCC entries with
 tccutil
 and try again.
 Some permissions only reappear after a full macOS restart.
 Example resets (replace bundle ID as needed):
-Copy
 sudo
 tccutil
 reset
@@ -1734,61 +1072,10 @@ Remote Control
 
 [Source: https://docs.openclaw.ai/platforms/mac/release]
 
-macOS Release - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-macOS companion app
-macOS Release
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Platforms overview
-Platforms
-macOS App
-Linux App
-Windows (WSL2)
-Android App
-iOS App
-macOS companion app
-macOS Dev Setup
-Menu Bar
-Voice Wake
-Voice Overlay
-WebChat
-Canvas
-Gateway Lifecycle
-Health Checks
-Menu Bar Icon
-macOS Logging
-macOS Permissions
-Remote Control
-macOS Signing
-macOS Release
-Gateway on macOS
-macOS IPC
-Skills
-Peekaboo Bridge
-OpenClaw macOS release (Sparkle)
-Prereqs
-Build &amp; package
-Appcast entry
-Publish &amp; verify
-macOS companion app
-macOS Release
-OpenClaw macOS release (Sparkle)
 This app now ships Sparkle auto-updates. Release builds must be Developer ID–signed, zipped, and published with a signed appcast entry.
 Prereqs
 Developer ID Application cert installed (example:
-Developer ID Application: &lt;Developer Name&gt; (&lt;TEAMID&gt;)
+Developer ID Application: <Developer Name> (<TEAMID>)
 Sparkle private key path set in the environment as
 SPARKLE_PRIVATE_KEY_FILE
 (path to your Sparkle ed25519 private key; public key baked into Info.plist). If it is missing, check
@@ -1802,8 +1089,8 @@ openclaw-notary
 APP_STORE_CONNECT_API_KEY_P8
 APP_STORE_CONNECT_KEY_ID
 APP_STORE_CONNECT_ISSUER_ID
-echo &quot;$APP_STORE_CONNECT_API_KEY_P8&quot; | sed &#x27;s/\\n/\n/g&#x27; &gt; /tmp/openclaw-notary.p8
-xcrun notarytool store-credentials &quot;openclaw-notary&quot; --key /tmp/openclaw-notary.p8 --key-id &quot;$APP_STORE_CONNECT_KEY_ID&quot; --issuer &quot;$APP_STORE_CONNECT_ISSUER_ID&quot;
+echo "$APP_STORE_CONNECT_API_KEY_P8" | sed 's/\\n/\n/g' > /tmp/openclaw-notary.p8
+xcrun notarytool store-credentials "openclaw-notary" --key /tmp/openclaw-notary.p8 --key-id "$APP_STORE_CONNECT_KEY_ID" --issuer "$APP_STORE_CONNECT_ISSUER_ID"
 pnpm
 deps installed (
 pnpm install --config.node-linker=hoisted
@@ -1812,7 +1099,7 @@ apps/macos/.build/artifacts/sparkle/Sparkle/bin/
 sign_update
 generate_appcast
 , etc.).
-Build &amp; package
+Build & package
 Notes:
 APP_BUILD
 maps to
@@ -1824,7 +1111,7 @@ sparkle:version
 Defaults to the current architecture (
 $(uname -m)
 ). For release/universal builds, set
-BUILD_ARCHS=&quot;arm64 x86_64&quot;
+BUILD_ARCHS="arm64 x86_64"
 (or
 BUILD_ARCHS=all
 Use
@@ -1832,22 +1119,21 @@ scripts/package-mac-dist.sh
 for release artifacts (zip + DMG + notarization). Use
 scripts/package-mac-app.sh
 for local/dev packaging.
-Copy
 # From repo root; set release IDs so Sparkle feed is enabled.
 # APP_BUILD must be numeric + monotonic for Sparkle compare.
 BUNDLE_ID
 bot.molt.mac
 APP_VERSION=2026.2.16 \
 APP_BUILD=
-&quot;$(
+"$(
 git
 rev-list
 --count
 HEAD
-)&quot;
+)"
 BUILD_CONFIG=release \
 SIGN_IDENTITY=
-&quot;Developer ID Application: &lt;Developer Name&gt; (&lt;TEAMID&gt;)&quot;
+"Developer ID Application: <Developer Name> (<TEAMID>)"
 scripts/package-mac-app.sh
 # Zip for distribution (includes resource forks for Sparkle delta support)
 ditto
@@ -1861,23 +1147,23 @@ dist/OpenClaw.app
 dist/OpenClaw-2026.2.16.dmg
 # Recommended: build + notarize/staple zip + DMG
 # First, create a keychain profile once:
-# xcrun notarytool store-credentials &quot;openclaw-notary&quot; \
-# --apple-id &quot;&lt;apple-id&gt;&quot; --team-id &quot;&lt;team-id&gt;&quot; --password &quot;&lt;app-specific-password&gt;&quot;
+# xcrun notarytool store-credentials "openclaw-notary" \
+# --apple-id "<apple-id>" --team-id "<team-id>" --password "<app-specific-password>"
 NOTARIZE
 NOTARYTOOL_PROFILE
 openclaw-notary
 BUNDLE_ID=bot.molt.mac \
 APP_VERSION=2026.2.16 \
 APP_BUILD=
-&quot;$(
+"$(
 git
 rev-list
 --count
 HEAD
-)&quot;
+)"
 BUILD_CONFIG=release \
 SIGN_IDENTITY=
-&quot;Developer ID Application: &lt;Developer Name&gt; (&lt;TEAMID&gt;)&quot;
+"Developer ID Application: <Developer Name> (<TEAMID>)"
 scripts/package-mac-dist.sh
 # Optional: ship dSYM alongside the release
 ditto
@@ -1886,7 +1172,6 @@ apps/macos/.build/release/OpenClaw.app.dSYM
 dist/OpenClaw-2026.2.16.dSYM.zip
 Appcast entry
 Use the release note generator so Sparkle renders formatted HTML notes:
-Copy
 SPARKLE_PRIVATE_KEY_FILE
 /path/to/ed25519-private-key
 scripts/make_appcast.sh
@@ -1900,7 +1185,7 @@ scripts/changelog-to-html.sh
 Commit the updated
 appcast.xml
 alongside the release assets (zip + dSYM) when publishing.
-Publish &amp; verify
+Publish & verify
 Upload
 OpenClaw-2026.2.16.zip
 (and
@@ -1912,7 +1197,7 @@ https://raw.githubusercontent.com/openclaw/openclaw/main/appcast.xml
 Sanity checks:
 curl -I https://raw.githubusercontent.com/openclaw/openclaw/main/appcast.xml
 returns 200.
-curl -I &lt;enclosure url&gt;
+curl -I <enclosure url>
 returns 200 after assets upload.
 On a previous public build, run “Check for Updates…” from the About tab and verify Sparkle installs the new build cleanly.
 Definition of done: signed app + appcast are published, update flow works from an older installed version, and release assets are attached to the GitHub release.
@@ -1924,63 +1209,6 @@ Gateway on macOS
 
 [Source: https://docs.openclaw.ai/platforms/mac/remote]
 
-Remote Control - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-macOS companion app
-Remote Control
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Platforms overview
-Platforms
-macOS App
-Linux App
-Windows (WSL2)
-Android App
-iOS App
-macOS companion app
-macOS Dev Setup
-Menu Bar
-Voice Wake
-Voice Overlay
-WebChat
-Canvas
-Gateway Lifecycle
-Health Checks
-Menu Bar Icon
-macOS Logging
-macOS Permissions
-Remote Control
-macOS Signing
-macOS Release
-Gateway on macOS
-macOS IPC
-Skills
-Peekaboo Bridge
-Remote OpenClaw (macOS ⇄ remote host)
-Modes
-Remote transports
-Prereqs on the remote host
-macOS app setup
-Web Chat
-Permissions
-Security notes
-WhatsApp login flow (remote)
-Troubleshooting
-Notification sounds
-macOS companion app
-Remote Control
-Remote OpenClaw (macOS ⇄ remote host)
 This flow lets the macOS app act as a full remote control for a OpenClaw gateway running on another host (desktop/server). It’s the app’s
 Remote over SSH
 (remote run) feature. All features—health checks, Voice Wake forwarding, and Web Chat—reuse the same remote SSH configuration from
@@ -2006,7 +1234,7 @@ Direct (ws/wss)
 : Connects straight to the gateway URL. The gateway sees the real client IP.
 Prereqs on the remote host
 Install Node + pnpm and build/install the OpenClaw CLI (
-pnpm install &amp;&amp; pnpm build &amp;&amp; pnpm link --global
+pnpm install && pnpm build && pnpm link --global
 Ensure
 openclaw
 is on PATH for non-interactive shells (symlink into
@@ -2103,17 +1331,16 @@ openclaw
 and
 node.invoke
 , e.g.:
-Copy
 openclaw
 nodes
 notify
 --node
-&lt;
-&gt;
+<
+>
 --title
-&quot;Ping&quot;
+"Ping"
 --body
-&quot;Remote gateway ready&quot;
+"Remote gateway ready"
 --sound
 Glass
 There is no global “default sound” toggle in the app anymore; callers choose a sound (or none) per request.
@@ -2125,59 +1352,6 @@ macOS Signing
 
 [Source: https://docs.openclaw.ai/platforms/mac/signing]
 
-macOS Signing - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-macOS companion app
-macOS Signing
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Platforms overview
-Platforms
-macOS App
-Linux App
-Windows (WSL2)
-Android App
-iOS App
-macOS companion app
-macOS Dev Setup
-Menu Bar
-Voice Wake
-Voice Overlay
-WebChat
-Canvas
-Gateway Lifecycle
-Health Checks
-Menu Bar Icon
-macOS Logging
-macOS Permissions
-Remote Control
-macOS Signing
-macOS Release
-Gateway on macOS
-macOS IPC
-Skills
-Peekaboo Bridge
-mac signing (debug builds)
-Usage
-Ad-hoc Signing Note
-Build metadata for About
-Why
-macOS companion app
-macOS Signing
-mac signing (debug builds)
-This app is usually built from
-scripts/package-mac-app.sh
 , which now:
 sets a stable debug bundle identifier:
 ai.openclaw.mac.debug
@@ -2202,28 +1376,27 @@ Packaging requires Node 22+
 reads
 SIGN_IDENTITY
 from the environment. Add
-export SIGN_IDENTITY=&quot;Apple Development: Your Name (TEAMID)&quot;
+export SIGN_IDENTITY="Apple Development: Your Name (TEAMID)"
 (or your Developer ID Application cert) to your shell rc to always sign with your cert. Ad-hoc signing requires explicit opt-in via
 ALLOW_ADHOC_SIGNING=1
-SIGN_IDENTITY=&quot;-&quot;
+SIGN_IDENTITY="-"
 (not recommended for permission testing).
 runs a Team ID audit after signing and fails if any Mach-O inside the app bundle is signed by a different Team ID. Set
 SKIP_TEAM_ID_CHECK=1
 to bypass.
 Usage
-Copy
 # from repo root
 scripts/package-mac-app.sh
 # auto-selects identity; errors if none found
 SIGN_IDENTITY
-&quot;Developer ID Application: Your Name&quot;
+"Developer ID Application: Your Name"
 scripts/package-mac-app.sh
 # real cert
 ALLOW_ADHOC_SIGNING
 scripts/package-mac-app.sh
 # ad-hoc (permissions will not stick)
 SIGN_IDENTITY
-&quot;-&quot;
+"-"
 scripts/package-mac-app.sh
 # explicit ad-hoc (same caveat)
 DISABLE_LIBRARY_VALIDATION
@@ -2231,7 +1404,7 @@ scripts/package-mac-app.sh
 # dev-only Sparkle Team ID mismatch workaround
 Ad-hoc Signing Note
 When signing with
-SIGN_IDENTITY=&quot;-&quot;
+SIGN_IDENTITY="-"
 (ad-hoc), the script automatically disables the
 Hardened Runtime
 --options runtime
@@ -2264,56 +1437,6 @@ macOS Release
 
 [Source: https://docs.openclaw.ai/platforms/mac/skills]
 
-Skills - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-macOS companion app
-Skills
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Platforms overview
-Platforms
-macOS App
-Linux App
-Windows (WSL2)
-Android App
-iOS App
-macOS companion app
-macOS Dev Setup
-Menu Bar
-Voice Wake
-Voice Overlay
-WebChat
-Canvas
-Gateway Lifecycle
-Health Checks
-Menu Bar Icon
-macOS Logging
-macOS Permissions
-Remote Control
-macOS Signing
-macOS Release
-Gateway on macOS
-macOS IPC
-Skills
-Peekaboo Bridge
-Skills (macOS)
-Data source
-Install actions
-Env/API keys
-Remote mode
-macOS companion app
-Skills
 Skills (macOS)
 The macOS app surfaces OpenClaw skills via the gateway; it does not parse skills locally.
 Data source
@@ -2338,7 +1461,7 @@ Env/API keys
 The app stores keys in
 ~/.openclaw/openclaw.json
 under
-skills.entries.&lt;skillKey&gt;
+skills.entries.<skillKey>
 skills.update
 patches
 enabled
@@ -2355,57 +1478,6 @@ Peekaboo Bridge
 
 [Source: https://docs.openclaw.ai/platforms/mac/voice-overlay]
 
-Voice Overlay - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-macOS companion app
-Voice Overlay
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Platforms overview
-Platforms
-macOS App
-Linux App
-Windows (WSL2)
-Android App
-iOS App
-macOS companion app
-macOS Dev Setup
-Menu Bar
-Voice Wake
-Voice Overlay
-WebChat
-Canvas
-Gateway Lifecycle
-Health Checks
-Menu Bar Icon
-macOS Logging
-macOS Permissions
-Remote Control
-macOS Signing
-macOS Release
-Gateway on macOS
-macOS IPC
-Skills
-Peekaboo Bridge
-Voice Overlay Lifecycle (macOS)
-Current intent
-Implemented (Dec 9, 2025)
-Next steps
-Debugging checklist
-Migration steps (suggested)
-macOS companion app
-Voice Overlay
 Voice Overlay Lifecycle (macOS)
 Audience: macOS app contributors. Goal: keep the voice overlay predictable when wake-word and push-to-talk overlap.
 Current intent
@@ -2482,12 +1554,11 @@ cancel
 cooldown
 Debugging checklist
 Stream logs while reproducing a sticky overlay:
-Copy
 sudo
 log
 stream
 --predicate
-&#x27;subsystem == &quot;bot.molt&quot; AND category CONTAINS &quot;voicewake&quot;&#x27;
+'subsystem == "bot.molt" AND category CONTAINS "voicewake"'
 --level
 info
 --style
@@ -2526,62 +1597,7 @@ WebChat
 
 [Source: https://docs.openclaw.ai/platforms/mac/voicewake]
 
-Voice Wake - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-macOS companion app
-Voice Wake
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Platforms overview
-Platforms
-macOS App
-Linux App
-Windows (WSL2)
-Android App
-iOS App
-macOS companion app
-macOS Dev Setup
-Menu Bar
-Voice Wake
-Voice Overlay
-WebChat
-Canvas
-Gateway Lifecycle
-Health Checks
-Menu Bar Icon
-macOS Logging
-macOS Permissions
-Remote Control
-macOS Signing
-macOS Release
-Gateway on macOS
-macOS IPC
-Skills
-Peekaboo Bridge
-Voice Wake &amp; Push-to-Talk
-Modes
-Runtime behavior (wake-word)
-Lifecycle invariants
-Sticky overlay failure mode (previous)
-Push-to-talk specifics
-User-facing settings
-Forwarding behavior
-Forwarding payload
-Quick verification
-macOS companion app
-Voice Wake
-Voice Wake &amp; Push-to-Talk
+Voice Wake & Push-to-Talk
 Modes
 Wake-word mode
 (default): always-on Speech recognizer waits for trigger tokens (
@@ -2634,8 +1650,8 @@ User-facing settings
 Voice Wake
 toggle: enables wake-word runtime.
 Hold Cmd+Fn to talk
-: enables the push-to-talk monitor. Disabled on macOS &lt; 26.
-Language &amp; mic pickers, live level meter, trigger-word table, tester (local-only; does not forward).
+: enables the push-to-talk monitor. Disabled on macOS < 26.
+Language & mic pickers, live level meter, trigger-word table, tester (local-only; does not forward).
 Mic picker preserves the last selection if a device disconnects, shows a disconnected hint, and temporarily falls back to the system default until it returns.
 Sounds
 : chimes on trigger detect and on send; defaults to the macOS “Glass” system sound. You can pick any
@@ -2663,56 +1679,6 @@ Voice Overlay
 
 [Source: https://docs.openclaw.ai/platforms/mac/webchat]
 
-WebChat - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-macOS companion app
-WebChat
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Platforms overview
-Platforms
-macOS App
-Linux App
-Windows (WSL2)
-Android App
-iOS App
-macOS companion app
-macOS Dev Setup
-Menu Bar
-Voice Wake
-Voice Overlay
-WebChat
-Canvas
-Gateway Lifecycle
-Health Checks
-Menu Bar Icon
-macOS Logging
-macOS Permissions
-Remote Control
-macOS Signing
-macOS Release
-Gateway on macOS
-macOS IPC
-Skills
-Peekaboo Bridge
-WebChat (macOS app)
-Launch &amp; debugging
-How it’s wired
-Security surface
-Known limitations
-macOS companion app
-WebChat
 WebChat (macOS app)
 The macOS menu bar app embeds the WebChat UI as a native SwiftUI view. It
 connects to the Gateway and defaults to the
@@ -2724,10 +1690,9 @@ Local mode
 Remote mode
 : forwards the Gateway control port over SSH and uses that
 tunnel as the data plane.
-Launch &amp; debugging
+Launch & debugging
 Manual: Lobster menu → “Open Chat”.
 Auto‑open for testing:
-Copy
 dist/OpenClaw.app/Contents/MacOS/OpenClaw
 --webchat
 Logs:
@@ -2767,60 +1732,6 @@ Canvas
 
 [Source: https://docs.openclaw.ai/platforms/mac/xpc]
 
-macOS IPC - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-macOS companion app
-macOS IPC
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Platforms overview
-Platforms
-macOS App
-Linux App
-Windows (WSL2)
-Android App
-iOS App
-macOS companion app
-macOS Dev Setup
-Menu Bar
-Voice Wake
-Voice Overlay
-WebChat
-Canvas
-Gateway Lifecycle
-Health Checks
-Menu Bar Icon
-macOS Logging
-macOS Permissions
-Remote Control
-macOS Signing
-macOS Release
-Gateway on macOS
-macOS IPC
-Skills
-Peekaboo Bridge
-OpenClaw macOS IPC architecture
-Goals
-How it works
-Gateway + node transport
-Node service + app IPC
-PeekabooBridge (UI automation)
-Operational flows
-Hardening notes
-macOS companion app
-macOS IPC
-OpenClaw macOS IPC architecture
 Current model:
 a local Unix socket connects the
 node host service
@@ -2852,8 +1763,7 @@ system.run
 requests are forwarded to the macOS app over a local Unix socket.
 The app performs the exec in UI context, prompts if needed, and returns output.
 Diagram (SCI):
-Copy
-Agent -&gt; Gateway -&gt; Node Service (WS)
+Agent -> Gateway -> Node Service (WS)
 | IPC (UDS + token + HMAC + TTL)
 Mac App (UI + TCC + system.run)
 PeekabooBridge (UI automation)
@@ -2869,7 +1779,7 @@ PeekabooBridge usage
 for details.
 Operational flows
 Restart/rebuild:
-SIGN_IDENTITY=&quot;Apple Development: &lt;Developer Name&gt; (&lt;TEAMID&gt;)&quot; scripts/restart-mac.sh
+SIGN_IDENTITY="Apple Development: <Developer Name> (<TEAMID>)" scripts/restart-mac.sh
 Kills existing instances
 Swift build + package
 Writes/bootstraps/kickstarts the LaunchAgent
@@ -2892,65 +1802,6 @@ Skills
 
 [Source: https://docs.openclaw.ai/platforms/macos]
 
-macOS App - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Platforms overview
-macOS App
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Platforms overview
-Platforms
-macOS App
-Linux App
-Windows (WSL2)
-Android App
-iOS App
-macOS companion app
-macOS Dev Setup
-Menu Bar
-Voice Wake
-Voice Overlay
-WebChat
-Canvas
-Gateway Lifecycle
-Health Checks
-Menu Bar Icon
-macOS Logging
-macOS Permissions
-Remote Control
-macOS Signing
-macOS Release
-Gateway on macOS
-macOS IPC
-Skills
-Peekaboo Bridge
-OpenClaw macOS Companion (menu bar + gateway broker)
-What it does
-Local vs remote mode
-Launchd control
-Node capabilities (mac)
-Exec approvals (system.run)
-Deep links
-openclaw://agent
-Onboarding flow (typical)
-Build &amp; dev workflow (native)
-Debug gateway connectivity (macOS CLI)
-Remote connection plumbing (SSH tunnels)
-Control tunnel (Gateway WebSocket port)
-Related docs
-Platforms overview
-macOS App
 OpenClaw macOS Companion (menu bar + gateway broker)
 The macOS app is the
 menu‑bar companion
@@ -2991,14 +1842,13 @@ Launchd control
 The app manages a per‑user LaunchAgent labeled
 bot.molt.gateway
 (or
-bot.molt.&lt;profile&gt;
+bot.molt.<profile>
 when using
 --profile
 OPENCLAW_PROFILE
 ; legacy
 com.openclaw.*
 still unloads).
-Copy
 launchctl
 kickstart
 gui/
@@ -3010,7 +1860,7 @@ gui/
 $UID
 /bot.molt.gateway
 Replace the label with
-bot.molt.&lt;profile&gt;
+bot.molt.<profile>
 when running a named profile.
 If the LaunchAgent isn’t installed, enable it from the app or run
 openclaw gateway install
@@ -3038,8 +1888,7 @@ When the headless node host service is running (remote mode), it connects to the
 system.run
 executes in the macOS app (UI/TCC context) over a local Unix socket; prompts + output stay in-app.
 Diagram (SCI):
-Copy
-Gateway -&gt; Node Service (WS)
+Gateway -> Node Service (WS)
 | IPC (UDS + token + HMAC + TTL)
 Mac App (UI + TCC + system.run)
 Exec approvals (system.run)
@@ -3048,25 +1897,23 @@ is controlled by
 Exec approvals
 in the macOS app (Settings → Exec approvals).
 Security + ask + allowlist are stored locally on the Mac in:
-Copy
 ~/.openclaw/exec-approvals.json
 Example:
-Copy
-&quot;version&quot;
-&quot;defaults&quot;
-&quot;security&quot;
-&quot;deny&quot;
-&quot;ask&quot;
-&quot;on-miss&quot;
-&quot;agents&quot;
-&quot;main&quot;
-&quot;security&quot;
-&quot;allowlist&quot;
-&quot;ask&quot;
-&quot;on-miss&quot;
-&quot;allowlist&quot;
-&quot;pattern&quot;
-&quot;/opt/homebrew/bin/rg&quot;
+"version"
+"defaults"
+"security"
+"deny"
+"ask"
+"on-miss"
+"agents"
+"main"
+"security"
+"allowlist"
+"ask"
+"on-miss"
+"allowlist"
+"pattern"
+"/opt/homebrew/bin/rg"
 Notes:
 allowlist
 entries are glob patterns for resolved binary paths.
@@ -3089,9 +1936,8 @@ openclaw://agent
 Triggers a Gateway
 agent
 request.
-Copy
 open
-&#x27;openclaw://agent?message=Hello%20from%20deep%20link&#x27;
+'openclaw://agent?message=Hello%20from%20deep%20link'
 Query parameters:
 message
 (required)
@@ -3126,8 +1972,8 @@ Ensure
 Local
 mode is active and the Gateway is running.
 Install the CLI if you want terminal access.
-Build &amp; dev workflow (native)
-cd apps/macos &amp;&amp; swift build
+Build & dev workflow (native)
+cd apps/macos && swift build
 swift run OpenClaw
 (or Xcode)
 Package app:
@@ -3135,7 +1981,6 @@ scripts/package-mac-app.sh
 Debug gateway connectivity (macOS CLI)
 Use the debug CLI to exercise the same Gateway WebSocket handshake and discovery
 logic that the macOS app uses, without launching the app.
-Copy
 apps/macos
 swift
 run
@@ -3150,13 +1995,13 @@ discover
 3000
 --json
 Connect options:
---url &lt;ws://host:port&gt;
+--url <ws://host:port>
 : override config
---mode &lt;local|remote&gt;
+--mode <local|remote>
 : resolve from config (default: config or local)
 --probe
 : force a fresh health probe
---timeout &lt;ms&gt;
+--timeout <ms>
 : request timeout (default:
 15000
 --json
@@ -3164,7 +2009,7 @@ Connect options:
 Discovery options:
 --include-local
 : include gateways that would be filtered as “local”
---timeout &lt;ms&gt;
+--timeout <ms>
 : overall discovery window (default:
 2000
 --json
@@ -3194,7 +2039,7 @@ Behavior:
 no random local port; the app reuses an existing healthy tunnel
 or restarts it if needed.
 SSH shape:
-ssh -N -L &lt;local&gt;:127.0.0.1:&lt;remote&gt;
+ssh -N -L <local>:127.0.0.1:<remote>
 with BatchMode +
 ExitOnForwardFailure + keepalive options.
 IP reporting:
@@ -3224,62 +2069,6 @@ Linux App
 
 [Source: https://docs.openclaw.ai/platforms/windows]
 
-Windows (WSL2) - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Platforms overview
-Windows (WSL2)
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Platforms overview
-Platforms
-macOS App
-Linux App
-Windows (WSL2)
-Android App
-iOS App
-macOS companion app
-macOS Dev Setup
-Menu Bar
-Voice Wake
-Voice Overlay
-WebChat
-Canvas
-Gateway Lifecycle
-Health Checks
-Menu Bar Icon
-macOS Logging
-macOS Permissions
-Remote Control
-macOS Signing
-macOS Release
-Gateway on macOS
-macOS IPC
-Skills
-Peekaboo Bridge
-Windows (WSL2)
-Install (WSL2)
-Gateway
-Gateway service install (CLI)
-Advanced: expose WSL services over LAN (portproxy)
-Step-by-step WSL2 install
-1) Install WSL2 + Ubuntu
-2) Enable systemd (required for gateway install)
-3) Install OpenClaw (inside WSL)
-Windows companion app
-Platforms overview
-Windows (WSL2)
-Windows (WSL2)
 OpenClaw on Windows is recommended
 via WSL2
 (Ubuntu recommended). The
@@ -3292,7 +2081,7 @@ Native Windows companion apps are planned.
 Install (WSL2)
 Getting Started
 (use inside WSL)
-Install &amp; updates
+Install & updates
 Official WSL2 guide (Microsoft):
 https://learn.microsoft.com/windows/wsl/install
 Gateway
@@ -3300,19 +2089,15 @@ Gateway runbook
 Configuration
 Gateway service install (CLI)
 Inside WSL2:
-Copy
 openclaw onboard --install-daemon
 Or:
-Copy
 openclaw gateway install
 Or:
-Copy
 openclaw configure
 Select
 Gateway service
 when prompted.
 Repair/migrate:
-Copy
 openclaw doctor
 Advanced: expose WSL services over LAN (portproxy)
 WSL has its own virtual network. If another machine needs to reach a service
@@ -3323,9 +2108,8 @@ forward a Windows port to the current WSL IP. The WSL IP changes after restarts,
 so you may need to refresh the forwarding rule.
 Example (PowerShell
 as Administrator
-Copy
 $Distro
-&quot;Ubuntu-24.04&quot;
+"Ubuntu-24.04"
 $ListenPort
 2222
 $TargetPort
@@ -3334,11 +2118,11 @@ $WslIp
 d $Distro
 hostname
 I).Trim().Split(
-&quot; &quot;
+" "
 -not
 $WslIp) {
 throw
-&quot;WSL IP not found.&quot;
+"WSL IP not found."
 netsh interface portproxy add v4tov4 listenaddress
 0.0
 0.0
@@ -3348,16 +2132,14 @@ connectaddress
 $WslIp connectport
 $TargetPort
 Allow the port through Windows Firewall (one-time):
-Copy
 New-NetFirewallRule
 DisplayName
-&quot;WSL SSH $ListenPort&quot;
+"WSL SSH $ListenPort"
 Direction Inbound
 Protocol TCP
 LocalPort $ListenPort
 Action Allow
 Refresh the portproxy after WSL restarts:
-Copy
 netsh interface portproxy delete v4tov4 listenport
 $ListenPort listenaddress
 0.0
@@ -3393,7 +2175,6 @@ step at login.
 Step-by-step WSL2 install
 1) Install WSL2 + Ubuntu
 Open PowerShell (Admin):
-Copy
 wsl
 install
 # Or pick a distro explicitly:
@@ -3407,29 +2188,25 @@ d Ubuntu
 Reboot if Windows asks.
 2) Enable systemd (required for gateway install)
 In your WSL terminal:
-Copy
 sudo
 tee
 /etc/wsl.conf
-&gt;
+>
 /dev/null
-&lt;&lt;
-&#x27;EOF&#x27;
+<<
+'EOF'
 [boot]
 systemd=true
 EOF
 Then from PowerShell:
-Copy
 wsl
 shutdown
 Re-open Ubuntu, then verify:
-Copy
 systemctl
 --user
 status
 3) Install OpenClaw (inside WSL)
 Follow the Linux Getting Started flow inside WSL:
-Copy
 git
 clone
 https://github.com/openclaw/openclaw.git

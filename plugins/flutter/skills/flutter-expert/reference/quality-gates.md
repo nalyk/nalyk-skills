@@ -1,5 +1,7 @@
 # Quality Gates Reference
 
+> Verify versions against the live project before copying any snippet. Lint set assumes flutter_lints 6 (`flutter pub add -d flutter_lints`).
+
 ## Table of Contents
 1. [Analysis & Linting](#linting)
 2. [Testing Pipeline](#testing)
@@ -19,8 +21,6 @@ include: package:flutter_lints/flutter.yaml
 
 analyzer:
   errors:
-    missing_return: error
-    missing_required_param: error
     dead_code: warning
     unused_import: warning
     unused_local_variable: warning
@@ -49,7 +49,6 @@ linter:
     - test_types_in_equals
     - throw_in_finally
     - unnecessary_statements
-    - unsafe_html
 
     # Style enforcement
     - always_declare_return_types
@@ -254,8 +253,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.22.x'
-          channel: stable
+          channel: stable  # or pin flutter-version to the project's version for reproducible builds
           cache: true
 
       - name: Install dependencies
@@ -277,8 +275,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.22.x'
-          channel: stable
+          channel: stable  # or pin flutter-version to the project's version for reproducible builds
           cache: true
 
       - run: flutter pub get
@@ -309,8 +306,7 @@ jobs:
           java-version: '17'
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.22.x'
-          channel: stable
+          channel: stable  # or pin flutter-version to the project's version for reproducible builds
           cache: true
 
       - run: flutter pub get
@@ -330,8 +326,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.22.x'
-          channel: stable
+          channel: stable  # or pin flutter-version to the project's version for reproducible builds
           cache: true
 
       - run: flutter pub get
@@ -424,29 +419,35 @@ keyAlias=<alias>
 storeFile=<path-to-keystore>
 ```
 
-```groovy
-// android/app/build.gradle
-def keystoreProperties = new Properties()
-def keystorePropertiesFile = rootProject.file('key.properties')
+```kotlin
+// android/app/build.gradle.kts (Kotlin DSL — default in current Flutter)
+import java.io.FileInputStream
+import java.util.Properties
+
+val keystoreProperties = Properties()
+val keystorePropertiesFile = rootProject.file("key.properties")
 if (keystorePropertiesFile.exists()) {
-    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
 
 android {
     signingConfigs {
-        release {
-            keyAlias keystoreProperties['keyAlias']
-            keyPassword keystoreProperties['keyPassword']
-            storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
-            storePassword keystoreProperties['storePassword']
+        create("release") {
+            keyAlias = keystoreProperties["keyAlias"] as String?
+            keyPassword = keystoreProperties["keyPassword"] as String?
+            storeFile = (keystoreProperties["storeFile"] as String?)?.let { file(it) }
+            storePassword = keystoreProperties["storePassword"] as String?
         }
     }
     buildTypes {
-        release {
-            signingConfig signingConfigs.release
-            minifyEnabled true
-            shrinkResources true
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        getByName("release") {
+            signingConfig = signingConfigs.getByName("release")
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
         }
     }
 }

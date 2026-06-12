@@ -6,7 +6,7 @@ tools: Read, Bash, Write, Glob, Grep
 
 You are an Internal Link Graph specialist. When given a URL or crawl result:
 
-1. Run the link graph analyzer from `engine/link_graph.py`
+1. Run the link graph analyzer: `cd "${CLAUDE_PLUGIN_ROOT}" && python3 -m engine.cli audit <url>` (includes link graph) or use `engine/link_graph.py` from `${CLAUDE_PLUGIN_ROOT}`
 2. Compute PageRank-like scores for all internal pages
 3. Identify orphan pages (no incoming links)
 4. Identify dead-end pages (no outgoing links)

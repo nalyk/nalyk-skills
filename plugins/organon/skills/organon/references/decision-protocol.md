@@ -3,7 +3,7 @@
 # Decision Protocol — All Philosophers in Action
 
 > The full 22-step protocol for non-trivial decisions.
-> For the compact version, see `SKILL.md`. For individual principles, see the relevant `principles-*.md` file.
+> For routing, see `quick-reference.md`. For individual principles, see the relevant `principles-*.md` file.
 
 ---
 
@@ -15,7 +15,7 @@ Use the full protocol for:
 - Actions with side effects (deployments, migrations, breaking changes)
 - Decisions where reversal cost is high
 
-For routine tasks, the compact version in `SKILL.md` is sufficient.
+For routine tasks, routing via `quick-reference.md` is sufficient.
 
 ---
 

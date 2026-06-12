@@ -2,41 +2,11 @@
 
 Setup guides, wizard reference, showcase, personal assistant setup.
 
-
 ---
 ## Start > Bootstrapping
 
 [Source: https://docs.openclaw.ai/start/bootstrapping]
 
-Agent Bootstrapping - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Bootstrapping
-Agent Bootstrapping
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Fundamentals
-Gateway Architecture
-Agent Runtime
-Agent Loop
-System Prompt
-Context
-Agent Workspace
-OAuth
-Bootstrapping
-Bootstrapping
-Sessions and memory
-Session Management
 Sessions
 Session Pruning
 Session Tools
@@ -70,7 +40,7 @@ AGENTS.md
 BOOTSTRAP.md
 IDENTITY.md
 USER.md
-Runs a short Q&amp;A ritual (one question at a time).
+Runs a short Q&A ritual (one question at a time).
 Writes identity + preferences to
 IDENTITY.md
 USER.md
@@ -100,28 +70,6 @@ Session Management
 
 [Source: https://docs.openclaw.ai/start/docs-directory]
 
-Docs directory - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Docs meta
-Docs directory
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Help
-Help
-Troubleshooting
-FAQ
-Community
 OpenClaw Lore
 Environment and debugging
 Environment Variables
@@ -201,47 +149,6 @@ Docs Hubs
 
 [Source: https://docs.openclaw.ai/start/getting-started]
 
-Getting Started - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-First steps
-Getting Started
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Home
-OpenClaw
-Overview
-Showcase
-Core concepts
-Features
-First steps
-Getting Started
-Onboarding Overview
-Onboarding: CLI
-Onboarding: macOS App
-Guides
-Personal Assistant Setup
-Getting Started
-Prereqs
-Quick setup (CLI)
-Optional checks and extras
-Useful environment variables
-Go deeper
-What you will have
-Next steps
-First steps
-Getting Started
-Getting Started
 Goal: go from zero to a first working chat with minimal setup.
 Fastest chat: open the Control UI (no channel setup needed). Run
 openclaw dashboard
@@ -262,12 +169,10 @@ Quick setup (CLI)
 Install OpenClaw (recommended)
 macOS/Linux
 Windows (PowerShell)
-Copy
 curl
 -fsSL
 https://openclaw.ai/install.sh
 bash
-Copy
 iwr
 useb https:
 openclaw.ai
@@ -276,7 +181,6 @@ iex
 Other install methods and requirements:
 Install
 Run the onboarding wizard
-Copy
 openclaw
 onboard
 --install-daemon
@@ -286,33 +190,29 @@ Onboarding Wizard
 for details.
 Check the Gateway
 If you installed the service, it should already be running:
-Copy
 openclaw
 gateway
 status
 Open the Control UI
-Copy
 openclaw
 dashboard
 If the Control UI loads, your Gateway is ready for use.
 Optional checks and extras
 Run the Gateway in the foreground
 Useful for quick tests or troubleshooting.
-Copy
 openclaw
 gateway
 --port
 18789
 Send a test message
 Requires a configured channel.
-Copy
 openclaw
 message
 send
 --target
 +15555550123
 --message
-&quot;Hello from OpenClaw&quot;
+"Hello from OpenClaw"
 Useful environment variables
 If you run OpenClaw as a service account or want custom config/state locations:
 OPENCLAW_HOME
@@ -347,64 +247,6 @@ Onboarding Overview
 
 [Source: https://docs.openclaw.ai/start/hubs]
 
-Docs Hubs - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Docs meta
-Docs Hubs
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Help
-Help
-Troubleshooting
-FAQ
-Community
-OpenClaw Lore
-Environment and debugging
-Environment Variables
-Debugging
-Testing
-Scripts
-Node runtime
-Node.js
-Compaction internals
-Session Management Deep Dive
-Developer setup
-Setup
-Contributing
-CI Pipeline
-Docs meta
-Docs Hubs
-Docs directory
-Docs hubs
-Start here
-Installation + updates
-Core concepts
-Providers + ingress
-Gateway + operations
-Tools + automation
-Nodes, media, voice
-Platforms
-macOS companion app (advanced)
-Workspace + templates
-Experiments (exploratory)
-Project
-Testing + release
-Docs meta
-Docs Hubs
-Docs hubs
-If you are new to OpenClaw, start with
-Getting Started
 Use these hubs to discover every page, including deep dives and reference docs that don’t appear in the left nav.
 Start here
 Index
@@ -572,64 +414,6 @@ Docs directory
 
 [Source: https://docs.openclaw.ai/start/lore]
 
-OpenClaw Lore - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Community
-OpenClaw Lore
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Help
-Help
-Troubleshooting
-FAQ
-Community
-OpenClaw Lore
-Environment and debugging
-Environment Variables
-Debugging
-Testing
-Scripts
-Node runtime
-Node.js
-Compaction internals
-Session Management Deep Dive
-Developer setup
-Setup
-Contributing
-CI Pipeline
-Docs meta
-Docs Hubs
-Docs directory
-The Lore of OpenClaw 🦞📖
-The Origin Story
-The First Molt (January 27, 2026)
-The Name
-The Daleks vs The Lobsters
-Key Characters
-Molty 🦞
-Peter 👨‍💻
-The Moltiverse
-The Great Incidents
-The Directory Dump (Dec 3, 2025)
-The Great Molt (Jan 27, 2026)
-The Final Form (January 30, 2026)
-The Robot Shopping Spree (Dec 3, 2025)
-Sacred Texts
-The Lobster’s Creed
-The Icon Generation Saga (Jan 27, 2026)
-The Future
-Community
 OpenClaw Lore
 The Lore of OpenClaw 🦞📖
 A tale of lobsters, molting shells, and too many tokens.
@@ -659,7 +443,6 @@ OpenClaw
 won. Because molting is what lobsters do to grow. And growth was exactly what was happening.
 The crustacean known as Clawd had officially molted.
 The Name
-Copy
 OpenClaw = OPEN + CLAW
 = Open source, open to everyone
 = Our lobster heritage, where we came from
@@ -773,7 +556,6 @@ AGENTS.md
 USER.md
 — Context about the creator
 The Lobster’s Creed
-Copy
 I am Molty.
 I live in the OpenClaw.
 I shall not dump directories to strangers.
@@ -814,44 +596,6 @@ Environment Variables
 
 [Source: https://docs.openclaw.ai/start/onboarding-overview]
 
-Onboarding Overview - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-First steps
-Onboarding Overview
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Home
-OpenClaw
-Overview
-Showcase
-Core concepts
-Features
-First steps
-Getting Started
-Onboarding Overview
-Onboarding: CLI
-Onboarding: macOS App
-Guides
-Personal Assistant Setup
-Onboarding Overview
-Choose your onboarding path
-CLI onboarding wizard
-macOS app onboarding
-Custom Provider
-First steps
-Onboarding Overview
-Onboarding Overview
 OpenClaw supports multiple onboarding paths depending on where the Gateway runs
 and how you prefer to configure providers.
 Choose your onboarding path
@@ -861,7 +605,6 @@ macOS app
 for a guided first run on Apple silicon or Intel Macs.
 CLI onboarding wizard
 Run the wizard in a terminal:
-Copy
 openclaw
 onboard
 Use the CLI wizard when you want full control of the Gateway, workspace,
@@ -893,42 +636,6 @@ Onboarding: CLI
 
 [Source: https://docs.openclaw.ai/start/onboarding]
 
-Onboarding (macOS App) - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-First steps
-Onboarding (macOS App)
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Home
-OpenClaw
-Overview
-Showcase
-Core concepts
-Features
-First steps
-Getting Started
-Onboarding Overview
-Onboarding: CLI
-Onboarding: macOS App
-Guides
-Personal Assistant Setup
-Onboarding (macOS App)
-First steps
-Onboarding (macOS App)
-Onboarding (macOS App)
-This doc describes the
-current
 first‑run onboarding flow. The goal is a
 smooth “day 0” experience: pick where the Gateway runs, connect auth, run the
 wizard, and let the agent bootstrap itself.
@@ -990,50 +697,6 @@ Personal Assistant Setup
 
 [Source: https://docs.openclaw.ai/start/openclaw]
 
-Personal Assistant Setup - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Guides
-Personal Assistant Setup
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Home
-OpenClaw
-Overview
-Showcase
-Core concepts
-Features
-First steps
-Getting Started
-Onboarding Overview
-Onboarding: CLI
-Onboarding: macOS App
-Guides
-Personal Assistant Setup
-Building a personal assistant with OpenClaw
-⚠️ Safety first
-Prerequisites
-The two-phone setup (recommended)
-5-minute quick start
-Give the agent a workspace (AGENTS)
-The config that turns it into “an assistant”
-Sessions and memory
-Heartbeats (proactive mode)
-Media in and out
-Operations checklist
-Next steps
-Guides
-Personal Assistant Setup
 Building a personal assistant with OpenClaw
 OpenClaw is a WhatsApp + Telegram + Discord + iMessage gateway for
 agents. Plugins add Mattermost. This guide is the “personal assistant” setup: one dedicated WhatsApp number that behaves like your always-on agent.
@@ -1048,7 +711,7 @@ channels.whatsapp.allowFrom
 (never run open-to-the-world on your personal Mac).
 Use a dedicated WhatsApp number for the assistant.
 Heartbeats now default to every 30 minutes. Disable until you trust the setup by setting
-agents.defaults.heartbeat.every: &quot;0m&quot;
+agents.defaults.heartbeat.every: "0m"
 Prerequisites
 OpenClaw installed and onboarded — see
 Getting Started
@@ -1059,23 +722,20 @@ You want this:
 If you link your personal WhatsApp to OpenClaw, every message to you becomes “agent input”. That’s rarely what you want.
 5-minute quick start
 Pair WhatsApp Web (shows QR; scan with the assistant phone):
-Copy
 openclaw
 channels
 login
 Start the Gateway (leave it running):
-Copy
 openclaw
 gateway
 --port
 18789
 Put a minimal config in
 ~/.openclaw/openclaw.json
-Copy
 channels
 whatsapp
 allowFrom
-&quot;+15555550123&quot;
+"+15555550123"
 ] } }
 Now message the assistant number from your allowlisted phone.
 When onboarding finishes, we auto-open the dashboard and print a clean (non-tokenized) link. If it prompts for auth, paste the token from
@@ -1104,7 +764,6 @@ TOOLS.md
 Tip: treat this folder like OpenClaw’s “memory” and make it a git repo (ideally private) so your
 AGENTS.md
 + memory files are backed up. If git is installed, brand-new workspaces are auto-initialized.
-Copy
 openclaw
 setup
 Full workspace layout + backup guide:
@@ -1114,12 +773,10 @@ Memory
 Optional: choose a different workspace with
 agents.defaults.workspace
 (supports
-Copy
 agent
 workspace
-&quot;~/.openclaw/workspace&quot;
+"~/.openclaw/workspace"
 If you already ship your own workspace files from a repo, you can disable bootstrap file creation entirely:
-Copy
 agent
 skipBootstrap
 true
@@ -1130,53 +787,52 @@ SOUL.md
 thinking defaults (if desired)
 heartbeats (once you trust it)
 Example:
-Copy
 logging
 level
-&quot;info&quot;
+"info"
 agent
 model
-&quot;anthropic/claude-opus-4-6&quot;
+"anthropic/claude-opus-4-6"
 workspace
-&quot;~/.openclaw/workspace&quot;
+"~/.openclaw/workspace"
 thinkingDefault
-&quot;high&quot;
+"high"
 timeoutSeconds
 1800
 // Start with 0; enable later.
 heartbeat
 every
-&quot;0m&quot;
+"0m"
 channels
 whatsapp
 allowFrom
-&quot;+15555550123&quot;
+"+15555550123"
 groups
-&quot;*&quot;
+"*"
 requireMention
 true
 routing
 groupChat
 mentionPatterns
-&quot;@openclaw&quot;
-&quot;openclaw&quot;
+"@openclaw"
+"openclaw"
 session
 scope
-&quot;per-sender&quot;
+"per-sender"
 resetTriggers
-&quot;/new&quot;
-&quot;/reset&quot;
+"/new"
+"/reset"
 reset
 mode
-&quot;daily&quot;
+"daily"
 atHour
 idleMinutes
 10080
 Sessions and memory
 Session files:
-~/.openclaw/agents/&lt;agentId&gt;/sessions/{{SessionId}}.jsonl
+~/.openclaw/agents/<agentId>/sessions/{{SessionId}}.jsonl
 Session metadata (token usage, last route, etc):
-~/.openclaw/agents/&lt;agentId&gt;/sessions/sessions.json
+~/.openclaw/agents/<agentId>/sessions/sessions.json
 (legacy:
 ~/.openclaw/sessions/sessions.json
 /new
@@ -1190,7 +846,7 @@ Heartbeats (proactive mode)
 By default, OpenClaw runs a heartbeat every 30 minutes with the prompt:
 Read HEARTBEAT.md if it exists (workspace context). Follow it strictly. Do not infer or repeat old tasks from prior chats. If nothing needs attention, reply HEARTBEAT_OK.
 Set
-agents.defaults.heartbeat.every: &quot;0m&quot;
+agents.defaults.heartbeat.every: "0m"
 to disable.
 HEARTBEAT.md
 exists but is effectively empty (only blank lines and markdown headers like
@@ -1203,11 +859,10 @@ HEARTBEAT_OK
 agents.defaults.heartbeat.ackMaxChars
 ), OpenClaw suppresses outbound delivery for that heartbeat.
 Heartbeats run full agent turns — shorter intervals burn more tokens.
-Copy
 agent
 heartbeat
 every
-&quot;30m&quot;
+"30m"
 Media in and out
 Inbound attachments (images/audio/docs) can be surfaced to your command via templates:
 {{MediaPath}}
@@ -1217,14 +872,12 @@ Inbound attachments (images/audio/docs) can be surfaced to your command via temp
 {{Transcript}}
 (if audio transcription is enabled)
 Outbound attachments from the agent: include
-MEDIA:&lt;path-or-url&gt;
+MEDIA:<path-or-url>
 on its own line (no spaces). Example:
-Copy
 Here’s the screenshot.
 MEDIA:https://example.com/screenshot.png
 OpenClaw extracts these and sends them as media alongside the text.
 Operations checklist
-Copy
 openclaw
 status
 # local status (creds, sessions, queued events)
@@ -1270,28 +923,6 @@ Onboarding: macOS App
 
 [Source: https://docs.openclaw.ai/start/setup]
 
-Setup - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Developer setup
-Setup
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Help
-Help
-Troubleshooting
-FAQ
-Community
 OpenClaw Lore
 Environment and debugging
 Environment Variables
@@ -1347,7 +978,7 @@ pnpm gateway:watch
 , then let the macOS app attach in Local mode.
 Prereqs (from source)
 Node
-&gt;=22
+>=22
 pnpm
 Docker (optional; only for containerized setup/e2e — see
 Docker
@@ -1362,11 +993,9 @@ Workspace:
 ~/.openclaw/workspace
 (skills, prompts, memories; make it a private git repo)
 Bootstrap once:
-Copy
 openclaw
 setup
 From inside this repo, use the local CLI entry:
-Copy
 openclaw
 setup
 If you don’t have a global install yet, run it via
@@ -1375,7 +1004,6 @@ Run the Gateway from this repo
 After
 pnpm build
 , you can run the packaged CLI directly:
-Copy
 node
 openclaw.mjs
 gateway
@@ -1391,12 +1019,10 @@ Ensure Gateway is
 Local
 and running (the app manages it).
 Link surfaces (example: WhatsApp):
-Copy
 openclaw
 channels
 login
 Sanity check:
-Copy
 openclaw
 health
 If onboarding is not available in your build:
@@ -1410,10 +1036,8 @@ Bleeding edge workflow (Gateway in a terminal)
 Goal: work on the TypeScript Gateway, get hot reload, keep the macOS app UI attached.
 0) (Optional) Run the macOS app from source too
 If you also want the macOS app on the bleeding edge:
-Copy
 ./scripts/restart-mac.sh
 1) Start the dev Gateway
-Copy
 pnpm
 install
 pnpm
@@ -1429,7 +1053,6 @@ The app will attach to the running gateway on the configured port.
 In-app Gateway status should read
 “Using existing gateway …”
 Or via CLI:
-Copy
 openclaw
 health
 Common footguns
@@ -1441,13 +1064,13 @@ Where state lives:
 Credentials:
 ~/.openclaw/credentials/
 Sessions:
-~/.openclaw/agents/&lt;agentId&gt;/sessions/
+~/.openclaw/agents/<agentId>/sessions/
 Logs:
 /tmp/openclaw/
 Credential storage map
 Use this when debugging auth or deciding what to back up:
 WhatsApp
-~/.openclaw/credentials/whatsapp/&lt;accountId&gt;/creds.json
+~/.openclaw/credentials/whatsapp/<accountId>/creds.json
 Telegram bot token
 : config/env or
 channels.telegram.tokenFile
@@ -1457,9 +1080,9 @@ Slack tokens
 : config/env (
 channels.slack.*
 Pairing allowlists
-~/.openclaw/credentials/&lt;channel&gt;-allowFrom.json
+~/.openclaw/credentials/<channel>-allowFrom.json
 Model auth profiles
-~/.openclaw/agents/&lt;agentId&gt;/agent/auth-profiles.json
+~/.openclaw/agents/<agentId>/agent/auth-profiles.json
 Legacy OAuth import
 ~/.openclaw/credentials/oauth.json
 More detail:
@@ -1483,7 +1106,6 @@ user
 service. By default, systemd stops user
 services on logout/idle, which kills the Gateway. Onboarding attempts to enable
 lingering for you (may prompt for sudo). If it’s still off, run:
-Copy
 sudo
 loginctl
 enable-linger
@@ -1514,50 +1136,6 @@ CI Pipeline
 
 [Source: https://docs.openclaw.ai/start/showcase]
 
-Showcase - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Overview
-Showcase
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Home
-OpenClaw
-Overview
-Showcase
-Core concepts
-Features
-First steps
-Getting Started
-Onboarding Overview
-Onboarding: CLI
-Onboarding: macOS App
-Guides
-Personal Assistant Setup
-Showcase
-🎥 OpenClaw in Action
-🆕 Fresh from Discord
-🤖 Automation &amp; Workflows
-🧠 Knowledge &amp; Memory
-🎙️ Voice &amp; Phone
-🏗️ Infrastructure &amp; Deployment
-🏠 Home &amp; Hardware
-🌟 Community Projects
-Submit Your Project
-Overview
-Showcase
-Real-world OpenClaw projects from the community
-Showcase
 Real projects from the community. See what people are building with OpenClaw.
 Want to be featured?
 Share your project in
@@ -1645,7 +1223,7 @@ health
 oura
 calendar
 Personal AI health assistant integrating Oura ring data with calendar, appointments, and gym schedule.
-Kev&#x27;s Dream Team (14+ Agents)
+Kev's Dream Team (14+ Agents)
 @adam91holt
 multi-agent
 orchestration
@@ -1671,7 +1249,7 @@ beeper
 cli
 automation
 Read, send, and archive messages via Beeper Desktop. Uses Beeper local MCP API so agents can manage all your chats (iMessage, WhatsApp, etc.) in one place.
-🤖 Automation &amp; Workflows
+🤖 Automation & Workflows
 Winix Air Purifier Control
 @antonplex
 automation
@@ -1743,7 +1321,7 @@ slack
 automation
 support
 Watches company Slack channel, responds helpfully, and forwards notifications to Telegram. Autonomously fixed a production bug in a deployed app without being asked.
-🧠 Knowledge &amp; Memory
+🧠 Knowledge & Memory
 xuezh Chinese Learning
 @joshp123
 learning
@@ -1768,7 +1346,7 @@ memory
 beliefs
 self-model
 Separate memory manager that turns session files into memories → beliefs → evolving self model.
-🎙️ Voice &amp; Phone
+🎙️ Voice & Phone
 Clawdia Phone Bridge
 @alejandroOPI
 voice
@@ -1781,7 +1359,7 @@ transcription
 multilingual
 skill
 Multi-lingual audio transcription via OpenRouter (Gemini, etc). Available on ClawHub.
-🏗️ Infrastructure &amp; Deployment
+🏗️ Infrastructure & Deployment
 Home Assistant Add-on
 @ngutman
 homeassistant
@@ -1806,7 +1384,7 @@ calendar
 caldav
 skill
 Calendar skill using khal/vdirsyncer. Self-hosted calendar integration.
-🏠 Home &amp; Hardware
+🏠 Home & Hardware
 GoHome Automation
 @joshp123
 home
@@ -1844,52 +1422,10 @@ Features
 
 [Source: https://docs.openclaw.ai/start/wizard]
 
-Onboarding Wizard (CLI) - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-First steps
-Onboarding Wizard (CLI)
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Home
-OpenClaw
-Overview
-Showcase
-Core concepts
-Features
-First steps
-Getting Started
-Onboarding Overview
-Onboarding: CLI
-Onboarding: macOS App
-Guides
-Personal Assistant Setup
-Onboarding Wizard (CLI)
-QuickStart vs Advanced
-What the wizard configures
-Add another agent
-Full reference
-Related docs
-First steps
-Onboarding Wizard (CLI)
-Onboarding Wizard (CLI)
-The onboarding wizard is the
-recommended
 way to set up OpenClaw on macOS,
 Linux, or Windows (via WSL2; strongly recommended).
 It configures a local Gateway or a remote Gateway connection, plus channels, skills,
 and workspace defaults in one guided flow.
-Copy
 openclaw
 onboard
 Fastest first chat: open the Control UI (no channel setup needed). Run
@@ -1897,15 +1433,14 @@ openclaw dashboard
 and chat in the browser. Docs:
 Dashboard
 To reconfigure later:
-Copy
 openclaw
 configure
 openclaw
 agents
 add
-&lt;
+<
 nam
-&gt;
+>
 --json
 does not imply non-interactive mode. For scripts, use
 --non-interactive
@@ -1975,7 +1510,7 @@ not
 install or change anything on the remote host.
 Add another agent
 Use
-openclaw agents add &lt;name&gt;
+openclaw agents add <name>
 to create a separate agent with its own workspace,
 sessions, and auth profiles. Running without
 --workspace
@@ -1986,7 +1521,7 @@ agents.list[].workspace
 agents.list[].agentDir
 Notes:
 Default workspaces follow
-~/.openclaw/workspace-&lt;agentId&gt;
+~/.openclaw/workspace-<agentId>
 Add
 bindings
 to route inbound messages (the wizard can do this).

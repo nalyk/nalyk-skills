@@ -2,73 +2,11 @@
 
 Architecture, agent runtime, sessions, memory, multi-agent, streaming, context.
 
-
 ---
 ## Concepts > Agent Loop
 
 [Source: https://docs.openclaw.ai/concepts/agent-loop]
 
-Agent Loop - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Fundamentals
-Agent Loop
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Fundamentals
-Gateway Architecture
-Agent Runtime
-Agent Loop
-System Prompt
-Context
-Agent Workspace
-OAuth
-Bootstrapping
-Bootstrapping
-Sessions and memory
-Session Management
-Sessions
-Session Pruning
-Session Tools
-Memory
-Compaction
-Multi-agent
-Multi-Agent Routing
-Presence
-Messages and delivery
-Messages
-Streaming and Chunking
-Retry Policy
-Command Queue
-Agent Loop (OpenClaw)
-Entry points
-How it works (high-level)
-Queueing + concurrency
-Session + workspace preparation
-Prompt assembly + system prompt
-Hook points (where you can intercept)
-Internal hooks (Gateway hooks)
-Plugin hooks (agent + gateway lifecycle)
-Streaming + partial replies
-Tool execution + messaging tools
-Reply shaping + suppression
-Compaction + retries
-Event streams (today)
-Chat channel handling
-Timeouts
-Where things can end early
-Fundamentals
-Agent Loop
 Agent Loop (OpenClaw)
 An agentic loop is the full “real” run of an agent: intake → context assembly → model inference →
 tool execution → streaming replies → persistence. It’s the authoritative path that turns a message
@@ -103,19 +41,19 @@ runEmbeddedPiAgent
 serializes runs via per-session + global queues
 resolves model + auth profile and builds the pi session
 subscribes to pi events and streams assistant/tool deltas
-enforces timeout -&gt; aborts run if exceeded
+enforces timeout -> aborts run if exceeded
 returns payloads + usage metadata
 subscribeEmbeddedPiSession
 bridges pi-agent-core events to OpenClaw
 agent
 stream:
-tool events =&gt;
-stream: &quot;tool&quot;
-assistant deltas =&gt;
-stream: &quot;assistant&quot;
-lifecycle events =&gt;
-stream: &quot;lifecycle&quot;
-phase: &quot;start&quot; | &quot;end&quot; | &quot;error&quot;
+tool events =>
+stream: "tool"
+assistant deltas =>
+stream: "assistant"
+lifecycle events =>
+stream: "lifecycle"
+phase: "start" | "end" | "error"
 agent.wait
 uses
 waitForAgentJob
@@ -266,63 +204,6 @@ System Prompt
 
 [Source: https://docs.openclaw.ai/concepts/agent-workspace]
 
-Agent Workspace - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Fundamentals
-Agent Workspace
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Fundamentals
-Gateway Architecture
-Agent Runtime
-Agent Loop
-System Prompt
-Context
-Agent Workspace
-OAuth
-Bootstrapping
-Bootstrapping
-Sessions and memory
-Session Management
-Sessions
-Session Pruning
-Session Tools
-Memory
-Compaction
-Multi-agent
-Multi-Agent Routing
-Presence
-Messages and delivery
-Messages
-Streaming and Chunking
-Retry Policy
-Command Queue
-Agent workspace
-Default location
-Extra workspace folders
-Workspace file map (what each file means)
-What is NOT in the workspace
-Git backup (recommended, private)
-1) Initialize the repo
-2) Add a private remote (beginner-friendly options)
-3) Ongoing updates
-Do not commit secrets
-Moving the workspace to a new machine
-Advanced notes
-Fundamentals
-Agent Workspace
-Agent workspace
 The workspace is the agent’s home. It is the only working directory used for
 file tools and for workspace context. Keep it private and treat it as memory.
 This is separate from
@@ -340,7 +221,7 @@ agents.defaults.sandbox
 When sandboxing is enabled and
 workspaceAccess
 is not
-&quot;rw&quot;
+"rw"
 , tools operate
 inside a sandbox workspace under
 ~/.openclaw/sandboxes
@@ -350,15 +231,14 @@ Default:
 ~/.openclaw/workspace
 OPENCLAW_PROFILE
 is set and not
-&quot;default&quot;
+"default"
 , the default becomes
-~/.openclaw/workspace-&lt;profile&gt;
+~/.openclaw/workspace-<profile>
 Override in
 ~/.openclaw/openclaw.json
-Copy
 agent
 workspace
-&quot;~/.openclaw/workspace&quot;
+"~/.openclaw/workspace"
 openclaw onboard
 openclaw configure
 , or
@@ -367,7 +247,6 @@ will create the
 workspace and seed the bootstrap files if they are missing.
 If you already manage the workspace files yourself, you can disable bootstrap
 file creation:
-Copy
 agent
 skipBootstrap
 true
@@ -449,7 +328,7 @@ and should NOT be committed to the workspace repo:
 (config)
 ~/.openclaw/credentials/
 (OAuth tokens, API keys)
-~/.openclaw/agents/&lt;agentId&gt;/sessions/
+~/.openclaw/agents/<agentId>/sessions/
 (session transcripts + metadata)
 ~/.openclaw/skills/
 (managed skills)
@@ -465,7 +344,6 @@ workspace lives).
 1) Initialize the repo
 If git is installed, brand-new workspaces are initialized automatically. If this
 workspace is not already a repo, run:
-Copy
 ~/.openclaw/workspace
 git
 init
@@ -480,7 +358,7 @@ HEARTBEAT.md
 memory/
 git
 commit
-&quot;Add agent workspace&quot;
+"Add agent workspace"
 2) Add a private remote (beginner-friendly options)
 Option A: GitHub web UI
 Create a new
@@ -489,7 +367,6 @@ repository on GitHub.
 Do not initialize with a README (avoids merge conflicts).
 Copy the HTTPS remote URL.
 Add the remote and push:
-Copy
 git
 branch
 main
@@ -497,15 +374,14 @@ git
 remote
 add
 origin
-&lt;
+<
 https-ur
-&gt;
+>
 git
 push
 origin
 main
 Option B: GitHub CLI (
-Copy
 auth
 login
 repo
@@ -523,7 +399,6 @@ repository on GitLab.
 Do not initialize with a README (avoids merge conflicts).
 Copy the HTTPS remote URL.
 Add the remote and push:
-Copy
 git
 branch
 main
@@ -531,22 +406,21 @@ git
 remote
 add
 origin
-&lt;
+<
 https-ur
-&gt;
+>
 git
 push
 origin
 main
 3) Ongoing updates
-Copy
 git
 status
 git
 add
 git
 commit
-&quot;Update memory&quot;
+"Update memory"
 git
 push
 Do not commit secrets
@@ -561,7 +435,6 @@ secret elsewhere (password manager, environment variables, or
 Suggested
 .gitignore
 starter:
-Copy
 .DS_Store
 .env
 **/*.key
@@ -575,10 +448,10 @@ agents.defaults.workspace
 to that path in
 ~/.openclaw/openclaw.json
 Run
-openclaw setup --workspace &lt;path&gt;
+openclaw setup --workspace <path>
 to seed any missing files.
 If you need sessions, copy
-~/.openclaw/agents/&lt;agentId&gt;/sessions/
+~/.openclaw/agents/<agentId>/sessions/
 from the
 old machine separately.
 Advanced notes
@@ -597,70 +470,6 @@ OAuth
 
 [Source: https://docs.openclaw.ai/concepts/agent]
 
-Agent Runtime - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Fundamentals
-Agent Runtime
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Fundamentals
-Gateway Architecture
-Agent Runtime
-Agent Loop
-System Prompt
-Context
-Agent Workspace
-OAuth
-Bootstrapping
-Bootstrapping
-Sessions and memory
-Session Management
-Sessions
-Session Pruning
-Session Tools
-Memory
-Compaction
-Multi-agent
-Multi-Agent Routing
-Presence
-Messages and delivery
-Messages
-Streaming and Chunking
-Retry Policy
-Command Queue
-Agent Runtime 🤖
-Workspace (required)
-Bootstrap files (injected)
-Built-in tools
-Skills
-pi-mono integration
-Sessions
-Steering while streaming
-Model refs
-Configuration (minimal)
-Fundamentals
-Agent Runtime
-Agent Runtime 🤖
-OpenClaw runs a single embedded agent runtime derived from
-pi-mono
-Workspace (required)
-OpenClaw uses a single agent workspace directory (
-agents.defaults.workspace
-) as the agent’s
-only
-working directory (
-cwd
 ) for tools and context.
 Recommended: use
 openclaw setup
@@ -704,7 +513,6 @@ is only created for a
 brand new workspace
 (no other bootstrap files present). If you delete it after completing the ritual, it should not be recreated on later restarts.
 To disable bootstrap file creation entirely (for pre-seeded workspaces), set:
-Copy
 agent
 skipBootstrap
 true
@@ -728,7 +536,7 @@ Bundled (shipped with the install)
 Managed/local:
 ~/.openclaw/skills
 Workspace:
-&lt;workspace&gt;/skills
+<workspace>/skills
 Skills can be gated by config/env (see
 skills
 Gateway configuration
@@ -737,11 +545,11 @@ OpenClaw reuses pieces of the pi-mono codebase (models/tools), but
 session management, discovery, and tool wiring are OpenClaw-owned
 No pi-coding agent runtime.
 ~/.pi/agent
-&lt;workspace&gt;/.pi
+<workspace>/.pi
 settings are consulted.
 Sessions
 Session transcripts are stored as JSONL at:
-~/.openclaw/agents/&lt;agentId&gt;/sessions/&lt;SessionId&gt;.jsonl
+~/.openclaw/agents/<agentId>/sessions/<SessionId>.jsonl
 The session ID is stable and chosen by OpenClaw.
 Legacy Pi/Tau session folders are
 not
@@ -765,7 +573,7 @@ Queue
 for mode + debounce/cap behavior.
 Block streaming sends completed assistant blocks as soon as they finish; it is
 off by default
-agents.defaults.blockStreamingDefault: &quot;off&quot;
+agents.defaults.blockStreamingDefault: "off"
 Tune the boundary via
 agents.defaults.blockStreamingBreak
 text_end
@@ -818,70 +626,6 @@ Agent Loop
 
 [Source: https://docs.openclaw.ai/concepts/architecture]
 
-Gateway Architecture - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Fundamentals
-Gateway Architecture
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Fundamentals
-Gateway Architecture
-Agent Runtime
-Agent Loop
-System Prompt
-Context
-Agent Workspace
-OAuth
-Bootstrapping
-Bootstrapping
-Sessions and memory
-Session Management
-Sessions
-Session Pruning
-Session Tools
-Memory
-Compaction
-Multi-agent
-Multi-Agent Routing
-Presence
-Messages and delivery
-Messages
-Streaming and Chunking
-Retry Policy
-Command Queue
-Gateway architecture
-Overview
-Components and flows
-Gateway (daemon)
-Clients (mac app / CLI / web admin)
-Nodes (macOS / iOS / Android / headless)
-WebChat
-Connection lifecycle (single client)
-Wire protocol (summary)
-Pairing + local trust
-Protocol typing and codegen
-Remote access
-Operations snapshot
-Invariants
-Fundamentals
-Gateway Architecture
-Gateway architecture
-Last updated: 2026-01-22
-Overview
-A single long‑lived
-Gateway
-owns all messaging surfaces (WhatsApp via
 Baileys, Telegram via grammY, Slack, Discord, Signal, iMessage, WebChat).
 Control-plane clients (macOS app, CLI, web UI, automations) connect to the
 Gateway over
@@ -962,10 +706,10 @@ must
 connect
 After handshake:
 Requests:
-{type:&quot;req&quot;, id, method, params}
-{type:&quot;res&quot;, id, ok, payload|error}
+{type:"req", id, method, params}
+{type:"res", id, ok, payload|error}
 Events:
-{type:&quot;event&quot;, event, payload, seq?, stateVersion?}
+{type:"event", event, payload, seq?, stateVersion?}
 OPENCLAW_GATEWAY_TOKEN
 (or
 --token
@@ -978,7 +722,7 @@ agent
 ) to
 safely retry; the server keeps a short‑lived dedupe cache.
 Nodes must include
-role: &quot;node&quot;
+role: "node"
 plus caps/commands/permissions in
 connect
 Pairing + local trust
@@ -1013,7 +757,6 @@ Swift models are generated from the JSON Schema.
 Remote access
 Preferred: Tailscale or VPN.
 Alternative: SSH tunnel
-Copy
 ssh
 18789:127.0.0.1:18789
 user@host
@@ -1039,61 +782,6 @@ Agent Runtime
 
 [Source: https://docs.openclaw.ai/concepts/compaction]
 
-Compaction - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Sessions and memory
-Compaction
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Fundamentals
-Gateway Architecture
-Agent Runtime
-Agent Loop
-System Prompt
-Context
-Agent Workspace
-OAuth
-Bootstrapping
-Bootstrapping
-Sessions and memory
-Session Management
-Sessions
-Session Pruning
-Session Tools
-Memory
-Compaction
-Multi-agent
-Multi-Agent Routing
-Presence
-Messages and delivery
-Messages
-Streaming and Chunking
-Retry Policy
-Command Queue
-Context Window &amp; Compaction
-What compaction is
-Configuration
-Auto-compaction (default on)
-Manual compaction
-Context window source
-Compaction vs pruning
-Tips
-Sessions and memory
-Compaction
-Context Window &amp; Compaction
-Every model has a
-context window
 (max tokens it can see). Long-running chats accumulate messages and tool results; once the window is tight, OpenClaw
 compacts
 older history to stay within limits.
@@ -1119,7 +807,7 @@ You’ll see:
 in verbose mode
 /status
 showing
-🧹 Compactions: &lt;count&gt;
+🧹 Compactions: <count>
 Before compaction, OpenClaw can run a
 silent memory flush
 turn to store
@@ -1130,7 +818,6 @@ Manual compaction
 Use
 /compact
 (optionally with instructions) to force a compaction pass:
-Copy
 /compact Focus on decisions and open questions
 Context window source
 Context window is model-specific. OpenClaw uses the model definition from the configured provider catalog to determine limits.
@@ -1165,64 +852,6 @@ Multi-Agent Routing
 
 [Source: https://docs.openclaw.ai/concepts/context]
 
-Context - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Fundamentals
-Context
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Fundamentals
-Gateway Architecture
-Agent Runtime
-Agent Loop
-System Prompt
-Context
-Agent Workspace
-OAuth
-Bootstrapping
-Bootstrapping
-Sessions and memory
-Session Management
-Sessions
-Session Pruning
-Session Tools
-Memory
-Compaction
-Multi-agent
-Multi-Agent Routing
-Presence
-Messages and delivery
-Messages
-Streaming and Chunking
-Retry Policy
-Command Queue
-Context
-Quick start (inspect context)
-Example output
-/context list
-/context detail
-What counts toward the context window
-How OpenClaw builds the system prompt
-Injected workspace files (Project Context)
-Skills: what’s injected vs loaded on-demand
-Tools: there are two costs
-Commands, directives, and “inline shortcuts”
-Sessions, compaction, and pruning (what persists)
-What /context actually reports
-Fundamentals
-Context
-Context
 “Context” is
 everything OpenClaw sends to the model for a run
 . It is bounded by the model’s
@@ -1251,14 +880,13 @@ Quick start (inspect context)
 → summarize older history into a compact entry to free window space.
 See also:
 Slash commands
-Token use &amp; costs
+Token use & costs
 Compaction
 Example output
 Values vary by model, provider, tool policy, and what’s in your workspace.
 /context list
-Copy
 🧠 Context breakdown
-Workspace: &lt;workspaceDir&gt;
+Workspace: <workspaceDir>
 Bootstrap max/file: 20,000 chars
 Sandbox: mode=non-main sandboxed=false
 System prompt (run): 38,412 chars (~9,603 tok) (Project Context 23,901 chars (~5,976 tok))
@@ -1277,7 +905,6 @@ Tool schemas (JSON): 31,988 chars (~7,997 tok) (counts toward context; not shown
 Tools: (same as above)
 Session tokens (cached): 14,250 total / ctx=32,000
 /context detail
-Copy
 🧠 Context breakdown (detailed)
 Top skills (prompt entry size):
 - frontend-design: 412 chars (~103 tok)
@@ -1408,42 +1035,6 @@ Agent Workspace
 
 [Source: https://docs.openclaw.ai/concepts/features]
 
-Features - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Core concepts
-Features
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Home
-OpenClaw
-Overview
-Showcase
-Core concepts
-Features
-First steps
-Getting Started
-Onboarding Overview
-Onboarding: CLI
-Onboarding: macOS App
-Guides
-Personal Assistant Setup
-Highlights
-Full list
-Core concepts
-Features
-Highlights
-Channels
 WhatsApp, Telegram, Discord, and iMessage with a single Gateway.
 Plugins
 Add Mattermost and more with extensions.
@@ -1484,107 +1075,6 @@ Getting Started
 
 [Source: https://docs.openclaw.ai/concepts/markdown-formatting]
 
-Markdown Formatting - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Concept internals
-Markdown Formatting
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-Markdown formatting
-Goals
-Pipeline
-IR example
-Where it is used
-Table handling
-Chunking rules
-Link policy
-Spoilers
-How to add or update a channel formatter
-Common gotchas
-Concept internals
-Markdown Formatting
 Markdown formatting
 OpenClaw formats outbound Markdown by converting it into a shared intermediate
 representation (IR) before rendering channel-specific output. The IR keeps the
@@ -1600,7 +1090,7 @@ Channel fit:
 map the same IR to Slack mrkdwn, Telegram HTML, and Signal
 style ranges without re-parsing Markdown.
 Pipeline
-Parse Markdown -&gt; IR
+Parse Markdown -> IR
 IR is plain text plus style spans (bold/italic/strike/code/spoiler) and link spans.
 Offsets are UTF-16 code units so Signal style ranges align with its API.
 Tables are parsed only when a channel opts into table conversion.
@@ -1610,15 +1100,15 @@ Inline formatting does not split across chunks; spans are sliced per chunk.
 Render per channel
 Slack:
 mrkdwn tokens (bold/italic/strike/code), links as
-&lt;url|label&gt;
+<url|label>
 Telegram:
 HTML tags (
-&lt;b&gt;
-&lt;i&gt;
-&lt;s&gt;
-&lt;code&gt;
-&lt;pre&gt;&lt;code&gt;
-&lt;a href&gt;
+<b>
+<i>
+<s>
+<code>
+<pre><code>
+<a href>
 Signal:
 plain text +
 text-style
@@ -1627,26 +1117,24 @@ label (url)
 when label differs.
 IR example
 Input Markdown:
-Copy
 Hello
 **world**
 — see
 docs
 (https://docs.openclaw.ai)
 IR (schematic):
-Copy
-&quot;text&quot;
-&quot;Hello world — see docs.&quot;
-&quot;styles&quot;
-&quot;start&quot;
-&quot;end&quot;
-&quot;style&quot;
-&quot;bold&quot;
-&quot;links&quot;
-&quot;start&quot;
-&quot;end&quot;
-&quot;href&quot;
-&quot;https://docs.openclaw.ai&quot;
+"text"
+"Hello world — see docs."
+"styles"
+"start"
+"end"
+"style"
+"bold"
+"links"
+"start"
+"end"
+"href"
+"https://docs.openclaw.ai"
 Where it is used
 Slack, Telegram, and Signal outbound adapters render from the IR.
 Other channels (WhatsApp, iMessage, MS Teams, Discord) still use plain text or
@@ -1663,7 +1151,6 @@ bullets
 off
 : disable table parsing and conversion; raw table text passes through.
 Config keys:
-Copy
 channels
 discord
 markdown
@@ -1687,18 +1174,18 @@ Streaming + chunking
 Link policy
 Slack:
 [label](url)
--&gt;
-&lt;url|label&gt;
+->
+<url|label>
 ; bare URLs remain bare. Autolink
 is disabled during parse to avoid double-linking.
 Telegram:
 [label](url)
--&gt;
-&lt;a href=&quot;url&quot;&gt;label&lt;/a&gt;
+->
+<a href="url">label</a>
 (HTML parse mode).
 Signal:
 [label](url)
--&gt;
+->
 label (url)
 unless label matches the URL.
 Spoilers
@@ -1729,9 +1216,9 @@ add or update format tests and an outbound delivery test if the
 channel uses chunking.
 Common gotchas
 Slack angle-bracket tokens (
-&lt;@U123&gt;
-&lt;#C123&gt;
-&lt;https://...&gt;
+<@U123>
+<#C123>
+<https://...>
 ) must be
 preserved; escape raw HTML safely.
 Telegram HTML requires escaping text outside tags to avoid broken markup.
@@ -1746,69 +1233,6 @@ Typing Indicators
 
 [Source: https://docs.openclaw.ai/concepts/memory]
 
-Memory - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Sessions and memory
-Memory
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Fundamentals
-Gateway Architecture
-Agent Runtime
-Agent Loop
-System Prompt
-Context
-Agent Workspace
-OAuth
-Bootstrapping
-Bootstrapping
-Sessions and memory
-Session Management
-Sessions
-Session Pruning
-Session Tools
-Memory
-Compaction
-Multi-agent
-Multi-Agent Routing
-Presence
-Messages and delivery
-Messages
-Streaming and Chunking
-Retry Policy
-Command Queue
-Memory
-Memory files (Markdown)
-When to write memory
-Automatic memory flush (pre-compaction ping)
-Vector memory search
-QMD backend (experimental)
-Additional memory paths
-Gemini embeddings (native)
-How the memory tools work
-What gets indexed (and when)
-Hybrid search (BM25 + vector)
-Why hybrid?
-How we merge results (the current design)
-Embedding cache
-Session memory search (experimental)
-SQLite vector acceleration (sqlite-vec)
-Local embedding auto-download
-Custom OpenAI-compatible endpoint example
-Sessions and memory
-Memory
-Memory
 OpenClaw memory is
 plain Markdown in the agent workspace
 . The files are the
@@ -1816,7 +1240,7 @@ source of truth; the model only “remembers” what gets written to disk.
 Memory search tools are provided by the active memory plugin (default:
 memory-core
 ). Disable memory plugins with
-plugins.slots.memory = &quot;none&quot;
+plugins.slots.memory = "none"
 Memory files (Markdown)
 The default workspace layout uses two memory layers:
 memory/YYYY-MM-DD.md
@@ -1860,7 +1284,6 @@ NO_REPLY
 is the correct response so the user never sees this turn.
 This is controlled by
 agents.defaults.compaction.memoryFlush
-Copy
 agents
 defaults
 compaction
@@ -1872,9 +1295,9 @@ true
 softThresholdTokens
 4000
 systemPrompt
-&quot;Session nearing compaction. Store durable memories now.&quot;
+"Session nearing compaction. Store durable memories now."
 prompt
-&quot;Write any lasting notes to memory/YYYY-MM-DD.md; reply with NO_REPLY if nothing to store.&quot;
+"Write any lasting notes to memory/YYYY-MM-DD.md; reply with NO_REPLY if nothing to store."
 Details:
 Soft threshold
 : flush triggers when the session token estimate crosses
@@ -1890,8 +1313,8 @@ One flush per compaction cycle
 sessions.json
 Workspace must be writable
 : if the session runs sandboxed with
-workspaceAccess: &quot;ro&quot;
-&quot;none&quot;
+workspaceAccess: "ro"
+"none"
 , the flush is skipped.
 For the full compaction lifecycle, see
 Session management + compaction
@@ -1947,7 +1370,7 @@ memorySearch.remote.apiKey
 memorySearch.remote.headers
 QMD backend (experimental)
 Set
-memory.backend = &quot;qmd&quot;
+memory.backend = "qmd"
 to swap the built-in SQLite indexer for
 QMD
 : a local-first search sidecar that combines
@@ -1955,7 +1378,7 @@ BM25 + vectors + reranking. Markdown stays the source of truth; OpenClaw shells
 out to QMD for retrieval. Key points:
 Prereqs
 Disabled by default. Opt in per-config (
-memory.backend = &quot;qmd&quot;
+memory.backend = "qmd"
 Install the QMD CLI separately (
 bun install -g https://github.com/tobi/qmd
 or grab
@@ -1971,7 +1394,7 @@ node-llama-cpp
 and auto-downloads GGUF
 models from HuggingFace on first use (no separate Ollama daemon required).
 The gateway runs QMD in a self-contained XDG home under
-~/.openclaw/agents/&lt;agentId&gt;/qmd/
+~/.openclaw/agents/<agentId>/qmd/
 by setting
 XDG_CONFIG_HOME
 and
@@ -1980,7 +1403,7 @@ OS support: macOS and Linux work out of the box once Bun + SQLite are
 installed. Windows is best supported via WSL2.
 How the sidecar runs
 The gateway writes a self-contained QMD home under
-~/.openclaw/agents/&lt;agentId&gt;/qmd/
+~/.openclaw/agents/<agentId>/qmd/
 (config + cache + sqlite DB).
 Collections are created via
 qmd collection add
@@ -2038,18 +1461,17 @@ You can point
 qmd
 at the exact same index by exporting the same XDG vars
 OpenClaw uses:
-Copy
 # Pick the same state dir OpenClaw uses
 STATE_DIR
-&quot;${OPENCLAW_STATE_DIR
+"${OPENCLAW_STATE_DIR
 $HOME
-.openclaw}&quot;
+.openclaw}"
 export
 XDG_CONFIG_HOME
-&quot;$STATE_DIR/agents/main/qmd/xdg-config&quot;
+"$STATE_DIR/agents/main/qmd/xdg-config"
 export
 XDG_CACHE_HOME
-&quot;$STATE_DIR/agents/main/qmd/xdg-cache&quot;
+"$STATE_DIR/agents/main/qmd/xdg-cache"
 # (Optional) force an index refresh + embeddings
 qmd
 update
@@ -2058,12 +1480,12 @@ embed
 # Warm up / trigger first-time model downloads
 qmd
 query
-&quot;test&quot;
+"test"
 memory-root
 --json
-&gt;
+>
 /dev/null
-2&gt;&amp;1
+2>&1
 Config surface (
 memory.qmd.*
 command
@@ -2127,18 +1549,18 @@ matches the
 normalized
 session key (lowercased, with any
 leading
-agent:&lt;id&gt;:
+agent:<id>:
 stripped). Example:
 discord:channel:
 match.rawKeyPrefix
 matches the
 raw
 session key (lowercased), including
-agent:&lt;id&gt;:
+agent:<id>:
 . Example:
 agent:main:discord:
 Legacy:
-match.keyPrefix: &quot;agent:...&quot;
+match.keyPrefix: "agent:..."
 is still treated as a raw-key prefix,
 but prefer
 rawKeyPrefix
@@ -2150,7 +1572,7 @@ channel
 chatType
 so empty results are easier to debug.
 Snippets sourced outside the workspace show up as
-qmd/&lt;collection&gt;/&lt;relative-path&gt;
+qmd/<collection>/<relative-path>
 memory_search
 results;
 memory_get
@@ -2159,37 +1581,36 @@ When
 memory.qmd.sessions.enabled = true
 , OpenClaw exports sanitized session
 transcripts (User/Assistant turns) into a dedicated QMD collection under
-~/.openclaw/agents/&lt;id&gt;/qmd/sessions/
+~/.openclaw/agents/<id>/qmd/sessions/
 , so
 memory_search
 can recall recent
 conversations without touching the builtin SQLite index.
 memory_search
 snippets now include a
-Source: &lt;path#line&gt;
+Source: <path#line>
 footer when
 memory.citations
 auto
 ; set
-memory.citations = &quot;off&quot;
+memory.citations = "off"
 to keep
 the path metadata internal (the agent still receives the path for
 memory_get
 , but the snippet text omits the footer and the system prompt
 warns the agent not to cite it).
 Example
-Copy
 memory: {
 backend
-&quot;qmd&quot;
+"qmd"
 citations
-&quot;auto&quot;
+"auto"
 qmd
 includeDefaultMemory
 true
 update
 interval
-&quot;5m&quot;
+"5m"
 debounceMs
 15000 }
 limits
@@ -2198,36 +1619,36 @@ timeoutMs
 4000 }
 scope
 default
-&quot;deny&quot;
+"deny"
 rules
 action
-&quot;allow&quot;
+"allow"
 match
 chatType
-&quot;direct&quot;
+"direct"
 } }
-// Normalized session-key prefix (strips `agent:&lt;id&gt;:`).
+// Normalized session-key prefix (strips `agent:<id>:`).
 action
-&quot;deny&quot;
+"deny"
 match
 keyPrefix
-&quot;discord:channel:&quot;
+"discord:channel:"
 } }
-// Raw session-key prefix (includes `agent:&lt;id&gt;:`).
+// Raw session-key prefix (includes `agent:<id>:`).
 action
-&quot;deny&quot;
+"deny"
 match
 rawKeyPrefix
-&quot;agent:main:discord:&quot;
+"agent:main:discord:"
 } }
 paths
 name
-&quot;docs&quot;
+"docs"
 path
-&quot;~/notes&quot;
+"~/notes"
 pattern
-&quot;**/*.md&quot;
-Citations &amp; fallback
+"**/*.md"
+Citations & fallback
 memory.citations
 applies regardless of backend (
 auto
@@ -2235,7 +1656,7 @@ off
 When
 qmd
 runs, we tag
-status().backend = &quot;qmd&quot;
+status().backend = "qmd"
 so diagnostics show which
 engine served the results. If the QMD subprocess exits or JSON output can’t be
 parsed, the search manager logs a warning and returns the builtin provider
@@ -2243,13 +1664,12 @@ parsed, the search manager logs a warning and returns the builtin provider
 Additional memory paths
 If you want to index Markdown files outside the default workspace layout, add
 explicit paths:
-Copy
 agents: {
 defaults
 memorySearch
 extraPaths
-&quot;../team-docs&quot;
-&quot;/srv/shared-notes/overview.md&quot;
+"../team-docs"
+"/srv/shared-notes/overview.md"
 Notes:
 Paths can be absolute or workspace-relative.
 Directories are scanned recursively for
@@ -2261,17 +1681,16 @@ Gemini embeddings (native)
 Set the provider to
 gemini
 to use the Gemini embeddings API directly:
-Copy
 agents: {
 defaults
 memorySearch
 provider
-&quot;gemini&quot;
+"gemini"
 model
-&quot;gemini-embedding-001&quot;
+"gemini-embedding-001"
 remote
 apiKey
-&quot;YOUR_GEMINI_API_KEY&quot;
+"YOUR_GEMINI_API_KEY"
 Notes:
 remote.baseUrl
 is optional (defaults to the Gemini API base URL).
@@ -2285,26 +1704,25 @@ custom OpenAI-compatible endpoint
 you can use the
 remote
 configuration with the OpenAI provider:
-Copy
 agents: {
 defaults
 memorySearch
 provider
-&quot;openai&quot;
+"openai"
 model
-&quot;text-embedding-3-small&quot;
+"text-embedding-3-small"
 remote
 baseUrl
-&quot;https://api.example.com/v1/&quot;
+"https://api.example.com/v1/"
 apiKey
-&quot;YOUR_OPENAI_COMPAT_API_KEY&quot;
+"YOUR_OPENAI_COMPAT_API_KEY"
 headers
-&quot;X-Custom-Header&quot;
-&quot;value&quot;
+"X-Custom-Header"
+"value"
 If you don’t want to set an API key, use
-memorySearch.provider = &quot;local&quot;
+memorySearch.provider = "local"
 or set
-memorySearch.fallback = &quot;none&quot;
+memorySearch.fallback = "none"
 Fallbacks:
 memorySearch.fallback
 can be
@@ -2328,8 +1746,8 @@ Set
 remote.batch.concurrency
 to control how many batch jobs we submit in parallel (default: 2).
 Batch mode applies when
-memorySearch.provider = &quot;openai&quot;
-&quot;gemini&quot;
+memorySearch.provider = "openai"
+"gemini"
 and uses the corresponding API key.
 Gemini batch jobs use the async embeddings batch endpoint and require Gemini Batch API availability.
 Why OpenAI batch is fast + cheap:
@@ -2339,16 +1757,15 @@ See the OpenAI Batch API docs and pricing for details:
 https://platform.openai.com/docs/api-reference/batch
 https://platform.openai.com/pricing
 Config example:
-Copy
 agents: {
 defaults
 memorySearch
 provider
-&quot;openai&quot;
+"openai"
 model
-&quot;text-embedding-3-small&quot;
+"text-embedding-3-small"
 fallback
-&quot;openai&quot;
+"openai"
 remote
 batch
 enabled
@@ -2365,14 +1782,14 @@ memory_get
 — read memory file content by path.
 Local mode:
 Set
-agents.defaults.memorySearch.provider = &quot;local&quot;
+agents.defaults.memorySearch.provider = "local"
 Provide
 agents.defaults.memorySearch.local.modelPath
 (GGUF or
 hf:
 URI).
 Optional: set
-agents.defaults.memorySearch.fallback = &quot;none&quot;
+agents.defaults.memorySearch.fallback = "none"
 to avoid remote fallback.
 How the memory tools work
 memory_search
@@ -2393,7 +1810,7 @@ File type: Markdown only (
 MEMORY.md
 memory/**/*.md
 Index storage: per-agent SQLite at
-~/.openclaw/memory/&lt;agentId&gt;.sqlite
+~/.openclaw/memory/<agentId>.sqlite
 (configurable via
 agents.defaults.memorySearch.store.path
 , supports
@@ -2454,7 +1871,6 @@ This isn’t “IR-theory perfect”, but it’s simple, fast, and tends to impr
 If we want to get fancier later, common next steps are Reciprocal Rank Fusion (RRF) or score normalization
 (min/max or z-score) before mixing.
 Config:
-Copy
 agents: {
 defaults
 memorySearch
@@ -2472,7 +1888,6 @@ OpenClaw can cache
 chunk embeddings
 in SQLite so reindexing and frequent updates (especially session transcripts) don’t re-embed unchanged text.
 Config:
-Copy
 agents: {
 defaults
 memorySearch
@@ -2487,7 +1902,6 @@ session transcripts
 and surface them via
 memory_search
 This is gated behind an experimental flag.
-Copy
 agents: {
 defaults
 memorySearch
@@ -2495,8 +1909,8 @@ experimental
 sessionMemory
 true
 sources
-&quot;memory&quot;
-&quot;sessions&quot;
+"memory"
+"sessions"
 Notes:
 Session indexing is
 opt-in
@@ -2511,10 +1925,9 @@ memory_get
 remains limited to memory files.
 Session indexing is isolated per agent (only that agent’s session logs are indexed).
 Session logs live on disk (
-~/.openclaw/agents/&lt;agentId&gt;/sessions/*.jsonl
+~/.openclaw/agents/<agentId>/sessions/*.jsonl
 ). Any process/user with filesystem access can read them, so treat disk access as the trust boundary. For stricter isolation, run agents under separate OS users or hosts.
 Delta thresholds (defaults shown):
-Copy
 agents: {
 defaults
 memorySearch
@@ -2532,7 +1945,6 @@ vec0
 ) and performs vector distance queries in the
 database. This keeps search fast without loading every embedding into JS.
 Configuration (optional):
-Copy
 agents: {
 defaults
 memorySearch
@@ -2541,7 +1953,7 @@ vector
 enabled
 true
 extensionPath
-&quot;/path/to/sqlite-vec&quot;
+"/path/to/sqlite-vec"
 Notes:
 enabled
 defaults to true; when disabled, search falls back to in-process
@@ -2556,7 +1968,7 @@ Default local embedding model:
 hf:ggml-org/embeddinggemma-300m-qat-q8_0-GGUF/embeddinggemma-300m-qat-Q8_0.gguf
 (~0.6 GB).
 When
-memorySearch.provider = &quot;local&quot;
+memorySearch.provider = "local"
 node-llama-cpp
 resolves
 modelPath
@@ -2572,29 +1984,28 @@ node-llama-cpp
 , then
 pnpm rebuild node-llama-cpp
 Fallback: if local setup fails and
-memorySearch.fallback = &quot;openai&quot;
+memorySearch.fallback = "openai"
 , we automatically switch to remote embeddings (
 openai/text-embedding-3-small
 unless overridden) and record the reason.
 Custom OpenAI-compatible endpoint example
-Copy
 agents: {
 defaults
 memorySearch
 provider
-&quot;openai&quot;
+"openai"
 model
-&quot;text-embedding-3-small&quot;
+"text-embedding-3-small"
 remote
 baseUrl
-&quot;https://api.example.com/v1/&quot;
+"https://api.example.com/v1/"
 apiKey
-&quot;YOUR_REMOTE_API_KEY&quot;
+"YOUR_REMOTE_API_KEY"
 headers
-&quot;X-Organization&quot;
-&quot;org-id&quot;
-&quot;X-Project&quot;
-&quot;project-id&quot;
+"X-Organization"
+"org-id"
+"X-Project"
+"project-id"
 Notes:
 remote.*
 takes precedence over
@@ -2611,70 +2022,14 @@ Compaction
 
 [Source: https://docs.openclaw.ai/concepts/messages]
 
-Messages - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Messages and delivery
-Messages
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Fundamentals
-Gateway Architecture
-Agent Runtime
-Agent Loop
-System Prompt
-Context
-Agent Workspace
-OAuth
-Bootstrapping
-Bootstrapping
-Sessions and memory
-Session Management
-Sessions
-Session Pruning
-Session Tools
-Memory
-Compaction
-Multi-agent
-Multi-Agent Routing
-Presence
-Messages and delivery
-Messages
-Streaming and Chunking
-Retry Policy
-Command Queue
-Messages
-Message flow (high level)
-Inbound dedupe
-Inbound debouncing
-Sessions and devices
-Inbound bodies and history context
-Queueing and followups
-Streaming, chunking, and batching
-Reasoning visibility and tokens
-Prefixes, threading, and replies
-Messages and delivery
-Messages
-Messages
 This page ties together how OpenClaw handles inbound messages, sessions, queueing,
 streaming, and reasoning visibility.
 Message flow (high level)
-Copy
 Inbound message
--&gt; routing/bindings -&gt; session key
--&gt; queue (if a run is active)
--&gt; agent run (streaming + tools)
--&gt; outbound replies (channel limits + chunking)
+-> routing/bindings -> session key
+-> queue (if a run is active)
+-> agent run (streaming + tools)
+-> outbound replies (channel limits + chunking)
 Key knobs live in configuration:
 messages.*
 for prefixes, queueing, and group behavior.
@@ -2700,7 +2055,6 @@ messages.inbound
 . Debouncing is scoped per channel + conversation
 and uses the most recent message for reply threading/IDs.
 Config (global default + per-channel overrides):
-Copy
 messages
 inbound
 debounceMs
@@ -2775,7 +2129,7 @@ messages.groupChat.historyLimit
 (global
 default) and per-channel overrides like
 channels.slack.historyLimit
-channels.telegram.accounts.&lt;id&gt;.historyLimit
+channels.telegram.accounts.<id>.historyLimit
 (set
 to disable).
 Queueing and followups
@@ -2830,9 +2184,9 @@ Prefixes, threading, and replies
 Outbound message formatting is centralized in
 messages
 messages.responsePrefix
-channels.&lt;channel&gt;.responsePrefix
+channels.<channel>.responsePrefix
 , and
-channels.&lt;channel&gt;.accounts.&lt;id&gt;.responsePrefix
+channels.<channel>.accounts.<id>.responsePrefix
 (outbound prefix cascade), plus
 channels.whatsapp.messagePrefix
 (WhatsApp inbound prefix)
@@ -2914,68 +2268,6 @@ Related settings include `auth.profiles`, `auth.order`, `auth.cooldowns.billingB
 
 [Source: https://docs.openclaw.ai/concepts/model-providers]
 
-Model Providers - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Configuration
-Model Providers
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Model Providers
-Model Provider Quickstart
-Model concepts
-Models CLI
-Configuration
-Model Providers
-Model Failover
-Providers
-Anthropic
-OpenAI
-OpenRouter
-Litellm
-Amazon Bedrock
-Vercel AI Gateway
-Moonshot AI
-MiniMax
-OpenCode Zen
-GLM Models
-Z.AI
-Synthetic
-Qianfan
-Model providers
-Quick rules
-Built-in providers (pi-ai catalog)
-OpenAI
-Anthropic
-OpenAI Code (Codex)
-OpenCode Zen
-Google Gemini (API key)
-Google Vertex, Antigravity, and Gemini CLI
-Z.AI (GLM)
-Vercel AI Gateway
-Other built-in providers
-Providers via models.providers (custom/base URL)
-Moonshot AI (Kimi)
-Kimi Coding
-Qwen OAuth (free tier)
-Synthetic
-MiniMax
-Ollama
-vLLM
-Local proxies (LM Studio, vLLM, LiteLLM, etc.)
-CLI examples
-Configuration
 Model Providers
 Model providers
 This page covers
@@ -2994,7 +2286,7 @@ agents.defaults.models
 CLI helpers:
 openclaw onboard
 openclaw models list
-openclaw models set &lt;provider/model&gt;
+openclaw models set <provider/model>
 Built-in providers (pi-ai catalog)
 OpenClaw ships with the pi‑ai catalog. These providers require
 models.providers
@@ -3008,12 +2300,11 @@ Example model:
 openai/gpt-5.1-codex
 CLI:
 openclaw onboard --auth-choice openai-api-key
-Copy
 agents
 defaults
 model
 primary
-&quot;openai/gpt-5.1-codex&quot;
+"openai/gpt-5.1-codex"
 } } }
 Anthropic
 Provider:
@@ -3027,12 +2318,11 @@ CLI:
 openclaw onboard --auth-choice token
 (paste setup-token) or
 openclaw models auth paste-token --provider anthropic
-Copy
 agents
 defaults
 model
 primary
-&quot;anthropic/claude-opus-4-6&quot;
+"anthropic/claude-opus-4-6"
 } } }
 OpenAI Code (Codex)
 Provider:
@@ -3043,12 +2333,11 @@ openai-codex/gpt-5.3-codex
 CLI:
 openclaw onboard --auth-choice openai-codex
 openclaw models auth login --provider openai-codex
-Copy
 agents
 defaults
 model
 primary
-&quot;openai-codex/gpt-5.3-codex&quot;
+"openai-codex/gpt-5.3-codex"
 } } }
 OpenCode Zen
 Provider:
@@ -3061,12 +2350,11 @@ Example model:
 opencode/claude-opus-4-6
 CLI:
 openclaw onboard --auth-choice opencode-zen
-Copy
 agents
 defaults
 model
 primary
-&quot;opencode/claude-opus-4-6&quot;
+"opencode/claude-opus-4-6"
 } } }
 Google Gemini (API key)
 Provider:
@@ -3191,28 +2479,27 @@ moonshot/kimi-k2-0905-preview
 moonshot/kimi-k2-turbo-preview
 moonshot/kimi-k2-thinking
 moonshot/kimi-k2-thinking-turbo
-Copy
 agents
 defaults
 model
 primary
-&quot;moonshot/kimi-k2.5&quot;
+"moonshot/kimi-k2.5"
 } }
 models
 mode
-&quot;merge&quot;
+"merge"
 providers
 moonshot
 baseUrl
-&quot;https://api.moonshot.ai/v1&quot;
+"https://api.moonshot.ai/v1"
 apiKey
-&quot;${MOONSHOT_API_KEY}&quot;
+"${MOONSHOT_API_KEY}"
 api
-&quot;openai-completions&quot;
+"openai-completions"
 models
-&quot;kimi-k2.5&quot;
+"kimi-k2.5"
 name
-&quot;Kimi K2.5&quot;
+"Kimi K2.5"
 Kimi Coding
 Kimi Coding uses Moonshot AI’s Anthropic-compatible endpoint:
 Provider:
@@ -3221,20 +2508,18 @@ Auth:
 KIMI_API_KEY
 Example model:
 kimi-coding/k2p5
-Copy
 env
 KIMI_API_KEY
-&quot;sk-...&quot;
+"sk-..."
 agents
 defaults
 model
 primary
-&quot;kimi-coding/k2p5&quot;
+"kimi-coding/k2p5"
 } }
 Qwen OAuth (free tier)
 Qwen provides OAuth access to Qwen Coder + Vision via a device-code flow.
 Enable the bundled plugin, then log in:
-Copy
 openclaw
 plugins
 enable
@@ -3264,28 +2549,27 @@ Example model:
 synthetic/hf:MiniMaxAI/MiniMax-M2.1
 CLI:
 openclaw onboard --auth-choice synthetic-api-key
-Copy
 agents
 defaults
 model
 primary
-&quot;synthetic/hf:MiniMaxAI/MiniMax-M2.1&quot;
+"synthetic/hf:MiniMaxAI/MiniMax-M2.1"
 } }
 models
 mode
-&quot;merge&quot;
+"merge"
 providers
 synthetic
 baseUrl
-&quot;https://api.synthetic.new/anthropic&quot;
+"https://api.synthetic.new/anthropic"
 apiKey
-&quot;${SYNTHETIC_API_KEY}&quot;
+"${SYNTHETIC_API_KEY}"
 api
-&quot;anthropic-messages&quot;
+"anthropic-messages"
 models
-&quot;hf:MiniMaxAI/MiniMax-M2.1&quot;
+"hf:MiniMaxAI/MiniMax-M2.1"
 name
-&quot;MiniMax M2.1&quot;
+"MiniMax M2.1"
 MiniMax
 MiniMax is configured via
 models.providers
@@ -3306,17 +2590,15 @@ Example model:
 ollama/llama3.3
 Installation:
 https://ollama.ai
-Copy
 # Install Ollama, then pull a model:
 ollama
 pull
 llama3.3
-Copy
 agents
 defaults
 model
 primary
-&quot;ollama/llama3.3&quot;
+"ollama/llama3.3"
 } }
 Ollama is automatically detected when running locally at
 http://127.0.0.1:11434/v1
@@ -3331,52 +2613,49 @@ Auth: Optional (depends on your server)
 Default base URL:
 http://127.0.0.1:8000/v1
 To opt in to auto-discovery locally (any value works if your server doesn’t enforce auth):
-Copy
 export
 VLLM_API_KEY
-&quot;vllm-local&quot;
+"vllm-local"
 Then set a model (replace with one of the IDs returned by
 /v1/models
-Copy
 agents
 defaults
 model
 primary
-&quot;vllm/your-model-id&quot;
+"vllm/your-model-id"
 } }
 See
 /providers/vllm
 for details.
 Local proxies (LM Studio, vLLM, LiteLLM, etc.)
 Example (OpenAI‑compatible):
-Copy
 agents
 defaults
 model
 primary
-&quot;lmstudio/minimax-m2.1-gs32&quot;
+"lmstudio/minimax-m2.1-gs32"
 models
-&quot;lmstudio/minimax-m2.1-gs32&quot;
+"lmstudio/minimax-m2.1-gs32"
 alias
-&quot;Minimax&quot;
+"Minimax"
 } }
 models
 providers
 lmstudio
 baseUrl
-&quot;http://localhost:1234/v1&quot;
+"http://localhost:1234/v1"
 apiKey
-&quot;LMSTUDIO_KEY&quot;
+"LMSTUDIO_KEY"
 api
-&quot;openai-completions&quot;
+"openai-completions"
 models
-&quot;minimax-m2.1-gs32&quot;
+"minimax-m2.1-gs32"
 name
-&quot;MiniMax M2.1&quot;
+"MiniMax M2.1"
 reasoning
 false
 input
-&quot;text&quot;
+"text"
 cost
 input
 output
@@ -3398,13 +2677,12 @@ maxTokens
 are optional.
 When omitted, OpenClaw defaults to:
 reasoning: false
-input: [&quot;text&quot;]
+input: ["text"]
 cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 }
 contextWindow: 200000
 maxTokens: 8192
 Recommended: set explicit values that match your proxy/model limits.
 CLI examples
-Copy
 openclaw
 onboard
 --auth-choice
@@ -3427,61 +2705,6 @@ Model Failover
 
 [Source: https://docs.openclaw.ai/concepts/models]
 
-Models CLI - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Model concepts
-Models CLI
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Model Providers
-Model Provider Quickstart
-Model concepts
-Models CLI
-Configuration
-Model Providers
-Model Failover
-Providers
-Anthropic
-OpenAI
-OpenRouter
-Litellm
-Amazon Bedrock
-Vercel AI Gateway
-Moonshot AI
-MiniMax
-OpenCode Zen
-GLM Models
-Z.AI
-Synthetic
-Qianfan
-Models CLI
-How model selection works
-Quick model picks (anecdotal)
-Setup wizard (recommended)
-Config keys (overview)
-“Model is not allowed” (and why replies stop)
-Switching models in chat (/model)
-CLI commands
-models list
-models status
-Scanning (OpenRouter free models)
-Models registry (models.json)
-Model concepts
-Models CLI
-Models CLI
-See
 /concepts/model-failover
 for auth profile
 rotation, cooldowns, and how that interacts with fallbacks.
@@ -3519,7 +2742,6 @@ MiniMax
 : better for writing and vibes.
 Setup wizard (recommended)
 If you don’t want to hand-edit config, run the onboarding wizard:
-Copy
 openclaw
 onboard
 It can set up model + auth for common providers, including
@@ -3557,8 +2779,7 @@ for
 and for
 session overrides. When a user selects a model that isn’t in that allowlist,
 OpenClaw returns:
-Copy
-Model &quot;provider/model&quot; is not allowed. Use /model to list available models.
+Model "provider/model" is not allowed. Use /model to list available models.
 This happens
 before
 a normal reply is generated, so the message can feel
@@ -3572,22 +2793,20 @@ agents.defaults.models
 Pick a model from
 /model list
 Example allowlist config:
-Copy
 agent
 model
 primary
-&quot;anthropic/claude-sonnet-4-5&quot;
+"anthropic/claude-sonnet-4-5"
 models
-&quot;anthropic/claude-sonnet-4-5&quot;
+"anthropic/claude-sonnet-4-5"
 alias
-&quot;Sonnet&quot;
-&quot;anthropic/claude-opus-4-6&quot;
+"Sonnet"
+"anthropic/claude-opus-4-6"
 alias
-&quot;Opus&quot;
+"Opus"
 Switching models in chat (
 /model
 You can switch models for the current session without restarting:
-Copy
 /model
 /model list
 /model 3
@@ -3598,7 +2817,7 @@ Notes:
 (and
 /model list
 ) is a compact, numbered picker (model family + available providers).
-/model &lt;#&gt;
+/model <#>
 selects from that picker.
 /model status
 is the detailed view (auth candidates and, when configured, provider endpoint
@@ -3610,7 +2829,7 @@ first
 . Use
 provider/model
 when typing
-/model &lt;ref&gt;
+/model <ref>
 If the model ID itself contains
 (OpenRouter-style), you must include the provider prefix (example:
 /model openrouter/moonshotai/kimi-k2
@@ -3621,7 +2840,6 @@ in the model ID).
 Full command behavior/config:
 Slash commands
 CLI commands
-Copy
 openclaw
 models
 list
@@ -3631,15 +2849,15 @@ status
 openclaw
 models
 set
-&lt;
+<
 provider/mode
-&gt;
+>
 openclaw
 models
 set-image
-&lt;
+<
 provider/mode
-&gt;
+>
 openclaw
 models
 aliases
@@ -3648,19 +2866,19 @@ openclaw
 models
 aliases
 add
-&lt;
+<
 alia
-&gt;
-&lt;
+>
+<
 provider/mode
-&gt;
+>
 openclaw
 models
 aliases
 remove
-&lt;
+<
 alia
-&gt;
+>
 openclaw
 models
 fallbacks
@@ -3669,16 +2887,16 @@ openclaw
 models
 fallbacks
 add
-&lt;
+<
 provider/mode
-&gt;
+>
 openclaw
 models
 fallbacks
 remove
-&lt;
+<
 provider/mode
-&gt;
+>
 openclaw
 models
 fallbacks
@@ -3691,16 +2909,16 @@ openclaw
 models
 image-fallbacks
 add
-&lt;
+<
 provider/mode
-&gt;
+>
 openclaw
 models
 image-fallbacks
 remove
-&lt;
+<
 provider/mode
-&gt;
+>
 openclaw
 models
 image-fallbacks
@@ -3714,7 +2932,7 @@ Shows configured models by default. Useful flags:
 : full catalog
 --local
 : local providers only
---provider &lt;name&gt;
+--provider <name>
 : filter by provider
 --plain
 : one model per line
@@ -3746,7 +2964,6 @@ for automation (exit
 when missing/expired,
 when expiring).
 Preferred Anthropic auth is the Claude Code CLI setup-token (run anywhere; paste on the gateway host if needed):
-Copy
 claude
 setup-token
 openclaw
@@ -3761,13 +2978,13 @@ optionally probe models for tool and image support.
 Key flags:
 --no-probe
 : skip live probes (metadata only)
---min-params &lt;b&gt;
+--min-params <b>
 : minimum parameter size (billions)
---max-age-days &lt;days&gt;
+--max-age-days <days>
 : skip older models
---provider &lt;name&gt;
+--provider <name>
 : provider prefix filter
---max-candidates &lt;n&gt;
+--max-candidates <n>
 : fallback list size
 --set-default
 : set
@@ -3816,7 +3033,7 @@ are written into
 models.json
 under the
 agent directory (default
-~/.openclaw/agents/&lt;agentId&gt;/models.json
+~/.openclaw/agents/<agentId>/models.json
 ). This file
 is merged by default unless
 models.mode
@@ -3830,70 +3047,6 @@ Model Providers
 
 [Source: https://docs.openclaw.ai/concepts/multi-agent]
 
-Multi-Agent Routing - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Multi-agent
-Multi-Agent Routing
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Fundamentals
-Gateway Architecture
-Agent Runtime
-Agent Loop
-System Prompt
-Context
-Agent Workspace
-OAuth
-Bootstrapping
-Bootstrapping
-Sessions and memory
-Session Management
-Sessions
-Session Pruning
-Session Tools
-Memory
-Compaction
-Multi-agent
-Multi-Agent Routing
-Presence
-Messages and delivery
-Messages
-Streaming and Chunking
-Retry Policy
-Command Queue
-Multi-Agent Routing
-What is “one agent”?
-Paths (quick map)
-Single-agent mode (default)
-Agent helper
-Multiple agents = multiple people, multiple personalities
-One WhatsApp number, multiple people (DM split)
-Routing rules (how messages pick an agent)
-Multiple accounts / phone numbers
-Concepts
-Example: two WhatsApps → two agents
-Example: WhatsApp daily chat + Telegram deep work
-Example: same channel, one peer to Opus
-Family agent bound to a WhatsApp group
-Per-Agent Sandbox and Tool Configuration
-Multi-agent
-Multi-Agent Routing
-Multi-Agent Routing
-Goal: multiple
-isolated
-agents (separate workspace +
-agentDir
 + sessions), plus multiple channel accounts (e.g. two WhatsApps) in one running Gateway. Inbound is routed to an agent via bindings.
 What is “one agent”?
 agent
@@ -3905,12 +3058,11 @@ agentDir
 ) for auth profiles, model registry, and per-agent config.
 Session store
 (chat history + routing state) under
-~/.openclaw/agents/&lt;agentId&gt;/sessions
+~/.openclaw/agents/<agentId>/sessions
 Auth profiles are
 per-agent
 . Each agent reads from its own:
-Copy
-~/.openclaw/agents/&lt;agentId&gt;/agent/auth-profiles.json
+~/.openclaw/agents/<agentId>/agent/auth-profiles.json
 Main agent credentials are
 not
 shared automatically. Never reuse
@@ -3951,24 +3103,24 @@ OPENCLAW_STATE_DIR
 Workspace:
 ~/.openclaw/workspace
 (or
-~/.openclaw/workspace-&lt;agentId&gt;
+~/.openclaw/workspace-<agentId>
 Agent dir:
-~/.openclaw/agents/&lt;agentId&gt;/agent
+~/.openclaw/agents/<agentId>/agent
 (or
 agents.list[].agentDir
 Sessions:
-~/.openclaw/agents/&lt;agentId&gt;/sessions
+~/.openclaw/agents/<agentId>/sessions
 Single-agent mode (default)
 If you do nothing, OpenClaw runs a single agent:
 agentId
 defaults to
 main
 Sessions are keyed as
-agent:main:&lt;mainKey&gt;
+agent:main:<mainKey>
 Workspace defaults to
 ~/.openclaw/workspace
 (or
-~/.openclaw/workspace-&lt;profile&gt;
+~/.openclaw/workspace-<profile>
 when
 OPENCLAW_PROFILE
 is set).
@@ -3976,7 +3128,6 @@ State defaults to
 ~/.openclaw/agents/main/agent
 Agent helper
 Use the agent wizard to add a new isolated agent:
-Copy
 openclaw
 agents
 add
@@ -3985,7 +3136,6 @@ Then add
 bindings
 (or let the wizard do it) to route inbound messages.
 Verify with:
-Copy
 openclaw
 agents
 list
@@ -4018,50 +3168,49 @@ one WhatsApp account
 . Match on sender E.164 (like
 +15551234567
 ) with
-peer.kind: &quot;direct&quot;
+peer.kind: "direct"
 . Replies still come from the same WhatsApp number (no per‑agent sender identity).
 Important detail: direct chats collapse to the agent’s
 main session key
 , so true isolation requires
 one agent per person
 Example:
-Copy
 agents
 list
-&quot;alex&quot;
+"alex"
 workspace
-&quot;~/.openclaw/workspace-alex&quot;
-&quot;mia&quot;
+"~/.openclaw/workspace-alex"
+"mia"
 workspace
-&quot;~/.openclaw/workspace-mia&quot;
+"~/.openclaw/workspace-mia"
 bindings
 agentId
-&quot;alex&quot;
+"alex"
 match
 channel
-&quot;whatsapp&quot;
+"whatsapp"
 peer
 kind
-&quot;direct&quot;
-&quot;+15551230001&quot;
+"direct"
+"+15551230001"
 } }
 agentId
-&quot;mia&quot;
+"mia"
 match
 channel
-&quot;whatsapp&quot;
+"whatsapp"
 peer
 kind
-&quot;direct&quot;
-&quot;+15551230002&quot;
+"direct"
+"+15551230002"
 } }
 channels
 whatsapp
 dmPolicy
-&quot;allowlist&quot;
+"allowlist"
 allowFrom
-&quot;+15551230001&quot;
-&quot;+15551230002&quot;
+"+15551230001"
+"+15551230002"
 Notes:
 DM access control is
 global per WhatsApp account
@@ -4086,7 +3235,7 @@ teamId
 accountId
 match for a channel
 channel-level match (
-accountId: &quot;*&quot;
+accountId: "*"
 fallback to default agent (
 agents.list[].default
 , else first list entry, default:
@@ -4112,218 +3261,214 @@ agentId
 : one “brain” (workspace, per-agent auth, per-agent session store).
 accountId
 : one channel account instance (e.g. WhatsApp account
-&quot;personal&quot;
-&quot;biz&quot;
+"personal"
+"biz"
 binding
 : routes inbound messages to an
 agentId
 (channel, accountId, peer)
 and optionally guild/team ids.
 Direct chats collapse to
-agent:&lt;agentId&gt;:&lt;mainKey&gt;
+agent:<agentId>:<mainKey>
 (per-agent “main”;
 session.mainKey
 Example: two WhatsApps → two agents
 ~/.openclaw/openclaw.json
 (JSON5):
-Copy
 agents
 list
-&quot;home&quot;
+"home"
 default
 true
 name
-&quot;Home&quot;
+"Home"
 workspace
-&quot;~/.openclaw/workspace-home&quot;
+"~/.openclaw/workspace-home"
 agentDir
-&quot;~/.openclaw/agents/home/agent&quot;
-&quot;work&quot;
+"~/.openclaw/agents/home/agent"
+"work"
 name
-&quot;Work&quot;
+"Work"
 workspace
-&quot;~/.openclaw/workspace-work&quot;
+"~/.openclaw/workspace-work"
 agentDir
-&quot;~/.openclaw/agents/work/agent&quot;
+"~/.openclaw/agents/work/agent"
 // Deterministic routing: first match wins (most-specific first).
 bindings
 { agentId
-&quot;home&quot;
+"home"
 match
 { channel
-&quot;whatsapp&quot;
+"whatsapp"
 accountId
-&quot;personal&quot;
+"personal"
 } }
 { agentId
-&quot;work&quot;
+"work"
 match
 { channel
-&quot;whatsapp&quot;
+"whatsapp"
 accountId
-&quot;biz&quot;
+"biz"
 } }
 // Optional per-peer override (example: send a specific group to work agent).
 agentId
-&quot;work&quot;
+"work"
 match
 channel
-&quot;whatsapp&quot;
+"whatsapp"
 accountId
-&quot;personal&quot;
+"personal"
 peer
 { kind
-&quot;group&quot;
-&quot;
-[email&#160;protected]
-&quot;
+"group"
+"
+[email protected]
+"
 // Off by default: agent-to-agent messaging must be explicitly enabled + allowlisted.
 tools
 agentToAgent
 enabled
 false
 allow
-&quot;home&quot;
-&quot;work&quot;
+"home"
+"work"
 channels
 whatsapp
 accounts
 personal
 // Optional override. Default: ~/.openclaw/credentials/whatsapp/personal
-// authDir: &quot;~/.openclaw/credentials/whatsapp/personal&quot;,
+// authDir: "~/.openclaw/credentials/whatsapp/personal",
 biz
 // Optional override. Default: ~/.openclaw/credentials/whatsapp/biz
-// authDir: &quot;~/.openclaw/credentials/whatsapp/biz&quot;,
+// authDir: "~/.openclaw/credentials/whatsapp/biz",
 Example: WhatsApp daily chat + Telegram deep work
 Split by channel: route WhatsApp to a fast everyday agent and Telegram to an Opus agent.
-Copy
 agents
 list
-&quot;chat&quot;
+"chat"
 name
-&quot;Everyday&quot;
+"Everyday"
 workspace
-&quot;~/.openclaw/workspace-chat&quot;
+"~/.openclaw/workspace-chat"
 model
-&quot;anthropic/claude-sonnet-4-5&quot;
-&quot;opus&quot;
+"anthropic/claude-sonnet-4-5"
+"opus"
 name
-&quot;Deep Work&quot;
+"Deep Work"
 workspace
-&quot;~/.openclaw/workspace-opus&quot;
+"~/.openclaw/workspace-opus"
 model
-&quot;anthropic/claude-opus-4-6&quot;
+"anthropic/claude-opus-4-6"
 bindings
 agentId
-&quot;chat&quot;
+"chat"
 match
 channel
-&quot;whatsapp&quot;
+"whatsapp"
 } }
 agentId
-&quot;opus&quot;
+"opus"
 match
 channel
-&quot;telegram&quot;
+"telegram"
 } }
 Notes:
 If you have multiple accounts for a channel, add
 accountId
 to the binding (for example
-{ channel: &quot;whatsapp&quot;, accountId: &quot;personal&quot; }
+{ channel: "whatsapp", accountId: "personal" }
 To route a single DM/group to Opus while keeping the rest on chat, add a
 match.peer
 binding for that peer; peer matches always win over channel-wide rules.
 Example: same channel, one peer to Opus
 Keep WhatsApp on the fast agent, but route one DM to Opus:
-Copy
 agents
 list
-&quot;chat&quot;
+"chat"
 name
-&quot;Everyday&quot;
+"Everyday"
 workspace
-&quot;~/.openclaw/workspace-chat&quot;
+"~/.openclaw/workspace-chat"
 model
-&quot;anthropic/claude-sonnet-4-5&quot;
-&quot;opus&quot;
+"anthropic/claude-sonnet-4-5"
+"opus"
 name
-&quot;Deep Work&quot;
+"Deep Work"
 workspace
-&quot;~/.openclaw/workspace-opus&quot;
+"~/.openclaw/workspace-opus"
 model
-&quot;anthropic/claude-opus-4-6&quot;
+"anthropic/claude-opus-4-6"
 bindings
 agentId
-&quot;opus&quot;
+"opus"
 match
 channel
-&quot;whatsapp&quot;
+"whatsapp"
 peer
 kind
-&quot;direct&quot;
-&quot;+15551234567&quot;
+"direct"
+"+15551234567"
 } }
 agentId
-&quot;chat&quot;
+"chat"
 match
 channel
-&quot;whatsapp&quot;
+"whatsapp"
 } }
 Peer bindings always win, so keep them above the channel-wide rule.
 Family agent bound to a WhatsApp group
 Bind a dedicated family agent to a single WhatsApp group, with mention gating
 and a tighter tool policy:
-Copy
 agents
 list
-&quot;family&quot;
+"family"
 name
-&quot;Family&quot;
+"Family"
 workspace
-&quot;~/.openclaw/workspace-family&quot;
+"~/.openclaw/workspace-family"
 identity
 name
-&quot;Family Bot&quot;
+"Family Bot"
 groupChat
 mentionPatterns
-&quot;@family&quot;
-&quot;@familybot&quot;
-&quot;@Family Bot&quot;
+"@family"
+"@familybot"
+"@Family Bot"
 sandbox
 mode
-&quot;all&quot;
+"all"
 scope
-&quot;agent&quot;
+"agent"
 tools
 allow
-&quot;exec&quot;
-&quot;read&quot;
-&quot;sessions_list&quot;
-&quot;sessions_history&quot;
-&quot;sessions_send&quot;
-&quot;sessions_spawn&quot;
-&quot;session_status&quot;
+"exec"
+"read"
+"sessions_list"
+"sessions_history"
+"sessions_send"
+"sessions_spawn"
+"session_status"
 deny
-&quot;write&quot;
-&quot;edit&quot;
-&quot;apply_patch&quot;
-&quot;browser&quot;
-&quot;canvas&quot;
-&quot;nodes&quot;
-&quot;cron&quot;
+"write"
+"edit"
+"apply_patch"
+"browser"
+"canvas"
+"nodes"
+"cron"
 bindings
 agentId
-&quot;family&quot;
+"family"
 match
 channel
-&quot;whatsapp&quot;
+"whatsapp"
 peer
 kind
-&quot;group&quot;
-&quot;
-[email&#160;protected]
-&quot;
+"group"
+"
+[email protected]
+"
 Notes:
 Tool allow/deny lists are
 tools
@@ -4337,40 +3482,39 @@ and keep
 group allowlists enabled for the channel.
 Per-Agent Sandbox and Tool Configuration
 Starting with v2026.1.6, each agent can have its own sandbox and tool restrictions:
-Copy
 agents
 list
-&quot;personal&quot;
+"personal"
 workspace
-&quot;~/.openclaw/workspace-personal&quot;
+"~/.openclaw/workspace-personal"
 sandbox
 mode
-&quot;off&quot;
+"off"
 // No sandbox for personal agent
 // No tool restrictions - all tools available
-&quot;family&quot;
+"family"
 workspace
-&quot;~/.openclaw/workspace-family&quot;
+"~/.openclaw/workspace-family"
 sandbox
 mode
-&quot;all&quot;
+"all"
 // Always sandboxed
 scope
-&quot;agent&quot;
+"agent"
 // One container per agent
 docker
 // Optional one-time setup after container creation
 setupCommand
-&quot;apt-get update &amp;&amp; apt-get install -y git curl&quot;
+"apt-get update && apt-get install -y git curl"
 tools
 allow
-&quot;read&quot;
+"read"
 // Only read tool
 deny
-&quot;exec&quot;
-&quot;write&quot;
-&quot;edit&quot;
-&quot;apply_patch&quot;
+"exec"
+"write"
+"edit"
+"apply_patch"
 // Deny others
 Note:
 setupCommand
@@ -4380,7 +3524,7 @@ and runs once on container creation.
 Per-agent
 sandbox.docker.*
 overrides are ignored when the resolved scope is
-&quot;shared&quot;
+"shared"
 Benefits:
 Security isolation
 : Restrict tools for untrusted agents
@@ -4400,7 +3544,7 @@ For group targeting, use
 agents.list[].groupChat.mentionPatterns
 so @mentions map cleanly to the intended agent.
 See
-Multi-Agent Sandbox &amp; Tools
+Multi-Agent Sandbox & Tools
 for detailed examples.
 Compaction
 Presence
@@ -4410,62 +3554,6 @@ Presence
 
 [Source: https://docs.openclaw.ai/concepts/oauth]
 
-OAuth - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Fundamentals
-OAuth
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Fundamentals
-Gateway Architecture
-Agent Runtime
-Agent Loop
-System Prompt
-Context
-Agent Workspace
-OAuth
-Bootstrapping
-Bootstrapping
-Sessions and memory
-Session Management
-Sessions
-Session Pruning
-Session Tools
-Memory
-Compaction
-Multi-agent
-Multi-Agent Routing
-Presence
-Messages and delivery
-Messages
-Streaming and Chunking
-Retry Policy
-Command Queue
-OAuth
-The token sink (why it exists)
-Storage (where tokens live)
-Anthropic setup-token (subscription auth)
-OAuth exchange (how login works)
-Anthropic (Claude Pro/Max) setup-token
-OpenAI Codex (ChatGPT OAuth)
-Refresh + expiry
-Multiple accounts (profiles) + routing
-1) Preferred: separate agents
-2) Advanced: multiple profiles in one agent
-Fundamentals
-OAuth
-OAuth
 OpenClaw supports “subscription auth” via OAuth for providers that offer it (notably
 OpenAI Codex (ChatGPT OAuth)
 ). For Anthropic subscriptions, use the
@@ -4484,14 +3572,13 @@ OpenClaw also supports
 provider plugins
 that ship their own OAuth or API‑key
 flows. Run them via:
-Copy
 openclaw
 models
 auth
 login
 --provider
-&lt;
-&gt;
+<
+>
 The token sink (why it exists)
 OAuth providers commonly mint a
 new refresh token
@@ -4511,9 +3598,9 @@ Storage (where tokens live)
 Secrets are stored
 per-agent
 Auth profiles (OAuth + API keys):
-~/.openclaw/agents/&lt;agentId&gt;/agent/auth-profiles.json
+~/.openclaw/agents/<agentId>/agent/auth-profiles.json
 Runtime cache (managed automatically; don’t edit):
-~/.openclaw/agents/&lt;agentId&gt;/agent/auth.json
+~/.openclaw/agents/<agentId>/agent/auth.json
 Legacy import-only file (still supported, but not the main store):
 ~/.openclaw/credentials/oauth.json
 (imported into
@@ -4527,7 +3614,6 @@ Anthropic setup-token (subscription auth)
 Run
 claude setup-token
 on any machine, then paste it into OpenClaw:
-Copy
 openclaw
 models
 auth
@@ -4535,7 +3621,6 @@ setup-token
 --provider
 anthropic
 If you generated the token elsewhere, paste it manually:
-Copy
 openclaw
 models
 auth
@@ -4543,7 +3628,6 @@ paste-token
 --provider
 anthropic
 Verify:
-Copy
 openclaw
 models
 status
@@ -4594,7 +3678,6 @@ Multiple accounts (profiles) + routing
 Two patterns:
 1) Preferred: separate agents
 If you want “personal” and “work” to never interact, use isolated agents (separate sessions + credentials + workspace):
-Copy
 openclaw
 agents
 add
@@ -4611,7 +3694,7 @@ Pick which profile is used:
 globally via config ordering (
 auth.order
 per-session via
-/model ...@&lt;profileId&gt;
+/model ...@<profileId>
 Example (session override):
 /model Opus@anthropic:work
 How to see what profile IDs exist:
@@ -4631,65 +3714,6 @@ Bootstrapping
 
 [Source: https://docs.openclaw.ai/concepts/presence]
 
-Presence - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Multi-agent
-Presence
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Fundamentals
-Gateway Architecture
-Agent Runtime
-Agent Loop
-System Prompt
-Context
-Agent Workspace
-OAuth
-Bootstrapping
-Bootstrapping
-Sessions and memory
-Session Management
-Sessions
-Session Pruning
-Session Tools
-Memory
-Compaction
-Multi-agent
-Multi-Agent Routing
-Presence
-Messages and delivery
-Messages
-Streaming and Chunking
-Retry Policy
-Command Queue
-Presence
-Presence fields (what shows up)
-Producers (where presence comes from)
-1) Gateway self entry
-2) WebSocket connect
-Why one‑off CLI commands don’t show up
-3) system-event beacons
-4) Node connects (role: node)
-Merge + dedupe rules (why instanceId matters)
-TTL and bounded size
-Remote/tunnel caveat (loopback IPs)
-Consumers
-macOS Instances tab
-Debugging tips
-Multi-agent
-Presence
-Presence
 OpenClaw “presence” is a lightweight, best‑effort view of:
 the
 Gateway
@@ -4744,7 +3768,7 @@ Gateway upserts a presence entry for that connection.
 Why one‑off CLI commands don’t show up
 The CLI often connects for short, one‑off commands. To avoid spamming the
 Instances list,
-client.mode === &quot;cli&quot;
+client.mode === "cli"
 not
 turned into a presence entry.
 system-event
@@ -4816,58 +3840,6 @@ Messages
 
 [Source: https://docs.openclaw.ai/concepts/queue]
 
-Command Queue - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Messages and delivery
-Command Queue
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Fundamentals
-Gateway Architecture
-Agent Runtime
-Agent Loop
-System Prompt
-Context
-Agent Workspace
-OAuth
-Bootstrapping
-Bootstrapping
-Sessions and memory
-Session Management
-Sessions
-Session Pruning
-Session Tools
-Memory
-Compaction
-Multi-agent
-Multi-Agent Routing
-Presence
-Messages and delivery
-Messages
-Streaming and Chunking
-Retry Policy
-Command Queue
-Command Queue (2026-01-16)
-Why
-How it works
-Queue modes (per channel)
-Queue options
-Per-session overrides
-Scope and guarantees
-Troubleshooting
-Messages and delivery
-Command Queue
 Command Queue (2026-01-16)
 We serialize inbound auto-reply runs (all channels) through a tiny in-process queue to prevent multiple agent runs from colliding, while still allowing safe parallelism across sessions.
 Why
@@ -4879,7 +3851,7 @@ runEmbeddedPiAgent
 enqueues by
 session key
 (lane
-session:&lt;key&gt;
+session:<key>
 ) to guarantee only one active run per session.
 Each session run is then queued into a
 global lane
@@ -4918,25 +3890,24 @@ one response per inbound message.
 Send
 /queue collect
 as a standalone command (per-session) or set
-messages.queue.byChannel.discord: &quot;collect&quot;
+messages.queue.byChannel.discord: "collect"
 Defaults (when unset in config):
 All surfaces →
 collect
 Configure globally or per channel via
 messages.queue
-Copy
 messages
 queue
 mode
-&quot;collect&quot;
+"collect"
 debounceMs
 1000
 cap
 drop
-&quot;summarize&quot;
+"summarize"
 byChannel
 discord
-&quot;collect&quot;
+"collect"
 Queue options
 Options apply to
 followup
@@ -4962,7 +3933,7 @@ cap: 20
 drop: summarize
 Per-session overrides
 Send
-/queue &lt;mode&gt;
+/queue <mode>
 as a standalone command to store the mode for the current session.
 Options can be combined:
 /queue collect debounce:2s cap:25 drop:summarize
@@ -4992,58 +3963,6 @@ Retry Policy
 
 [Source: https://docs.openclaw.ai/concepts/retry]
 
-Retry Policy - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Messages and delivery
-Retry Policy
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Fundamentals
-Gateway Architecture
-Agent Runtime
-Agent Loop
-System Prompt
-Context
-Agent Workspace
-OAuth
-Bootstrapping
-Bootstrapping
-Sessions and memory
-Session Management
-Sessions
-Session Pruning
-Session Tools
-Memory
-Compaction
-Multi-agent
-Multi-Agent Routing
-Presence
-Messages and delivery
-Messages
-Streaming and Chunking
-Retry Policy
-Command Queue
-Retry policy
-Goals
-Defaults
-Behavior
-Discord
-Telegram
-Configuration
-Notes
-Messages and delivery
-Retry Policy
 Retry policy
 Goals
 Retry per HTTP request, not per multi-step flow.
@@ -5071,7 +3990,6 @@ Markdown parse errors are not retried; they fall back to plain text.
 Configuration
 Set retry policy per provider in
 ~/.openclaw/openclaw.json
-Copy
 channels
 telegram
 retry
@@ -5102,73 +4020,13 @@ Command Queue
 
 [Source: https://docs.openclaw.ai/concepts/session-pruning]
 
-Session Pruning - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Sessions and memory
-Session Pruning
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Fundamentals
-Gateway Architecture
-Agent Runtime
-Agent Loop
-System Prompt
-Context
-Agent Workspace
-OAuth
-Bootstrapping
-Bootstrapping
-Sessions and memory
-Session Management
-Sessions
-Session Pruning
-Session Tools
-Memory
-Compaction
-Multi-agent
-Multi-Agent Routing
-Presence
-Messages and delivery
-Messages
-Streaming and Chunking
-Retry Policy
-Command Queue
-Session Pruning
-When it runs
-Smart defaults (Anthropic)
-What this improves (cost + cache behavior)
-What can be pruned
-Context window estimation
-Mode
-cache-ttl
-Soft vs hard pruning
-Tool selection
-Interaction with other limits
-Defaults (when enabled)
-Examples
-Sessions and memory
-Session Pruning
-Session Pruning
-Session pruning trims
-old tool results
 from the in-memory context right before each LLM call. It does
 not
 rewrite the on-disk session history (
 *.jsonl
 When it runs
 When
-mode: &quot;cache-ttl&quot;
+mode: "cache-ttl"
 is enabled and the last Anthropic call for the session is older than
 ttl
 Only affects the messages sent to the model for that request.
@@ -5256,14 +4114,14 @@ support
 wildcards.
 Deny wins.
 Matching is case-insensitive.
-Empty allow list =&gt; all tools allowed.
+Empty allow list => all tools allowed.
 Interaction with other limits
 Built-in tools already truncate their own output; session pruning is an extra layer that prevents long-running chats from accumulating too much tool output in the model context.
 Compaction is separate: compaction summarizes and persists, pruning is transient per request. See
 /concepts/compaction
 Defaults (when enabled)
 ttl
-&quot;5m&quot;
+"5m"
 keepLastAssistants
 softTrimRatio
 0.3
@@ -5274,34 +4132,31 @@ minPrunableToolChars
 softTrim
 { maxChars: 4000, headChars: 1500, tailChars: 1500 }
 hardClear
-{ enabled: true, placeholder: &quot;[Old tool result content cleared]&quot; }
+{ enabled: true, placeholder: "[Old tool result content cleared]" }
 Examples
 Default (off):
-Copy
 agent
 contextPruning
 mode
-&quot;off&quot;
+"off"
 Enable TTL-aware pruning:
-Copy
 agent
 contextPruning
 mode
-&quot;cache-ttl&quot;
+"cache-ttl"
 ttl
-&quot;5m&quot;
+"5m"
 Restrict pruning to specific tools:
-Copy
 agent
 contextPruning
 mode
-&quot;cache-ttl&quot;
+"cache-ttl"
 tools
 allow
-&quot;exec&quot;
-&quot;read&quot;
+"exec"
+"read"
 deny
-&quot;*image*&quot;
+"*image*"
 ] }
 See config reference:
 Gateway Configuration
@@ -5313,61 +4168,6 @@ Session Tools
 
 [Source: https://docs.openclaw.ai/concepts/session-tool]
 
-Session Tools - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Sessions and memory
-Session Tools
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Fundamentals
-Gateway Architecture
-Agent Runtime
-Agent Loop
-System Prompt
-Context
-Agent Workspace
-OAuth
-Bootstrapping
-Bootstrapping
-Sessions and memory
-Session Management
-Sessions
-Session Pruning
-Session Tools
-Memory
-Compaction
-Multi-agent
-Multi-Agent Routing
-Presence
-Messages and delivery
-Messages
-Streaming and Chunking
-Retry Policy
-Command Queue
-Session Tools
-Tool Names
-Key Model
-sessions_list
-sessions_history
-sessions_send
-Channel Field
-Security / Send Policy
-sessions_spawn
-Sandbox Session Visibility
-Sessions and memory
-Session Tools
-Session Tools
 Goal: small, hard-to-misuse tool set so agents can list sessions, fetch history, and send to another session.
 Tool Names
 sessions_list
@@ -5376,25 +4176,25 @@ sessions_send
 sessions_spawn
 Key Model
 Main direct chat bucket is always the literal key
-&quot;main&quot;
+"main"
 (resolved to the current agent’s main key).
 Group chats use
-agent:&lt;agentId&gt;:&lt;channel&gt;:group:&lt;id&gt;
-agent:&lt;agentId&gt;:&lt;channel&gt;:channel:&lt;id&gt;
+agent:<agentId>:<channel>:group:<id>
+agent:<agentId>:<channel>:channel:<id>
 (pass the full key).
 Cron jobs use
-cron:&lt;job.id&gt;
+cron:<job.id>
 Hooks use
-hook:&lt;uuid&gt;
+hook:<uuid>
 unless explicitly set.
 Node sessions use
-node-&lt;nodeId&gt;
+node-<nodeId>
 unless explicitly set.
 global
 and
 unknown
 are reserved values and are never listed. If
-session.scope = &quot;global&quot;
+session.scope = "global"
 , we alias it to
 main
 for all tools so callers never see
@@ -5404,15 +4204,15 @@ List sessions as an array of rows.
 Parameters:
 kinds?: string[]
 filter: any of
-&quot;main&quot; | &quot;group&quot; | &quot;cron&quot; | &quot;hook&quot; | &quot;node&quot; | &quot;other&quot;
+"main" | "group" | "cron" | "hook" | "node" | "other"
 limit?: number
 max rows (default: server default, clamp e.g. 200)
 activeMinutes?: number
 only sessions updated within N minutes
 messageLimit?: number
-0 = no messages (default 0); &gt;0 = include last N messages
+0 = no messages (default 0); >0 = include last N messages
 Behavior:
-messageLimit &gt; 0
+messageLimit > 0
 fetches
 chat.history
 per session and includes the last N messages.
@@ -5455,7 +4255,7 @@ transcriptPath
 (best-effort path derived from store dir + sessionId)
 messages?
 (only when
-messageLimit &gt; 0
+messageLimit > 0
 sessions_history
 Fetch transcript for one session.
 Parameters:
@@ -5471,7 +4271,7 @@ includeTools?: boolean
 Behavior:
 includeTools=false
 filters
-role: &quot;toolResult&quot;
+role: "toolResult"
 messages.
 Returns messages array in the raw transcript format.
 When given a
@@ -5488,30 +4288,30 @@ sessions_list
 message
 (required)
 timeoutSeconds?: number
-(default &gt;0; 0 = fire-and-forget)
+(default >0; 0 = fire-and-forget)
 Behavior:
 timeoutSeconds = 0
 : enqueue and return
-{ runId, status: &quot;accepted&quot; }
-timeoutSeconds &gt; 0
+{ runId, status: "accepted" }
+timeoutSeconds > 0
 : wait up to N seconds for completion, then return
-{ runId, status: &quot;ok&quot;, reply }
+{ runId, status: "ok", reply }
 If wait times out:
-{ runId, status: &quot;timeout&quot;, error }
+{ runId, status: "timeout", error }
 . Run continues; call
 sessions_history
 later.
 If the run fails:
-{ runId, status: &quot;error&quot;, error }
+{ runId, status: "error", error }
 Announce delivery runs after the primary run completes and is best-effort;
-status: &quot;ok&quot;
+status: "ok"
 does not guarantee the announce was delivered.
 Waits via gateway
 agent.wait
 (server-side) so reconnects don’t drop the wait.
 Agent-to-agent message context is injected for the primary run.
 Inter-session messages are persisted with
-message.provenance.kind = &quot;inter_session&quot;
+message.provenance.kind = "inter_session"
 so transcript readers can distinguish routed agent instructions from external user input.
 After the primary run completes, OpenClaw runs a
 reply-back loop
@@ -5546,21 +4346,20 @@ channel
 unknown
 Security / Send Policy
 Policy-based blocking by channel/chat type (not per session id).
-Copy
-&quot;session&quot;
-&quot;sendPolicy&quot;
-&quot;rules&quot;
-&quot;match&quot;
-&quot;channel&quot;
-&quot;discord&quot;
-&quot;chatType&quot;
-&quot;group&quot;
-&quot;action&quot;
-&quot;deny&quot;
-&quot;default&quot;
-&quot;allow&quot;
+"session"
+"sendPolicy"
+"rules"
+"match"
+"channel"
+"discord"
+"chatType"
+"group"
+"action"
+"deny"
+"default"
+"allow"
 Runtime override (per session entry):
-sendPolicy: &quot;allow&quot; | &quot;deny&quot;
+sendPolicy: "allow" | "deny"
 (unset = inherit config)
 Settable via
 sessions.patch
@@ -5593,7 +4392,7 @@ Allowlist:
 agents.list[].subagents.allowAgents
 : list of agent ids allowed via
 agentId
-[&quot;*&quot;]
+["*"]
 to allow any). Default: only the requester agent.
 Discovery:
 Use
@@ -5602,7 +4401,7 @@ to discover which agent ids are allowed for
 sessions_spawn
 Behavior:
 Starts a new
-agent:&lt;agentId&gt;:subagent:&lt;uuid&gt;
+agent:<agentId>:subagent:<uuid>
 session with
 deliver: false
 Sub-agents default to the full tool set
@@ -5613,7 +4412,7 @@ Sub-agents are not allowed to call
 sessions_spawn
 (no sub-agent → sub-agent spawning).
 Always non-blocking: returns
-{ status: &quot;accepted&quot;, runId, childSessionKey }
+{ status: "accepted", runId, childSessionKey }
 immediately.
 After completion, OpenClaw runs a sub-agent
 announce step
@@ -5642,20 +4441,19 @@ For sandboxed sessions,
 agents.defaults.sandbox.sessionToolsVisibility
 can hard-clamp visibility.
 Config:
-Copy
 tools
 sessions
-// &quot;self&quot; | &quot;tree&quot; | &quot;agent&quot; | &quot;all&quot;
-// default: &quot;tree&quot;
+// "self" | "tree" | "agent" | "all"
+// default: "tree"
 visibility
-&quot;tree&quot;
+"tree"
 agents
 defaults
 sandbox
-// default: &quot;spawned&quot;
+// default: "spawned"
 sessionToolsVisibility
-&quot;spawned&quot;
-// or &quot;all&quot;
+"spawned"
+// or "all"
 Notes:
 self
 : only the current session key.
@@ -5667,11 +4465,11 @@ all
 : any session (cross-agent access still requires
 tools.agentToAgent
 When a session is sandboxed and
-sessionToolsVisibility=&quot;spawned&quot;
+sessionToolsVisibility="spawned"
 , OpenClaw clamps visibility to
 tree
 even if you set
-tools.sessions.visibility=&quot;all&quot;
+tools.sessions.visibility="all"
 Session Pruning
 Memory
 
@@ -5680,68 +4478,8 @@ Memory
 
 [Source: https://docs.openclaw.ai/concepts/session]
 
-Session Management - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Sessions and memory
-Session Management
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Fundamentals
-Gateway Architecture
-Agent Runtime
-Agent Loop
-System Prompt
-Context
-Agent Workspace
-OAuth
-Bootstrapping
-Bootstrapping
-Sessions and memory
-Session Management
-Sessions
-Session Pruning
-Session Tools
-Memory
-Compaction
-Multi-agent
-Multi-Agent Routing
-Presence
-Messages and delivery
-Messages
-Streaming and Chunking
-Retry Policy
-Command Queue
-Session Management
-Secure DM mode (recommended for multi-user setups)
-Gateway is the source of truth
-Where state lives
-Session pruning
-Pre-compaction memory flush
-Mapping transports → session keys
-Lifecycle
-Send policy (optional)
-Configuration (optional rename example)
-Inspecting
-Tips
-Session origin metadata
-Sessions and memory
-Session Management
-Session Management
-OpenClaw treats
-one direct-chat session per agent
 as primary. Direct chats collapse to
-agent:&lt;agentId&gt;:&lt;mainKey&gt;
+agent:<agentId>:<mainKey>
 (default
 main
 ), while group/channel chats get their own keys.
@@ -5774,31 +4512,30 @@ multiple people
 , you should strongly consider enabling secure DM mode. Without it, all users share the same conversation context, which can leak private information between users.
 Example of the problem with default settings:
 Alice (
-&lt;SENDER_A&gt;
+<SENDER_A>
 ) messages your agent about a private topic (for example, a medical appointment)
 Bob (
-&lt;SENDER_B&gt;
+<SENDER_B>
 ) messages your agent asking “What were we talking about?”
 Because both DMs share the same session, the model may answer Bob using Alice’s prior context.
 The fix:
 Set
 dmScope
 to isolate sessions per user:
-Copy
 // ~/.openclaw/openclaw.json
 session
 // Secure DM mode: isolate DM context per channel + sender.
 dmScope
-&quot;per-channel-peer&quot;
+"per-channel-peer"
 When to enable this:
 You have pairing approvals for more than one sender
 You use a DM allowlist with multiple entries
 You set
-dmPolicy: &quot;open&quot;
+dmPolicy: "open"
 Multiple phone numbers or accounts can message your agent
 Notes:
 Default is
-dmScope: &quot;main&quot;
+dmScope: "main"
 for continuity (all DMs share the main session). This is fine for single-user setups.
 For multi-account inboxes on the same channel, prefer
 per-account-channel-peer
@@ -5825,14 +4562,14 @@ Where state lives
 On the
 gateway host
 Store file:
-~/.openclaw/agents/&lt;agentId&gt;/sessions/sessions.json
+~/.openclaw/agents/<agentId>/sessions/sessions.json
 (per agent).
 Transcripts:
-~/.openclaw/agents/&lt;agentId&gt;/sessions/&lt;SessionId&gt;.jsonl
+~/.openclaw/agents/<agentId>/sessions/<SessionId>.jsonl
 (Telegram topic sessions use
-.../&lt;SessionId&gt;-topic-&lt;threadId&gt;.jsonl
+.../<SessionId>-topic-<threadId>.jsonl
 The store is a map
-sessionKey -&gt; { sessionId, updatedAt, ... }
+sessionKey -> { sessionId, updatedAt, ... }
 . Deleting entries is safe; they are recreated on demand.
 Group entries may include
 displayName
@@ -5870,48 +4607,48 @@ session.dmScope
 (default
 main
 main
-agent:&lt;agentId&gt;:&lt;mainKey&gt;
+agent:<agentId>:<mainKey>
 (continuity across devices/channels).
 Multiple phone numbers and channels can map to the same agent main key; they act as transports into one conversation.
 per-peer
-agent:&lt;agentId&gt;:dm:&lt;peerId&gt;
+agent:<agentId>:dm:<peerId>
 per-channel-peer
-agent:&lt;agentId&gt;:&lt;channel&gt;:dm:&lt;peerId&gt;
+agent:<agentId>:<channel>:dm:<peerId>
 per-account-channel-peer
-agent:&lt;agentId&gt;:&lt;channel&gt;:&lt;accountId&gt;:dm:&lt;peerId&gt;
+agent:<agentId>:<channel>:<accountId>:dm:<peerId>
 (accountId defaults to
 default
 session.identityLinks
 matches a provider-prefixed peer id (for example
 telegram:123
 ), the canonical key replaces
-&lt;peerId&gt;
+<peerId>
 so the same person shares a session across channels.
 Group chats isolate state:
-agent:&lt;agentId&gt;:&lt;channel&gt;:group:&lt;id&gt;
+agent:<agentId>:<channel>:group:<id>
 (rooms/channels use
-agent:&lt;agentId&gt;:&lt;channel&gt;:channel:&lt;id&gt;
+agent:<agentId>:<channel>:channel:<id>
 Telegram forum topics append
-:topic:&lt;threadId&gt;
+:topic:<threadId>
 to the group id for isolation.
 Legacy
-group:&lt;id&gt;
+group:<id>
 keys are still recognized for migration.
 Inbound contexts may still use
-group:&lt;id&gt;
+group:<id>
 ; the channel is inferred from
 Provider
 and normalized to the canonical
-agent:&lt;agentId&gt;:&lt;channel&gt;:group:&lt;id&gt;
+agent:<agentId>:<channel>:group:<id>
 form.
 Other sources:
 Cron jobs:
-cron:&lt;job.id&gt;
+cron:<job.id>
 Webhooks:
-hook:&lt;uuid&gt;
+hook:<uuid>
 (unless explicitly set by the hook)
 Node runs:
-node-&lt;nodeId&gt;
+node-<nodeId>
 Lifecycle
 Reset policy: sessions are reused until they expire, and expiry is evaluated on the next inbound message.
 Daily reset: defaults to
@@ -5947,7 +4684,7 @@ Reset triggers: exact
 (plus any extras in
 resetTriggers
 ) start a fresh session id and pass the remainder of the message through.
-/new &lt;model&gt;
+/new <model>
 accepts a model alias,
 provider/model
 , or provider name (fuzzy match) to set the new session model. If
@@ -5960,33 +4697,32 @@ sessionId
 per run (no idle reuse).
 Send policy (optional)
 Block delivery for specific session types without listing individual ids.
-Copy
 session
 sendPolicy
 rules
 action
-&quot;deny&quot;
+"deny"
 match
 channel
-&quot;discord&quot;
+"discord"
 chatType
-&quot;group&quot;
+"group"
 } }
 action
-&quot;deny&quot;
+"deny"
 match
 keyPrefix
-&quot;cron:&quot;
+"cron:"
 } }
-// Match the raw session key (including the `agent:&lt;id&gt;:` prefix).
+// Match the raw session key (including the `agent:<id>:` prefix).
 action
-&quot;deny&quot;
+"deny"
 match
 rawKeyPrefix
-&quot;agent:main:discord:&quot;
+"agent:main:discord:"
 } }
 default
-&quot;allow&quot;
+"allow"
 Runtime override (owner only):
 /send on
 → allow for this session
@@ -5996,63 +4732,62 @@ Runtime override (owner only):
 → clear override and use config rules
 Send these as standalone messages so they register.
 Configuration (optional rename example)
-Copy
 // ~/.openclaw/openclaw.json
 session
 scope
-&quot;per-sender&quot;
+"per-sender"
 // keep group keys separate
 dmScope
-&quot;main&quot;
+"main"
 // DM continuity (set per-channel-peer/per-account-channel-peer for shared inboxes)
 identityLinks
 alice
-&quot;telegram:123456789&quot;
-&quot;discord:987654321012345678&quot;
+"telegram:123456789"
+"discord:987654321012345678"
 reset
 // Defaults: mode=daily, atHour=4 (gateway host local time).
 // If you also set idleMinutes, whichever expires first wins.
 mode
-&quot;daily&quot;
+"daily"
 atHour
 idleMinutes
 120
 resetByType
 thread
 mode
-&quot;daily&quot;
+"daily"
 atHour
 4 }
 direct
 mode
-&quot;idle&quot;
+"idle"
 idleMinutes
 240 }
 group
 mode
-&quot;idle&quot;
+"idle"
 idleMinutes
 120 }
 resetByChannel
 discord
 mode
-&quot;idle&quot;
+"idle"
 idleMinutes
 10080 }
 resetTriggers
-&quot;/new&quot;
-&quot;/reset&quot;
+"/new"
+"/reset"
 store
-&quot;~/.openclaw/agents/{agentId}/sessions/sessions.json&quot;
+"~/.openclaw/agents/{agentId}/sessions/sessions.json"
 mainKey
-&quot;main&quot;
+"main"
 Inspecting
 openclaw status
 — shows store path and recent sessions.
 openclaw sessions --json
 — dumps every entry (filter with
---active &lt;minutes&gt;
-openclaw gateway call sessions.list --params &#x27;{}&#x27;
+--active <minutes>
+openclaw gateway call sessions.list --params '{}'
 — fetch sessions from the running gateway (use
 --url
 --token
@@ -6111,114 +4846,10 @@ Sessions
 
 [Source: https://docs.openclaw.ai/concepts/sessions]
 
-Sessions - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Sessions and memory
-Sessions
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Fundamentals
-Gateway Architecture
-Agent Runtime
-Agent Loop
-System Prompt
-Context
-Agent Workspace
-OAuth
-Bootstrapping
-Bootstrapping
-Sessions and memory
-Session Management
-Sessions
-Session Pruning
-Session Tools
-Memory
-Compaction
-Multi-agent
-Multi-Agent Routing
-Presence
-Messages and delivery
-Messages
-Streaming and Chunking
-Retry Policy
-Command Queue
-Sessions
-Sessions and memory
-Sessions
-Sessions
-Canonical session management docs live in
-Session management
-Session Management
-Session Pruning
-
----
 ## Concepts > Streaming
 
 [Source: https://docs.openclaw.ai/concepts/streaming]
 
-Streaming and Chunking - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Messages and delivery
-Streaming and Chunking
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Fundamentals
-Gateway Architecture
-Agent Runtime
-Agent Loop
-System Prompt
-Context
-Agent Workspace
-OAuth
-Bootstrapping
-Bootstrapping
-Sessions and memory
-Session Management
-Sessions
-Session Pruning
-Session Tools
-Memory
-Compaction
-Multi-agent
-Multi-Agent Routing
-Presence
-Messages and delivery
-Messages
-Streaming and Chunking
-Retry Policy
-Command Queue
-Streaming + chunking
-Block streaming (channel messages)
-Chunking algorithm (low/high bounds)
-Coalescing (merge streamed blocks)
-Human-like pacing between blocks
-“Stream chunks or everything”
-Telegram preview streaming (token-ish)
-Messages and delivery
-Streaming and Chunking
-Streaming + chunking
 OpenClaw has two separate “streaming” layers:
 Block streaming (channels):
 emit completed
@@ -6233,7 +4864,6 @@ no true token-delta streaming
 to channel messages today. Telegram preview streaming is the only partial-stream surface.
 Block streaming (channel messages)
 Block streaming sends assistant output in coarse chunks as it becomes available.
-Copy
 Model output
 └─ text_delta/events
 ├─ (blockStreamingBreak=text_end)
@@ -6251,18 +4881,18 @@ channel send
 : actual outbound messages (block replies).
 Controls:
 agents.defaults.blockStreamingDefault
-&quot;on&quot;
-&quot;off&quot;
+"on"
+"off"
 (default off).
 Channel overrides:
 *.blockStreaming
 (and per-account variants) to force
-&quot;on&quot;
-&quot;off&quot;
+"on"
+"off"
 per channel.
 agents.defaults.blockStreamingBreak
-&quot;text_end&quot;
-&quot;message_end&quot;
+"text_end"
+"message_end"
 agents.defaults.blockStreamingChunk
 { minChars, maxChars, breakPreference? }
 agents.defaults.blockStreamingCoalesce
@@ -6295,7 +4925,7 @@ Chunking algorithm (low/high bounds)
 Block chunking is implemented by
 EmbeddedBlockChunker
 Low bound:
-don’t emit until buffer &gt;=
+don’t emit until buffer >=
 minChars
 (unless forced).
 High bound:
@@ -6369,15 +4999,15 @@ block replies
 “Stream chunks or everything”
 This maps to:
 Stream chunks:
-blockStreamingDefault: &quot;on&quot;
-blockStreamingBreak: &quot;text_end&quot;
+blockStreamingDefault: "on"
+blockStreamingBreak: "text_end"
 (emit as you go). Non-Telegram channels also need
 *.blockStreaming: true
 Stream everything at end:
-blockStreamingBreak: &quot;message_end&quot;
+blockStreamingBreak: "message_end"
 (flush once, possibly multiple chunks if very long).
 No block streaming:
-blockStreamingDefault: &quot;off&quot;
+blockStreamingDefault: "off"
 (only final reply).
 Channel note:
 For non-Telegram channels, block streaming is
@@ -6400,7 +5030,7 @@ sendMessage
 (first update) +
 editMessageText
 (subsequent updates).
-channels.telegram.streamMode: &quot;partial&quot; | &quot;block&quot; | &quot;off&quot;
+channels.telegram.streamMode: "partial" | "block" | "off"
 partial
 : preview updates with latest stream text.
 block
@@ -6408,7 +5038,7 @@ block
 off
 : no preview streaming.
 Preview chunk config (only for
-streamMode: &quot;block&quot;
+streamMode: "block"
 channels.telegram.draftChunk
 (defaults:
 minChars: 200
@@ -6419,7 +5049,6 @@ Text-only finals are applied by editing the preview message in place.
 Non-text/complex finals fall back to normal final message delivery.
 /reasoning stream
 writes reasoning into the live preview (Telegram only).
-Copy
 Telegram
 └─ sendMessage (temporary preview message)
 ├─ streamMode=partial → edit latest text
@@ -6439,58 +5068,6 @@ Retry Policy
 
 [Source: https://docs.openclaw.ai/concepts/system-prompt]
 
-System Prompt - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Fundamentals
-System Prompt
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Fundamentals
-Gateway Architecture
-Agent Runtime
-Agent Loop
-System Prompt
-Context
-Agent Workspace
-OAuth
-Bootstrapping
-Bootstrapping
-Sessions and memory
-Session Management
-Sessions
-Session Pruning
-Session Tools
-Memory
-Compaction
-Multi-agent
-Multi-Agent Routing
-Presence
-Messages and delivery
-Messages
-Streaming and Chunking
-Retry Policy
-Command Queue
-System Prompt
-Structure
-Prompt modes
-Workspace bootstrap injection
-Time handling
-Skills
-Documentation
-Fundamentals
-System Prompt
-System Prompt
 OpenClaw builds a custom system prompt for every agent run. The prompt is
 OpenClaw-owned
 and does not use the pi-coding-agent default prompt.
@@ -6517,7 +5094,7 @@ Workspace Files (injected)
 : indicates bootstrap files are included below.
 Sandbox
 (when enabled): indicates sandboxed runtime, sandbox paths, and whether elevated exec is available.
-Current Date &amp; Time
+Current Date & Time
 : user-local time, timezone, and time format.
 Reply Tags
 : optional reply tag syntax for supported providers.
@@ -6549,7 +5126,7 @@ Silent Replies
 Heartbeats
 . Tooling,
 Safety
-Workspace, Sandbox, Current Date &amp; Time (when known), Runtime, and injected
+Workspace, Sandbox, Current Date & Time (when known), Runtime, and injected
 context stay available.
 none
 : returns only the base identity line.
@@ -6620,7 +5197,7 @@ To inspect how much each injected file contributes (raw vs injected, truncation,
 Context
 Time handling
 The system prompt includes a dedicated
-Current Date &amp; Time
+Current Date & Time
 section when the
 user timezone is known. To keep the prompt cache-stable, it now only includes
 the
@@ -6635,7 +5212,7 @@ agents.defaults.userTimezone
 agents.defaults.timeFormat
 auto
 See
-Date &amp; Time
+Date & Time
 for full behavior details.
 Skills
 When eligible skills exist, OpenClaw injects a compact
@@ -6649,14 +5226,13 @@ read
 to load the SKILL.md at the listed
 location (workspace, managed, or bundled). If no skills are eligible, the
 Skills section is omitted.
-Copy
-&lt;available_skills&gt;
-&lt;skill&gt;
-&lt;name&gt;...&lt;/name&gt;
-&lt;description&gt;...&lt;/description&gt;
-&lt;location&gt;...&lt;/location&gt;
-&lt;/skill&gt;
-&lt;/available_skills&gt;
+<available_skills>
+<skill>
+<name>...</name>
+<description>...</description>
+<location>...</location>
+</skill>
+</available_skills>
 This keeps the base prompt small while still enabling targeted skill usage.
 Documentation
 When available, the system prompt includes a
@@ -6680,148 +5256,44 @@ Context
 
 [Source: https://docs.openclaw.ai/concepts/timezone]
 
-Timezones - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Concept internals
-Timezones
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-Timezones
-Message envelopes (local by default)
-Examples
-Tool payloads (raw provider data + normalized fields)
-User timezone for the system prompt
-Concept internals
-Timezones
-Timezones
-OpenClaw standardizes timestamps so the model sees a
-single reference time
-Message envelopes (local by default)
 Inbound messages are wrapped in an envelope like:
-Copy
 [Provider ... 2026-01-05 16:26 PST] message text
 The timestamp in the envelope is
 host-local by default
 , with minutes precision.
 You can override this with:
-Copy
 agents
 defaults
 envelopeTimezone
-&quot;local&quot;
-// &quot;utc&quot; | &quot;local&quot; | &quot;user&quot; | IANA timezone
+"local"
+// "utc" | "local" | "user" | IANA timezone
 envelopeTimestamp
-&quot;on&quot;
-// &quot;on&quot; | &quot;off&quot;
+"on"
+// "on" | "off"
 envelopeElapsed
-&quot;on&quot;
-// &quot;on&quot; | &quot;off&quot;
-envelopeTimezone: &quot;utc&quot;
+"on"
+// "on" | "off"
+envelopeTimezone: "utc"
 uses UTC.
-envelopeTimezone: &quot;user&quot;
+envelopeTimezone: "user"
 uses
 agents.defaults.userTimezone
 (falls back to host timezone).
 Use an explicit IANA timezone (e.g.,
-&quot;Europe/Vienna&quot;
+"Europe/Vienna"
 ) for a fixed offset.
-envelopeTimestamp: &quot;off&quot;
+envelopeTimestamp: "off"
 removes absolute timestamps from envelope headers.
-envelopeElapsed: &quot;off&quot;
+envelopeElapsed: "off"
 removes elapsed time suffixes (the
 +2m
 style).
 Examples
 Local (default):
-Copy
 [Signal Alice +1555 2026-01-18 00:19 PST] hello
 Fixed timezone:
-Copy
 [Signal Alice +1555 2026-01-18 06:19 GMT+1] hello
 Elapsed time:
-Copy
 [Signal Alice +1555 +2m 2026-01-18T05:19Z] follow-up
 Tool payloads (raw provider data + normalized fields)
 Tool calls (
@@ -6842,14 +5314,13 @@ to tell the model the user’s local time zone. If it is
 unset, OpenClaw resolves the
 host timezone at runtime
 (no config write).
-Copy
 agents
 defaults
 userTimezone
-&quot;America/Chicago&quot;
+"America/Chicago"
 } }
 The system prompt includes:
-Current Date &amp; Time
+Current Date & Time
 section with local time and timezone
 Time format: 12-hour
 24-hour
@@ -6857,7 +5328,7 @@ You can control the prompt format with
 agents.defaults.timeFormat
 auto
 See
-Date &amp; Time
+Date & Time
 for the full behavior and examples.
 Usage Tracking
 Credits
@@ -6867,111 +5338,6 @@ Credits
 
 [Source: https://docs.openclaw.ai/concepts/typebox]
 
-TypeBox - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Concept internals
-TypeBox
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-TypeBox as protocol source of truth
-Mental model (30 seconds)
-Where the schemas live
-Current pipeline
-How the schemas are used at runtime
-Example frames
-Minimal client (Node.js)
-Worked example: add a method end‑to‑end
-Swift codegen behavior
-Versioning + compatibility
-Schema patterns and conventions
-Live schema JSON
-When you change schemas
-Concept internals
-TypeBox
-TypeBox as protocol source of truth
-Last updated: 2026-01-10
 TypeBox is a TypeScript-first schema library. We use it to define the
 Gateway
 WebSocket protocol
@@ -6988,11 +5354,11 @@ Gateway architecture
 Mental model (30 seconds)
 Every Gateway WS message is one of three frames:
 Request
-{ type: &quot;req&quot;, id, method, params }
+{ type: "req", id, method, params }
 Response
-{ type: &quot;res&quot;, id, ok, payload | error }
+{ type: "res", id, ok, payload | error }
 Event
-{ type: &quot;event&quot;, event, payload, seq?, stateVersion? }
+{ type: "event", event, payload, seq?, stateVersion? }
 The first frame
 must
 be a
@@ -7007,13 +5373,12 @@ presence
 tick
 agent
 Connection flow (minimal):
-Copy
 Client Gateway
-|---- req:connect --------&gt;|
-|&lt;---- res:hello-ok --------|
-|&lt;---- event:tick ----------|
-|---- req:health ----------&gt;|
-|&lt;---- res:health ----------|
+|---- req:connect -------->|
+|<---- res:hello-ok --------|
+|<---- event:tick ----------|
+|---- req:health ---------->|
+|<---- res:health ----------|
 Common methods + events:
 Category
 Examples
@@ -7098,135 +5463,129 @@ events
 hello-ok
 Example frames
 Connect (first message):
-Copy
-&quot;type&quot;
-&quot;req&quot;
-&quot;id&quot;
-&quot;c1&quot;
-&quot;method&quot;
-&quot;connect&quot;
-&quot;params&quot;
-&quot;minProtocol&quot;
-&quot;maxProtocol&quot;
-&quot;client&quot;
-&quot;id&quot;
-&quot;openclaw-macos&quot;
-&quot;displayName&quot;
-&quot;macos&quot;
-&quot;version&quot;
-&quot;1.0.0&quot;
-&quot;platform&quot;
-&quot;macos 15.1&quot;
-&quot;mode&quot;
-&quot;ui&quot;
-&quot;instanceId&quot;
-&quot;A1B2&quot;
+"type"
+"req"
+"id"
+"c1"
+"method"
+"connect"
+"params"
+"minProtocol"
+"maxProtocol"
+"client"
+"id"
+"openclaw-macos"
+"displayName"
+"macos"
+"version"
+"1.0.0"
+"platform"
+"macos 15.1"
+"mode"
+"ui"
+"instanceId"
+"A1B2"
 Hello-ok response:
-Copy
-&quot;type&quot;
-&quot;res&quot;
-&quot;id&quot;
-&quot;c1&quot;
-&quot;ok&quot;
+"type"
+"res"
+"id"
+"c1"
+"ok"
 true
-&quot;payload&quot;
-&quot;type&quot;
-&quot;hello-ok&quot;
-&quot;protocol&quot;
-&quot;server&quot;
-&quot;version&quot;
-&quot;dev&quot;
-&quot;connId&quot;
-&quot;ws-1&quot;
-&quot;features&quot;
-&quot;methods&quot;
-&quot;health&quot;
-&quot;events&quot;
-&quot;tick&quot;
+"payload"
+"type"
+"hello-ok"
+"protocol"
+"server"
+"version"
+"dev"
+"connId"
+"ws-1"
+"features"
+"methods"
+"health"
+"events"
+"tick"
 ] }
-&quot;snapshot&quot;
-&quot;presence&quot;
-&quot;health&quot;
-&quot;stateVersion&quot;
-&quot;presence&quot;
-&quot;health&quot;
-&quot;uptimeMs&quot;
-&quot;policy&quot;
-&quot;maxPayload&quot;
+"snapshot"
+"presence"
+"health"
+"stateVersion"
+"presence"
+"health"
+"uptimeMs"
+"policy"
+"maxPayload"
 1048576
-&quot;maxBufferedBytes&quot;
+"maxBufferedBytes"
 1048576
-&quot;tickIntervalMs&quot;
+"tickIntervalMs"
 30000
 Request + response:
-Copy
-&quot;type&quot;
-&quot;req&quot;
-&quot;id&quot;
-&quot;r1&quot;
-&quot;method&quot;
-&quot;health&quot;
-Copy
-&quot;type&quot;
-&quot;res&quot;
-&quot;id&quot;
-&quot;r1&quot;
-&quot;ok&quot;
+"type"
+"req"
+"id"
+"r1"
+"method"
+"health"
+"type"
+"res"
+"id"
+"r1"
+"ok"
 true
-&quot;payload&quot;
-&quot;ok&quot;
+"payload"
+"ok"
 true
 } }
 Event:
-Copy
-&quot;type&quot;
-&quot;event&quot;
-&quot;event&quot;
-&quot;tick&quot;
-&quot;payload&quot;
-&quot;ts&quot;
+"type"
+"event"
+"event"
+"tick"
+"payload"
+"ts"
 1730000000
-&quot;seq&quot;
+"seq"
 Minimal client (Node.js)
 Smallest useful flow: connect + health.
-Copy
 import
 { WebSocket }
 from
-&quot;ws&quot;
+"ws"
 const
 new
 WebSocket
-&quot;ws://127.0.0.1:18789&quot;
+"ws://127.0.0.1:18789"
 .on
-&quot;open&quot;
-=&gt;
+"open"
+=>
 .send
 JSON
 .stringify
 type
-&quot;req&quot;
-&quot;c1&quot;
+"req"
+"c1"
 method
-&quot;connect&quot;
+"connect"
 params
 minProtocol
 maxProtocol
 client
-&quot;cli&quot;
+"cli"
 displayName
-&quot;example&quot;
+"example"
 version
-&quot;dev&quot;
+"dev"
 platform
-&quot;node&quot;
+"node"
 mode
-&quot;cli&quot;
+"cli"
 });
 .on
-&quot;message&quot;
+"message"
 (data)
-=&gt;
+=>
 const
 msg
 JSON
@@ -7236,37 +5595,37 @@ String
 msg
 .type
 ===
-&quot;res&quot;
-&amp;&amp;
+"res"
+&&
 msg
 .id
 ===
-&quot;c1&quot;
-&amp;&amp;
+"c1"
+&&
 msg
 .ok) {
 .send
 JSON
 .stringify
 ({ type
-&quot;req&quot;
-&quot;h1&quot;
+"req"
+"h1"
 method
-&quot;health&quot;
+"health"
 }));
 msg
 .type
 ===
-&quot;res&quot;
-&amp;&amp;
+"res"
+&&
 msg
 .id
 ===
-&quot;h1&quot;
+"h1"
 ) {
 console
 .log
-&quot;health:&quot;
+"health:"
 msg
 .payload);
 .close
@@ -7280,7 +5639,6 @@ request that returns
 Schema (source of truth)
 Add to
 src/gateway/protocol/schema.ts
-Copy
 export
 const
 SystemEchoParamsSchema
@@ -7305,56 +5663,52 @@ false
 Add both to
 ProtocolSchemas
 and export types:
-Copy
 SystemEchoParams
 SystemEchoParamsSchema
 SystemEchoResult
 SystemEchoResultSchema
-Copy
 export
 type
 SystemEchoParams
 Static
-&lt;
+<
 typeof
-SystemEchoParamsSchema&gt;;
+SystemEchoParamsSchema>;
 export
 type
 SystemEchoResult
 Static
-&lt;
+<
 typeof
-SystemEchoResultSchema&gt;;
+SystemEchoResultSchema>;
 Validation
 src/gateway/protocol/index.ts
 , export an AJV validator:
-Copy
 export
 const
 validateSystemEchoParams
 ajv
 .compile
-&lt;
+<
 SystemEchoParams
-&gt;(SystemEchoParamsSchema);
+>(SystemEchoParamsSchema);
 Server behavior
 Add a handler in
 src/gateway/server-methods/system.ts
-Copy
 export
 const
 systemHandlers
 GatewayRequestHandlers
-&quot;system.echo&quot;
+"system.echo"
 ({ params
 respond })
-=&gt;
+=>
 const
 text
 String
 params
 .text
-&quot;&quot;
+""
 respond
 true
 { ok
@@ -7365,11 +5719,10 @@ src/gateway/server-methods.ts
 (already merges
 systemHandlers
 then add
-&quot;system.echo&quot;
+"system.echo"
 METHODS
 src/gateway/server.ts
 Regenerate
-Copy
 pnpm
 protocol:check
 Tests + docs
@@ -7438,102 +5791,6 @@ Markdown Formatting
 
 [Source: https://docs.openclaw.ai/concepts/typing-indicators]
 
-Typing Indicators - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Concept internals
-Typing Indicators
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-Typing indicators
-Defaults
-Modes
-Configuration
-Notes
-Concept internals
-Typing Indicators
-Typing indicators
 Typing indicators are sent to the chat channel while a run is active. Use
 agents.defaults.typingMode
 to control
@@ -7571,7 +5828,7 @@ thinking
 — start typing on the
 first reasoning delta
 (requires
-reasoningLevel: &quot;stream&quot;
+reasoningLevel: "stream"
 for the run).
 message
 — start typing on the
@@ -7586,16 +5843,14 @@ message
 thinking
 instant
 Configuration
-Copy
 agent
 typingMode
-&quot;thinking&quot;
+"thinking"
 typingIntervalSeconds
 You can override mode or cadence per session:
-Copy
 session
 typingMode
-&quot;message&quot;
+"message"
 typingIntervalSeconds
 Notes
 message
@@ -7604,7 +5859,7 @@ NO_REPLY
 token used to suppress output).
 thinking
 only fires if the run streams reasoning (
-reasoningLevel: &quot;stream&quot;
+reasoningLevel: "stream"
 If the model doesn’t emit reasoning deltas, typing won’t start.
 Heartbeats never show typing, regardless of mode.
 typingIntervalSeconds
@@ -7620,100 +5875,6 @@ Usage Tracking
 
 [Source: https://docs.openclaw.ai/concepts/usage-tracking]
 
-Usage Tracking - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Concept internals
-Usage Tracking
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-Usage tracking
-What it is
-Where it shows up
-Providers + credentials
-Concept internals
-Usage Tracking
 Usage tracking
 What it is
 Pulls provider usage/quota directly from their usage endpoints.

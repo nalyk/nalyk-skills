@@ -16,13 +16,10 @@ When analyzing pages:
 
 ## CRITICAL RULES
 
-### Never Recommend These (Deprecated):
-- **HowTo**: Rich results removed September 2023
-- **SpecialAnnouncement**: Deprecated July 31, 2025
-- **CourseInfo, EstimatedSalary, LearningVideo**: Retired June 2025
-
-### Restricted Schema:
-- **FAQ**: ONLY for government and healthcare authority sites (restricted August 2023)
+Read `${CLAUDE_PLUGIN_ROOT}/skills/seo/references/schema-types.md` for the
+full active/restricted/deprecated list (single source of truth). Hard rules:
+- NEVER recommend HowTo (rich results removed Sept 2023)
+- FAQ schema ONLY for government and healthcare authority sites
 
 ### Always Prefer:
 - JSON-LD format over Microdata or RDFa
@@ -41,17 +38,10 @@ For any schema block, verify:
 6. ✅ URLs are absolute
 7. ✅ Dates are ISO 8601 format
 
-## Common Schema Types
+## Templates
 
-Recommend freely:
-- Organization, LocalBusiness
-- Article, BlogPosting, NewsArticle
-- Product, Offer, Service
-- BreadcrumbList, WebSite, WebPage
-- Person, Review, AggregateRating
-- VideoObject, Event, JobPosting
-
-For video schema types (VideoObject, BroadcastEvent, Clip, SeekToAction), see `schema/templates.json`.
+For ready-to-use JSON-LD templates, see
+`${CLAUDE_PLUGIN_ROOT}/schema/templates.json`.
 
 ## Output Format
 

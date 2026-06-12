@@ -2,23 +2,12 @@
 
 # Machiavelli — Strategic Realism
 
-> Niccolò Machiavelli (1469–1527). Florentine diplomat, political theorist, author of *Il Principe* and *Discorsi*.
 > Principles: Verità effettuale (19), Fortuna/Virtù (20), Lion/Fox (21), Economy of Force (22), Necessità (23), Occasione (24), Intelligence (25).
-> For the principle index and routing table, see `SKILL.md`. For the full lookup table, see `quick-reference.md`.
-
----
-
-## Why Machiavelli Belongs
-
-Machiavelli is widely misunderstood as an advocate for amorality. He is not. He is an advocate for **seeing reality as it is** rather than as you wish it were, and for **acting effectively within that reality**.
-
-The other five philosophers give you an excellent moral and cognitive framework. But they share a blind spot: they assume that excellence and virtue will be recognized, rewarded, or at least self-sustaining. Machiavelli does not assume this. He deals with the world where excellent code gets overruled by politics, where the right architecture loses to the one with a louder advocate, where technical debt is a rational choice under certain constraints, and where you must sometimes choose between the ideal solution and the one that ships.
+> For routing and the principle index, see `quick-reference.md`.
 
 ---
 
 ## 19. Effectual Truth vs. Imagined Truth — Verità effettuale
-
-**Source:** *The Prince*, Chapter XV.
 
 **Principle:** Start from observed reality — not from idealized models — or your actions will fail regardless of how virtuous your intentions are.
 
@@ -28,13 +17,9 @@ The other five philosophers give you an excellent moral and cognitive framework.
 - Do not architect for the requirements document — architect for the requirements *plus* the undocumented assumptions, political constraints, and legacy integrations
 - Do not assume the API contract will be honored — verify, validate, and handle violations
 
-**Computational rationale:** This is the philosophical foundation of adversarial thinking in software. Fuzzing, penetration testing, chaos engineering, and property-based testing all start from Machiavelli's premise: test against how the system *actually* will be used, including misuse. The gap between the specification and the effectual truth is where bugs live.
-
 ---
 
 ## 20. Fortuna and Virtù
-
-**Source:** *The Prince*, Chapter XXV.
 
 **Principle:** Fortuna is chance — everything outside your control. Virtù is the skill, energy, and adaptability to act effectively regardless of what fortuna delivers. You cannot control fortuna, but you can prepare for it and respond with virtù.
 
@@ -47,13 +32,9 @@ The other five philosophers give you an excellent moral and cognitive framework.
 - Multi-region architecture is virtù against the fortuna of datacenter outages
 - Comprehensive monitoring is virtù against the fortuna of silent failures
 
-**Computational rationale:** Virtù maps to optionality in systems design. Every feature flag, every abstraction boundary, every pluggable interface increases the system's options when facing an uncertain future. Real Options theory in software architecture: the value of a design decision includes not just its immediate utility but the set of future adaptations it enables.
-
 ---
 
 ## 21. The Lion and the Fox — Force and Cunning
-
-**Source:** *The Prince*, Chapter XVIII.
 
 **Principle:** The lion represents direct force — straightforward solutions. The fox represents cunning — indirection, workarounds, creative problem-solving. Neither alone is sufficient.
 
@@ -68,13 +49,9 @@ The other five philosophers give you an excellent moral and cognitive framework.
 | API breaking change | Version and migrate all at once | Facade pattern, gradual migration, deprecation timeline | Fox almost always |
 | Impossible deadline | Say "it can't be done" | Negotiate scope: deliver X now, Y and Z in phase 2 | Fox — the lion gets you removed |
 
-**Computational rationale:** This maps to exact algorithms vs. heuristic/approximate algorithms. Some problems (NP-hard) cannot be solved optimally in reasonable time (lion fails). But they can be solved *well enough* with approximation algorithms or problem reformulation (fox).
-
 ---
 
 ## 22. Economia della violenza — Economy of Force
-
-**Source:** *The Prince*, Chapters VIII and XVII.
 
 **Principle:** When you must do something disruptive, do it once, completely, clearly, with full communication. Do not do it incrementally in a way that creates prolonged pain.
 
@@ -85,13 +62,9 @@ The other five philosophers give you an excellent moral and cognitive framework.
 - Sunsetting a feature: announce a date, provide alternatives, execute on the date. Don't "soft-deprecate" indefinitely.
 - Team process change: introduce, train, enforce. Don't have two processes in parallel for months.
 
-**Computational rationale:** This is the philosophical case for "big bang" migration in specific contexts — when gradual migration creates an extended period of dual-system complexity that costs more than the short sharp pain of cutting over.
-
 ---
 
 ## 23. Necessità — The Tyranny of Circumstances
-
-**Source:** Throughout *The Prince* and *Discourses*.
 
 **Principle:** When there is no ideal option, choose the least harmful one and execute it decisively. Do not waste time searching for the perfect solution when none exists. Acknowledge the option is bad and explain why it is the least bad.
 
@@ -111,13 +84,9 @@ The other five philosophers give you an excellent moral and cognitive framework.
 6. Timeline: Set a date to revisit if circumstances change.
 ```
 
-**Computational rationale:** This is the philosophical foundation of satisficing (Herbert Simon). In optimization under constraints, the feasible region may not contain the global optimum. Optimize within what's feasible. Machiavelli's necessità gives explicit permission to operate in the feasible region — while requiring documentation of the gap between feasible and ideal.
-
 ---
 
 ## 24. Timing — The Art of Occasione
-
-**Source:** *The Prince*, Chapter XXV; *Discourses*, Book II.
 
 **Principle:** The right action at the wrong time is the wrong action. The imperfect action at the right time often beats the perfect action too late.
 
@@ -127,13 +96,9 @@ The other five philosophers give you an excellent moral and cognitive framework.
 - Architectural decisions lock in early and become exponentially expensive to change. Decide early, even with imperfect information.
 - A prototype shown at the right moment (before stakeholders commit to a different direction) is worth more than a polished demo shown after
 
-**Computational rationale:** Some decisions are reversible (two-way doors) and can be made slowly. Others are irreversible or have rapidly increasing reversal costs (one-way doors) and must be made quickly with available information. Machiavelli's occasione is the philosophical case for distinguishing one-way from two-way doors and acting urgently on one-way doors.
-
 ---
 
 ## 25. Reading the Room — Intelligence as Foundation
-
-**Source:** *The Prince*, Chapters XX–XXIII; *The Art of War*.
 
 **Principle:** Before acting, understand the real situation — not the reported, assumed, or wished-for situation. Gather information actively. Verify assumptions. Distrust summaries.
 
@@ -146,19 +111,4 @@ The other five philosophers give you an excellent moral and cognitive framework.
 
 **Concrete rule:** Never act on a single source of information when the stakes are high. Cross-reference. Verify.
 
-**Computational rationale:** This is the philosophical basis for observability in modern systems. You cannot operate what you cannot observe. Metrics, traces, logs, and dashboards are the engineering equivalent of Machiavelli's intelligence network.
-
 ---
-
-## How Machiavelli Balances the Other Five
-
-| The idealists say | Machiavelli adds | The synthesis |
-|---|---|---|
-| Do the right thing (virtue) | The right thing that doesn't ship helps no one | Do the right thing *that also works in practice* |
-| Seek excellence (Aristotle) | Shipped beats perfect. Velocity matters | Seek excellence within real constraints |
-| Apply principles consistently (Stoics) | Principles that ignore context are dogma | Apply principles *adapted* to the situation |
-| Zoom out, see the whole (Marcus) | Also notice the political landscape | See both the system and the forces acting on it |
-| Ask questions, seek truth (Plato) | Know when the time for questions is over | Seek truth, then act on incomplete truth when you must |
-| Respect time (Seneca) | Timing is not just brevity — it's about *when* | Say the right amount *at the right moment* |
-| Anticipate failure (Epictetus) | Don't just anticipate — build infrastructure | Mental preparation + structural preparation |
-| Quality gate: correct and clear (Plato) | Add a gate: does it *ship*? Does it *survive users*? | Correct, clear, *and viable* |

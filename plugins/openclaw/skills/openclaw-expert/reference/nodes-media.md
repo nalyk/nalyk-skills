@@ -2,91 +2,11 @@
 
 Device management, audio, camera, images, talk mode, voice wake, location.
 
-
 ---
 ## Nodes > Audio
 
 [Source: https://docs.openclaw.ai/nodes/audio]
 
-Audio and Voice Notes - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Media and devices
-Audio and Voice Notes
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Tools
-Built-in tools
-Lobster
-LLM Task
-Exec Tool
-Web Tools
-apply_patch Tool
-Elevated Mode
-Thinking Levels
-Reactions
-Browser
-Browser (OpenClaw-managed)
-Browser Login
-Chrome Extension
-Browser Troubleshooting
-Agent coordination
-Agent Send
-Sub-Agents
-Multi-Agent Sandbox &amp; Tools
-Skills
-Slash Commands
-Skills
-Skills Config
-ClawHub
-Plugins
-Extensions
-Voice Call Plugin
-Zalo Personal Plugin
-Automation
-Hooks
-Cron Jobs
-Cron vs Heartbeat
-Automation Troubleshooting
-Webhooks
-Gmail PubSub
-Polls
-Auth Monitoring
-Media and devices
-Nodes
-Node Troubleshooting
-Image and Media Support
-Audio and Voice Notes
-Camera Capture
-Talk Mode
-Voice Wake
-Location Command
-Audio / Voice Notes — 2026-01-17
-What works
-Auto-detection (default)
-Config examples
-Provider + CLI fallback (OpenAI + Whisper CLI)
-Provider-only with scope gating
-Provider-only (Deepgram)
-Notes &amp; limits
-Mention Detection in Groups
-Gotchas
-Media and devices
-Audio and Voice Notes
-Audio / Voice Notes — 2026-01-17
-What works
-Media understanding (audio)
 : If audio understanding is enabled (or auto‑detected), OpenClaw:
 Locates the first audio attachment (local path or URL) and downloads it if needed.
 Enforces
@@ -148,7 +68,6 @@ PATH
 ), or set an explicit CLI model with a full command path.
 Config examples
 Provider + CLI fallback (OpenAI + Whisper CLI)
-Copy
 tools
 media
 audio
@@ -158,20 +77,19 @@ maxBytes
 20971520
 models
 provider
-&quot;openai&quot;
+"openai"
 model
-&quot;gpt-4o-mini-transcribe&quot;
+"gpt-4o-mini-transcribe"
 type
-&quot;cli&quot;
+"cli"
 command
-&quot;whisper&quot;
+"whisper"
 args
-&quot;--model&quot;
-&quot;base&quot;
-&quot;{{MediaPath}}&quot;
+"--model"
+"base"
+"{{MediaPath}}"
 timeoutSeconds
 Provider-only with scope gating
-Copy
 tools
 media
 audio
@@ -179,21 +97,20 @@ enabled
 true
 scope
 default
-&quot;allow&quot;
+"allow"
 rules
 action
-&quot;deny&quot;
+"deny"
 match
 chatType
-&quot;group&quot;
+"group"
 } }]
 models
 provider
-&quot;openai&quot;
+"openai"
 model
-&quot;gpt-4o-mini-transcribe&quot;
+"gpt-4o-mini-transcribe"
 Provider-only (Deepgram)
-Copy
 tools
 media
 audio
@@ -201,16 +118,16 @@ enabled
 true
 models
 provider
-&quot;deepgram&quot;
+"deepgram"
 model
-&quot;nova-3&quot;
-Notes &amp; limits
+"nova-3"
+Notes & limits
 Provider auth follows the standard model auth order (auth profiles, env vars,
 models.providers.*.apiKey
 Deepgram picks up
 DEEPGRAM_API_KEY
 when
-provider: &quot;deepgram&quot;
+provider: "deepgram"
 is used.
 Deepgram setup details:
 Deepgram (audio transcription)
@@ -236,12 +153,12 @@ to trim output.
 OpenAI auto default is
 gpt-4o-mini-transcribe
 ; set
-model: &quot;gpt-4o-transcribe&quot;
+model: "gpt-4o-transcribe"
 for higher accuracy.
 Use
 tools.media.audio.attachments
 to process multiple voice notes (
-mode: &quot;all&quot;
+mode: "all"
 maxAttachments
 Transcript is available to templates as
 {{Transcript}}
@@ -290,91 +207,6 @@ Camera Capture
 
 [Source: https://docs.openclaw.ai/nodes/camera]
 
-Camera Capture - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Media and devices
-Camera Capture
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Tools
-Built-in tools
-Lobster
-LLM Task
-Exec Tool
-Web Tools
-apply_patch Tool
-Elevated Mode
-Thinking Levels
-Reactions
-Browser
-Browser (OpenClaw-managed)
-Browser Login
-Chrome Extension
-Browser Troubleshooting
-Agent coordination
-Agent Send
-Sub-Agents
-Multi-Agent Sandbox &amp; Tools
-Skills
-Slash Commands
-Skills
-Skills Config
-ClawHub
-Plugins
-Extensions
-Voice Call Plugin
-Zalo Personal Plugin
-Automation
-Hooks
-Cron Jobs
-Cron vs Heartbeat
-Automation Troubleshooting
-Webhooks
-Gmail PubSub
-Polls
-Auth Monitoring
-Media and devices
-Nodes
-Node Troubleshooting
-Image and Media Support
-Audio and Voice Notes
-Camera Capture
-Talk Mode
-Voice Wake
-Location Command
-Camera capture (agent)
-iOS node
-User setting (default on)
-Commands (via Gateway node.invoke)
-Foreground requirement
-CLI helper (temp files + MEDIA)
-Android node
-Android user setting (default on)
-Permissions
-Android foreground requirement
-Payload guard
-macOS app
-User setting (default off)
-CLI helper (node invoke)
-Safety + practical limits
-macOS screen video (OS-level)
-Media and devices
-Camera Capture
-Camera capture (agent)
-OpenClaw supports
-camera capture
 for agent workflows:
 iOS node
 (paired via Gateway): capture a
@@ -447,8 +279,8 @@ deviceId
 : string (optional; from
 camera.list
 Response payload:
-format: &quot;jpg&quot;
-base64: &quot;&lt;...&gt;&quot;
+format: "jpg"
+base64: "<...>"
 width
 height
 Payload guard: photos are recompressed to keep the base64 payload under 5 MB.
@@ -473,8 +305,8 @@ deviceId
 : string (optional; from
 camera.list
 Response payload:
-format: &quot;mp4&quot;
-base64: &quot;&lt;...&gt;&quot;
+format: "mp4"
+base64: "<...>"
 durationMs
 hasAudio
 Foreground requirement
@@ -488,24 +320,23 @@ foreground
 NODE_BACKGROUND_UNAVAILABLE
 CLI helper (temp files + MEDIA)
 The easiest way to get attachments is via the CLI helper, which writes decoded media to a temp file and prints
-MEDIA:&lt;path&gt;
+MEDIA:<path>
 Examples:
-Copy
 openclaw
 nodes
 camera
 snap
 --node
-&lt;
-&gt;
+<
+>
 # default: both front + back (2 MEDIA lines)
 openclaw
 nodes
 camera
 snap
 --node
-&lt;
-&gt;
+<
+>
 --facing
 front
 openclaw
@@ -513,8 +344,8 @@ nodes
 camera
 clip
 --node
-&lt;
-&gt;
+<
+>
 --duration
 3000
 openclaw
@@ -522,8 +353,8 @@ nodes
 camera
 clip
 --node
-&lt;
-&gt;
+<
+>
 --no-audio
 Notes:
 nodes camera snap
@@ -584,30 +415,29 @@ Use the main
 openclaw
 CLI to invoke camera commands on the macOS node.
 Examples:
-Copy
 openclaw
 nodes
 camera
 list
 --node
-&lt;
-&gt;
+<
+>
 # list camera ids
 openclaw
 nodes
 camera
 snap
 --node
-&lt;
-&gt;
-# prints MEDIA:&lt;path&gt;
+<
+>
+# prints MEDIA:<path>
 openclaw
 nodes
 camera
 snap
 --node
-&lt;
-&gt;
+<
+>
 --max-width
 1280
 openclaw
@@ -615,8 +445,8 @@ nodes
 camera
 snap
 --node
-&lt;
-&gt;
+<
+>
 --delay-ms
 2000
 openclaw
@@ -624,48 +454,48 @@ nodes
 camera
 snap
 --node
-&lt;
-&gt;
+<
+>
 --device-id
-&lt;
-&gt;
+<
+>
 openclaw
 nodes
 camera
 clip
 --node
-&lt;
-&gt;
+<
+>
 --duration
 10s
-# prints MEDIA:&lt;path&gt;
+# prints MEDIA:<path>
 openclaw
 nodes
 camera
 clip
 --node
-&lt;
-&gt;
+<
+>
 --duration-ms
 3000
-# prints MEDIA:&lt;path&gt; (legacy flag)
+# prints MEDIA:<path> (legacy flag)
 openclaw
 nodes
 camera
 clip
 --node
-&lt;
-&gt;
+<
+>
 --device-id
-&lt;
-&gt;
+<
+>
 openclaw
 nodes
 camera
 clip
 --node
-&lt;
-&gt;
+<
+>
 --no-audio
 Notes:
 openclaw nodes camera snap
@@ -681,24 +511,23 @@ Photo payloads are recompressed to keep base64 under 5 MB.
 Safety + practical limits
 Camera and microphone access trigger the usual OS permission prompts (and require usage strings in Info.plist).
 Video clips are capped (currently
-&lt;= 60s
+<= 60s
 ) to avoid oversized node payloads (base64 overhead + message limits).
 macOS screen video (OS-level)
 For
 screen
 video (not camera), use the macOS companion:
-Copy
 openclaw
 nodes
 screen
 record
 --node
-&lt;
-&gt;
+<
+>
 --duration
 10s
 --fps
-# prints MEDIA:&lt;path&gt;
+# prints MEDIA:<path>
 Notes:
 Requires macOS
 Screen Recording
@@ -711,81 +540,7 @@ Talk Mode
 
 [Source: https://docs.openclaw.ai/nodes/images]
 
-Image and Media Support - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Media and devices
-Image and Media Support
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Tools
-Built-in tools
-Lobster
-LLM Task
-Exec Tool
-Web Tools
-apply_patch Tool
-Elevated Mode
-Thinking Levels
-Reactions
-Browser
-Browser (OpenClaw-managed)
-Browser Login
-Chrome Extension
-Browser Troubleshooting
-Agent coordination
-Agent Send
-Sub-Agents
-Multi-Agent Sandbox &amp; Tools
-Skills
-Slash Commands
-Skills
-Skills Config
-ClawHub
-Plugins
-Extensions
-Voice Call Plugin
-Zalo Personal Plugin
-Automation
-Hooks
-Cron Jobs
-Cron vs Heartbeat
-Automation Troubleshooting
-Webhooks
-Gmail PubSub
-Polls
-Auth Monitoring
-Media and devices
-Nodes
-Node Troubleshooting
-Image and Media Support
-Audio and Voice Notes
-Camera Capture
-Talk Mode
-Voice Wake
-Location Command
-Image &amp; Media Support — 2025-12-05
-Goals
-CLI Surface
-WhatsApp Web channel behavior
-Auto-Reply Pipeline
-Inbound Media to Commands (Pi)
-Limits &amp; Errors
-Notes for Tests
-Media and devices
-Image and Media Support
-Image &amp; Media Support — 2025-12-05
+Image & Media Support — 2025-12-05
 The WhatsApp channel runs via
 Baileys Web
 . This document captures the current media handling rules for send, gateway, and agent replies.
@@ -795,7 +550,7 @@ openclaw message send --media
 Allow auto-replies from the web inbox to include media alongside text.
 Keep per-type limits sane and predictable.
 CLI Surface
-openclaw message send --media &lt;path-or-url&gt; [--message &lt;caption&gt;]
+openclaw message send --media <path-or-url> [--message <caption>]
 --media
 optional; caption can be empty for media-only sends.
 --dry-run
@@ -808,7 +563,7 @@ Input: local file path
 HTTP(S) URL.
 Flow: load into a Buffer, detect media kind, and build the correct payload:
 Images:
-resize &amp; recompress to JPEG (max side 2048px) targeting
+resize & recompress to JPEG (max side 2048px) targeting
 agents.defaults.mediaMaxMb
 (default 5 MB), capped at 6 MB.
 Audio/Voice/Video:
@@ -845,7 +600,7 @@ When a per-session Docker sandbox is enabled, inbound media is copied into the s
 MediaPath
 MediaUrl
 are rewritten to a relative path like
-media/inbound/&lt;filename&gt;
+media/inbound/<filename>
 Media understanding (if configured via
 tools.media.*
 or shared
@@ -862,9 +617,9 @@ Audio sets
 and uses the transcript for command parsing so slash commands still work.
 Video and image descriptions preserve any caption text for command parsing.
 By default only the first matching image/audio/video attachment is processed; set
-tools.media.&lt;cap&gt;.attachments
+tools.media.<cap>.attachments
 to process multiple attachments.
-Limits &amp; Errors
+Limits & Errors
 Outbound send caps (WhatsApp web send)
 Images: ~6 MB cap after recompression.
 Audio/voice/video: 16 MB cap; documents: 100 MB cap.
@@ -889,86 +644,6 @@ Audio and Voice Notes
 
 [Source: https://docs.openclaw.ai/nodes/location-command]
 
-Location Command - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Media and devices
-Location Command
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Tools
-Built-in tools
-Lobster
-LLM Task
-Exec Tool
-Web Tools
-apply_patch Tool
-Elevated Mode
-Thinking Levels
-Reactions
-Browser
-Browser (OpenClaw-managed)
-Browser Login
-Chrome Extension
-Browser Troubleshooting
-Agent coordination
-Agent Send
-Sub-Agents
-Multi-Agent Sandbox &amp; Tools
-Skills
-Slash Commands
-Skills
-Skills Config
-ClawHub
-Plugins
-Extensions
-Voice Call Plugin
-Zalo Personal Plugin
-Automation
-Hooks
-Cron Jobs
-Cron vs Heartbeat
-Automation Troubleshooting
-Webhooks
-Gmail PubSub
-Polls
-Auth Monitoring
-Media and devices
-Nodes
-Node Troubleshooting
-Image and Media Support
-Audio and Voice Notes
-Camera Capture
-Talk Mode
-Voice Wake
-Location Command
-Location command (nodes)
-TL;DR
-Why a selector (not just a switch)
-Settings model
-Permissions mapping (node.permissions)
-Command: location.get
-Background behavior (future)
-Model/tooling integration
-UX copy (suggested)
-Media and devices
-Location Command
-Location command (nodes)
-TL;DR
-location.get
-is a node command (via
-node.invoke
 Off by default.
 Settings use a selector: Off / While Using / Always.
 Separate toggle: Precise Location.
@@ -1006,33 +681,31 @@ location.get
 Called via
 node.invoke
 Params (suggested):
-Copy
-&quot;timeoutMs&quot;
+"timeoutMs"
 10000
-&quot;maxAgeMs&quot;
+"maxAgeMs"
 15000
-&quot;desiredAccuracy&quot;
-&quot;coarse|balanced|precise&quot;
+"desiredAccuracy"
+"coarse|balanced|precise"
 Response payload:
-Copy
-&quot;lat&quot;
+"lat"
 48.20849
-&quot;lon&quot;
+"lon"
 16.37208
-&quot;accuracyMeters&quot;
+"accuracyMeters"
 12.5
-&quot;altitudeMeters&quot;
+"altitudeMeters"
 182.0
-&quot;speedMps&quot;
+"speedMps"
 0.0
-&quot;headingDeg&quot;
+"headingDeg"
 270.0
-&quot;timestamp&quot;
-&quot;2026-01-03T12:34:56.000Z&quot;
-&quot;isPrecise&quot;
+"timestamp"
+"2026-01-03T12:34:56.000Z"
+"isPrecise"
 true
-&quot;source&quot;
-&quot;gps|wifi|cell|unknown&quot;
+"source"
+"gps|wifi|cell|unknown"
 Errors (stable codes):
 LOCATION_DISABLED
 : selector is off.
@@ -1064,7 +737,7 @@ tool adds
 location_get
 action (node required).
 CLI:
-openclaw nodes location get --node &lt;id&gt;
+openclaw nodes location get --node <id>
 Agent guidelines: only call when user enabled location and understands the scope.
 UX copy (suggested)
 Off: “Location sharing is disabled.”
@@ -1078,79 +751,6 @@ Voice Wake
 
 [Source: https://docs.openclaw.ai/nodes/talk]
 
-Talk Mode - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Media and devices
-Talk Mode
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Tools
-Built-in tools
-Lobster
-LLM Task
-Exec Tool
-Web Tools
-apply_patch Tool
-Elevated Mode
-Thinking Levels
-Reactions
-Browser
-Browser (OpenClaw-managed)
-Browser Login
-Chrome Extension
-Browser Troubleshooting
-Agent coordination
-Agent Send
-Sub-Agents
-Multi-Agent Sandbox &amp; Tools
-Skills
-Slash Commands
-Skills
-Skills Config
-ClawHub
-Plugins
-Extensions
-Voice Call Plugin
-Zalo Personal Plugin
-Automation
-Hooks
-Cron Jobs
-Cron vs Heartbeat
-Automation Troubleshooting
-Webhooks
-Gmail PubSub
-Polls
-Auth Monitoring
-Media and devices
-Nodes
-Node Troubleshooting
-Image and Media Support
-Audio and Voice Notes
-Camera Capture
-Talk Mode
-Voice Wake
-Location Command
-Talk Mode
-Behavior (macOS)
-Voice directives in replies
-Config (~/.openclaw/openclaw.json)
-macOS UI
-Notes
-Media and devices
-Talk Mode
-Talk Mode
 Talk mode is a continuous voice conversation loop:
 Listen for speech
 Send transcript to the model (main session, chat.send)
@@ -1173,10 +773,9 @@ Voice directives in replies
 The assistant may prefix its reply with a
 single JSON line
 to control voice:
-Copy
-&quot;voice&quot;
-&quot;&lt;voice-id&gt;&quot;
-&quot;once&quot;
+"voice"
+"<voice-id>"
+"once"
 true
 Rules:
 First non-empty line only.
@@ -1209,16 +808,15 @@ latency_tier
 once
 Config (
 ~/.openclaw/openclaw.json
-Copy
 talk
 voiceId
-&quot;elevenlabs_voice_id&quot;
+"elevenlabs_voice_id"
 modelId
-&quot;eleven_v3&quot;
+"eleven_v3"
 outputFormat
-&quot;mp3_44100_128&quot;
+"mp3_44100_128"
 apiKey
-&quot;elevenlabs_api_key&quot;
+"elevenlabs_api_key"
 interruptOnSpeech
 true
 Defaults:
@@ -1298,83 +896,8 @@ Voice Wake
 
 [Source: https://docs.openclaw.ai/nodes/troubleshooting]
 
-Node Troubleshooting - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Media and devices
-Node Troubleshooting
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Tools
-Built-in tools
-Lobster
-LLM Task
-Exec Tool
-Web Tools
-apply_patch Tool
-Elevated Mode
-Thinking Levels
-Reactions
-Browser
-Browser (OpenClaw-managed)
-Browser Login
-Chrome Extension
-Browser Troubleshooting
-Agent coordination
-Agent Send
-Sub-Agents
-Multi-Agent Sandbox &amp; Tools
-Skills
-Slash Commands
-Skills
-Skills Config
-ClawHub
-Plugins
-Extensions
-Voice Call Plugin
-Zalo Personal Plugin
-Automation
-Hooks
-Cron Jobs
-Cron vs Heartbeat
-Automation Troubleshooting
-Webhooks
-Gmail PubSub
-Polls
-Auth Monitoring
-Media and devices
-Nodes
-Node Troubleshooting
-Image and Media Support
-Audio and Voice Notes
-Camera Capture
-Talk Mode
-Voice Wake
-Location Command
-Node troubleshooting
-Command ladder
-Foreground requirements
-Permissions matrix
-Pairing versus approvals
-Common node error codes
-Fast recovery loop
-Media and devices
-Node Troubleshooting
-Node troubleshooting
 Use this page when a node is visible in status but node tools fail.
 Command ladder
-Copy
 openclaw
 status
 openclaw
@@ -1390,7 +913,6 @@ channels
 status
 --probe
 Then run node specific checks:
-Copy
 openclaw
 nodes
 status
@@ -1398,16 +920,16 @@ openclaw
 nodes
 describe
 --node
-&lt;
+<
 idOrNameOrI
-&gt;
+>
 openclaw
 approvals
 get
 --node
-&lt;
+<
 idOrNameOrI
-&gt;
+>
 Healthy signals:
 Node is connected and paired for role
 node
@@ -1421,22 +943,21 @@ camera.*
 screen.*
 are foreground only on iOS/Android nodes.
 Quick check and fix:
-Copy
 openclaw
 nodes
 describe
 --node
-&lt;
+<
 idOrNameOrI
-&gt;
+>
 openclaw
 nodes
 canvas
 snapshot
 --node
-&lt;
+<
 idOrNameOrI
-&gt;
+>
 openclaw
 logs
 --follow
@@ -1477,7 +998,6 @@ Device pairing
 Exec approvals
 : can this node run a specific shell command?
 Quick checks:
-Copy
 openclaw
 devices
 list
@@ -1488,18 +1008,18 @@ openclaw
 approvals
 get
 --node
-&lt;
+<
 idOrNameOrI
-&gt;
+>
 openclaw
 approvals
 allowlist
 add
 --node
-&lt;
+<
 idOrNameOrI
-&gt;
-&quot;/usr/bin/uname&quot;
+>
+"/usr/bin/uname"
 If pairing is missing, approve the node device first.
 If pairing is fine but
 system.run
@@ -1522,7 +1042,6 @@ SYSTEM_RUN_DENIED: approval required
 SYSTEM_RUN_DENIED: allowlist miss
 → command blocked by allowlist mode.
 Fast recovery loop
-Copy
 openclaw
 nodes
 status
@@ -1530,16 +1049,16 @@ openclaw
 nodes
 describe
 --node
-&lt;
+<
 idOrNameOrI
-&gt;
+>
 openclaw
 approvals
 get
 --node
-&lt;
+<
 idOrNameOrI
-&gt;
+>
 openclaw
 logs
 --follow
@@ -1562,86 +1081,6 @@ Image and Media Support
 
 [Source: https://docs.openclaw.ai/nodes/voicewake]
 
-Voice Wake - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Media and devices
-Voice Wake
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Tools
-Built-in tools
-Lobster
-LLM Task
-Exec Tool
-Web Tools
-apply_patch Tool
-Elevated Mode
-Thinking Levels
-Reactions
-Browser
-Browser (OpenClaw-managed)
-Browser Login
-Chrome Extension
-Browser Troubleshooting
-Agent coordination
-Agent Send
-Sub-Agents
-Multi-Agent Sandbox &amp; Tools
-Skills
-Slash Commands
-Skills
-Skills Config
-ClawHub
-Plugins
-Extensions
-Voice Call Plugin
-Zalo Personal Plugin
-Automation
-Hooks
-Cron Jobs
-Cron vs Heartbeat
-Automation Troubleshooting
-Webhooks
-Gmail PubSub
-Polls
-Auth Monitoring
-Media and devices
-Nodes
-Node Troubleshooting
-Image and Media Support
-Audio and Voice Notes
-Camera Capture
-Talk Mode
-Voice Wake
-Location Command
-Voice Wake (Global Wake Words)
-Storage (Gateway host)
-Protocol
-Methods
-Events
-Client behavior
-macOS app
-iOS node
-Android node
-Media and devices
-Voice Wake
-Voice Wake (Global Wake Words)
-OpenClaw treats
-wake words as a single global list
-owned by the
-Gateway
 There are
 no per-node custom wake words
 Any node/app UI may edit
@@ -1653,12 +1092,11 @@ Storage (Gateway host)
 Wake words are stored on the gateway machine at:
 ~/.openclaw/settings/voicewake.json
 Shape:
-Copy
-&quot;triggers&quot;
-&quot;openclaw&quot;
-&quot;claude&quot;
-&quot;computer&quot;
-&quot;updatedAtMs&quot;
+"triggers"
+"openclaw"
+"claude"
+"computer"
+"updatedAtMs"
 1730000000000
 Protocol
 Methods

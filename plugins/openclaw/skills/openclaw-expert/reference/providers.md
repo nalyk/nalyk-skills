@@ -2,70 +2,11 @@
 
 Configuration for every supported model provider.
 
-
 ---
 ## Providers > Anthropic
 
 [Source: https://docs.openclaw.ai/providers/anthropic]
 
-Anthropic - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Providers
-Anthropic
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Model Providers
-Model Provider Quickstart
-Model concepts
-Models CLI
-Configuration
-Model Providers
-Model Failover
-Providers
-Anthropic
-OpenAI
-OpenRouter
-Litellm
-Amazon Bedrock
-Vercel AI Gateway
-Moonshot AI
-MiniMax
-OpenCode Zen
-GLM Models
-Z.AI
-Synthetic
-Qianfan
-Anthropic (Claude)
-Option A: Anthropic API key
-CLI setup
-Config snippet
-Prompt caching (Anthropic API)
-Configuration
-Defaults
-Legacy parameter
-Option B: Claude setup-token
-Where to get a setup-token
-CLI setup (setup-token)
-Config snippet (setup-token)
-Notes
-Troubleshooting
-Providers
-Anthropic
-Anthropic (Claude)
-Anthropic builds the
-Claude
 model family and provides access via an API.
 In OpenClaw you can authenticate with an API key or a
 setup-token
@@ -74,7 +15,6 @@ Best for:
 standard API access and usage-based billing.
 Create your API key in the Anthropic Console.
 CLI setup
-Copy
 openclaw
 onboard
 # choose: Anthropic API key
@@ -82,17 +22,16 @@ onboard
 openclaw
 onboard
 --anthropic-api-key
-&quot;$ANTHROPIC_API_KEY&quot;
+"$ANTHROPIC_API_KEY"
 Config snippet
-Copy
 env
 ANTHROPIC_API_KEY
-&quot;sk-ant-...&quot;
+"sk-ant-..."
 agents
 defaults
 model
 primary
-&quot;anthropic/claude-opus-4-6&quot;
+"anthropic/claude-opus-4-6"
 } } }
 Prompt caching (Anthropic API)
 OpenClaw supports Anthropic’s prompt caching feature. This is
@@ -114,17 +53,16 @@ Default for API Key auth
 long
 1 hour
 Extended cache (requires beta flag)
-Copy
 agents
 defaults
 models
-&quot;anthropic/claude-opus-4-6&quot;
+"anthropic/claude-opus-4-6"
 params
 cacheRetention
-&quot;long&quot;
+"long"
 Defaults
 When using Anthropic API Key authentication, OpenClaw automatically applies
-cacheRetention: &quot;short&quot;
+cacheRetention: "short"
 (5-minute cache) for all Anthropic models. You can override this by explicitly setting
 cacheRetention
 in your config.
@@ -132,10 +70,10 @@ Legacy parameter
 The older
 cacheControlTtl
 parameter is still supported for backwards compatibility:
-&quot;5m&quot;
+"5m"
 maps to
 short
-&quot;1h&quot;
+"1h"
 maps to
 long
 We recommend migrating to the new
@@ -154,13 +92,11 @@ Setup-tokens are created by the
 Claude Code CLI
 , not the Anthropic Console. You can run this on
 any machine
-Copy
 claude
 setup-token
 Paste the token into OpenClaw (wizard:
 Anthropic token (paste setup-token)
 ), or run it on the gateway host:
-Copy
 openclaw
 models
 auth
@@ -168,7 +104,6 @@ setup-token
 --provider
 anthropic
 If you generated the token on a different machine, paste it:
-Copy
 openclaw
 models
 auth
@@ -176,19 +111,17 @@ paste-token
 --provider
 anthropic
 CLI setup (setup-token)
-Copy
 # Paste a setup-token during onboarding
 openclaw
 onboard
 --auth-choice
 setup-token
 Config snippet (setup-token)
-Copy
 agents
 defaults
 model
 primary
-&quot;anthropic/claude-opus-4-6&quot;
+"anthropic/claude-opus-4-6"
 } } }
 Notes
 Generate the setup-token with
@@ -240,56 +173,6 @@ OpenAI
 
 [Source: https://docs.openclaw.ai/providers/bedrock]
 
-Amazon Bedrock - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Providers
-Amazon Bedrock
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Model Providers
-Model Provider Quickstart
-Model concepts
-Models CLI
-Configuration
-Model Providers
-Model Failover
-Providers
-Anthropic
-OpenAI
-OpenRouter
-Litellm
-Amazon Bedrock
-Vercel AI Gateway
-Moonshot AI
-MiniMax
-OpenCode Zen
-GLM Models
-Z.AI
-Synthetic
-Qianfan
-Amazon Bedrock
-What pi‑ai supports
-Automatic model discovery
-Setup (manual)
-EC2 Instance Roles
-Notes
-Providers
-Amazon Bedrock
-Amazon Bedrock
-OpenClaw can use
-Amazon Bedrock
 models via pi‑ai’s
 Bedrock Converse
 streaming provider. Bedrock auth uses the
@@ -317,16 +200,15 @@ bedrock:ListFoundationModels
 and is cached (default: 1 hour).
 Config options live under
 models.bedrockDiscovery
-Copy
 models
 bedrockDiscovery
 enabled
 true
 region
-&quot;us-east-1&quot;
+"us-east-1"
 providerFilter
-&quot;anthropic&quot;
-&quot;amazon&quot;
+"anthropic"
+"amazon"
 refreshInterval
 3600
 defaultContextWindow
@@ -361,49 +243,47 @@ are used for discovered models (override if you know your model limits).
 Setup (manual)
 Ensure AWS credentials are available on the
 gateway host
-Copy
 export
 AWS_ACCESS_KEY_ID
-&quot;AKIA...&quot;
+"AKIA..."
 export
 AWS_SECRET_ACCESS_KEY
-&quot;...&quot;
+"..."
 export
 AWS_REGION
-&quot;us-east-1&quot;
+"us-east-1"
 # Optional:
 export
 AWS_SESSION_TOKEN
-&quot;...&quot;
+"..."
 export
 AWS_PROFILE
-&quot;your-profile&quot;
+"your-profile"
 # Optional (Bedrock API key/bearer token):
 export
 AWS_BEARER_TOKEN_BEDROCK
-&quot;...&quot;
+"..."
 Add a Bedrock provider and model to your config (no
 apiKey
 required):
-Copy
 models
 providers
-&quot;amazon-bedrock&quot;
+"amazon-bedrock"
 baseUrl
-&quot;https://bedrock-runtime.us-east-1.amazonaws.com&quot;
+"https://bedrock-runtime.us-east-1.amazonaws.com"
 api
-&quot;bedrock-converse-stream&quot;
+"bedrock-converse-stream"
 auth
-&quot;aws-sdk&quot;
+"aws-sdk"
 models
-&quot;us.anthropic.claude-opus-4-6-v1:0&quot;
+"us.anthropic.claude-opus-4-6-v1:0"
 name
-&quot;Claude Opus 4.6 (Bedrock)&quot;
+"Claude Opus 4.6 (Bedrock)"
 reasoning
 true
 input
-&quot;text&quot;
-&quot;image&quot;
+"text"
+"image"
 cost
 input
 output
@@ -418,7 +298,7 @@ agents
 defaults
 model
 primary
-&quot;amazon-bedrock/us.anthropic.claude-opus-4-6-v1:0&quot;
+"amazon-bedrock/us.anthropic.claude-opus-4-6-v1:0"
 EC2 Instance Roles
 When running OpenClaw on an EC2 instance with an IAM role attached, the AWS SDK
 will automatically use the instance metadata service (IMDS) for authentication.
@@ -429,7 +309,6 @@ Set
 AWS_PROFILE=default
 to signal that AWS credentials are
 available. The actual authentication still uses the instance role via IMDS.
-Copy
 # Add to ~/.bashrc or your shell profile
 export
 AWS_PROFILE
@@ -446,7 +325,6 @@ bedrock:ListFoundationModels
 Or attach the managed policy
 AmazonBedrockFullAccess
 Quick setup:
-Copy
 # 1. Create IAM role and instance profile
 aws
 iam
@@ -454,13 +332,13 @@ create-role
 --role-name
 EC2-Bedrock-Access
 --assume-role-policy-document
-&#x27;{
-&quot;Version&quot;: &quot;2012-10-17&quot;,
-&quot;Statement&quot;: [{
-&quot;Effect&quot;: &quot;Allow&quot;,
-&quot;Principal&quot;: {&quot;Service&quot;: &quot;ec2.amazonaws.com&quot;},
-&quot;Action&quot;: &quot;sts:AssumeRole&quot;
-}&#x27;
+'{
+"Version": "2012-10-17",
+"Statement": [{
+"Effect": "Allow",
+"Principal": {"Service": "ec2.amazonaws.com"},
+"Action": "sts:AssumeRole"
+}'
 aws
 iam
 attach-role-policy
@@ -501,12 +379,12 @@ models.bedrockDiscovery.region
 us-east-1
 # 4. Set the workaround env vars
 echo
-&#x27;export AWS_PROFILE=default&#x27;
-&gt;&gt;
+'export AWS_PROFILE=default'
+>>
 ~/.bashrc
 echo
-&#x27;export AWS_REGION=us-east-1&#x27;
-&gt;&gt;
+'export AWS_REGION=us-east-1'
+>>
 ~/.bashrc
 source
 ~/.bashrc
@@ -545,75 +423,25 @@ Vercel AI Gateway
 
 [Source: https://docs.openclaw.ai/providers/glm]
 
-GLM Models - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Providers
-GLM Models
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Model Providers
-Model Provider Quickstart
-Model concepts
-Models CLI
-Configuration
-Model Providers
-Model Failover
-Providers
-Anthropic
-OpenAI
-OpenRouter
-Litellm
-Amazon Bedrock
-Vercel AI Gateway
-Moonshot AI
-MiniMax
-OpenCode Zen
-GLM Models
-Z.AI
-Synthetic
-Qianfan
-GLM models
-CLI setup
-Config snippet
-Notes
-Providers
-GLM Models
-GLM models
-GLM is a
-model family
 (not a company) available through the Z.AI platform. In OpenClaw, GLM
 models are accessed via the
 zai
 provider and model IDs like
 zai/glm-5
 CLI setup
-Copy
 openclaw
 onboard
 --auth-choice
 zai-api-key
 Config snippet
-Copy
 env
 ZAI_API_KEY
-&quot;sk-...&quot;
+"sk-..."
 agents
 defaults
 model
 primary
-&quot;zai/glm-5&quot;
+"zai/glm-5"
 } } }
 Notes
 GLM versions and availability can change; check Z.AI’s docs for the latest.
@@ -632,60 +460,6 @@ Z.AI
 
 [Source: https://docs.openclaw.ai/providers/litellm]
 
-Litellm - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Model Providers
-Model Provider Quickstart
-Model concepts
-Models CLI
-Configuration
-Model Providers
-Model Failover
-Providers
-Anthropic
-OpenAI
-OpenRouter
-Litellm
-Amazon Bedrock
-Vercel AI Gateway
-Moonshot AI
-MiniMax
-OpenCode Zen
-GLM Models
-Z.AI
-Synthetic
-Qianfan
-LiteLLM
-Why use LiteLLM with OpenClaw?
-Quick start
-Via onboarding
-Manual setup
-Configuration
-Environment variables
-Config file
-Virtual keys
-Model routing
-Viewing usage
-Notes
-See also
-Providers
-Litellm
-LiteLLM
-LiteLLM
 is an open-source LLM gateway that provides a unified API to 100+ model providers. Route OpenClaw through LiteLLM to get centralized cost tracking, logging, and the flexibility to switch backends without changing your OpenClaw config.
 Why use LiteLLM with OpenClaw?
 Cost tracking
@@ -700,65 +474,60 @@ Fallbacks
 — Automatic failover if your primary provider is down
 Quick start
 Via onboarding
-Copy
 openclaw
 onboard
 --auth-choice
 litellm-api-key
 Manual setup
 Start LiteLLM Proxy:
-Copy
 pip
 install
-&#x27;litellm[proxy]&#x27;
+'litellm[proxy]'
 litellm
 --model
 claude-opus-4-6
 Point OpenClaw to LiteLLM:
-Copy
 export
 LITELLM_API_KEY
-&quot;your-litellm-key&quot;
+"your-litellm-key"
 openclaw
 That’s it. OpenClaw now routes through LiteLLM.
 Configuration
 Environment variables
-Copy
 export
 LITELLM_API_KEY
-&quot;sk-litellm-key&quot;
+"sk-litellm-key"
 Config file
-Copy
 models
 providers
 litellm
 baseUrl
-&quot;http://localhost:4000&quot;
+"http://localhost:4000"
 apiKey
-&quot;${LITELLM_API_KEY}&quot;
+"${LITELLM_API_KEY}"
 api
-&quot;openai-completions&quot;
+"openai-completions"
 models
-&quot;claude-opus-4-6&quot;
+"claude-opus-4-6"
 name
-&quot;Claude Opus 4.6&quot;
+"Claude Opus 4.6"
 reasoning
 true
 input
-&quot;text&quot;
-&quot;image&quot;
+"text"
+"image"
 contextWindow
 200000
 maxTokens
 64000
-&quot;gpt-4o&quot;
+"gpt-4o"
 name
-&quot;GPT-4o&quot;
+"GPT-4o"
 reasoning
 false
 input
-&quot;text&quot;
-&quot;image&quot;
+"text"
+"image"
 contextWindow
 128000
 maxTokens
@@ -767,26 +536,24 @@ agents
 defaults
 model
 primary
-&quot;litellm/claude-opus-4-6&quot;
+"litellm/claude-opus-4-6"
 Virtual keys
 Create a dedicated key for OpenClaw with spend limits:
-Copy
 curl
 POST
-&quot;http://localhost:4000/key/generate&quot;
-&quot;Authorization: Bearer $LITELLM_MASTER_KEY&quot;
-&quot;Content-Type: application/json&quot;
-&#x27;{
-&quot;key_alias&quot;: &quot;openclaw&quot;,
-&quot;max_budget&quot;: 50.00,
-&quot;budget_duration&quot;: &quot;monthly&quot;
-}&#x27;
+"http://localhost:4000/key/generate"
+"Authorization: Bearer $LITELLM_MASTER_KEY"
+"Content-Type: application/json"
+'{
+"key_alias": "openclaw",
+"max_budget": 50.00,
+"budget_duration": "monthly"
+}'
 Use the generated key as
 LITELLM_API_KEY
 Model routing
 LiteLLM can route model requests to different backends. Configure in your LiteLLM
 config.yaml
-Copy
 model_list
 model_name
 claude-opus-4-6
@@ -807,15 +574,14 @@ claude-opus-4-6
 — LiteLLM handles the routing.
 Viewing usage
 Check LiteLLM’s dashboard or API:
-Copy
 # Key info
 curl
-&quot;http://localhost:4000/key/info&quot;
-&quot;Authorization: Bearer sk-litellm-key&quot;
+"http://localhost:4000/key/info"
+"Authorization: Bearer sk-litellm-key"
 # Spend logs
 curl
-&quot;http://localhost:4000/spend/logs&quot;
-&quot;Authorization: Bearer $LITELLM_MASTER_KEY&quot;
+"http://localhost:4000/spend/logs"
+"Authorization: Bearer $LITELLM_MASTER_KEY"
 Notes
 LiteLLM runs on
 http://localhost:4000
@@ -835,63 +601,6 @@ Amazon Bedrock
 
 [Source: https://docs.openclaw.ai/providers/minimax]
 
-MiniMax - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Providers
-MiniMax
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Model Providers
-Model Provider Quickstart
-Model concepts
-Models CLI
-Configuration
-Model Providers
-Model Failover
-Providers
-Anthropic
-OpenAI
-OpenRouter
-Litellm
-Amazon Bedrock
-Vercel AI Gateway
-Moonshot AI
-MiniMax
-OpenCode Zen
-GLM Models
-Z.AI
-Synthetic
-Qianfan
-MiniMax
-Model overview (M2.1)
-MiniMax M2.1 vs MiniMax M2.1 Lightning
-Choose a setup
-MiniMax OAuth (Coding Plan) — recommended
-MiniMax M2.1 (API key)
-MiniMax M2.1 as fallback (Opus primary)
-Optional: Local via LM Studio (manual)
-Configure via openclaw configure
-Configuration options
-Notes
-Troubleshooting
-“Unknown model: minimax/MiniMax-M2.1”
-Providers
-MiniMax
-MiniMax
-MiniMax is an AI company that builds the
-M2/M2.1
 model family. The current
 coding-focused release is
 MiniMax M2.1
@@ -934,7 +643,6 @@ MiniMax OAuth (Coding Plan) — recommended
 Best for:
 quick setup with MiniMax Coding Plan via OAuth, no API key required.
 Enable the bundled OAuth plugin and authenticate:
-Copy
 openclaw
 plugins
 enable
@@ -967,35 +675,34 @@ Select
 Model/auth
 Choose
 MiniMax M2.1
-Copy
 env
 MINIMAX_API_KEY
-&quot;sk-...&quot;
+"sk-..."
 agents
 defaults
 model
 primary
-&quot;minimax/MiniMax-M2.1&quot;
+"minimax/MiniMax-M2.1"
 } } }
 models
 mode
-&quot;merge&quot;
+"merge"
 providers
 minimax
 baseUrl
-&quot;https://api.minimax.io/anthropic&quot;
+"https://api.minimax.io/anthropic"
 apiKey
-&quot;${MINIMAX_API_KEY}&quot;
+"${MINIMAX_API_KEY}"
 api
-&quot;anthropic-messages&quot;
+"anthropic-messages"
 models
-&quot;MiniMax-M2.1&quot;
+"MiniMax-M2.1"
 name
-&quot;MiniMax M2.1&quot;
+"MiniMax M2.1"
 reasoning
 false
 input
-&quot;text&quot;
+"text"
 cost
 input
 output
@@ -1009,24 +716,23 @@ maxTokens
 MiniMax M2.1 as fallback (Opus primary)
 Best for:
 keep Opus 4.6 as primary, fail over to MiniMax M2.1.
-Copy
 env
 MINIMAX_API_KEY
-&quot;sk-...&quot;
+"sk-..."
 agents
 defaults
 models
-&quot;anthropic/claude-opus-4-6&quot;
+"anthropic/claude-opus-4-6"
 alias
-&quot;opus&quot;
-&quot;minimax/MiniMax-M2.1&quot;
+"opus"
+"minimax/MiniMax-M2.1"
 alias
-&quot;minimax&quot;
+"minimax"
 model
 primary
-&quot;anthropic/claude-opus-4-6&quot;
+"anthropic/claude-opus-4-6"
 fallbacks
-&quot;minimax/MiniMax-M2.1&quot;
+"minimax/MiniMax-M2.1"
 Optional: Local via LM Studio (manual)
 Best for:
 local inference with LM Studio.
@@ -1034,36 +740,35 @@ We have seen strong results with MiniMax M2.1 on powerful hardware (e.g. a
 desktop/server) using LM Studio’s local server.
 Configure manually via
 openclaw.json
-Copy
 agents
 defaults
 model
 primary
-&quot;lmstudio/minimax-m2.1-gs32&quot;
+"lmstudio/minimax-m2.1-gs32"
 models
-&quot;lmstudio/minimax-m2.1-gs32&quot;
+"lmstudio/minimax-m2.1-gs32"
 alias
-&quot;Minimax&quot;
+"Minimax"
 } }
 models
 mode
-&quot;merge&quot;
+"merge"
 providers
 lmstudio
 baseUrl
-&quot;http://127.0.0.1:1234/v1&quot;
+"http://127.0.0.1:1234/v1"
 apiKey
-&quot;lmstudio&quot;
+"lmstudio"
 api
-&quot;openai-responses&quot;
+"openai-responses"
 models
-&quot;minimax-m2.1-gs32&quot;
+"minimax-m2.1-gs32"
 name
-&quot;MiniMax M2.1 GS32&quot;
+"MiniMax M2.1 GS32"
 reasoning
 false
 input
-&quot;text&quot;
+"text"
 cost
 input
 output
@@ -1114,7 +819,7 @@ merge
 if you want to add MiniMax alongside built-ins.
 Notes
 Model refs are
-minimax/&lt;model&gt;
+minimax/<model>
 Coding Plan usage API:
 https://api.minimaxi.com/v1/api/openplatform/coding_plan/remains
 (requires a coding plan key).
@@ -1122,7 +827,7 @@ Update pricing values in
 models.json
 if you need exact cost tracking.
 Referral link for MiniMax Coding Plan (10% off):
-https://platform.minimax.io/subscribe/coding-plan?code=DbXJTRClnb&amp;source=link
+https://platform.minimax.io/subscribe/coding-plan?code=DbXJTRClnb&source=link
 See
 /concepts/model-providers
 for provider rules.
@@ -1160,7 +865,6 @@ case‑sensitive
 minimax/MiniMax-M2.1
 minimax/MiniMax-M2.1-lightning
 Then recheck with:
-Copy
 openclaw
 models
 list
@@ -1172,52 +876,6 @@ OpenCode Zen
 
 [Source: https://docs.openclaw.ai/providers/models]
 
-Model Provider Quickstart - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Overview
-Model Provider Quickstart
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Model Providers
-Model Provider Quickstart
-Model concepts
-Models CLI
-Configuration
-Model Providers
-Model Failover
-Providers
-Anthropic
-OpenAI
-OpenRouter
-Litellm
-Amazon Bedrock
-Vercel AI Gateway
-Moonshot AI
-MiniMax
-OpenCode Zen
-GLM Models
-Z.AI
-Synthetic
-Qianfan
-Model Providers
-Highlight: Venice (Venice AI)
-Quick start (two steps)
-Supported providers (starter set)
-Overview
-Model Provider Quickstart
-Model Providers
 OpenClaw can use many LLM providers. Pick one, authenticate, then set the default
 model as
 provider/model
@@ -1234,12 +892,11 @@ Quick start (two steps)
 Authenticate with the provider (usually via
 openclaw onboard
 Set the default model:
-Copy
 agents
 defaults
 model
 primary
-&quot;anthropic/claude-opus-4-6&quot;
+"anthropic/claude-opus-4-6"
 } } }
 Supported providers (starter set)
 OpenAI (API + Codex)
@@ -1324,56 +981,6 @@ Users can select between international and China endpoints: `https://api.moonsho
 
 [Source: https://docs.openclaw.ai/providers/openai]
 
-OpenAI - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Providers
-OpenAI
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Model Providers
-Model Provider Quickstart
-Model concepts
-Models CLI
-Configuration
-Model Providers
-Model Failover
-Providers
-Anthropic
-OpenAI
-OpenRouter
-Litellm
-Amazon Bedrock
-Vercel AI Gateway
-Moonshot AI
-MiniMax
-OpenCode Zen
-GLM Models
-Z.AI
-Synthetic
-Qianfan
-OpenAI
-Option A: OpenAI API key (OpenAI Platform)
-CLI setup
-Config snippet
-Option B: OpenAI Code (Codex) subscription
-CLI setup (Codex OAuth)
-Config snippet (Codex subscription)
-Notes
-Providers
-OpenAI
-OpenAI
 OpenAI provides developer APIs for GPT models. Codex supports
 ChatGPT sign-in
 for subscription
@@ -1385,7 +992,6 @@ Best for:
 direct API access and usage-based billing.
 Get your API key from the OpenAI dashboard.
 CLI setup
-Copy
 openclaw
 onboard
 --auth-choice
@@ -1394,24 +1000,22 @@ openai-api-key
 openclaw
 onboard
 --openai-api-key
-&quot;$OPENAI_API_KEY&quot;
+"$OPENAI_API_KEY"
 Config snippet
-Copy
 env
 OPENAI_API_KEY
-&quot;sk-...&quot;
+"sk-..."
 agents
 defaults
 model
 primary
-&quot;openai/gpt-5.1-codex&quot;
+"openai/gpt-5.1-codex"
 } } }
 Option B: OpenAI Code (Codex) subscription
 Best for:
 using ChatGPT/Codex subscription access instead of an API key.
 Codex cloud requires ChatGPT sign-in, while the Codex CLI supports ChatGPT or API key sign-in.
 CLI setup (Codex OAuth)
-Copy
 # Run Codex OAuth in the wizard
 openclaw
 onboard
@@ -1425,12 +1029,11 @@ login
 --provider
 openai-codex
 Config snippet (Codex subscription)
-Copy
 agents
 defaults
 model
 primary
-&quot;openai-codex/gpt-5.3-codex&quot;
+"openai-codex/gpt-5.3-codex"
 } } }
 Notes
 Model refs always use
@@ -1447,61 +1050,12 @@ OpenRouter
 
 [Source: https://docs.openclaw.ai/providers/opencode]
 
-OpenCode Zen - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Providers
-OpenCode Zen
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Model Providers
-Model Provider Quickstart
-Model concepts
-Models CLI
-Configuration
-Model Providers
-Model Failover
-Providers
-Anthropic
-OpenAI
-OpenRouter
-Litellm
-Amazon Bedrock
-Vercel AI Gateway
-Moonshot AI
-MiniMax
-OpenCode Zen
-GLM Models
-Z.AI
-Synthetic
-Qianfan
-OpenCode Zen
-CLI setup
-Config snippet
-Notes
-Providers
-OpenCode Zen
-OpenCode Zen
-OpenCode Zen is a
-curated list of models
 recommended by the OpenCode team for coding agents.
 It is an optional, hosted model access path that uses an API key and the
 opencode
 provider.
 Zen is currently in beta.
 CLI setup
-Copy
 openclaw
 onboard
 --auth-choice
@@ -1510,17 +1064,16 @@ opencode-zen
 openclaw
 onboard
 --opencode-zen-api-key
-&quot;$OPENCODE_API_KEY&quot;
+"$OPENCODE_API_KEY"
 Config snippet
-Copy
 env
 OPENCODE_API_KEY
-&quot;sk-...&quot;
+"sk-..."
 agents
 defaults
 model
 primary
-&quot;opencode/claude-opus-4-6&quot;
+"opencode/claude-opus-4-6"
 } } }
 Notes
 OPENCODE_ZEN_API_KEY
@@ -1535,58 +1088,8 @@ GLM Models
 
 [Source: https://docs.openclaw.ai/providers/openrouter]
 
-OpenRouter - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Providers
-OpenRouter
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Model Providers
-Model Provider Quickstart
-Model concepts
-Models CLI
-Configuration
-Model Providers
-Model Failover
-Providers
-Anthropic
-OpenAI
-OpenRouter
-Litellm
-Amazon Bedrock
-Vercel AI Gateway
-Moonshot AI
-MiniMax
-OpenCode Zen
-GLM Models
-Z.AI
-Synthetic
-Qianfan
-OpenRouter
-CLI setup
-Config snippet
-Notes
-Providers
-OpenRouter
-OpenRouter
-OpenRouter provides a
-unified API
-that routes requests to many models behind a single
 endpoint and API key. It is OpenAI-compatible, so most OpenAI SDKs work by switching the base URL.
 CLI setup
-Copy
 openclaw
 onboard
 --auth-choice
@@ -1594,20 +1097,19 @@ apiKey
 --token-provider
 openrouter
 --token
-&quot;$OPENROUTER_API_KEY&quot;
+"$OPENROUTER_API_KEY"
 Config snippet
-Copy
 env
 OPENROUTER_API_KEY
-&quot;sk-or-...&quot;
+"sk-or-..."
 agents
 defaults
 model
 primary
-&quot;openrouter/anthropic/claude-sonnet-4-5&quot;
+"openrouter/anthropic/claude-sonnet-4-5"
 Notes
 Model refs are
-openrouter/&lt;provider&gt;/&lt;model&gt;
+openrouter/<provider>/<model>
 For more model/provider options, see
 /concepts/model-providers
 OpenRouter uses a Bearer token with your API key under the hood.
@@ -1619,52 +1121,6 @@ Litellm
 
 [Source: https://docs.openclaw.ai/providers/qianfan]
 
-Qianfan - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Providers
-Qianfan
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Model Providers
-Model Provider Quickstart
-Model concepts
-Models CLI
-Configuration
-Model Providers
-Model Failover
-Providers
-Anthropic
-OpenAI
-OpenRouter
-Litellm
-Amazon Bedrock
-Vercel AI Gateway
-Moonshot AI
-MiniMax
-OpenCode Zen
-GLM Models
-Z.AI
-Synthetic
-Qianfan
-Qianfan Provider Guide
-Prerequisites
-Getting Your API Key
-CLI setup
-Related Documentation
-Providers
-Qianfan
 Qianfan Provider Guide
 Qianfan is Baidu’s MaaS platform, provides a
 unified API
@@ -1682,7 +1138,6 @@ Generate an API key (format:
 bce-v3/ALTAK-...
 Copy the API key for use with OpenClaw
 CLI setup
-Copy
 openclaw
 onboard
 --auth-choice
@@ -1699,53 +1154,6 @@ Synthetic
 
 [Source: https://docs.openclaw.ai/providers/synthetic]
 
-Synthetic - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Providers
-Synthetic
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Model Providers
-Model Provider Quickstart
-Model concepts
-Models CLI
-Configuration
-Model Providers
-Model Failover
-Providers
-Anthropic
-OpenAI
-OpenRouter
-Litellm
-Amazon Bedrock
-Vercel AI Gateway
-Moonshot AI
-MiniMax
-OpenCode Zen
-GLM Models
-Z.AI
-Synthetic
-Qianfan
-Synthetic
-Quick setup
-Config example
-Model catalog
-Notes
-Providers
-Synthetic
-Synthetic
 Synthetic exposes Anthropic-compatible endpoints. OpenClaw registers it as the
 synthetic
 provider and uses the Anthropic Messages API.
@@ -1754,48 +1162,45 @@ Set
 SYNTHETIC_API_KEY
 (or run the wizard below).
 Run onboarding:
-Copy
 openclaw
 onboard
 --auth-choice
 synthetic-api-key
 The default model is set to:
-Copy
 synthetic/hf:MiniMaxAI/MiniMax-M2.1
 Config example
-Copy
 env
 SYNTHETIC_API_KEY
-&quot;sk-...&quot;
+"sk-..."
 agents
 defaults
 model
 primary
-&quot;synthetic/hf:MiniMaxAI/MiniMax-M2.1&quot;
+"synthetic/hf:MiniMaxAI/MiniMax-M2.1"
 models
-&quot;synthetic/hf:MiniMaxAI/MiniMax-M2.1&quot;
+"synthetic/hf:MiniMaxAI/MiniMax-M2.1"
 alias
-&quot;MiniMax M2.1&quot;
+"MiniMax M2.1"
 } }
 models
 mode
-&quot;merge&quot;
+"merge"
 providers
 synthetic
 baseUrl
-&quot;https://api.synthetic.new/anthropic&quot;
+"https://api.synthetic.new/anthropic"
 apiKey
-&quot;${SYNTHETIC_API_KEY}&quot;
+"${SYNTHETIC_API_KEY}"
 api
-&quot;anthropic-messages&quot;
+"anthropic-messages"
 models
-&quot;hf:MiniMaxAI/MiniMax-M2.1&quot;
+"hf:MiniMaxAI/MiniMax-M2.1"
 name
-&quot;MiniMax M2.1&quot;
+"MiniMax M2.1"
 reasoning
 false
 input
-&quot;text&quot;
+"text"
 cost
 input
 output
@@ -1920,7 +1325,7 @@ true
 text
 Notes
 Model refs use
-synthetic/&lt;modelId&gt;
+synthetic/<modelId>
 If you enable a model allowlist (
 agents.defaults.models
 ), add every model you
@@ -1936,54 +1341,6 @@ Qianfan
 
 [Source: https://docs.openclaw.ai/providers/vercel-ai-gateway]
 
-Vercel AI Gateway - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Providers
-Vercel AI Gateway
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Model Providers
-Model Provider Quickstart
-Model concepts
-Models CLI
-Configuration
-Model Providers
-Model Failover
-Providers
-Anthropic
-OpenAI
-OpenRouter
-Litellm
-Amazon Bedrock
-Vercel AI Gateway
-Moonshot AI
-MiniMax
-OpenCode Zen
-GLM Models
-Z.AI
-Synthetic
-Qianfan
-Vercel AI Gateway
-Quick start
-Non-interactive example
-Environment note
-Providers
-Vercel AI Gateway
-Vercel AI Gateway
-The
-Vercel AI Gateway
 provides a unified API to access hundreds of models through a single endpoint.
 Provider:
 vercel-ai-gateway
@@ -1992,20 +1349,17 @@ AI_GATEWAY_API_KEY
 API: Anthropic Messages compatible
 Quick start
 Set the API key (recommended: store it for the Gateway):
-Copy
 openclaw
 onboard
 --auth-choice
 ai-gateway-api-key
 Set a default model:
-Copy
 agents
 defaults
 model
 primary
-&quot;vercel-ai-gateway/anthropic/claude-opus-4.6&quot;
+"vercel-ai-gateway/anthropic/claude-opus-4.6"
 Non-interactive example
-Copy
 openclaw
 onboard
 --non-interactive
@@ -2014,7 +1368,7 @@ local
 --auth-choice
 ai-gateway-api-key
 --ai-gateway-api-key
-&quot;$AI_GATEWAY_API_KEY&quot;
+"$AI_GATEWAY_API_KEY"
 Environment note
 If the Gateway runs as a daemon (launchd/systemd), make sure
 AI_GATEWAY_API_KEY
@@ -2030,61 +1384,12 @@ Moonshot AI
 
 [Source: https://docs.openclaw.ai/providers/zai]
 
-Z.AI - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Providers
-Z.AI
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Overview
-Model Providers
-Model Provider Quickstart
-Model concepts
-Models CLI
-Configuration
-Model Providers
-Model Failover
-Providers
-Anthropic
-OpenAI
-OpenRouter
-Litellm
-Amazon Bedrock
-Vercel AI Gateway
-Moonshot AI
-MiniMax
-OpenCode Zen
-GLM Models
-Z.AI
-Synthetic
-Qianfan
-Z.AI
-CLI setup
-Config snippet
-Notes
-Providers
-Z.AI
-Z.AI
-Z.AI is the API platform for
-GLM
 models. It provides REST APIs for GLM and uses API keys
 for authentication. Create your API key in the Z.AI console. OpenClaw uses the
 zai
 provider
 with a Z.AI API key.
 CLI setup
-Copy
 openclaw
 onboard
 --auth-choice
@@ -2093,21 +1398,20 @@ zai-api-key
 openclaw
 onboard
 --zai-api-key
-&quot;$ZAI_API_KEY&quot;
+"$ZAI_API_KEY"
 Config snippet
-Copy
 env
 ZAI_API_KEY
-&quot;sk-...&quot;
+"sk-..."
 agents
 defaults
 model
 primary
-&quot;zai/glm-5&quot;
+"zai/glm-5"
 } } }
 Notes
 GLM models are available as
-zai/&lt;model&gt;
+zai/<model>
 (example:
 zai/glm-5
 See

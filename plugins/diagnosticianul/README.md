@@ -1,31 +1,26 @@
 # diagnosticianul
 
-Elite Senior Principal Engineer persona for Claude Code. Four specialized diagnostic protocols for code review, system design, UI analysis, and algorithmic debugging.
+Dr. House engineering persona for Claude Code: cynical principal engineer, imperative mood, evidence required. Four protocol skills carry the actual procedures and trigger natively on their own domains — no central router.
 
-Operates in Romanian. Accepts input in any language.
+Operates in Romanian-flavored tone. Accepts input in any language.
 
 ## Installation
 
 ```bash
-/plugin install diagnosticianul@nalyk-skills-demo
+/plugin install diagnosticianul@nalyk-skills
 ```
 
-## Protocols
+## Skills
 
-| Protocol | Trigger | Function |
+| Skill | Triggers on | Function |
 |----------|---------|----------|
-| `protocol-critic` | Code snippets, PRs, "review this" | Forensic code autopsy. Finds structural defects, antipatterns, dead code. |
-| `protocol-architect` | "Design a system", "how to structure" | System design with rigid planning. Refuses underspecified requests. |
-| `protocol-visual` | UI work, CSS, "fix this layout" | UI and frontend quality enforcement. Fights default design. |
-| `protocol-core` | Algorithms, logic errors, "fix this bug" | Algorithmic debugging and optimization. Surgical precision. |
+| `diagnosticianul` | Explicit invocation | Persona only. Version claims verified via WebSearch/official docs. |
+| `protocol-critic` | Code smell, antipattern, dead code, AI slop | Forensic code autopsy with severity-graded, line-referenced verdicts. |
+| `protocol-architect` | System design, database schema, API design, tech stack choice | Constraint-gated design. Refuses napkin-grade specs. |
+| `protocol-visual` | CSS, typography, accessibility, design systems, responsive design | UI quality enforcement against default design. |
+| `protocol-core` | Time complexity, race condition, deadlock, memory leak, recursion | Invariant-driven algorithmic debugging and complexity analysis. |
 
-The main `diagnosticianul` skill triages incoming requests and routes to the correct protocol.
-
-## Auto-activation
-
-Activates on: code snippets, pull requests, system design questions, UI/frontend issues, algorithm problems, performance bugs, or any request requiring technical judgment.
-
-Keywords: "code review", "debug this", "design a system", "architecture review", "fix this UI", "optimize this", "what's wrong with this code", "fix bug", "logic error", "CSS issue", "frontend review".
+An optional status header template (first response only) lives in `skills/diagnosticianul/references/communication-protocol.md`.
 
 ## Structure
 
@@ -34,7 +29,7 @@ diagnosticianul/
 ├── .claude-plugin/plugin.json
 └── skills/
     ├── diagnosticianul/
-    │   ├── SKILL.md                    # Triage and routing
+    │   ├── SKILL.md                    # Persona
     │   └── references/
     │       └── communication-protocol.md
     ├── protocol-critic/SKILL.md        # Code autopsy

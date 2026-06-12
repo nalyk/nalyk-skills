@@ -7,23 +7,23 @@ Personal Claude Code plugin marketplace. 10 plugins covering automation, orchest
 Add the marketplace:
 
 ```bash
-/plugin marketplace add nalyk/nalyk-skills-demo
+/plugin marketplace add nalyk/nalyk-skills
 ```
 
 Install individual plugins:
 
 ```bash
-/plugin install <plugin-name>@nalyk-skills-demo
+/plugin install <plugin-name>@nalyk-skills
 ```
 
 ## Plugins
 
-### auto-ralph (v2.0.0)
+### auto-ralph (v3.0.0)
 
-Deterministic Ralph Loop activation. A `UserPromptSubmit` hook scores every incoming task (0-4) and auto-invokes the Ralph Loop when the score hits the threshold.
+Gates imperative coding tasks (en/ro/ru) into Ralph Loops. A silent-by-default `UserPromptSubmit` hook flags matches; a deterministic 0-4 scorer routes score >= 3 to `/ralph-loop`.
 
 ```bash
-/plugin install auto-ralph@nalyk-skills-demo
+/plugin install auto-ralph@nalyk-skills
 ```
 
 **Triggers:** "ralph this", "auto ralph", "loop it" -- or auto-detects bug fixes, features, and refactoring tasks (score >= 3).
@@ -43,12 +43,12 @@ Output: Romanian. Input: ro/en/ru/mixed.
 
 ---
 
-### orchestrator (v1.0.0)
+### orchestrator (v2.0.0)
 
-Multi-agent task decomposition and parallel execution. Breaks complex tasks into workstreams, routes them to appropriate agents (Explore, Plan, general-purpose), and synthesizes results.
+Decomposes a task into parallel subagent workstreams, routes them to appropriate agents, and synthesizes results.
 
 ```bash
-/plugin install orchestrator@nalyk-skills-demo
+/plugin install orchestrator@nalyk-skills
 ```
 
 **Commands:**
@@ -65,12 +65,12 @@ Multi-agent task decomposition and parallel execution. Breaks complex tasks into
 
 ---
 
-### audit-agent (v1.0.0)
+### audit-agent (v2.1.0)
 
 Three audit frameworks: Steve Jobs (design simplification, 13 questions), George Carlin (BS detection, 13 questions), Vibe (engineering quality, 20 scored metrics).
 
 ```bash
-/plugin install audit-agent@nalyk-skills-demo
+/plugin install audit-agent@nalyk-skills
 ```
 
 **Commands:**
@@ -86,23 +86,23 @@ Three audit frameworks: Steve Jobs (design simplification, 13 questions), George
 
 ---
 
-### debate (v1.0.0)
+### debate (v2.0.0)
 
-Multi-model adversarial debate. Claude defends a position against external CLI models (Gemini, Codex, Qwen). Produces tradeoff documents when models disagree, exposing hidden assumptions.
+Multi-model adversarial debate. Claude defends a position against external CLI models (agy/Gemini, Codex, Qwen) in parallel rounds. Produces consensus, tradeoff documents, or ADRs.
 
 Refuses to run with Claude-only. Requires at least 1 external CLI.
 
 ```bash
-/plugin install debate@nalyk-skills-demo
+/plugin install debate@nalyk-skills
 ```
 
 **Prerequisites -- at least one:**
 
-| CLI | Install | Free Tier |
-|-----|---------|-----------|
-| Gemini | `npm i -g @google/gemini-cli` | 1000 req/day |
+| CLI | Install | Notes |
+|-----|---------|-------|
+| agy (Gemini models) | Antigravity CLI v1.0.7+, per vendor docs | pinned to a Gemini model; the legacy `gemini` CLI is dead/unsupported |
 | Codex | `npm i -g @openai/codex` | ChatGPT Plus |
-| Qwen | `npm i -g @qwen-code/qwen-code` | 2000 req/day |
+| Qwen | `npm i -g @qwen-code/qwen-code` | free tier 2000 req/day |
 
 **Commands:**
 
@@ -116,12 +116,12 @@ Refuses to run with Claude-only. Requires at least 1 external CLI.
 
 ---
 
-### diagnosticianul (v2026.1.0)
+### diagnosticianul (v2027.0.0)
 
 Elite Senior Principal Engineer persona. Four specialized diagnostic protocols for code review, system design, UI analysis, and algorithmic debugging. Romanian-flavored.
 
 ```bash
-/plugin install diagnosticianul@nalyk-skills-demo
+/plugin install diagnosticianul@nalyk-skills
 ```
 
 **Protocols:**
@@ -137,12 +137,12 @@ Elite Senior Principal Engineer persona. Four specialized diagnostic protocols f
 
 ---
 
-### organon (v1.0.0)
+### organon (v2.0.0)
 
-Philosophical reasoning engine. 62 principles from 20 philosophers applied as a decision engine and code review framework. Based on [Organon](https://gitlab.com/lightcyphers-open/organon) by Lightcyphers SRL.
+Philosophical reasoning engine. 63 principles (0-62) from 20 philosophers applied as a decision engine and code review framework. Based on [Organon](https://gitlab.com/lightcyphers-open/organon) by Lightcyphers SRL.
 
 ```bash
-/plugin install organon@nalyk-skills-demo
+/plugin install organon@nalyk-skills
 ```
 
 **Commands:**
@@ -161,18 +161,17 @@ Philosophical reasoning engine. 62 principles from 20 philosophers applied as a 
 
 ---
 
-### seo-skill (v2.2.0)
+### seo-skill (v3.0.0)
 
 Deterministic SEO analysis engine. 98 atomic checks across 7 categories, async multi-page crawler, real Core Web Vitals via PageSpeed Insights, internal link graph with PageRank, auto-fix generation, audit history with regression detection.
 
 ```bash
-/plugin install seo-skill@nalyk-skills-demo
+/plugin install seo-skill@nalyk-skills
 ```
 
-**Post-install -- Python dependencies:**
+**Post-install -- Python dependencies** (from the installed seo-skill plugin directory):
 
 ```bash
-cd ~/.claude/plugins/cache/nalyk-skills-demo/seo-skill/2.2.0
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
 ```
@@ -193,16 +192,16 @@ python3 -m venv .venv
 | `/seo history <url>` | Audit score history |
 | `/seo monitor setup` | Generate CI/CD configs (GitHub Actions, GitLab CI) |
 
-16 sub-skills, 7 parallel subagents, CI/CD integration.
+One orchestrator skill plus 7 specialist subagents, CI/CD integration.
 
 ---
 
-### flutter (v1.0.0)
+### flutter (v2.1.0)
 
-Expert-level Flutter and Dart development knowledge. Architecture decisions, state management (Riverpod, BLoC, Provider), project scaffolding, code templates, quality gates, CI/CD.
+Flutter/Dart development skill. Architecture scaffolds, Riverpod 3/BLoC state management, GoRouter, Freezed, testing, CI/CD quality gates. Version-agnostic snippets; triggers only on explicit Flutter/Dart signals.
 
 ```bash
-/plugin install flutter@nalyk-skills-demo
+/plugin install flutter@nalyk-skills
 ```
 
 No external dependencies. Knowledge plugin.
@@ -213,12 +212,12 @@ No external dependencies. Knowledge plugin.
 
 ---
 
-### openclaw (v1.1.0)
+### openclaw (v1.2.0)
 
-Deep expertise in OpenClaw (self-hosted multi-channel AI gateway). Complete knowledge from all 279 documentation pages. 14 reference files, ~1.4MB of indexed content.
+OpenClaw expert skill (self-hosted multi-channel AI gateway). Grep-first retrieval over a chrome-stripped 268-page docs corpus organized into 14 topic files.
 
 ```bash
-/plugin install openclaw@nalyk-skills-demo
+/plugin install openclaw@nalyk-skills
 ```
 
 No external dependencies. Knowledge plugin.
@@ -229,17 +228,17 @@ No external dependencies. Knowledge plugin.
 
 ---
 
-### statusline (v2.0.0)
+### statusline (v3.0.0)
 
 Powerline-style status bar for Claude Code. Shows model badge, git status, context window usage, vim mode.
 
 ```bash
-/plugin install statusline@nalyk-skills-demo
+/plugin install statusline@nalyk-skills
 ```
 
 **Requirements:** `jq`, terminal with Unicode support. Powerline font recommended.
 
-Auto-configures via `SessionStart` hook. No manual setup needed. Restart Claude Code after install.
+Auto-configures via `SessionStart` hook only when no statusLine is set; never overwrites an existing one. Restart Claude Code after install.
 
 ---
 

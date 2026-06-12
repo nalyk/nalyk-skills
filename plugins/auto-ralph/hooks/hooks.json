@@ -1,5 +1,5 @@
 {
-  "description": "auto-ralph v2.1 deterministic activation: SessionStart primes the model; UserPromptSubmit injects per-turn scoring gate via plain-stdout context injection.",
+  "description": "SessionStart emits a one-line notice; UserPromptSubmit flags imperative verbs / explicit triggers and stays silent otherwise.",
   "hooks": {
     "SessionStart": [
       {

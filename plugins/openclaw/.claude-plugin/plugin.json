@@ -1,7 +1,7 @@
 {
   "name": "openclaw",
-  "description": "ULTRA deep expertise in OpenClaw — complete knowledge from all 279 documentation pages covering architecture, channels, providers, tools, CLI, automation, platforms, and more",
-  "version": "1.1.0",
+  "description": "OpenClaw expert skill — self-hosted multi-channel AI agent gateway. Grep-first retrieval over a chrome-stripped 268-page docs corpus: channels, providers, gateway config, CLI, sandboxing, automation.",
+  "version": "1.2.0",
   "author": {
     "name": "nalyk"
   },

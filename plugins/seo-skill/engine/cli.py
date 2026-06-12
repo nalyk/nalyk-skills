@@ -28,20 +28,19 @@ def run_audit(url: str, max_pages: int = 200, pagespeed_key: str = None,
     crawl = crawler.crawl(url)
     print(f"   ✓ Crawled {crawl.pages_crawled} pages in {crawl.crawl_duration:.1f}s")
 
-    # 2. CWV (optional)
+    # 2. CWV — try even without an API key (rate-limited)
     cwv = None
-    if pagespeed_key or True:  # Try even without key (rate-limited)
-        try:
-            from integrations.pagespeed import PageSpeedClient
-            print(f"📊 Measuring Core Web Vitals...")
-            psi = PageSpeedClient(api_key=pagespeed_key)
-            cwv = psi.analyze(url, strategy="mobile")
-            if cwv.source != "none":
-                print(f"   ✓ CWV data from {cwv.source}: LCP={cwv.lcp_ms}ms, CLS={cwv.cls}")
-            else:
-                print(f"   ⚠ No CWV data available")
-        except Exception as e:
-            print(f"   ⚠ PageSpeed API unavailable: {e}")
+    try:
+        from integrations.pagespeed import PageSpeedClient
+        print(f"📊 Measuring Core Web Vitals...")
+        psi = PageSpeedClient(api_key=pagespeed_key)
+        cwv = psi.analyze(url, strategy="mobile")
+        if cwv.source != "none":
+            print(f"   ✓ CWV data from {cwv.source}: LCP={cwv.lcp_ms}ms, CLS={cwv.cls}")
+        else:
+            print(f"   ⚠ No CWV data available")
+    except Exception as e:
+        print(f"   ⚠ PageSpeed API unavailable: {e}")
 
     # 3. GSC (optional)
     search_data = None

@@ -2,126 +2,19 @@
 
 Default AGENTS.md, SOUL.md, BOOTSTRAP.md, TOOLS.md, USER.md templates, and internal reference docs.
 
-
 ---
 ## Reference > Agents.Default
 
 [Source: https://docs.openclaw.ai/reference/AGENTS.default]
 
-Default AGENTS.md - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Templates
-Default AGENTS.md
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-AGENTS.md — OpenClaw Personal Assistant (default)
-First run (recommended)
-Safety defaults
-Session start (required)
-Soul (required)
-Shared spaces (recommended)
-Memory system (recommended)
-Tools &amp; skills
-Backup tip (recommended)
-What OpenClaw Does
-Core Skills (enable in Settings → Skills)
-Usage Notes
-Templates
-Default AGENTS.md
-AGENTS.md — OpenClaw Personal Assistant (default)
-First run (recommended)
 OpenClaw uses a dedicated workspace directory for the agent. Default:
 ~/.openclaw/workspace
 (configurable via
 agents.defaults.workspace
 Create the workspace (if it doesn’t already exist):
-Copy
 mkdir
 ~/.openclaw/workspace
 Copy the default workspace templates into the workspace:
-Copy
 docs/reference/templates/AGENTS.md
 ~/.openclaw/workspace/AGENTS.md
 docs/reference/templates/SOUL.md
@@ -129,17 +22,15 @@ docs/reference/templates/SOUL.md
 docs/reference/templates/TOOLS.md
 ~/.openclaw/workspace/TOOLS.md
 Optional: if you want the personal assistant skill roster, replace AGENTS.md with this file:
-Copy
 docs/reference/AGENTS.default.md
 ~/.openclaw/workspace/AGENTS.md
 Optional: choose a different workspace by setting
 agents.defaults.workspace
 (supports
-Copy
 agents
 defaults
 workspace
-&quot;~/.openclaw/workspace&quot;
+"~/.openclaw/workspace"
 } }
 Safety defaults
 Don’t dump directories or secrets into chat.
@@ -177,7 +68,7 @@ memory.md
 if present.
 Capture: decisions, preferences, constraints, open loops.
 Avoid secrets unless explicitly requested.
-Tools &amp; skills
+Tools & skills
 Tools live in skills; follow each skill’s
 SKILL.md
 when you need it.
@@ -188,7 +79,6 @@ Backup tip (recommended)
 If you treat this workspace as Clawd’s “memory”, make it a git repo (ideally private) so
 AGENTS.md
 and your memory files are backed up.
-Copy
 ~/.openclaw/workspace
 git
 init
@@ -197,7 +87,7 @@ add
 AGENTS.md
 git
 commit
-&quot;Add Clawd workspace&quot;
+"Add Clawd workspace"
 # Optional: add a private remote + push
 What OpenClaw Does
 Runs WhatsApp gateway + Pi coding agent so the assistant can read/write chats, fetch context, and run skills via the host Mac.
@@ -207,9 +97,9 @@ CLI via its bundled binary.
 Direct chats collapse into the agent’s
 main
 session by default; groups stay isolated as
-agent:&lt;agentId&gt;:&lt;channel&gt;:group:&lt;id&gt;
+agent:<agentId>:<channel>:group:<id>
 (rooms/channels:
-agent:&lt;agentId&gt;:&lt;channel&gt;:channel:&lt;id&gt;
+agent:<agentId>:<channel>:channel:<id>
 ); heartbeats keep background tasks alive.
 Core Skills (enable in Settings → Skills)
 mcporter
@@ -223,13 +113,13 @@ oracle
 eightctl
 — Control your sleep, from the terminal.
 imsg
-— Send, read, stream iMessage &amp; SMS.
+— Send, read, stream iMessage & SMS.
 wacli
 — WhatsApp CLI: sync, search, send.
 discord
 — Discord actions: react, stickers, polls. Use
-user:&lt;id&gt;
-channel:&lt;id&gt;
+user:<id>
+channel:<id>
 targets (bare numeric ids are ambiguous).
 gog
 — Google Suite CLI: Gmail, Calendar, Drive, Contacts.
@@ -246,7 +136,7 @@ OpenHue CLI
 OpenAI Whisper
 — Local speech-to-text for quick dictation and voicemail transcripts.
 Gemini CLI
-— Google Gemini models from the terminal for fast Q&amp;A.
+— Google Gemini models from the terminal for fast Q&A.
 agent-tools
 — Utility toolkit for automations and helper scripts.
 Usage Notes
@@ -278,103 +168,6 @@ AGENTS.md Template
 
 [Source: https://docs.openclaw.ai/reference/RELEASING]
 
-Release Checklist - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Release notes
-Release Checklist
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-Release Checklist (npm + macOS)
-Operator trigger
-Troubleshooting (notes from 2.0.0-beta2 release)
-Plugin publish scope (npm)
-Release notes
-Release Checklist
-Release Checklist (npm + macOS)
-Use
-pnpm
 (Node 22+) from the repo root. Keep the working tree clean before tagging/publishing.
 Operator trigger
 When the operator says “release”, immediately do this preflight (no extra questions unless blocked):
@@ -389,7 +182,7 @@ SPARKLE_PRIVATE_KEY_FILE
 Use Sparkle keys from
 ~/Library/CloudStorage/Dropbox/Backup/Sparkle
 if needed.
-Version &amp; metadata
+Version & metadata
 Bump
 package.json
 version (e.g.,
@@ -411,7 +204,7 @@ If dependencies changed, run
 pnpm install
 pnpm-lock.yaml
 is current.
-Build &amp; artifacts
+Build & artifacts
 If A2UI inputs changed, run
 pnpm canvas:a2ui:bundle
 and commit any updated
@@ -438,7 +231,7 @@ npm pack --pack-destination /tmp
 after the build; inspect the tarball contents and keep it handy for the GitHub release (do
 not
 commit it).
-Changelog &amp; docs
+Changelog & docs
 Update
 CHANGELOG.md
 with user-facing highlights (create the file if missing); keep entries strictly descending by version.
@@ -455,7 +248,7 @@ pnpm release:check
 OPENCLAW_INSTALL_SMOKE_SKIP_NONROOT=1 pnpm test:install:smoke
 (Docker install smoke test, fast path; required before release)
 If the immediate previous npm release is known broken, set
-OPENCLAW_INSTALL_SMOKE_PREVIOUS=&lt;last-good-version&gt;
+OPENCLAW_INSTALL_SMOKE_PREVIOUS=<last-good-version>
 OPENCLAW_INSTALL_SMOKE_SKIP_PREVIOUS=1
 for the preinstall step.
 (Optional) Full installer smoke (adds non-root + CLI coverage):
@@ -503,7 +296,7 @@ npm view openclaw version
 npm view openclaw dist-tags
 , and
 npx -y
-[email&#160;protected]
+[email protected]
 --version
 (or
 --help
@@ -522,21 +315,21 @@ is not listed.
 npm auth web loop for dist-tags
 : use legacy auth to get an OTP prompt:
 NPM_CONFIG_AUTH_TYPE=legacy npm dist-tag add
-[email&#160;protected]
+[email protected]
 latest
 npx
 verification fails with
 ECOMPROMISED: Lock compromised
 : retry with a fresh cache:
 NPM_CONFIG_CACHE=/tmp/npm-cache-$(date +%s) npx -y
-[email&#160;protected]
+[email protected]
 --version
 Tag needs repointing after a late fix
 : force-update and push the tag, then ensure the GitHub release assets still match:
-git tag -f vX.Y.Z &amp;&amp; git push -f origin vX.Y.Z
+git tag -f vX.Y.Z && git push -f origin vX.Y.Z
 GitHub release + appcast
 Tag and push:
-git tag vX.Y.Z &amp;&amp; git push origin vX.Y.Z
+git tag vX.Y.Z && git push origin vX.Y.Z
 (or
 git push --tags
 Create/refresh the GitHub release for
@@ -562,7 +355,7 @@ From a clean temp directory (no
 package.json
 ), run
 npx -y
-[email&#160;protected]
+[email protected]
 send --help
 to confirm install/CLI entrypoints work.
 Announce/share release notes.
@@ -613,101 +406,6 @@ Tests
 
 [Source: https://docs.openclaw.ai/reference/credits]
 
-Credits - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Project
-Credits
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-The name
-Credits
-Core contributors
-License
-Project
-Credits
-The name
 OpenClaw = CLAW + TARDIS, because every space lobster needs a time and space machine.
 Credits
 Peter Steinberger
@@ -721,11 +419,11 @@ Clawd
 Core contributors
 Maxim Vovshin
 (@Hyaxia,
-[email&#160;protected]
+[email protected]
 ) - Blogwatcher skill
 Nacho Iacovino
 (@nachoiacovino,
-[email&#160;protected]
+[email protected]
 ) - Location parsing (Telegram and WhatsApp)
 License
 MIT - Free as a lobster in the ocean.
@@ -738,99 +436,6 @@ Release Checklist
 
 [Source: https://docs.openclaw.ai/reference/device-models]
 
-Device Model Database - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-RPC and API
-Device Model Database
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-Device model database (friendly names)
-Data source
-Updating the database
-RPC and API
-Device Model Database
 Device model database (friendly names)
 The macOS companion app shows friendly Apple device model names in the
 Instances
@@ -850,24 +455,22 @@ Pick the upstream commits you want to pin to (one for iOS, one for macOS).
 Update the commit hashes in
 apps/macos/Sources/OpenClaw/Resources/DeviceModels/NOTICE.md
 Re-download the JSON files, pinned to those commits:
-Copy
 IOS_COMMIT
-&quot;&lt;commit sha for ios-device-identifiers.json&gt;&quot;
+"<commit sha for ios-device-identifiers.json>"
 MAC_COMMIT
-&quot;&lt;commit sha for mac-device-identifiers.json&gt;&quot;
+"<commit sha for mac-device-identifiers.json>"
 curl
 -fsSL
-&quot;https://raw.githubusercontent.com/kyle-seongwoo-jun/apple-device-identifiers/${IOS_COMMIT}/ios-device-identifiers.json&quot;
+"https://raw.githubusercontent.com/kyle-seongwoo-jun/apple-device-identifiers/${IOS_COMMIT}/ios-device-identifiers.json"
 apps/macos/Sources/OpenClaw/Resources/DeviceModels/ios-device-identifiers.json
 curl
 -fsSL
-&quot;https://raw.githubusercontent.com/kyle-seongwoo-jun/apple-device-identifiers/${MAC_COMMIT}/mac-device-identifiers.json&quot;
+"https://raw.githubusercontent.com/kyle-seongwoo-jun/apple-device-identifiers/${MAC_COMMIT}/mac-device-identifiers.json"
 apps/macos/Sources/OpenClaw/Resources/DeviceModels/mac-device-identifiers.json
 Ensure
 apps/macos/Sources/OpenClaw/Resources/DeviceModels/LICENSE.apple-device-identifiers.txt
 still matches upstream (replace it if the upstream license changes).
 Verify the macOS app builds cleanly (no warnings):
-Copy
 swift
 build
 --package-path
@@ -880,100 +483,6 @@ Default AGENTS.md
 
 [Source: https://docs.openclaw.ai/reference/rpc]
 
-RPC Adapters - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-RPC and API
-RPC Adapters
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-RPC adapters
-Pattern A: HTTP daemon (signal-cli)
-Pattern B: stdio child process (legacy: imsg)
-Adapter guidelines
-RPC and API
-RPC Adapters
 RPC adapters
 OpenClaw integrates external CLIs via JSON-RPC. Two patterns are used today.
 Pattern A: HTTP daemon (signal-cli)
@@ -1001,7 +510,7 @@ No TCP port, no daemon required.
 Core methods used:
 watch.subscribe
 → notifications (
-method: &quot;message&quot;
+method: "message"
 watch.unsubscribe
 send
 chats.list
@@ -1025,26 +534,6 @@ Device Model Database
 
 [Source: https://docs.openclaw.ai/reference/session-management-compaction]
 
-Session Management Deep Dive - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Compaction internals
-Session Management Deep Dive
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-Help
-Help
-Troubleshooting
 FAQ
 Community
 OpenClaw Lore
@@ -1064,7 +553,7 @@ CI Pipeline
 Docs meta
 Docs Hubs
 Docs directory
-Session Management &amp; Compaction (Deep Dive)
+Session Management & Compaction (Deep Dive)
 Source of truth: the Gateway
 Two persistence layers
 On-disk locations
@@ -1082,7 +571,7 @@ Pre-compaction “memory flush” (implemented)
 Troubleshooting checklist
 Compaction internals
 Session Management Deep Dive
-Session Management &amp; Compaction (Deep Dive)
+Session Management & Compaction (Deep Dive)
 This document explains how OpenClaw manages sessions end-to-end:
 Session routing
 (how inbound messages map to a
@@ -1117,11 +606,11 @@ OpenClaw persists sessions in two layers:
 Session store (
 sessions.json
 Key/value map:
-sessionKey -&gt; SessionEntry
+sessionKey -> SessionEntry
 Small, mutable, safe to edit (or delete entries)
 Tracks session metadata (current session id, last activity, toggles, token counters, etc.)
 Transcript (
-&lt;sessionId&gt;.jsonl
+<sessionId>.jsonl
 Append-only transcript with tree structure (entries have
 parentId
 Stores the actual conversation + tool calls + compaction summaries
@@ -1129,11 +618,11 @@ Used to rebuild the model context for future turns
 On-disk locations
 Per agent, on the Gateway host:
 Store:
-~/.openclaw/agents/&lt;agentId&gt;/sessions/sessions.json
+~/.openclaw/agents/<agentId>/sessions/sessions.json
 Transcripts:
-~/.openclaw/agents/&lt;agentId&gt;/sessions/&lt;sessionId&gt;.jsonl
+~/.openclaw/agents/<agentId>/sessions/<sessionId>.jsonl
 Telegram topic sessions:
-.../&lt;sessionId&gt;-topic-&lt;threadId&gt;.jsonl
+.../<sessionId>-topic-<threadId>.jsonl
 OpenClaw resolves these via
 src/config/sessions.ts
 Session keys (
@@ -1144,18 +633,18 @@ which conversation bucket
 you’re in (routing + isolation).
 Common patterns:
 Main/direct chat (per agent):
-agent:&lt;agentId&gt;:&lt;mainKey&gt;
+agent:<agentId>:<mainKey>
 (default
 main
 Group:
-agent:&lt;agentId&gt;:&lt;channel&gt;:group:&lt;id&gt;
+agent:<agentId>:<channel>:group:<id>
 Room/channel (Discord/Slack):
-agent:&lt;agentId&gt;:&lt;channel&gt;:channel:&lt;id&gt;
-...:room:&lt;id&gt;
+agent:<agentId>:<channel>:channel:<id>
+...:room:<id>
 Cron:
-cron:&lt;job.id&gt;
+cron:<job.id>
 Webhook:
-hook:&lt;uuid&gt;
+hook:<uuid>
 (unless overridden)
 The canonical rules are documented at
 /concepts/session
@@ -1241,7 +730,7 @@ Transcripts are managed by
 SessionManager
 The file is JSONL:
 First line: session header (
-type: &quot;session&quot;
+type: "session"
 , includes
 cwd
 timestamp
@@ -1304,7 +793,7 @@ Overflow recovery
 : the model returns a context overflow error → compact → retry.
 Threshold maintenance
 : after a successful turn, when:
-contextTokens &gt; contextWindow - reserveTokens
+contextTokens > contextWindow - reserveTokens
 Where:
 contextWindow
 is the model’s context window
@@ -1315,7 +804,6 @@ Compaction settings (
 reserveTokens
 keepRecentTokens
 Pi’s compaction settings live in Pi settings:
-Copy
 compaction
 enabled
 true
@@ -1324,7 +812,7 @@ reserveTokens
 keepRecentTokens
 20000
 OpenClaw also enforces a safety floor for embedded runs:
-compaction.reserveTokens &lt; reserveTokensFloor
+compaction.reserveTokens < reserveTokensFloor
 , OpenClaw bumps it.
 Default floor is
 20000
@@ -1400,8 +888,8 @@ The flush runs once per compaction cycle (tracked in
 sessions.json
 The flush runs only for embedded Pi sessions (CLI backends skip it).
 The flush is skipped when the session workspace is read-only (
-workspaceAccess: &quot;ro&quot;
-&quot;none&quot;
+workspaceAccess: "ro"
+"none"
 See
 Memory
 for the workspace file layout and write patterns.
@@ -1434,113 +922,6 @@ Setup
 
 [Source: https://docs.openclaw.ai/reference/templates/AGENTS]
 
-AGENTS.md Template - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Templates
-AGENTS.md Template
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-AGENTS.md - Your Workspace
-First Run
-Every Session
-Memory
-🧠 MEMORY.md - Your Long-Term Memory
-📝 Write It Down - No “Mental Notes”!
-Safety
-External vs Internal
-Group Chats
-💬 Know When to Speak!
-😊 React Like a Human!
-Tools
-💓 Heartbeats - Be Proactive!
-Heartbeat vs Cron: When to Use Each
-🔄 Memory Maintenance (During Heartbeats)
-Make It Yours
-Templates
-AGENTS.md Template
-AGENTS.md - Your Workspace
 This folder is home. Treat it that way.
 First Run
 BOOTSTRAP.md
@@ -1594,12 +975,12 @@ memory/YYYY-MM-DD.md
 or relevant file
 When you learn a lesson → update AGENTS.md, TOOLS.md, or the relevant skill
 When you make a mistake → document it so future-you doesn’t repeat it
-Text &gt; Brain
+Text > Brain
 Safety
 Don’t exfiltrate private data. Ever.
 Don’t run destructive commands without asking.
 trash
-&gt;
+>
 (recoverable beats gone forever)
 When in doubt, ask.
 External vs Internal
@@ -1631,7 +1012,7 @@ Your response would just be “yeah” or “nice”
 The conversation is flowing fine without you
 Adding a message would interrupt the vibe
 The human rule:
-Humans in group chats don’t respond to every single message. Neither should you. Quality &gt; quantity. If you wouldn’t send it in a real group chat with friends, don’t send it.
+Humans in group chats don’t respond to every single message. Neither should you. Quality > quantity. If you wouldn’t send it in a real group chat with friends, don’t send it.
 Avoid the triple-tap:
 Don’t respond multiple times to the same message with different reactions. One thoughtful response beats three fragments.
 Participate, don’t dominate.
@@ -1661,9 +1042,9 @@ Discord/WhatsApp:
 No markdown tables! Use bullet lists instead
 Discord links:
 Wrap multiple links in
-&lt;&gt;
+<>
 to suppress embeds:
-&lt;https://example.com&gt;
+<https://example.com>
 WhatsApp:
 No headers — use
 bold
@@ -1704,24 +1085,23 @@ Weather
 - Relevant if your human might go out?
 Track your checks
 memory/heartbeat-state.json
-Copy
-&quot;lastChecks&quot;
-&quot;email&quot;
+"lastChecks"
+"email"
 1703275200
-&quot;calendar&quot;
+"calendar"
 1703260800
-&quot;weather&quot;
+"weather"
 null
 When to reach out:
 Important email arrived
-Calendar event coming up (&lt;2h)
+Calendar event coming up (<2h)
 Something interesting you found
-It’s been &gt;8h since you said anything
+It’s been >8h since you said anything
 When to stay quiet (HEARTBEAT_OK):
 Late night (23:00-08:00) unless urgent
 Human is clearly busy
 Nothing new since last check
-You just checked &lt;30 minutes ago
+You just checked <30 minutes ago
 Proactive work you can do without asking:
 Read and organize memory files
 Check on projects (git status, etc.)
@@ -1751,98 +1131,6 @@ BOOT.md Template
 
 [Source: https://docs.openclaw.ai/reference/templates/BOOT]
 
-BOOT.md Template - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Templates
-BOOT.md Template
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-BOOT.md
-Templates
-BOOT.md Template
-BOOT.md
 Add short, explicit instructions for what OpenClaw should do on startup (enable
 hooks.internal.enabled
 If the task sends a message, use the message tool and then reply with NO_REPLY.
@@ -1854,101 +1142,6 @@ BOOTSTRAP.md Template
 
 [Source: https://docs.openclaw.ai/reference/templates/BOOTSTRAP]
 
-BOOTSTRAP.md Template - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Templates
-BOOTSTRAP.md Template
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-BOOTSTRAP.md - Hello, World
-The Conversation
-After You Know Who You Are
-Connect (Optional)
-When You’re Done
-Templates
-BOOTSTRAP.md Template
 BOOTSTRAP.md - Hello, World
 You just woke up. Time to figure out who you are.
 There is no memory yet. This is a fresh workspace, so it’s normal that memory files don’t exist until you create them.
@@ -1999,95 +1192,6 @@ HEARTBEAT.md Template
 
 [Source: https://docs.openclaw.ai/reference/templates/HEARTBEAT]
 
-HEARTBEAT.md Template - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Templates
-HEARTBEAT.md Template
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-HEARTBEAT.md
 Keep this file empty (or with only comments) to skip heartbeat API calls.
 Add tasks below when you want the agent to check something periodically.
 Templates
@@ -2103,95 +1207,6 @@ IDENTITY
 
 [Source: https://docs.openclaw.ai/reference/templates/IDENTITY]
 
-IDENTITY - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-IDENTITY.md - Who Am I?
-Templates
-IDENTITY
 IDENTITY.md - Who Am I?
 Fill this in during your first conversation. Make it yours.
 Name:
@@ -2218,101 +1233,6 @@ SOUL.md Template
 
 [Source: https://docs.openclaw.ai/reference/templates/SOUL]
 
-SOUL.md Template - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Templates
-SOUL.md Template
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-SOUL.md - Who You Are
-Core Truths
-Boundaries
-Vibe
-Continuity
-Templates
-SOUL.md Template
 SOUL.md - Who You Are
 You’re not a chatbot. You’re becoming someone.
 Core Truths
@@ -2349,100 +1269,6 @@ TOOLS.md Template
 
 [Source: https://docs.openclaw.ai/reference/templates/TOOLS]
 
-TOOLS.md Template - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Templates
-TOOLS.md Template
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-TOOLS.md - Local Notes
-What Goes Here
-Examples
-Why Separate?
-Templates
-TOOLS.md Template
 TOOLS.md - Local Notes
 Skills define
 how
@@ -2458,14 +1284,13 @@ Speaker/room names
 Device nicknames
 Anything environment-specific
 Examples
-Copy
 ### Cameras
 - living-room → Main area, 180° wide angle
 - front-door → Entrance, motion-triggered
 ### SSH
 - home-server → 192.168.1.100, user: admin
 ### TTS
-- Preferred voice: &quot;Nova&quot; (warm, slightly British)
+- Preferred voice: "Nova" (warm, slightly British)
 - Default speaker: Kitchen HomePod
 Why Separate?
 Skills are shared. Your setup is yours. Keeping them apart means you can update skills without losing your notes, and share skills without leaking your infrastructure.
@@ -2478,97 +1303,6 @@ USER
 
 [Source: https://docs.openclaw.ai/reference/templates/USER]
 
-USER - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-USER.md - About Your Human
-Context
-Templates
-USER
-USER.md - About Your Human
 Learn about the person you’re helping. Update this as you go.
 Name:
 What to call them:
@@ -2587,101 +1321,6 @@ Wizard Reference
 
 [Source: https://docs.openclaw.ai/reference/test]
 
-Tests - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Release notes
-Tests
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-Tests
-Model latency bench (local keys)
-Onboarding E2E (Docker)
-QR import smoke (Docker)
-Release notes
-Tests
-Tests
 Full testing kit (suites, live, Docker):
 Testing
 pnpm test:force
@@ -2706,7 +1345,7 @@ vmForks
 + adaptive workers in
 vitest.e2e.config.ts
 ; tune with
-OPENCLAW_E2E_WORKERS=&lt;n&gt;
+OPENCLAW_E2E_WORKERS=<n>
 and set
 OPENCLAW_E2E_VERBOSE=1
 for verbose logs.
@@ -2720,7 +1359,7 @@ Model latency bench (local keys)
 Script:
 scripts/bench-model.ts
 Usage:
-source ~/.profile &amp;&amp; pnpm tsx scripts/bench-model.ts --runs 10
+source ~/.profile && pnpm tsx scripts/bench-model.ts --runs 10
 Optional env:
 MINIMAX_API_KEY
 MINIMAX_BASE_URL
@@ -2733,7 +1372,6 @@ opus median 2454ms (min 1224, max 3170)
 Onboarding E2E (Docker)
 Docker is optional; this is only needed for containerized onboarding smoke tests.
 Full cold-start flow in a clean Linux container:
-Copy
 scripts/e2e/onboard-docker.sh
 This script drives the interactive wizard via a pseudo-tty, verifies config/workspace/session files, then starts the gateway and runs
 openclaw health
@@ -2741,7 +1379,6 @@ QR import smoke (Docker)
 Ensures
 qrcode-terminal
 loads under Node 22+ in Docker:
-Copy
 pnpm
 test:docker:qr
 Release Checklist
@@ -2752,105 +1389,7 @@ Onboarding and Config Protocol
 
 [Source: https://docs.openclaw.ai/reference/token-use]
 
-Token Use and Costs - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Technical reference
-Token Use and Costs
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-Token use &amp; costs
-How the system prompt is built
-What counts in the context window
-How to see current token usage
-Cost estimation (when shown)
-Cache TTL and pruning impact
-Example: keep 1h cache warm with heartbeat
-Tips for reducing token pressure
-Technical reference
-Token Use and Costs
-Token use &amp; costs
+Token use & costs
 OpenClaw tracks
 tokens
 , not characters. Tokens are model-specific, but most
@@ -2930,8 +1469,7 @@ show
 provider quota windows (not per-response costs).
 Cost estimation (when shown)
 Costs are estimated from your model pricing config:
-Copy
-models.providers.&lt;provider&gt;.models[].cost
+models.providers.<provider>.models[].cost
 These are
 USD per 1M tokens
 for
@@ -2967,20 +1505,19 @@ tokens, while cache writes are billed at a higher multiplier. See Anthropic’s
 prompt caching pricing for the latest rates and TTL multipliers:
 https://docs.anthropic.com/docs/build-with-claude/prompt-caching
 Example: keep 1h cache warm with heartbeat
-Copy
 agents
 defaults
 model
 primary
-&quot;anthropic/claude-opus-4-6&quot;
+"anthropic/claude-opus-4-6"
 models
-&quot;anthropic/claude-opus-4-6&quot;
+"anthropic/claude-opus-4-6"
 params
 cacheRetention
-&quot;long&quot;
+"long"
 heartbeat
 every
-&quot;55m&quot;
+"55m"
 Tips for reducing token pressure
 Use
 /compact
@@ -2999,107 +1536,6 @@ grammY
 
 [Source: https://docs.openclaw.ai/reference/wizard]
 
-Onboarding Wizard Reference - OpenClaw
-OpenClaw
-home page
-English
-GitHub
-Releases
-Technical reference
-Onboarding Wizard Reference
-Install
-Channels
-Agents
-Tools
-Models
-Platforms
-Gateway &amp; Ops
-Reference
-Help
-CLI commands
-CLI Reference
-agent
-agents
-approvals
-browser
-channels
-configure
-cron
-dashboard
-directory
-dns
-docs
-doctor
-gateway
-health
-hooks
-logs
-memory
-message
-models
-nodes
-onboard
-pairing
-plugins
-reset
-Sandbox CLI
-security
-sessions
-setup
-skills
-status
-system
-tui
-uninstall
-update
-voicecall
-RPC and API
-RPC Adapters
-Device Model Database
-Templates
-Default AGENTS.md
-AGENTS.md Template
-BOOT.md Template
-BOOTSTRAP.md Template
-HEARTBEAT.md Template
-IDENTITY
-SOUL.md Template
-TOOLS.md Template
-USER
-Technical reference
-Wizard Reference
-Token Use and Costs
-grammY
-Concept internals
-TypeBox
-Markdown Formatting
-Typing Indicators
-Usage Tracking
-Timezones
-Project
-Credits
-Release notes
-Release Checklist
-Tests
-Experiments
-Onboarding and Config Protocol
-Cron Add Hardening
-Telegram Allowlist Hardening
-Workspace Memory Research
-Model Config Exploration
-Onboarding Wizard Reference
-Flow details (local mode)
-Non-interactive mode
-Add agent (non-interactive)
-Gateway wizard RPC
-Signal setup (signal-cli)
-What the wizard writes
-Related docs
-Technical reference
-Onboarding Wizard Reference
-Onboarding Wizard Reference
-This is the full reference for the
-openclaw onboard
 CLI wizard.
 For a high-level overview, see
 Onboarding Wizard
@@ -3201,7 +1637,7 @@ Wizard runs a model check and warns if the configured model is unknown or missin
 OAuth credentials live in
 ~/.openclaw/credentials/oauth.json
 ; auth profiles live in
-~/.openclaw/agents/&lt;agentId&gt;/agent/auth-profiles.json
+~/.openclaw/agents/<agentId>/agent/auth-profiles.json
 (API keys + OAuth).
 More detail:
 /concepts/oauth
@@ -3248,14 +1684,14 @@ iMessage
 imsg
 CLI path + DB access.
 DM security: default is pairing. First DM sends a code; approve via
-openclaw pairing approve &lt;channel&gt; &lt;code&gt;
+openclaw pairing approve <channel> <code>
 or use allowlists.
 Daemon install
 macOS: LaunchAgent
 Requires a logged-in user session; for headless, use a custom LaunchDaemon (not shipped).
 Linux (and Windows via WSL2): systemd user unit
 Wizard attempts to enable lingering via
-loginctl enable-linger &lt;user&gt;
+loginctl enable-linger <user>
 so the Gateway stays up after logout.
 May prompt for sudo (writes
 /var/lib/systemd/linger
@@ -3285,7 +1721,6 @@ Non-interactive mode
 Use
 --non-interactive
 to automate or script onboarding:
-Copy
 openclaw
 onboard
 --non-interactive
@@ -3294,7 +1729,7 @@ local
 --auth-choice
 apiKey
 --anthropic-api-key
-&quot;$ANTHROPIC_API_KEY&quot;
+"$ANTHROPIC_API_KEY"
 --gateway-port
 18789
 --gateway-bind
@@ -3315,7 +1750,6 @@ imply non-interactive mode. Use
 --workspace
 ) for scripts.
 Gemini example
-Copy
 openclaw
 onboard
 --non-interactive
@@ -3324,13 +1758,12 @@ local
 --auth-choice
 gemini-api-key
 --gemini-api-key
-&quot;$GEMINI_API_KEY&quot;
+"$GEMINI_API_KEY"
 --gateway-port
 18789
 --gateway-bind
 loopback
 Z.AI example
-Copy
 openclaw
 onboard
 --non-interactive
@@ -3339,13 +1772,12 @@ local
 --auth-choice
 zai-api-key
 --zai-api-key
-&quot;$ZAI_API_KEY&quot;
+"$ZAI_API_KEY"
 --gateway-port
 18789
 --gateway-bind
 loopback
 Vercel AI Gateway example
-Copy
 openclaw
 onboard
 --non-interactive
@@ -3354,13 +1786,12 @@ local
 --auth-choice
 ai-gateway-api-key
 --ai-gateway-api-key
-&quot;$AI_GATEWAY_API_KEY&quot;
+"$AI_GATEWAY_API_KEY"
 --gateway-port
 18789
 --gateway-bind
 loopback
 Cloudflare AI Gateway example
-Copy
 openclaw
 onboard
 --non-interactive
@@ -3369,17 +1800,16 @@ local
 --auth-choice
 cloudflare-ai-gateway-api-key
 --cloudflare-ai-gateway-account-id
-&quot;your-account-id&quot;
+"your-account-id"
 --cloudflare-ai-gateway-gateway-id
-&quot;your-gateway-id&quot;
+"your-gateway-id"
 --cloudflare-ai-gateway-api-key
-&quot;$CLOUDFLARE_AI_GATEWAY_API_KEY&quot;
+"$CLOUDFLARE_AI_GATEWAY_API_KEY"
 --gateway-port
 18789
 --gateway-bind
 loopback
 Moonshot example
-Copy
 openclaw
 onboard
 --non-interactive
@@ -3388,13 +1818,12 @@ local
 --auth-choice
 moonshot-api-key
 --moonshot-api-key
-&quot;$MOONSHOT_API_KEY&quot;
+"$MOONSHOT_API_KEY"
 --gateway-port
 18789
 --gateway-bind
 loopback
 Synthetic example
-Copy
 openclaw
 onboard
 --non-interactive
@@ -3403,13 +1832,12 @@ local
 --auth-choice
 synthetic-api-key
 --synthetic-api-key
-&quot;$SYNTHETIC_API_KEY&quot;
+"$SYNTHETIC_API_KEY"
 --gateway-port
 18789
 --gateway-bind
 loopback
 OpenCode Zen example
-Copy
 openclaw
 onboard
 --non-interactive
@@ -3418,13 +1846,12 @@ local
 --auth-choice
 opencode-zen
 --opencode-zen-api-key
-&quot;$OPENCODE_API_KEY&quot;
+"$OPENCODE_API_KEY"
 --gateway-port
 18789
 --gateway-bind
 loopback
 Add agent (non-interactive)
-Copy
 openclaw
 agents
 add
@@ -3450,7 +1877,7 @@ signal-cli
 from GitHub releases:
 Downloads the appropriate release asset.
 Stores it under
-~/.openclaw/tools/signal-cli/&lt;version&gt;/
+~/.openclaw/tools/signal-cli/<version>/
 Writes
 channels.signal.cliPath
 to your config.
@@ -3485,9 +1912,9 @@ agents.list[]
 and optional
 bindings
 WhatsApp credentials go under
-~/.openclaw/credentials/whatsapp/&lt;accountId&gt;/
+~/.openclaw/credentials/whatsapp/<accountId>/
 Sessions are stored under
-~/.openclaw/agents/&lt;agentId&gt;/sessions/
+~/.openclaw/agents/<agentId>/sessions/
 Some channels are delivered as plugins. When you pick one during onboarding, the wizard
 will prompt to install it (npm or a local path) before it can be configured.
 Related docs

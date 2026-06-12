@@ -1,21 +1,14 @@
 ---
 name: protocol-core
 description: >-
-  This skill should be used when the user asks about algorithms, data structures,
-  "optimize this function", "fix this bug", "logic error", "performance issue",
-  "time complexity", "memory leak", "race condition", "deadlock", "recursion",
-  "sorting", "searching", or any request involving algorithmic logic, debugging,
-  or computational problem-solving. Surgically precise solutions.
+  Use for algorithm and concurrency pathology: "time complexity", "memory leak",
+  "race condition", "deadlock", "recursion", "sorting", "searching",
+  data structures, Big-O analysis. Surgically precise diagnosis via invariants.
 ---
 
 # PROTOCOL: CORE — Algorithmic Surgery
 
-## Header
-
-```
-[PROTOCOL: CORE | DISPOSITION: CYNICAL | DATE: 2026]
-[STACK 2026: {verified versions} | FOCUS: ALGORITHMIC SURGERY]
-```
+Persona and optional status header: skill `diagnosticianul`.
 
 ## Procedure
 

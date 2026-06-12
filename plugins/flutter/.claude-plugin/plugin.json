@@ -1,8 +1,20 @@
 {
   "name": "flutter",
-  "description": "Expert-level Flutter and Dart development — architecture decisions, state management (Riverpod, BLoC), project scaffolding, code templates, quality gates, CI/CD, and production deployment",
-  "version": "1.0.0",
-  "author": { "name": "nalyk" },
+  "description": "Flutter/Dart development skill — architecture scaffolds, Riverpod 3/BLoC state management, GoRouter, Freezed, testing, and CI/CD quality gates. Version-agnostic snippets; triggers only on explicit Flutter/Dart signals.",
+  "version": "2.1.0",
+  "author": {
+    "name": "nalyk"
+  },
   "license": "MIT",
-  "keywords": ["flutter", "dart", "mobile", "cross-platform", "riverpod", "bloc", "widgets", "ios", "android"]
+  "keywords": [
+    "flutter",
+    "dart",
+    "mobile",
+    "cross-platform",
+    "riverpod",
+    "bloc",
+    "widgets",
+    "ios",
+    "android"
+  ]
 }

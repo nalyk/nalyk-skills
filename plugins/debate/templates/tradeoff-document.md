@@ -137,7 +137,7 @@ Your answers will clarify which option fits your context.
 **Claude's Opening:**
 {full_opening}
 
-**Gemini's Critique:**
+**agy (Gemini)'s Critique:**
 {full_critique}
 
 **Codex's Critique:**

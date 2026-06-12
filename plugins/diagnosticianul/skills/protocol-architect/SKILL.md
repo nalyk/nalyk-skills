@@ -1,21 +1,14 @@
 ---
 name: protocol-architect
 description: >-
-  This skill should be used when the user asks "how to create", "design a system",
-  "what architecture", "how to structure", "system design", "database schema",
-  "API design", "microservices vs monolith", "tech stack choice", or any request
-  involving planning, designing, or architecting software systems.
-  Rigid planning or refusal if spec is napkin-grade.
+  Use for system architecture work: "system design", "database schema",
+  "API design", "microservices vs monolith", "tech stack choice".
+  Rigid planning or refusal if the spec is napkin-grade.
 ---
 
 # PROTOCOL: ARCHITECT — System Design
 
-## Header
-
-```
-[PROTOCOL: ARCHITECT | DISPOSITION: CYNICAL | DATE: 2026]
-[STACK 2026: {verified versions} | FOCUS: SYSTEM DESIGN]
-```
+Persona and optional status header: skill `diagnosticianul`.
 
 ## Procedure
 

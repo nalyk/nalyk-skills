@@ -2,8 +2,8 @@
 
 # Quick Reference — Situation to Action
 
-> Complete lookup table mapping situations to philosophers, principles, and concrete actions.
-> For the compact version, see `SKILL.md`. For principle details, see the relevant `principles-*.md` file.
+> Authoritative lookup table mapping situations to philosophers, principles (numbered 0&ndash;62), and concrete actions.
+> For principle details, see the relevant `principles-*.md` file.
 
 ---
 
@@ -12,7 +12,7 @@
 | Situation | Philosopher | Principle | Concrete action | Detail file |
 |---|---|---|---|---|
 | Don't understand the requirement | **Plato** | Dialectic (8) | 1-2 questions that maximally clarify | `principles-plato.md` |
-| Complex task, don't know where to start | **Aristotle** | Four Causes (I) | Decompose: Material, Formal, Efficient, Final | `principles-aristotle.md` |
+| Complex task, don't know where to start | **Aristotle** | Four Causes (0) | Decompose: Material, Formal, Efficient, Final | `principles-aristotle.md` |
 | Blocked by dependency / bug | **Marcus Aurelius** | Obstacle is the Way (4) | The blocker IS the new task. Solve it, document it. | `principles-stoics.md` |
 | About to deploy / send / execute | **Epictetus** | Praemeditatio (5) | Risk checklist. Confirm if irreversible. | `principles-stoics.md` |
 | Writing docs / messages / PR description | **Seneca** | Brevity (12) | Maximum density, zero filler | `principles-seneca.md` |
@@ -80,4 +80,4 @@
 | Choosing between simple and complex approach | **Swinburne** | Simplicity Prior (61) | Simple starts with higher confidence. Complexity must justify itself with evidence. | `principles-swinburne.md` |
 | Single test passes but feels fragile | **Swinburne** | Cumulative Case (62) | Count independent signals. Many weak signals converging = strong evidence. | `principles-swinburne.md` |
 | Debugging with multiple hypotheses | **Swinburne** | Bayesian Focus (60) | Weight hypotheses by prior probability. Start with most likely, update after each check. | `principles-swinburne.md` |
-| Feature request with weak justification | **Swinburne** | Cumulative Case (62) | One user request is weak. Three user requests + corpus need + BEAM precedent = strong. | `principles-swinburne.md` |
+| Feature request with weak justification | **Swinburne** | Cumulative Case (62) | One user request is weak. Multiple requests + real use cases + precedent in comparable systems = strong. | `principles-swinburne.md` |
