@@ -1,6 +1,6 @@
 # nalyk-skills
 
-Personal Claude Code plugin marketplace. 10 plugins covering automation, orchestration, code review, debugging, multi-model debate, SEO analysis, Flutter development, OpenClaw infrastructure, and philosophical reasoning.
+Personal Claude Code plugin marketplace. 8 plugins covering automation, orchestration, code review, debugging, multi-model debate, SEO analysis, and philosophical reasoning.
 
 ## Installation
 
@@ -196,38 +196,6 @@ One orchestrator skill plus 7 specialist subagents, CI/CD integration.
 
 ---
 
-### flutter (v2.1.0)
-
-Flutter/Dart development skill. Architecture scaffolds, Riverpod 3/BLoC state management, GoRouter, Freezed, testing, CI/CD quality gates. Version-agnostic snippets; triggers only on explicit Flutter/Dart signals.
-
-```bash
-/plugin install flutter@nalyk-skills
-```
-
-No external dependencies. Knowledge plugin.
-
-**Auto-activates on:** explicit Flutter/Dart signals only — `pubspec.yaml` present, or Flutter, Dart, Riverpod, BLoC, GoRouter, iOS/Android Flutter build issues mentioned. Bare "mobile app" requests are intentionally not claimed.
-
-**Reference material:** ~2,250 lines covering architecture patterns, state management comparison, code templates, and quality gates.
-
----
-
-### openclaw (v1.2.0)
-
-OpenClaw expert skill (self-hosted multi-channel AI gateway). Grep-first retrieval over a chrome-stripped 268-page docs corpus organized into 14 topic files.
-
-```bash
-/plugin install openclaw@nalyk-skills
-```
-
-No external dependencies. Knowledge plugin.
-
-**Coverage:** Architecture, all 20+ channels (WhatsApp, Telegram, Discord, Slack, Signal, etc.), all model providers, all 44 CLI commands, installation methods, gateway configuration, security, sandboxing, automation, platform-specific guides.
-
-**Auto-activates on:** OpenClaw, `openclaw.json`, gateway setup, WhatsApp/Telegram/Discord bot integration, pi-mono, ClawHub.
-
----
-
 ### statusline (v3.0.0)
 
 Powerline-style status bar for Claude Code. Shows model badge, git status, context window usage, vim mode.
@@ -241,31 +209,6 @@ Powerline-style status bar for Claude Code. Shows model badge, git status, conte
 Auto-configures via `SessionStart` hook only when no statusLine is set; never overwrites an existing one. Restart Claude Code after install.
 
 ---
-
-## Scripts
-
-### scripts/enable-session-memory.py
-
-Enables the unreleased Claude Code Session Memory feature by modifying local feature flags in `~/.claude.json`.
-
-```bash
-python3 scripts/enable-session-memory.py
-# Restart Claude Code after running
-```
-
-**What it sets:**
-
-| Setting | Server Default | Script Sets |
-|---------|---------------|-------------|
-| First trigger | 140,000 tokens | 10,000 tokens |
-| Update interval | 10,000 tokens | 5,000 tokens |
-| Tool call trigger | 5 calls | 3 calls |
-
-Storage: `~/.claude/projects/{project}/{session-id}/session-memory/summary.md`
-
-The server may reset these flags on sync. Re-run if session memory stops working.
-
-Source: [decodeclaude.com/session-memory](https://decodeclaude.com/session-memory/)
 
 ## Plugin Details
 
