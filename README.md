@@ -210,31 +210,6 @@ Auto-configures via `SessionStart` hook only when no statusLine is set; never ov
 
 ---
 
-## Scripts
-
-### scripts/enable-session-memory.py
-
-Enables the unreleased Claude Code Session Memory feature by modifying local feature flags in `~/.claude.json`.
-
-```bash
-python3 scripts/enable-session-memory.py
-# Restart Claude Code after running
-```
-
-**What it sets:**
-
-| Setting | Server Default | Script Sets |
-|---------|---------------|-------------|
-| First trigger | 140,000 tokens | 10,000 tokens |
-| Update interval | 10,000 tokens | 5,000 tokens |
-| Tool call trigger | 5 calls | 3 calls |
-
-Storage: `~/.claude/projects/{project}/{session-id}/session-memory/summary.md`
-
-The server may reset these flags on sync. Re-run if session memory stops working.
-
-Source: [decodeclaude.com/session-memory](https://decodeclaude.com/session-memory/)
-
 ## Plugin Details
 
 See individual plugin READMEs in `plugins/<name>/` for full documentation.
