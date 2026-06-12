@@ -83,23 +83,6 @@
       "category": "ui"
     },
     {
-      "name": "openclaw",
-      "source": "./plugins/openclaw",
-      "description": "OpenClaw expert skill — self-hosted multi-channel AI agent gateway. Grep-first retrieval over a chrome-stripped 268-page docs corpus: channels, providers, gateway config, CLI, sandboxing, automation.",
-      "version": "1.2.0",
-      "keywords": [
-        "openclaw",
-        "ai-gateway",
-        "whatsapp",
-        "telegram",
-        "discord",
-        "multi-channel",
-        "self-hosted",
-        "agents"
-      ],
-      "category": "knowledge"
-    },
-    {
       "name": "diagnosticianul",
       "source": "./plugins/diagnosticianul",
       "description": "Dr. House engineering persona plus four diagnostic protocol skills: critic (code autopsy), architect (system design), visual (UI/CSS/accessibility), core (algorithms/concurrency). Each protocol triggers on its own noun domain.",
@@ -115,24 +98,6 @@
         "senior-engineer"
       ],
       "category": "productivity"
-    },
-    {
-      "name": "flutter",
-      "source": "./plugins/flutter",
-      "description": "Flutter/Dart development skill — architecture scaffolds, Riverpod 3/BLoC state management, GoRouter, Freezed, testing, and CI/CD quality gates. Version-agnostic snippets; triggers only on explicit Flutter/Dart signals.",
-      "version": "2.1.0",
-      "keywords": [
-        "flutter",
-        "dart",
-        "mobile",
-        "cross-platform",
-        "riverpod",
-        "bloc",
-        "widgets",
-        "ios",
-        "android"
-      ],
-      "category": "knowledge"
     },
     {
       "name": "organon",
