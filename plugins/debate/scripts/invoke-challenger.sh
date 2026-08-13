@@ -24,10 +24,14 @@ if ! cd "$WORKSPACE" 2>/dev/null; then
 fi
 
 # Persona isolation: agy reads GEMINI.md from CWD but may also ingest a
-# workspace AGENTS.md (the Codex persona). The workspace therefore keeps the
-# agy persona in its own subdir: WORKSPACE/agy/GEMINI.md.
+# workspace AGENTS.md (the Codex persona); vibe reads AGENTS.md directly from
+# CWD — the SAME filename codex reads. Each therefore keeps its persona in its
+# own subdir and runs from there: WORKSPACE/agy/GEMINI.md for agy,
+# WORKSPACE/vibe/AGENTS.md for vibe.
 if [ "$CLI_NAME" = "agy" ] && [ -d "$WORKSPACE/agy" ]; then
     cd "$WORKSPACE/agy" || { fail_json "error" "agy_subdir_unreadable"; exit 0; }
+elif [ "$CLI_NAME" = "vibe" ] && [ -d "$WORKSPACE/vibe" ]; then
+    cd "$WORKSPACE/vibe" || { fail_json "error" "vibe_subdir_unreadable"; exit 0; }
 fi
 
 OUT="$(mktemp "/tmp/debate-${CLI_NAME}-out.XXXXXX")"
@@ -50,8 +54,8 @@ case "$CLI_NAME" in
             --full-auto --skip-git-repo-check \
             >"$OUT" 2>"$ERR" || RC=$?
         ;;
-    qwen)
-        timeout "$TIMEOUT" qwen -p "$PROMPT" -y \
+    vibe)
+        timeout "$TIMEOUT" vibe --prompt "$PROMPT" --yolo --trust \
             >"$OUT" 2>"$ERR" || RC=$?
         ;;
     *)

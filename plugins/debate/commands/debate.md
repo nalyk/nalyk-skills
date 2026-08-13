@@ -1,5 +1,5 @@
 ---
-description: "Multi-model adversarial debate. Claude defends a position against external CLI models (agy/Gemini, Codex, Qwen). Usage: /debate <topic>"
+description: "Multi-model adversarial debate. Claude defends a position against external CLI models (agy/Gemini, Codex, Mistral Vibe). Usage: /debate <topic>"
 argument-hint: "<topic to debate - question, decision, code, architecture, anything>"
 allowed-tools: Bash, Task, Read, Write, Glob, Grep, TodoWrite, Skill
 ---
@@ -34,30 +34,30 @@ if [ -f "$CACHE" ] && [ -n "$(find "$CACHE" -mmin -1440 2>/dev/null)" ]; then
     CHALLENGERS=$(tr '\n' ' ' < "$CACHE")
 else
     CHALLENGERS=""
-    for c in agy codex qwen; do command -v "$c" >/dev/null 2>&1 && CHALLENGERS="$CHALLENGERS$c "; done
+    for c in agy codex vibe; do command -v "$c" >/dev/null 2>&1 && CHALLENGERS="$CHALLENGERS$c "; done
 fi
 COUNT=$(echo "$CHALLENGERS" | wc -w)
 
-# Workspace: debates/NNN-slug/ (agy gets its own subdir for persona isolation)
+# Workspace: debates/NNN-slug/ (agy and vibe get their own subdirs for persona isolation)
 mkdir -p debates
 LAST=$(ls debates 2>/dev/null | grep -E '^[0-9]{3}-' | sort | tail -1 | cut -c1-3 || true)
 NEXT=$(printf '%03d' $((10#${LAST:-0} + 1)))
 WORKSPACE_PATH="$(pwd)/debates/${NEXT}-${SLUG}"
-mkdir -p "$WORKSPACE_PATH/rounds" "$WORKSPACE_PATH/agy"
+mkdir -p "$WORKSPACE_PATH/rounds" "$WORKSPACE_PATH/agy" "$WORKSPACE_PATH/vibe"
 
 echo "CHALLENGERS=$CHALLENGERS"; echo "COUNT=$COUNT"
 echo "TIMEOUT_PER_CLI=$TIMEOUT_PER_CLI"; echo "MAX_ROUNDS=$MAX_ROUNDS"
 echo "WORKSPACE_PATH=$WORKSPACE_PATH"
 ```
 
-**If COUNT=0: STOP.** Output: "DEBATE ABORTED: no external challengers. Claude debating itself is theater. Run /debate:doctor and install at least one CLI (agy/codex/qwen)." Do not proceed.
+**If COUNT=0: STOP.** Output: "DEBATE ABORTED: no external challengers. Claude debating itself is theater. Run /debate:doctor and install at least one CLI (agy/codex/vibe)." Do not proceed.
 
 Otherwise show a one-line banner: `(DEBATE) topic | challengers: <list> | max rounds: <N>` — then generate personas:
 
 **Invoke the `debate-persona-generator` skill** with TOPIC, detected DOMAIN, and WORKSPACE_PATH. It must write three DISTINCT persona files:
 - `$WORKSPACE_PATH/agy/GEMINI.md` (Architect — read by agy)
 - `$WORKSPACE_PATH/AGENTS.md` (Operator — read by codex)
-- `$WORKSPACE_PATH/QWEN.md` (Adversary — read by qwen)
+- `$WORKSPACE_PATH/vibe/AGENTS.md` (Adversary — read by vibe)
 
 Only write files for available challengers. Verify each file exists before Phase 1.
 
@@ -103,7 +103,7 @@ Each result is a JSON envelope `{model, status, output|error, stderr_tail}` (als
 Display per challenger:
 
 ```
-### agy (Gemini) says: / ### codex says: / ### qwen says:
+### agy (Gemini) says: / ### codex says: / ### vibe says:
 Verdict / Critique / Evidence / Alternative / Assumptions challenged
 ```
 
@@ -115,7 +115,7 @@ Verdict / Critique / Evidence / Alternative / Assumptions challenged
 |------------|---------|--------------------|-----------|
 | agy | | | |
 | codex | | | |
-| qwen | | | |
+| vibe | | | |
 
 Rules:
 - All AGREE (high confidence) → Phase 8 fast exit
@@ -135,7 +135,7 @@ For each blocking critique: ACCEPT (update position, explain) / PARTIALLY ACCEPT
 
 For each challenger whose critique you REJECTED, the prompts now differ — dispatch the challenger agents IN PARALLEL (all Task calls in ONE message):
 
-- Agents: `challenger-agy`, `challenger-codex`, `challenger-qwen`
+- Agents: `challenger-agy`, `challenger-codex`, `challenger-vibe`
 - Pass each: `WORKSPACE_PATH`, `TIMEOUT_PER_CLI`, `ROUND`, and a PROMPT containing their original critique + Claude's response + the question: "ACCEPT / MAINTAIN (why) / ESCALATE (clarify)"
 
 ACCEPT → resolved. MAINTAIN → log disagreement. ESCALATE → back to Phase 4 with the clarified critique.

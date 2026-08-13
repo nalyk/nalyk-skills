@@ -2,7 +2,7 @@
 name: debate
 description: >-
   Multi-model adversarial debate: Claude defends a position against external
-  CLI models (agy/Gemini, Codex, Qwen). Trigger on "debate this", "challenge
+  CLI models (agy/Gemini, Codex, Mistral Vibe). Trigger on "debate this", "challenge
   my thinking", "devil's advocate", "stress test this idea", "second opinion
   from other models", "what am I missing".
 ---
@@ -25,7 +25,7 @@ Claude forms a position, then external AI models challenge it through structured
 |-----|-------|-----------------------------------|
 | `agy` | Gemini (Antigravity CLI, pinned to a Gemini model) | `agy/GEMINI.md` |
 | `codex` | GPT (ChatGPT Plus) | `AGENTS.md` |
-| `qwen` | Qwen | `QWEN.md` |
+| `vibe` | Mistral Vibe | `vibe/AGENTS.md` |
 
 The legacy `gemini` CLI is dead; a resolving binary is a stale shim. Use `agy`.
 

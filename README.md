@@ -86,7 +86,7 @@ Three audit frameworks: Steve Jobs (design simplification, 13 questions), George
 
 ### debate (v2.0.0)
 
-Multi-model adversarial debate. Claude defends a position against external CLI models (agy/Gemini, Codex, Qwen) in parallel rounds. Produces consensus, tradeoff documents, or ADRs.
+Multi-model adversarial debate. Claude defends a position against external CLI models (agy/Gemini, Codex, Mistral Vibe) in parallel rounds. Produces consensus, tradeoff documents, or ADRs.
 
 Refuses to run with Claude-only. Requires at least 1 external CLI.
 
@@ -100,7 +100,7 @@ Refuses to run with Claude-only. Requires at least 1 external CLI.
 |-----|---------|-------|
 | agy (Gemini models) | Antigravity CLI v1.0.7+, per vendor docs | pinned to a Gemini model; the legacy `gemini` CLI is dead/unsupported |
 | Codex | `npm i -g @openai/codex` | ChatGPT Plus |
-| Qwen | `npm i -g @qwen-code/qwen-code` | free tier 2000 req/day |
+| Mistral Vibe (Devstral) | `curl -LsSf https://mistral.ai/vibe/install.sh \| bash` | then `vibe --setup`; free API key at console.mistral.ai |
 
 **Commands:**
 

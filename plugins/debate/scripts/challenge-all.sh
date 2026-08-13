@@ -19,7 +19,7 @@ CLIS=""
 if [ -f "$CACHE" ] && [ -n "$(find "$CACHE" -mmin -1440 2>/dev/null)" ]; then
     CLIS="$(cat "$CACHE")"
 else
-    for c in agy codex qwen; do
+    for c in agy codex vibe; do
         if command -v "$c" >/dev/null 2>&1; then
             CLIS="${CLIS}${c}
 "

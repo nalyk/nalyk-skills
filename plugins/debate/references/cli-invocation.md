@@ -6,13 +6,13 @@
 debates/NNN-topic-slug/            <- debate workspace
 ├── agy/GEMINI.md   --> agy reads at process start (Architect persona)
 ├── AGENTS.md       --> codex reads at process start (Operator persona)
-├── QWEN.md         --> qwen reads at process start (Adversary persona)
+├── vibe/AGENTS.md  --> vibe reads at process start (Adversary persona)
 └── rounds/rNNN_<cli>.json         <- per-round result envelopes
 ```
 
 Each CLI loads its context file **at process initialization from CWD**, so every invocation must run from the workspace. The scripts handle this — never hand-roll inline per-CLI bash.
 
-**Persona isolation:** agy reads `GEMINI.md` from CWD, but it may also ingest a CWD `AGENTS.md` (the Codex persona). The agy persona therefore lives in the `agy/` subdir, and `invoke-challenger.sh` runs agy from there.
+**Persona isolation:** BOTH agy and vibe isolate in a subdir. agy reads `GEMINI.md` from CWD, but it may also ingest a CWD `AGENTS.md` (the Codex persona). vibe reads `AGENTS.md` DIRECTLY — the SAME filename codex reads — loading the first `AGENTS.md` found walking up from CWD. So each Adversary/Architect persona lives in its own subdir: the agy persona in the `agy/` subdir, the vibe persona in `vibe/AGENTS.md`, and `invoke-challenger.sh` runs each CLI from its own subdir.
 
 ## Supported CLIs
 
@@ -20,7 +20,7 @@ Each CLI loads its context file **at process initialization from CWD**, so every
 |-----|----------|--------------|---------------------|
 | `agy` | Gemini (Antigravity CLI v1.0.7+) | `agy/GEMINI.md` | `agy -p "<prompt>" --dangerously-skip-permissions --print-timeout <s> --model "Gemini 3.5 Flash (High)"` |
 | `codex` | GPT (ChatGPT Plus) | `AGENTS.md` | `codex exec "<prompt>" --full-auto --skip-git-repo-check` (TUI output needs file redirect) |
-| `qwen` | Qwen (free tier 2000 req/day) | `QWEN.md` | `qwen -p "<prompt>" -y` (auto-approval) |
+| `vibe` | Mistral (Devstral) | `vibe/AGENTS.md` | `vibe --prompt "<prompt>" --yolo --trust` |
 
 ### agy notes (Gemini replacement)
 
@@ -29,6 +29,15 @@ Each CLI loads its context file **at process initialization from CWD**, so every
 - agy also serves **Claude** models. ALWAYS pin `--model` to a Gemini tier (`"Gemini 3.5 Flash (High)"`), otherwise the debate becomes Claude-debates-Claude.
 - No auth subcommand. Health probe:
   `timeout 60 agy -p "respond with exactly: DEBATE_AUTH_OK" --dangerously-skip-permissions | grep -q DEBATE_AUTH_OK`
+
+### vibe notes (Mistral Vibe — Adversary challenger)
+
+- vibe reads `AGENTS.md` from CWD — the **same file codex reads** — so its persona lives in the `vibe/` subdir (`vibe/AGENTS.md`) and `invoke-challenger.sh` runs vibe from there.
+- `--trust` is **REQUIRED**: a fresh workspace dir is untrusted by default, and vibe only loads a project `AGENTS.md` inside trusted folders — without it the persona silently does NOT load and vibe returns generic responses.
+- Do NOT pin `--model`: vibe serves ONLY Mistral models (default Devstral / Mistral Medium), so unlike agy there is no Claude-contamination risk to guard against.
+- A global `~/.vibe/AGENTS.md`, if the user has one, is also loaded (a caveat, same class as the agy/codex globals).
+- Health probe:
+  `timeout 60 vibe --prompt "respond with exactly: DEBATE_AUTH_OK" --yolo --trust | grep -q DEBATE_AUTH_OK`
 
 ## The Scripts (single source of truth)
 
@@ -80,7 +89,7 @@ If the CLI returns plain text instead of JSON, treat the whole `output` as the c
 
 ## Troubleshooting
 
-- **Generic-assistant responses (persona not loaded):** the CLI did not run from the workspace. Use the scripts; verify the persona files exist (`agy/GEMINI.md`, `AGENTS.md`, `QWEN.md`).
+- **Generic-assistant responses (persona not loaded):** the CLI did not run from the workspace. Use the scripts; verify the persona files exist (`agy/GEMINI.md`, `AGENTS.md`, `vibe/AGENTS.md`).
 - **All challengers give the same critique:** persona files are not distinct — regenerate with the `debate-persona-generator` skill.
-- **status=not_found:** install the CLI (codex: `npm i -g @openai/codex`; qwen: `npm i -g @qwen-code/qwen-code`; agy: per vendor docs).
-- **status=error with auth-ish stderr_tail:** run `/debate:doctor`; authenticate (codex: `codex auth`, qwen: `qwen auth login`; agy authenticates via its own first-run flow).
+- **status=not_found:** install the CLI (codex: `npm i -g @openai/codex`; vibe: `curl -LsSf https://mistral.ai/vibe/install.sh | bash`; agy: per vendor docs).
+- **status=error with auth-ish stderr_tail:** run `/debate:doctor`; authenticate (codex: `codex auth`, vibe: `vibe --setup`; agy authenticates via its own first-run flow).

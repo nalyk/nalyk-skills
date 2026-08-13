@@ -143,7 +143,7 @@ Your answers will clarify which option fits your context.
 **Codex's Critique:**
 {full_critique}
 
-**Qwen's Critique:**
+**Vibe's Critique:**
 {full_critique}
 
 ### Round 2: Claude's Response

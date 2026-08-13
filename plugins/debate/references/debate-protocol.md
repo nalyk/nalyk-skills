@@ -6,11 +6,11 @@ Hybrid protocol: **parallel first, sequential if needed**. `commands/debate.md` 
 Phase 0: PREFLIGHT + WORKSPACE + PERSONAS
     ├── Read ~/.claude/debate.local.md (timeout_per_cli, max_rounds; defaults 120/5)
     ├── Challengers: /tmp/debate-available-challengers if <24h old,
-    │   else inline `command -v agy|codex|qwen` fallback (no abort on stale cache)
+    │   else inline `command -v agy|codex|vibe` fallback (no abort on stale cache)
     ├── 0 challengers -> ABORT (Claude-only debate is theater)
     ├── Create debates/NNN-slug/{rounds/,agy/}
     └── debate-persona-generator skill writes DISTINCT personas:
-        agy/GEMINI.md (Architect), AGENTS.md (Operator), QWEN.md (Adversary)
+        agy/GEMINI.md (Architect), AGENTS.md (Operator), vibe/AGENTS.md (Adversary)
           |
 Phase 1: CLAUDE'S OPENING (position, reasoning, confidence, weaknesses, assumptions)
           |
@@ -25,7 +25,7 @@ Phase 3: CONSENSUS CHECK
 Phase 4: CLAUDE RESPONDS (accept / partially accept / reject; track v1 -> v2 -> ...)
           |
 Phase 5: CHALLENGER REBUTTAL (prompts now differ per challenger)
-    └── Dispatch challenger-agy / challenger-codex / challenger-qwen agents
+    └── Dispatch challenger-agy / challenger-codex / challenger-vibe agents
         IN PARALLEL (all Task calls in ONE message), each gets WORKSPACE_PATH,
         TIMEOUT_PER_CLI and its own prompt; agents run invoke-challenger.sh.
         Replies: ACCEPT (resolved) / MAINTAIN (log) / ESCALATE (back to Phase 4)
@@ -43,7 +43,7 @@ Phase 8: FINAL OUTPUT (consensus summary OR tradeoff document)
 |--------------|-----|-------------|---------|
 | `agy/GEMINI.md` | agy (Gemini) | **Architect** | Scaling, complexity, design flaws |
 | `AGENTS.md` | codex | **Operator** | Maintenance, failure modes, debugging |
-| `QWEN.md` | qwen | **Adversary** | Security, edge cases, abuse scenarios |
+| `vibe/AGENTS.md` | vibe | **Adversary** | Security, edge cases, abuse scenarios |
 
 Personas are written ONCE at debate start and never modified mid-debate — each CLI re-reads its file on every invocation (fresh process), giving a stable expert identity across rounds.
 

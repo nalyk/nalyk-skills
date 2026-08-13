@@ -52,7 +52,7 @@ Claude initially proposed:
 - Verdict: {agree/partial/disagree}
 - Strength: {strong/moderate/minor}
 
-**From Qwen:**
+**From Vibe:**
 - {key critique point}
 - Verdict: {agree/partial/disagree}
 - Strength: {strong/moderate/minor}
@@ -186,7 +186,7 @@ Revisit this decision if:
 **Codex:**
 {full JSON response}
 
-**Qwen:**
+**Vibe:**
 {full JSON response}
 
 ### Phase 3+: Confrontation Rounds

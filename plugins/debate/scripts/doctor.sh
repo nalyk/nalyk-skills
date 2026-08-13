@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # doctor.sh — debate system health check.
-# Detects challenger CLIs (agy, codex, qwen), probes authentication with a
+# Detects challenger CLIs (agy, codex, vibe), probes authentication with a
 # live round-trip, prints one parametric status block, and caches the working
 # challenger list to /tmp/debate-available-challengers.
 #
@@ -43,8 +43,8 @@ probe_codex() {
     return "$rc"
 }
 
-probe_qwen() {
-    timeout 60 qwen -p "respond with exactly: DEBATE_AUTH_OK" -y 2>/dev/null \
+probe_vibe() {
+    timeout 60 vibe --prompt "respond with exactly: DEBATE_AUTH_OK" --yolo --trust 2>/dev/null \
         | grep -q "DEBATE_AUTH_OK"
 }
 
@@ -52,7 +52,7 @@ echo "=== DEBATE SYSTEM DIAGNOSTIC ==="
 echo "Probing challengers (live auth round-trip, up to 60s each)..."
 probe agy   probe_agy
 probe codex probe_codex
-probe qwen  probe_qwen
+probe vibe  probe_vibe
 
 COUNT="$(echo "$AVAILABLE" | grep -c .)" || COUNT=0
 LIST="$(echo "$AVAILABLE" | tr '\n' ' ' | sed 's/ *$//')"
@@ -81,7 +81,7 @@ Install and authenticate at least ONE challenger:
   agy    Antigravity CLI v1.0.7+ (Gemini models) - install per vendor docs,
          must be on PATH as 'agy'. Probe: agy -p "..." --dangerously-skip-permissions
   codex  npm i -g @openai/codex          then: codex auth   (ChatGPT Plus)
-  qwen   npm i -g @qwen-code/qwen-code   then: qwen auth login (free tier)
+  vibe   curl -LsSf https://mistral.ai/vibe/install.sh | bash   then: vibe --setup (free key: console.mistral.ai)
 
 Then re-run /debate:doctor.
 EOF

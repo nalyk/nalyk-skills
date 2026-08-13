@@ -8,7 +8,7 @@ Multi-model adversarial debate plugin for Claude Code. Claude forms a position; 
 |-----|----------|-------|
 | `agy` | Gemini | Antigravity CLI v1.0.7+, pinned to a Gemini model. The legacy `gemini` CLI is dead — a resolving binary is a stale shim. |
 | `codex` | GPT | `npm i -g @openai/codex`, then `codex auth` (ChatGPT Plus) |
-| `qwen` | Qwen | `npm i -g @qwen-code/qwen-code`, then `qwen auth login` (free: 2000 req/day) |
+| `vibe` | Mistral Vibe (Devstral) | `curl -LsSf https://mistral.ai/vibe/install.sh \| bash`, then `vibe --setup` (free API key: console.mistral.ai) |
 
 Minimum: 1 working challenger. Check with `/debate:doctor`.
 
@@ -22,7 +22,7 @@ Minimum: 1 working challenger. Check with `/debate:doctor`.
 
 ## How It Works
 
-1. **Workspace + personas** — `debates/NNN-slug/` is created; the `debate-persona-generator` skill writes three distinct expert personas as CLI context files: `agy/GEMINI.md` (Architect), `AGENTS.md` (Operator), `QWEN.md` (Adversary). agy gets its own subdir so it never ingests the Codex persona.
+1. **Workspace + personas** — `debates/NNN-slug/` is created; the `debate-persona-generator` skill writes three distinct expert personas as CLI context files: `agy/GEMINI.md` (Architect), `AGENTS.md` (Operator), `vibe/AGENTS.md` (Adversary). agy and vibe each get their own subdir so they never ingest the Codex `AGENTS.md` persona.
 2. **Claude's opening position** — stance, reasoning, confidence, assumptions.
 3. **Parallel challenge** — `scripts/challenge-all.sh` launches all challengers in the background and waits: a round costs max(timeouts), not the sum.
 4. **Consensus check** — all agree → fast exit; disagreement → confrontation rounds (per-challenger rebuttals via challenger agents + `scripts/invoke-challenger.sh`).
@@ -47,7 +47,7 @@ adr_path: "./docs/decisions"   # where /debate:adr writes
 debate/
 ├── .claude-plugin/plugin.json
 ├── commands/            debate.md, doctor.md, adr.md
-├── agents/              challenger-agy.md, challenger-codex.md, challenger-qwen.md, assumption-extractor.md
+├── agents/              challenger-agy.md, challenger-codex.md, challenger-vibe.md, assumption-extractor.md
 ├── scripts/             invoke-challenger.sh, challenge-all.sh, doctor.sh
 ├── skills/              debate/, debate-persona-generator/
 ├── templates/           adr-template.md, tradeoff-document.md

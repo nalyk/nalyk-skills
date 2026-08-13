@@ -45,7 +45,7 @@ Filename: `$ADR_NUM-<slug>.md` (topic lowercased, hyphens, max 50 chars). Exampl
 
 ## 3. GENERATE THE ADR
 
-Read `${CLAUDE_PLUGIN_ROOT}/templates/adr-template.md` and fill it with the debate results (challenges per model — agy/codex/qwen, position evolution, consensus status, alternatives, consequences, risks, assumptions, full audit trail). Write the result to `$ADR_PATH/$ADR_NUM-<slug>.md`.
+Read `${CLAUDE_PLUGIN_ROOT}/templates/adr-template.md` and fill it with the debate results (challenges per model — agy/codex/vibe, position evolution, consensus status, alternatives, consequences, risks, assumptions, full audit trail). Write the result to `$ADR_PATH/$ADR_NUM-<slug>.md`.
 
 ---
 

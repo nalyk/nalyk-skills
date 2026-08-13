@@ -22,9 +22,9 @@ Write one persona per available challenger CLI:
 |------|-----|-----------|---------|
 | `WORKSPACE_PATH/agy/GEMINI.md` | agy (Gemini) | **Architect** | Over-engineering, scaling bottlenecks, complexity |
 | `WORKSPACE_PATH/AGENTS.md` | codex | **Operator** | Maintenance nightmares, failure modes, observability gaps |
-| `WORKSPACE_PATH/QWEN.md` | qwen | **Adversary** | Attack vectors, trust assumptions, edge cases |
+| `WORKSPACE_PATH/vibe/AGENTS.md` | vibe | **Adversary** | Attack vectors, trust assumptions, edge cases |
 
-**Persona isolation:** the agy persona lives in the `agy/` subdir because agy reads GEMINI.md from CWD and could otherwise also ingest the workspace `AGENTS.md` (the Codex persona). The invoke script runs agy from that subdir.
+**Persona isolation:** the agy persona lives in the `agy/` subdir because agy reads GEMINI.md from CWD and could otherwise also ingest the workspace `AGENTS.md` (the Codex persona). The vibe persona lives in the `vibe/` subdir because vibe reads `AGENTS.md` DIRECTLY — the SAME filename codex reads at the workspace root — so vibe's Adversary persona (`vibe/AGENTS.md`) and codex's Operator persona (`AGENTS.md`) are two DIFFERENT `AGENTS.md` files in different dirs; running vibe from `vibe/` makes it load `vibe/AGENTS.md` and never reach the parent. The invoke script runs agy from `agy/` and vibe from `vibe/`.
 
 Adapt archetypes to the domain:
 
@@ -84,5 +84,5 @@ You MUST respond with valid JSON:
 - [ ] All three personas have DISTINCT expertise angles (each catches flaws the others miss)
 - [ ] Credentials are specific and domain-relevant, not generic
 - [ ] JSON response format is included in each file
-- [ ] Files written to the exact paths above (agy persona inside `agy/`)
+- [ ] Files written to the exact paths above (agy persona inside `agy/`, vibe persona inside `vibe/`)
 - [ ] Personas are written ONCE per debate and never modified mid-debate
