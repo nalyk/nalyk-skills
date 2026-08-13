@@ -84,7 +84,7 @@ Three audit frameworks: Steve Jobs (design simplification, 13 questions), George
 
 ---
 
-### debate (v2.0.0)
+### debate (v2.1.0)
 
 Multi-model adversarial debate. Claude defends a position against external CLI models (agy/Gemini, Codex, Mistral Vibe) in parallel rounds. Produces consensus, tradeoff documents, or ADRs.
 
