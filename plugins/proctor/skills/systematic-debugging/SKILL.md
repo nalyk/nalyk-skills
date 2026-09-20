@@ -83,6 +83,21 @@ Complete each phase before proceeding to the next.
 - "One more fix attempt" (when already tried 2+)
 - Each fix reveals new problem in different place
 
+## Hook Enforcement
+
+Proctor's hooks reinforce this discipline mechanically:
+
+- **Fix-round cap:** The hook tracks how many fix attempts you've made
+  in an SDD cycle. At the configured cap (default 5), it blocks further
+  dispatch and forces adjudication. This prevents infinite guess-and-check
+  loops.
+- **Test gate:** The git gate blocks commits without fresh, passing test
+  evidence. You cannot skip Phase 4's "create failing test case" step —
+  the gate enforces it at commit time.
+- **Test freshness:** Evidence expires after a configurable window
+  (default 5 minutes). Stale evidence from before your fix attempt
+  doesn't count.
+
 ## Common Rationalizations
 
 | Excuse | Reality |

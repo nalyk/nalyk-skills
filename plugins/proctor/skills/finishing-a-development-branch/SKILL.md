@@ -50,3 +50,15 @@ Delete the feature branch if merged:
 ```bash
 git branch -d <branch-name>
 ```
+
+If the branch used a git worktree, remove it first:
+```bash
+git worktree remove <worktree-path>
+git branch -d <branch-name>
+```
+
+Check for any orphaned worktrees:
+```bash
+git worktree list
+git worktree prune
+```

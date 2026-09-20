@@ -41,6 +41,16 @@ For each independent task:
 - When genuinely idle, wait in bounded stretches (5-10 minutes)
 - Between stretches, reconcile: list live children, chase finished ones
 
+## Hook Awareness
+
+Proctor tracks agent spawns via the `agent.spawn` hook. Each dispatch
+increments the agent counter visible in the SDD dashboard. The hook also
+records the model each agent uses — during SDD, spawning without an
+explicit model triggers a soft reminder about cost.
+
+The dashboard shows live agent count. You do not need to manage this
+state; the hooks handle it.
+
 ## After Completion
 
 Merge results. If agents touched overlapping areas despite independence

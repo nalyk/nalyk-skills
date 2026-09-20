@@ -72,6 +72,21 @@ These thoughts mean STOP — you are rationalizing:
 | "The skill is overkill" | Simple things become complex. Use it. |
 | "I'll just do this one thing first" | Check BEFORE doing anything. |
 
+## Configuration
+
+Proctor's enforcement thresholds are configurable via plugin settings:
+
+- **Protected branches** — which branches are guarded (default:
+  main, master, production, release)
+- **Test freshness** — minutes before test evidence expires (default: 5)
+- **Skill watchdog threshold** — turns without a skill before the
+  reminder fires (default: 4)
+- **Fix-round cap** — maximum fix attempts before forced adjudication
+  (default: 5)
+
+These are set per-user via the plugin configuration UI. You do not need
+to manage them — the hooks read them automatically.
+
 ## User Instructions
 
 User instructions (CLAUDE.md, AGENTS.md, direct requests) take precedence

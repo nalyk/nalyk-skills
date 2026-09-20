@@ -1,12 +1,13 @@
 {
   "name": "proctor",
+  "displayName": "Proctor",
   "description": "Hook-enforced development discipline for Claude Code. Skills teach methodology; hooks enforce compliance; store survives compaction.",
   "version": "1.0.0",
   "author": {
     "name": "nalyk"
   },
-  "homepage": "https://github.com/nalyk/proctor",
-  "repository": "https://github.com/nalyk/proctor",
+  "homepage": "https://github.com/nalyk/nalyk-skills",
+  "repository": "https://github.com/nalyk/nalyk-skills",
   "license": "MIT",
   "keywords": [
     "skills",
@@ -17,6 +18,41 @@
     "verification",
     "enforcement",
     "subagent-driven-development",
-    "discipline"
-  ]
+    "discipline",
+    "git-gates",
+    "branch-protection"
+  ],
+  "userConfig": {
+    "protectedBranches": {
+      "type": "string",
+      "title": "Protected branches",
+      "description": "Branch names protected from destructive git operations (commit, push, merge, rebase, reset)",
+      "default": "main",
+      "multiple": true
+    },
+    "testFreshnessMinutes": {
+      "type": "number",
+      "title": "Test freshness (minutes)",
+      "description": "How many minutes before test evidence expires and the git gate blocks commits",
+      "default": 5,
+      "min": 1,
+      "max": 60
+    },
+    "watchdogTurnThreshold": {
+      "type": "number",
+      "title": "Skill watchdog threshold",
+      "description": "Number of consecutive turns without a skill invocation before the watchdog fires a reminder",
+      "default": 4,
+      "min": 2,
+      "max": 20
+    },
+    "fixRoundCap": {
+      "type": "number",
+      "title": "Fix-round cap",
+      "description": "Maximum fix-loop rounds in SDD before the hook forces adjudication instead of another dispatch",
+      "default": 5,
+      "min": 2,
+      "max": 15
+    }
+  }
 }

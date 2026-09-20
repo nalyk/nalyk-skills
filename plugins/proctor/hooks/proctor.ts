@@ -3,6 +3,11 @@
 //
 // Skills teach methodology. Hooks enforce compliance. Store survives compaction.
 //
+// Three layers:
+//   Teaching  (skills)  → prose methodology the agent reads and follows
+//   Enforcement (hooks) → TypeScript middleware that gates or nudges
+//   Infrastructure ($)  → persistent state that survives compaction
+//
 // Run /plugin-types to regenerate the declarations for your build.
 
 import type { Register } from "claude-code";
@@ -48,6 +53,7 @@ interface SDDState {
 interface SessionState {
   startedAt: number;
   skillInvoked: boolean;
+  lastSkillName: string | null;
   watchdogNudgeSent: boolean;
   testCommand: string | null;
   branch: string | null;
@@ -56,10 +62,13 @@ interface SessionState {
   branchConsents: Record<string, boolean>;
   turnsSinceSkill: number;
   agentsSpawned: number;
+  turnCount: number;
 }
 
 // ─────────────────────────────────────────────────────────────────────
-//  Store helpers
+//  Store helpers — $.store is JSON-backed KV under
+//  ~/.claude/plugins/store/, persisting across sessions.
+//  Module-level variables are session-scoped.
 // ─────────────────────────────────────────────────────────────────────
 
 const KEYS = {
@@ -71,7 +80,7 @@ const KEYS = {
 async function load<T>(
   $: any,
   key: string,
-  fallback: T
+  fallback: T,
 ): Promise<T> {
   const raw = await $.store.get(key);
   if (!raw) return fallback;
@@ -87,7 +96,7 @@ async function save($: any, key: string, value: unknown): Promise<void> {
 }
 
 // ─────────────────────────────────────────────────────────────────────
-//  Test command detection
+//  Test command detection — file-based heuristics + npm scripts field
 // ─────────────────────────────────────────────────────────────────────
 
 const TEST_PATTERNS: Array<{ file: string; command: string }> = [
@@ -100,39 +109,82 @@ const TEST_PATTERNS: Array<{ file: string; command: string }> = [
   { file: "Gemfile", command: "bundle exec rspec" },
   { file: "mix.exs", command: "mix test" },
   { file: "build.gradle", command: "./gradlew test" },
+  { file: "build.gradle.kts", command: "./gradlew test" },
   { file: "pom.xml", command: "mvn test" },
+  { file: "CMakeLists.txt", command: "ctest" },
+  { file: "Rakefile", command: "rake test" },
+  { file: "deno.json", command: "deno test" },
+  { file: "bun.lockb", command: "bun test" },
 ];
 
 const TEST_RUN_RE =
-  /\b(npm\s+test|npx\s+(jest|vitest|mocha|playwright)|yarn\s+test|pnpm\s+test|pytest|py\.test|cargo\s+test|go\s+test|bundle\s+exec\s+rspec|mix\s+test|make\s+test|gradle\w*\s+test|mvn\s+test|dotnet\s+test|swift\s+test|jest|vitest|mocha)\b/;
+  /\b(npm\s+test|npx\s+(jest|vitest|mocha|playwright|cypress)|yarn\s+test|pnpm\s+test|bun\s+test|deno\s+test|pytest|py\.test|python\s+-m\s+pytest|cargo\s+test|go\s+test|bundle\s+exec\s+rspec|mix\s+test|make\s+test|gradle\w*\s+test|mvn\s+test|dotnet\s+test|swift\s+test|ctest|rake\s+test|jest|vitest|mocha)\b/;
 
-const GIT_GATE_RE = /\bgit\s+(commit|push|merge)\b/;
+const GIT_COMMIT_PUSH_RE = /\bgit\s+(commit|push|merge)\b/;
 
 const GIT_DESTRUCTIVE_RE =
-  /\bgit\s+(commit|push|merge|rebase|reset\s+--hard|force-push)\b/;
+  /\bgit\s+(commit|push|merge|rebase|reset\s+--hard|force-push|checkout\s+--\s)\b/;
 
 // ─────────────────────────────────────────────────────────────────────
 //  SDD signal detection
 // ─────────────────────────────────────────────────────────────────────
 
 const SDD_START_RE =
-  /\b(subagent[- ]driven[- ]development|proctor:subagent|sdd)\b/i;
+  /\b(subagent[- ]driven[- ]development|proctor:subagent|sdd\s+session)\b/i;
 
-const TASK_COMPLETE_RE =
-  /Task\s+(\d+)\s*:\s*complete\b/i;
+const TASK_COMPLETE_RE = /Task\s+(\d+)\s*:\s*complete\b/i;
 
-const FIX_ROUND_RE =
-  /Task\s+(\d+)\s*:\s*fix\s+round\s+(\d+)/i;
+const FIX_ROUND_RE = /Task\s+(\d+)\s*:\s*fix\s+round\s+(\d+)/i;
 
 const RULING_RE =
-  /Ruling:\s*(.+?)(?:\s*—\s*(.+?))?(?:\s*—\s*cost\s+if\s+wrong:\s*(.+))?$/im;
+  /Ruling:\s*(.+?)(?:\s*--\s*(.+?))?(?:\s*--\s*cost\s+if\s+wrong:\s*(.+))?$/im;
+
+// ─────────────────────────────────────────────────────────────────────
+//  Helpers
+// ─────────────────────────────────────────────────────────────────────
+
+function formatElapsed(ms: number): string {
+  const mins = Math.round(ms / 60_000);
+  if (mins < 60) return `${mins}m`;
+  const hours = Math.floor(mins / 60);
+  return `${hours}h${mins % 60}m`;
+}
+
+function buildSDDInjection(sdd: SDDState): string {
+  const completed = sdd.completedTasks;
+  const rulingsSummary = sdd.rulings
+    .map(
+      (r) =>
+        `  Task ${r.task} [${r.phase}]: ${r.text} (cost: ${r.costIfWrong})`,
+    )
+    .join("\n");
+
+  return [
+    `[PROCTOR — SDD STATE — survives compaction]`,
+    `Plan: ${sdd.plan}`,
+    `Tasks: ${completed.length}/${sdd.totalTasks} complete`,
+    `Completed: ${completed.length > 0 ? completed.join(", ") : "none"}`,
+    `Current: Task ${sdd.currentTask}`,
+    `Resume from: Task ${completed.length > 0 ? Math.max(...completed) + 1 : 1}`,
+    `Fix rounds this task: ${sdd.currentFixRound} | total: ${sdd.totalFixRounds}`,
+    `Agents spawned: ${sdd.totalAgents}`,
+    sdd.rulings.length > 0
+      ? `Rulings made (${sdd.rulings.length}):\n${rulingsSummary}`
+      : "Rulings: none yet",
+    sdd.deferredMinors.length > 0
+      ? `Deferred minors: ${sdd.deferredMinors.map((m) => `[Task ${m.task}] ${m.finding}`).join("; ")}`
+      : "",
+    `Last implementer model: ${sdd.lastImplementerModel ?? "none"}`,
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
 
 // ─────────────────────────────────────────────────────────────────────
 //  REGISTRATION
 // ─────────────────────────────────────────────────────────────────────
 
 export const register: Register = (on, options) => {
-  // User-configurable options (via plugin.json userConfig)
   const PROTECTED_BRANCHES = (options?.protectedBranches as string[]) ?? [
     "main",
     "master",
@@ -150,16 +202,31 @@ export const register: Register = (on, options) => {
   // ───────────────────────────────────────────────────────────────────
 
   on("session.start", async ($: any, e: any, next: any) => {
-    // Detect test framework
     let testCommand: string | null = null;
-    for (const pattern of TEST_PATTERNS) {
-      if (await $.fs.exists(pattern.file)) {
-        testCommand = pattern.command;
-        break;
+
+    // Try package.json scripts.test first for accuracy
+    try {
+      if (await $.fs.exists("package.json")) {
+        const raw = await $.fs.read("package.json");
+        const pkg = JSON.parse(raw);
+        if (pkg.scripts?.test && pkg.scripts.test !== 'echo "Error: no test specified" && exit 1') {
+          testCommand = "npm test";
+        }
+      }
+    } catch {
+      // Fall through to pattern detection
+    }
+
+    // Fall back to file-based detection
+    if (!testCommand) {
+      for (const pattern of TEST_PATTERNS) {
+        if (await $.fs.exists(pattern.file)) {
+          testCommand = pattern.command;
+          break;
+        }
       }
     }
 
-    // Detect branch
     let branch: string | null = null;
     let isWorktree = false;
     try {
@@ -180,17 +247,10 @@ export const register: Register = (on, options) => {
         "rev-parse",
         "--git-common-dir",
       ]);
-      const superproject = await $.process.run([
-        "git",
-        "rev-parse",
-        "--show-superproject-working-tree",
-      ]);
 
       const dirNorm = gitDir.stdout.trim();
       const commonNorm = gitCommon.stdout.trim();
-      const superNorm = superproject.stdout.trim();
-
-      isWorktree = dirNorm !== commonNorm && superNorm === "";
+      isWorktree = dirNorm !== commonNorm;
     } catch {
       // Not a git repo — gates won't fire
     }
@@ -198,6 +258,7 @@ export const register: Register = (on, options) => {
     const session: SessionState = {
       startedAt: Date.now(),
       skillInvoked: false,
+      lastSkillName: null,
       watchdogNudgeSent: false,
       testCommand,
       branch,
@@ -206,22 +267,26 @@ export const register: Register = (on, options) => {
       branchConsents: {},
       turnsSinceSkill: 0,
       agentsSpawned: 0,
+      turnCount: 0,
     };
 
     await save($, KEYS.session, session);
 
-    // Log startup
     const env: string[] = [];
     if (testCommand) env.push(`tests: ${testCommand}`);
     if (branch) env.push(`branch: ${branch}`);
-    if (isWorktree) env.push("worktree: yes");
-    $.ui.log(`Proctor active${env.length ? ` (${env.join(", ")})` : ""}`);
+    if (isWorktree) env.push("worktree");
+    env.push(`protected: ${PROTECTED_BRANCHES.join(",")}`);
+    $.ui.log(`Proctor active (${env.join(" | ")})`);
 
     return next(e);
   });
 
   // ───────────────────────────────────────────────────────────────────
   //  2. COMPACTION-PROOF STATE — inject SDD state into context
+  //     Uses prompt.section to survive compaction automatically.
+  //     The store persists across sessions; this hook ensures the
+  //     agent sees state even after context is compressed.
   // ───────────────────────────────────────────────────────────────────
 
   on(
@@ -231,46 +296,28 @@ export const register: Register = (on, options) => {
       const sdd = await load<SDDState | null>($, KEYS.sdd, null);
       if (!sdd?.active) return next(e);
 
-      const completed = sdd.completedTasks;
-      const rulingsSummary = sdd.rulings
-        .map(
-          (r) =>
-            `  Task ${r.task} [${r.phase}]: ${r.text} (cost: ${r.costIfWrong})`
-        )
-        .join("\n");
-
-      const injection = [
-        `[PROCTOR — SDD STATE — survives compaction]`,
-        `Plan: ${sdd.plan}`,
-        `Tasks: ${sdd.completedTasks.length}/${sdd.totalTasks} complete`,
-        `Completed: ${completed.length > 0 ? completed.join(", ") : "none"}`,
-        `Current: Task ${sdd.currentTask}`,
-        `Resume from: Task ${completed.length > 0 ? Math.max(...completed) + 1 : 1}`,
-        `Fix rounds total: ${sdd.totalFixRounds}`,
-        `Agents spawned: ${sdd.totalAgents}`,
-        sdd.rulings.length > 0
-          ? `Rulings made:\n${rulingsSummary}`
-          : "Rulings: none",
-        sdd.deferredMinors.length > 0
-          ? `Deferred minors: ${sdd.deferredMinors.length}`
-          : "",
-      ]
-        .filter(Boolean)
-        .join("\n");
-
+      const injection = buildSDDInjection(sdd);
       return next({ ...e, text: e.text + "\n\n" + injection });
-    }
+    },
   );
 
   // ───────────────────────────────────────────────────────────────────
   //  3. GIT GATES — hard enforcement on Bash tool calls
+  //
+  //     Three gates:
+  //     a) Test evidence required before commit/push/merge
+  //     b) Test freshness window (configurable, default 5 min)
+  //     c) Protected branch enforcement
+  //
+  //     These are HARD DENIALS — the agent cannot proceed.
+  //     This is what distinguishes proctor from prose-only plugins.
   // ───────────────────────────────────────────────────────────────────
 
   on("tool.call", { tool: "Bash" }, async ($: any, e: any, next: any) => {
     const cmd: string = e.command ?? "";
 
-    // ── GATE: Git commit/push requires fresh test evidence ─────────
-    if (GIT_GATE_RE.test(cmd)) {
+    // ── GATE: Git commit/push requires fresh passing test evidence ──
+    if (GIT_COMMIT_PUSH_RE.test(cmd)) {
       const evidence = await load<TestEvidence | null>($, KEYS.test, null);
 
       if (!evidence) {
@@ -278,7 +325,7 @@ export const register: Register = (on, options) => {
           deny:
             "Proctor gate: no test evidence in this session. " +
             "Run the project's test suite before committing. " +
-            "This gate enforces verification-before-completion mechanically.",
+            "This is a mechanical gate — no override exists without tests.",
         };
       }
 
@@ -287,8 +334,8 @@ export const register: Register = (on, options) => {
         const mins = Math.round(age / 60_000);
         return {
           deny:
-            `Proctor gate: last test run was ${mins} minutes ago ` +
-            `(freshness window: ${TEST_FRESHNESS_MS / 60_000} min). ` +
+            `Proctor gate: last test run was ${mins}m ago ` +
+            `(freshness window: ${TEST_FRESHNESS_MS / 60_000}m). ` +
             `Run the test suite again before committing.`,
         };
       }
@@ -298,7 +345,7 @@ export const register: Register = (on, options) => {
           deny:
             `Proctor gate: last test run failed (exit ${evidence.exitCode}). ` +
             `Fix the failures before committing.\n` +
-            `Last output tail: ${evidence.tailOutput}`,
+            `Last output:\n${evidence.tailOutput}`,
         };
       }
     }
@@ -311,26 +358,27 @@ export const register: Register = (on, options) => {
         if (!hasConsent) {
           return {
             deny:
-              `Proctor gate: refusing destructive git operation on ` +
+              `Proctor gate: destructive git operation blocked on ` +
               `protected branch '${session.branch}'. ` +
-              `Create a feature branch with git checkout -b <name>, or ` +
-              `ask your human partner for explicit consent. ` +
-              `If consent is granted, the hook will record it and allow ` +
-              `subsequent operations on this branch for this session.`,
+              `Create a feature branch first: git checkout -b <name>. ` +
+              `Your human partner can grant explicit consent for this ` +
+              `branch if needed ("proctor: allow ${session.branch}").`,
           };
         }
       }
     }
 
-    // ── PASSTHROUGH: execute the command ────────────────────────────
+    // ── Execute the command ─────────────────────────────────────────
     const result = await next(e);
 
-    // ── TRACK: test runs ───────────────────────────────────────────
+    // ── POST: Track test runs ───────────────────────────────────────
     if (TEST_RUN_RE.test(cmd)) {
       const stdout: string = result.stdout ?? "";
-      const tail = stdout.substring(Math.max(0, stdout.length - 800));
+      const stderr: string = result.stderr ?? "";
+      const output = stdout + stderr;
+      const tail = output.substring(Math.max(0, output.length - 1200));
       const evidence: TestEvidence = {
-        command: cmd,
+        command: cmd.substring(0, 200),
         timestamp: Date.now(),
         exitCode: result.exitCode ?? 0,
         tailOutput: tail,
@@ -338,7 +386,7 @@ export const register: Register = (on, options) => {
       await save($, KEYS.test, evidence);
     }
 
-    // ── TRACK: branch changes ──────────────────────────────────────
+    // ── POST: Track branch changes ──────────────────────────────────
     if (/\bgit\s+(checkout|switch)\b/.test(cmd) && result.exitCode === 0) {
       try {
         const branchResult = await $.process.run([
@@ -349,14 +397,14 @@ export const register: Register = (on, options) => {
         const session = await load<SessionState | null>(
           $,
           KEYS.session,
-          null
+          null,
         );
         if (session) {
           session.branch = branchResult.stdout.trim() || null;
           await save($, KEYS.session, session);
         }
       } catch {
-        // Ignore — non-critical tracking
+        // Non-critical
       }
     }
 
@@ -364,10 +412,23 @@ export const register: Register = (on, options) => {
   });
 
   // ───────────────────────────────────────────────────────────────────
-  //  4. SKILL INVOCATION WATCHDOG — soft nudge
+  //  4. SKILL INVOCATION TRACKING — via skill.prompt event
+  //     This fires when the Skill tool is actually invoked,
+  //     far more reliable than detecting SKILL.md file reads.
   // ───────────────────────────────────────────────────────────────────
 
-  // Track skill reads
+  on("skill.prompt", async ($: any, e: any, next: any) => {
+    const session = await load<SessionState | null>($, KEYS.session, null);
+    if (session) {
+      session.skillInvoked = true;
+      session.turnsSinceSkill = 0;
+      session.lastSkillName = e.skill ?? null;
+      await save($, KEYS.session, session);
+    }
+    return next(e);
+  });
+
+  // Also track via Read as fallback for direct SKILL.md reads
   on("tool.call", { tool: "Read" }, async ($: any, e: any, next: any) => {
     const result = await next(e);
     const path: string = e.file_path ?? "";
@@ -382,171 +443,237 @@ export const register: Register = (on, options) => {
     return result;
   });
 
-  // Nudge if working without skills
-  on("turn.complete", async ($: any, e: any, next: any) => {
-    const result = await next(e);
-    if (e.reason !== "answer") return result;
-
-    const session = await load<SessionState | null>($, KEYS.session, null);
-    if (!session) return result;
-
-    session.turnsSinceSkill++;
-    await save($, KEYS.session, session);
-
-    if (
-      !session.skillInvoked &&
-      !session.watchdogNudgeSent &&
-      session.turnsSinceSkill >= WATCHDOG_TURN_THRESHOLD
-    ) {
-      session.watchdogNudgeSent = true;
-      await save($, KEYS.session, session);
-      return {
-        ...result,
-        context: [
-          ...(result.context ?? []),
-          "Proctor watchdog: you have been working for several turns " +
-            "without invoking a skill. If brainstorming, TDD, debugging, " +
-            "or another skill applies to what you are doing, invoke it now. " +
-            "If you have considered and rejected all skills, carry on.",
-        ],
-      };
-    }
-
-    return result;
-  });
-
   // ───────────────────────────────────────────────────────────────────
-  //  5. SDD STATE MACHINE — compaction-proof task tracking
+  //  5. TURN LIFECYCLE — consolidated handler
+  //     Combines: watchdog nudge, SDD state tracking, context
+  //     pressure warning, and ruling aggregation into ONE handler
+  //     to avoid redundant store round-trips.
   // ───────────────────────────────────────────────────────────────────
 
-  // Detect SDD activation and task completions in agent output
   on("turn.complete", async ($: any, e: any, next: any) => {
     const result = await next(e);
     const answer: string = e.answer ?? "";
-    if (!answer) return result;
 
+    // Load state once
+    const session = await load<SessionState | null>($, KEYS.session, null);
     let sdd = await load<SDDState | null>($, KEYS.sdd, null);
 
-    // Detect SDD session start
-    if (!sdd?.active && SDD_START_RE.test(answer)) {
-      // Extract plan path and task count from the turn
-      const planMatch = answer.match(
-        /plan[:\s]+[`"']?([^\s`"']+\.md)[`"']?/i
-      );
-      const taskCountMatch = answer.match(
-        /(\d+)\s*(?:tasks?|todos?)/i
-      );
+    const contextAdditions: string[] = [];
+    let sessionChanged = false;
+    let sddChanged = false;
 
-      sdd = {
-        active: true,
-        plan: planMatch?.[1] ?? "unknown",
-        startedAt: Date.now(),
-        totalTasks: taskCountMatch ? parseInt(taskCountMatch[1], 10) : 0,
-        currentTask: 1,
-        completedTasks: [],
-        currentFixRound: 0,
-        totalFixRounds: 0,
-        totalAgents: 0,
-        lastImplementerModel: null,
-        rulings: [],
-        deferredMinors: [],
-      };
-      await save($, KEYS.sdd, sdd);
-      $.ui.log("Proctor: SDD session started — state tracking active");
-    }
+    // ── Turn counting + skill watchdog ──────────────────────────────
+    if (session && e.reason === "answer") {
+      session.turnCount++;
+      session.turnsSinceSkill++;
+      sessionChanged = true;
 
-    if (!sdd?.active) return result;
-
-    let changed = false;
-
-    // Detect task completions
-    const completeMatch = answer.match(TASK_COMPLETE_RE);
-    if (completeMatch) {
-      const taskNum = parseInt(completeMatch[1], 10);
-      if (!sdd.completedTasks.includes(taskNum)) {
-        sdd.completedTasks.push(taskNum);
-        sdd.completedTasks.sort((a, b) => a - b);
-        sdd.currentTask = taskNum + 1;
-        sdd.currentFixRound = 0;
-        changed = true;
+      if (
+        !session.skillInvoked &&
+        !session.watchdogNudgeSent &&
+        session.turnsSinceSkill >= WATCHDOG_TURN_THRESHOLD
+      ) {
+        session.watchdogNudgeSent = true;
+        contextAdditions.push(
+          "Proctor watchdog: you have worked for several turns " +
+            "without invoking a skill. If brainstorming, TDD, debugging, " +
+            "or another proctor skill applies, invoke it now. " +
+            "If you have considered and rejected all skills, carry on.",
+        );
       }
     }
 
-    // Detect fix rounds
-    const fixMatch = answer.match(FIX_ROUND_RE);
-    if (fixMatch) {
-      const round = parseInt(fixMatch[2], 10);
-      sdd.currentFixRound = round;
-      sdd.totalFixRounds++;
-      changed = true;
+    // ── SDD state machine ──────────────────────────────────────────
+    if (answer) {
+      // Detect SDD session start
+      if (!sdd?.active && SDD_START_RE.test(answer)) {
+        const planMatch = answer.match(
+          /plan[:\s]+[`"']?([^\s`"']+\.md)[`"']?/i,
+        );
+        const taskCountMatch = answer.match(
+          /(\d+)\s*(?:tasks?|todos?)/i,
+        );
 
-      // Enforce fix-round cap
-      if (round >= FIX_ROUND_CAP) {
-        return {
-          ...result,
-          context: [
-            ...(result.context ?? []),
-            `Proctor: fix-round cap reached (${round}/${FIX_ROUND_CAP}). ` +
-              `Adjudicate each open finding — park contestable ones, ` +
-              `rule on load-bearing ones. Do not dispatch another fix round.`,
-          ],
+        sdd = {
+          active: true,
+          plan: planMatch?.[1] ?? "unknown",
+          startedAt: Date.now(),
+          totalTasks: taskCountMatch ? parseInt(taskCountMatch[1], 10) : 0,
+          currentTask: 1,
+          completedTasks: [],
+          currentFixRound: 0,
+          totalFixRounds: 0,
+          totalAgents: 0,
+          lastImplementerModel: null,
+          rulings: [],
+          deferredMinors: [],
         };
+        sddChanged = true;
+        $.ui.log("Proctor: SDD session started — state tracking active");
+      }
+
+      if (sdd?.active) {
+        // Detect task completions
+        const completeMatch = answer.match(TASK_COMPLETE_RE);
+        if (completeMatch) {
+          const taskNum = parseInt(completeMatch[1], 10);
+          if (!sdd.completedTasks.includes(taskNum)) {
+            sdd.completedTasks.push(taskNum);
+            sdd.completedTasks.sort((a, b) => a - b);
+            sdd.currentTask = taskNum + 1;
+            sdd.currentFixRound = 0;
+            sddChanged = true;
+          }
+        }
+
+        // Detect fix rounds
+        const fixMatch = answer.match(FIX_ROUND_RE);
+        if (fixMatch) {
+          const round = parseInt(fixMatch[2], 10);
+          sdd.currentFixRound = round;
+          sdd.totalFixRounds++;
+          sddChanged = true;
+
+          if (round >= FIX_ROUND_CAP) {
+            contextAdditions.push(
+              `Proctor: fix-round cap reached (${round}/${FIX_ROUND_CAP}). ` +
+                `Adjudicate each open finding — park contestable ones, ` +
+                `rule on load-bearing ones. Do not dispatch another fix round.`,
+            );
+          }
+        }
+
+        // Detect rulings
+        const rulingMatch = answer.match(RULING_RE);
+        if (rulingMatch) {
+          sdd.rulings.push({
+            task: sdd.currentTask,
+            text: rulingMatch[1]?.trim() ?? "",
+            costIfWrong: rulingMatch[3]?.trim() ?? "unknown",
+            phase:
+              sdd.currentFixRound > 0
+                ? "fix-loop"
+                : sdd.completedTasks.length === sdd.totalTasks
+                  ? "final"
+                  : "preflight",
+          });
+          sddChanged = true;
+        }
+
+        // Detect deferred minors
+        const minorMatch = answer.match(
+          /minor\s*\(deferred\):\s*(.+)/i,
+        );
+        if (minorMatch) {
+          sdd.deferredMinors.push({
+            task: sdd.currentTask,
+            finding: minorMatch[1].trim(),
+          });
+          sddChanged = true;
+        }
       }
     }
 
-    // Detect rulings
-    const rulingMatch = answer.match(RULING_RE);
-    if (rulingMatch) {
-      sdd.rulings.push({
-        task: sdd.currentTask,
-        text: rulingMatch[1]?.trim() ?? "",
-        costIfWrong: rulingMatch[3]?.trim() ?? "unknown",
-        phase:
-          sdd.currentFixRound > 0
-            ? "fix-loop"
-            : sdd.completedTasks.length === sdd.totalTasks
-              ? "final"
-              : "preflight",
-      });
-      changed = true;
+    // ── Context pressure warning ────────────────────────────────────
+    if (session && sdd?.active) {
+      const tc = session.turnCount;
+      if (tc === 50 || tc === 70 || tc === 90) {
+        contextAdditions.push(
+          `Proctor: turn ${tc} — context pressure increasing. ` +
+            `SDD state is persisted in $.store and survives compaction. ` +
+            `Verify the ledger file is current. After compaction, the ` +
+            `[PROCTOR — SDD STATE] block shows your recovery point.`,
+        );
+      }
     }
 
-    if (changed) {
-      await save($, KEYS.sdd, sdd);
+    // ── Ruling aggregation at session end ────────────────────────────
+    if (sdd?.active && sdd.rulings.length > 0) {
+      const isFinishing =
+        /\b(finishing-a-development-branch|all\s+tasks?\s+complete|sdd\s+done|sdd\s+finished)\b/i.test(
+          answer,
+        );
+
+      if (isFinishing) {
+        const rulingList = sdd.rulings
+          .map(
+            (r, i) =>
+              `${i + 1}. [Task ${r.task}, ${r.phase}] ${r.text}` +
+              (r.costIfWrong !== "unknown"
+                ? ` — cost: ${r.costIfWrong}`
+                : ""),
+          )
+          .join("\n");
+
+        const minorList =
+          sdd.deferredMinors.length > 0
+            ? sdd.deferredMinors
+                .map((m) => `- [Task ${m.task}] ${m.finding}`)
+                .join("\n")
+            : "none";
+
+        contextAdditions.push(
+          `Proctor ruling aggregation — include in your final message:\n\n` +
+            `RULINGS MADE (${sdd.rulings.length}):\n${rulingList}\n\n` +
+            `DEFERRED MINORS (${sdd.deferredMinors.length}):\n${minorList}`,
+        );
+      }
+    }
+
+    // Save state once
+    if (sessionChanged) await save($, KEYS.session, session);
+    if (sddChanged) await save($, KEYS.sdd, sdd);
+
+    if (contextAdditions.length > 0) {
+      return {
+        ...result,
+        context: [...(result.context ?? []), ...contextAdditions],
+      };
     }
 
     return result;
   });
 
   // ───────────────────────────────────────────────────────────────────
-  //  6. AGENT SPAWN ENFORCEMENT — model selection + tracking
+  //  6. AGENT SPAWN ENFORCEMENT — model selection + cost tracking
   // ───────────────────────────────────────────────────────────────────
 
   on("agent.spawn", async ($: any, e: any, next: any) => {
     const sdd = await load<SDDState | null>($, KEYS.sdd, null);
     const session = await load<SessionState | null>($, KEYS.session, null);
 
-    // Track agent count
     if (session) {
       session.agentsSpawned++;
       await save($, KEYS.session, session);
     }
     if (sdd?.active) {
       sdd.totalAgents++;
+
+      // Track the implementer model
+      if (e.model) {
+        sdd.lastImplementerModel = e.model;
+      }
       await save($, KEYS.sdd, sdd);
     }
 
     const contextAdditions: string[] = [];
 
-    // Model selection nudge — warn when no model explicitly set
+    // Model selection nudge during SDD
     if (!e.model && sdd?.active) {
-      const sessionModel = await $.session.model();
-      contextAdditions.push(
-        `Proctor SDD: no model specified for this subagent — it will ` +
-          `inherit the session model (${sessionModel}). For mechanical ` +
-          `implementation tasks, a cheaper model reduces cost. Specify ` +
-          `the model explicitly.`
-      );
+      try {
+        const sessionModel = await $.session.model();
+        contextAdditions.push(
+          `Proctor SDD: no model specified for this subagent — it will ` +
+            `inherit the session model (${sessionModel}). For mechanical ` +
+            `implementation tasks, specify a cheaper model explicitly. ` +
+            `Reserve the session model for judgment-heavy work.`,
+        );
+      } catch {
+        contextAdditions.push(
+          `Proctor SDD: no model specified for this subagent. ` +
+            `Specify the model explicitly for cost control.`,
+        );
+      }
     }
 
     // Fix-loop escalation enforcement
@@ -555,17 +682,11 @@ export const register: Register = (on, options) => {
       if (lastModel && e.model === lastModel) {
         contextAdditions.push(
           `Proctor SDD: fix-loop round ${sdd.currentFixRound}/` +
-            `${FIX_ROUND_CAP}. You are dispatching with the same model ` +
-            `(${lastModel}) that got stuck. SDD requires escalation to a ` +
-            `more capable model for rounds 4-5.`
+            `${FIX_ROUND_CAP}. Dispatching with the same model ` +
+            `(${lastModel}) that got stuck. Escalate to a more capable ` +
+            `model for rounds 4-5.`,
         );
       }
-    }
-
-    // Track the implementer model
-    if (sdd?.active && e.model) {
-      sdd.lastImplementerModel = e.model;
-      await save($, KEYS.sdd, sdd);
     }
 
     if (contextAdditions.length > 0) {
@@ -579,7 +700,7 @@ export const register: Register = (on, options) => {
   });
 
   // ───────────────────────────────────────────────────────────────────
-  //  7. SDD PROGRESS DASHBOARD — ui.render above prompt
+  //  7. SDD PROGRESS DASHBOARD — rendered above prompt
   // ───────────────────────────────────────────────────────────────────
 
   on(
@@ -590,40 +711,42 @@ export const register: Register = (on, options) => {
       if (!sdd?.active) return next(e);
 
       const t = await $.ui.resolve(e);
-      const elapsed = Math.round((Date.now() - sdd.startedAt) / 60_000);
+      const elapsed = formatElapsed(Date.now() - sdd.startedAt);
       const pct =
         sdd.totalTasks > 0
           ? Math.round(
-              (sdd.completedTasks.length / sdd.totalTasks) * 100
+              (sdd.completedTasks.length / sdd.totalTasks) * 100,
             )
           : 0;
 
-      const fixInfo =
-        sdd.currentFixRound > 0
-          ? ` | fix ${sdd.currentFixRound}/${FIX_ROUND_CAP}`
-          : "";
+      const parts: string[] = [
+        `⚡ SDD ${pct}%`,
+        `T${sdd.currentTask}/${sdd.totalTasks} (${sdd.completedTasks.length}✓)`,
+      ];
 
-      const rulingInfo =
-        sdd.rulings.length > 0 ? ` | ${sdd.rulings.length} rulings` : "";
+      if (sdd.currentFixRound > 0)
+        parts.push(`fix ${sdd.currentFixRound}/${FIX_ROUND_CAP}`);
 
-      const bar = `⚡ SDD ${pct}% — ` +
-        `Task ${sdd.currentTask}/${sdd.totalTasks} ` +
-        `(${sdd.completedTasks.length} done)` +
-        `${fixInfo}` +
-        ` | ${sdd.totalAgents} agents` +
-        `${rulingInfo}` +
-        ` | ${elapsed}m`;
+      parts.push(`${sdd.totalAgents} agents`);
+
+      if (sdd.rulings.length > 0)
+        parts.push(`${sdd.rulings.length} rulings`);
+
+      if (sdd.deferredMinors.length > 0)
+        parts.push(`${sdd.deferredMinors.length} deferred`);
+
+      parts.push(elapsed);
 
       return (
         <t.Box>
-          <t.Text>{bar}</t.Text>
+          <t.Text>{parts.join(" │ ")}</t.Text>
         </t.Box>
       );
-    }
+    },
   );
 
   // ───────────────────────────────────────────────────────────────────
-  //  8. ATTRIBUTION — enhanced commit messages
+  //  8. ATTRIBUTION — enhanced commit messages with task + test info
   // ───────────────────────────────────────────────────────────────────
 
   on("attribution.text", async ($: any, e: any, next: any) => {
@@ -636,61 +759,35 @@ export const register: Register = (on, options) => {
     const additions: string[] = [];
 
     if (sdd.currentTask > 0) {
-      additions.push(`[SDD Task ${sdd.currentTask}]`);
+      additions.push(`[SDD Task ${sdd.currentTask}/${sdd.totalTasks}]`);
     }
     if (evidence && evidence.exitCode === 0) {
-      additions.push(`[Tests: ${evidence.command} ✓]`);
+      additions.push(`[Tests: ✓]`);
+    }
+    if (sdd.rulings.length > 0) {
+      additions.push(`[${sdd.rulings.length} rulings]`);
     }
 
     if (additions.length > 0) {
       const text: string = result.text ?? "";
-      return { ...result, text: text + "\n\n" + additions.join(" ") };
+      return { ...result, text: text + "\n" + additions.join(" ") };
     }
 
     return result;
   });
 
   // ───────────────────────────────────────────────────────────────────
-  //  9. CONTEXT PRESSURE WARNING — approaching compaction
-  // ───────────────────────────────────────────────────────────────────
-
-  on("turn.complete", async ($: any, e: any, next: any) => {
-    const result = await next(e);
-    const turnCount = await $.session.turnCount();
-
-    // Warn at configurable threshold (60 turns is a rough proxy for
-    // approaching context limits in a heavy-tool session)
-    if (turnCount === 60 || turnCount === 80) {
-      const sdd = await load<SDDState | null>($, KEYS.sdd, null);
-
-      if (sdd?.active) {
-        return {
-          ...result,
-          context: [
-            ...(result.context ?? []),
-            `Proctor: turn ${turnCount} — context pressure increasing. ` +
-              `Your SDD state is persisted in the store and will survive ` +
-              `compaction. Verify the ledger file is current. After ` +
-              `compaction, the injected [PROCTOR — SDD STATE] block ` +
-              `shows your recovery point.`,
-          ],
-        };
-      }
-    }
-
-    return result;
-  });
-
-  // ───────────────────────────────────────────────────────────────────
-  //  10. BRANCH CONSENT HANDLER — allow override after human approval
+  //  9. BRANCH CONSENT HANDLER — explicit consent for protected
+  //     branches. Requires the exact phrase "proctor: allow <branch>"
+  //     to prevent accidental consent from natural language.
   // ───────────────────────────────────────────────────────────────────
 
   on("prompt.submit", async ($: any, e: any, next: any) => {
     const text: string = e.text ?? "";
 
-    // Detect explicit consent for protected branch work
+    // Strict consent pattern: "proctor: allow <branch>"
     const consentMatch = text.match(
-      /\b(?:allow|consent|approve|yes,?\s*(?:commit|work)\s*(?:on|to)?)\s+(?:on\s+)?(\w+)\b/i
+      /\bproctor:\s*allow\s+(\S+)\b/i,
     );
     if (consentMatch) {
       const branch = consentMatch[1];
@@ -698,17 +795,21 @@ export const register: Register = (on, options) => {
       if (session && session.protectedBranches.includes(branch)) {
         session.branchConsents[branch] = true;
         await save($, KEYS.session, session);
-        $.ui.log(`Proctor: branch '${branch}' consent recorded`);
+        $.ui.log(`Proctor: consent recorded for branch '${branch}'`);
       }
     }
 
-    // Detect SDD deactivation
-    if (/\b(?:sdd\s+(?:done|finished|complete)|finishing-a-development-branch)\b/i.test(text)) {
+    // SDD deactivation
+    if (
+      /\b(?:sdd\s+(?:done|finished|complete)|proctor:\s*sdd\s+stop)\b/i.test(
+        text,
+      )
+    ) {
       const sdd = await load<SDDState | null>($, KEYS.sdd, null);
       if (sdd?.active) {
         sdd.active = false;
         await save($, KEYS.sdd, sdd);
-        $.ui.log("Proctor: SDD session marked complete");
+        $.ui.log("Proctor: SDD session ended");
       }
     }
 
@@ -716,46 +817,26 @@ export const register: Register = (on, options) => {
   });
 
   // ───────────────────────────────────────────────────────────────────
-  //  11. RULING AGGREGATION — surface all rulings at session end
+  //  10. TOOL DESCRIPTIONS — inject gate awareness so the model
+  //      knows about enforcement before hitting it
   // ───────────────────────────────────────────────────────────────────
 
-  on("turn.complete", async ($: any, e: any, next: any) => {
-    const result = await next(e);
-    const answer: string = e.answer ?? "";
+  on(
+    "tool.describe",
+    { tool: "Bash" },
+    async ($: any, e: any, next: any) => {
+      const result = await next(e);
+      const description: string = result.description ?? "";
 
-    // Detect session completion signals
-    const isFinishing =
-      /\b(finishing-a-development-branch|all\s+tasks?\s+complete|sdd\s+done)\b/i.test(
-        answer
-      );
-    if (!isFinishing) return result;
+      const gateNotice =
+        "\n[Proctor] Git commit/push/merge requires fresh passing " +
+        "test evidence. Protected branches require explicit consent " +
+        '("proctor: allow <branch>").';
 
-    const sdd = await load<SDDState | null>($, KEYS.sdd, null);
-    if (!sdd || sdd.rulings.length === 0) return result;
-
-    const rulingList = sdd.rulings
-      .map(
-        (r, i) =>
-          `${i + 1}. [Task ${r.task}, ${r.phase}] ${r.text}` +
-          (r.costIfWrong !== "unknown" ? ` — cost: ${r.costIfWrong}` : "")
-      )
-      .join("\n");
-
-    const minorList =
-      sdd.deferredMinors.length > 0
-        ? sdd.deferredMinors
-            .map((m) => `- [Task ${m.task}] ${m.finding}`)
-            .join("\n")
-        : "none";
-
-    return {
-      ...result,
-      context: [
-        ...(result.context ?? []),
-        `Proctor ruling aggregation — include these in your final message:\n\n` +
-          `RULINGS MADE (${sdd.rulings.length}):\n${rulingList}\n\n` +
-          `DEFERRED MINORS (${sdd.deferredMinors.length}):\n${minorList}`,
-      ],
-    };
-  });
+      return {
+        ...result,
+        description: description + gateNotice,
+      };
+    },
+  );
 };

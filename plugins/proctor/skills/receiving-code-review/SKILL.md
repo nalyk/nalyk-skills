@@ -31,3 +31,22 @@ Technical correctness over social comfort.
 Push back when the suggestion would break existing tests, conflicts with
 architectural decisions, or the reviewer misunderstands context. Push
 back with evidence, not opinion.
+
+## Classification Framework
+
+Not all feedback is equal. Classify each item before acting:
+
+| Category | Action | Example |
+|----------|--------|---------|
+| **Correctness** | Fix immediately, test | "This null check misses the empty-string case" |
+| **Architecture** | Evaluate against codebase patterns | "Extract this into a service" |
+| **Style/naming** | Accept if consistent with project | "Rename `getData` to `fetchUserProfile`" |
+| **Speculative** | Push back with evidence | "What if we need X in the future?" |
+| **Contradictory** | Flag the conflict, ask for resolution | Reviewer A says X, reviewer B says not-X |
+
+## After Implementation
+
+Run the full test suite after each change. Use
+proctor:verification-before-completion before claiming the review is
+addressed. The git gate blocks your commit if tests aren't fresh and
+passing — this is intentional.
