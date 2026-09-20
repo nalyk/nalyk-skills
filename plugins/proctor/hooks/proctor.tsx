@@ -343,12 +343,20 @@ function buildSDDInjection(sdd: SDDState, stepBudget: number, timeBudgetMs: numb
 // ─────────────────────────────────────────────────────────────────────
 
 export const register: Register = (on, options) => {
-  const PROTECTED_BRANCHES = (options?.protectedBranches as string[]) ?? [
-    "main",
-    "master",
-    "production",
-    "release",
-  ];
+  // A `multiple` userConfig field arrives as a string when one value is
+  // stored (and the manifest default is a plain string), as an array when
+  // several are. Normalise both, plus comma/space separated input.
+  const configuredBranches = (
+    Array.isArray(options?.protectedBranches)
+      ? (options.protectedBranches as unknown[])
+      : String(options?.protectedBranches ?? "").split(/[,\s]+/)
+  )
+    .map((b) => String(b).trim())
+    .filter(Boolean);
+
+  const PROTECTED_BRANCHES = configuredBranches.length
+    ? configuredBranches
+    : ["main", "master", "production", "release"];
   const TEST_FRESHNESS_MS =
     ((options?.testFreshnessMinutes as number) ?? 5) * 60_000;
   const WATCHDOG_TURN_THRESHOLD =
