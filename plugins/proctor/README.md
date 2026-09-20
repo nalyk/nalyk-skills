@@ -101,6 +101,7 @@ protection, SDD dashboard, state persistence — do not fire.
 | **Test freshness** | `git commit`, `git push` | Test run within 5 minutes (configurable) |
 | **Test passing** | `git commit`, `git push` | Last test run exit code 0 |
 | **Branch protection** | `git commit/push/merge/rebase/reset` on main/master | Feature branch or explicit human consent |
+| **Secret detection** | `git commit` with staged credentials | No AWS keys, API tokens, private keys, or hardcoded passwords in diff |
 
 ### Soft Enforcers (context injection — the agent is reminded)
 
@@ -109,8 +110,14 @@ protection, SDD dashboard, state persistence — do not fire.
 | **Skill watchdog** | 4+ turns without invoking a skill | "If a skill applies, invoke it now" (once) |
 | **Model selection** | Agent spawn without explicit model during SDD | "Session model may be unnecessarily expensive" |
 | **Fix-round cap** | Round N of 5 reached | "Adjudicate — do not dispatch another round" |
+| **Step budget** | 80% / 100% of tool call limit per task | Warning at 80%, forced adjudication at 100% |
+| **Time budget** | 80% / 100% of wall-clock limit per task | Warning at 80%, forced adjudication at 100% |
 | **Context pressure** | Turn 60, 80 | "SDD state survives compaction — verify ledger" |
 | **Ruling aggregation** | Session completion detected | Full list of rulings and deferred minors |
+| **Destructive command** | `rm -rf`, `chmod 777`, `curl\|bash`, etc. | "Verify this is intentional" |
+| **Diff size** | Commit exceeds 500 lines changed | "Consider breaking into smaller commits" |
+| **Test hint** | No tests run this session | Injects detected test command |
+| **Phase indicator** | Skill invocation changes lifecycle phase | Shows current phase in context |
 
 ### Infrastructure (invisible — the agent doesn't manage these)
 
@@ -123,10 +130,23 @@ protection, SDD dashboard, state persistence — do not fire.
 | **Branch tracking** | Detects branch changes for protection enforcement |
 | **Agent counting** | Tracks agents spawned for dashboard and diagnostics |
 | **Commit attribution** | Appends task references and test evidence to commit messages |
+| **Phase lifecycle** | Tracks idle → brainstorming → planning → implementing → reviewing → finishing |
+| **Quality metrics** | Cross-session counters: commits, gate denials, fix rounds, test runs |
+| **Ruling persistence** | Last 20 rulings preserved across sessions |
+
+### Operator Commands
+
+| Command | What it does |
+|---------|-------------|
+| `proctor: status` | Full status dashboard: phase, branch, SDD state, test evidence, quality metrics |
+| `proctor: show trace` | Last 25 structured trace events with timestamps |
+| `proctor: allow <branch>` | Grant consent for protected branch operations |
+| `proctor: approve design` | Exit planning mode |
+| `sdd done` / `proctor: sdd stop` | Deactivate SDD session |
 
 ## Skills
 
-Proctor includes 13 development skills. Each is a methodology document
+Proctor includes 14 development skills. Each is a methodology document
 the agent reads and follows. The hooks enforce the critical gates that
 skills alone cannot guarantee.
 
@@ -157,6 +177,8 @@ Plugin options (via `plugin.json` `userConfig`):
 | `testFreshnessMinutes` | `5` | How many minutes before test evidence expires |
 | `watchdogTurnThreshold` | `4` | Turns without a skill before the watchdog fires |
 | `fixRoundCap` | `5` | Maximum fix-loop rounds in SDD |
+| `stepBudgetPerTask` | `100` | Tool call limit per SDD task (warn 80%, block 100%) |
+| `timeBudgetPerTaskMinutes` | `30` | Wall-clock limit per SDD task in minutes (warn 80%, block 100%) |
 
 ## Architecture
 
@@ -165,8 +187,8 @@ proctor/
 ├── .claude-plugin/plugin.json     # Plugin manifest
 ├── hooks/
 │   ├── hooks.json                 # Module registration
-│   └── proctor.ts                 # All hook registrations (~500 lines)
-├── skills/                        # 13 methodology skills
+│   └── proctor.ts                 # All hook registrations
+├── skills/                        # 14 methodology skills
 │   ├── using-proctor/
 │   ├── brainstorming/
 │   ├── test-driven-development/

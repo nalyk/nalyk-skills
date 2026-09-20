@@ -49,6 +49,29 @@ reference them. What they enforce:
   are surfaced for inclusion in your final message.
 - **Context pressure warning.** At high turn counts, you are reminded that
   SDD state survives compaction and the ledger should be current.
+- **Secret detection gate.** `git commit` is hard-denied if the staged
+  diff contains AWS keys, API tokens, GitHub/GitLab PATs, private keys,
+  or hardcoded passwords. This is irreversible — credentials cannot be
+  un-pushed.
+- **Destructive command warning.** `rm -rf`, `chmod 777`, pipe-to-shell,
+  `dd if=`, and `mkfs` commands trigger a soft warning so you verify
+  intent before proceeding.
+- **Time budget.** During SDD, each task has a configurable wall-clock
+  limit. Warning at 80%, forced adjudication at 100%.
+- **Diff size awareness.** After a successful commit, a warning fires if
+  >500 lines changed, suggesting smaller focused commits.
+- **Test command hint.** If a test command has been detected but no tests
+  have been run this session, a hint is injected reminding you to run
+  tests before the git gate blocks you.
+- **Phase lifecycle tracking.** Your current development phase (idle →
+  brainstorming → planning → implementing → reviewing → finishing) is
+  tracked automatically based on skill invocations. It survives
+  compaction and is visible via `proctor: status`.
+- **Quality metrics.** Cross-session counters track total commits, gate
+  denials, fix rounds, and test runs. View with `proctor: status`.
+- **Trace visibility.** Type `proctor: show trace` to see the last 25
+  structured events with timestamps. Type `proctor: status` for a full
+  dashboard.
 
 ## The Rule
 

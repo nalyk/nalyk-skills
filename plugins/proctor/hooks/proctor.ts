@@ -51,6 +51,7 @@ interface SDDState {
   deferredMinors: DeferredMinor[];
   toolCallsThisTask: number;
   totalToolCalls: number;
+  taskStartedAt: number;
 }
 
 interface SessionState {
@@ -68,6 +69,13 @@ interface SessionState {
   turnCount: number;
   planningMode: boolean;
   planningSkill: string | null;
+  currentPhase:
+    | "idle"
+    | "brainstorming"
+    | "planning"
+    | "implementing"
+    | "reviewing"
+    | "finishing";
 }
 
 interface SessionHistory {
@@ -75,6 +83,13 @@ interface SessionHistory {
   projectPath: string | null;
   skillUsage: Record<string, number>;
   sessionsCount: number;
+  recentRulings: Array<{ text: string; ts: number }>;
+  qualityMetrics: {
+    totalCommits: number;
+    gateDenials: number;
+    fixRounds: number;
+    testsRun: number;
+  };
 }
 
 interface TraceEvent {
@@ -102,6 +117,13 @@ const DEFAULT_HISTORY: SessionHistory = {
   projectPath: null,
   skillUsage: {},
   sessionsCount: 0,
+  recentRulings: [],
+  qualityMetrics: {
+    totalCommits: 0,
+    gateDenials: 0,
+    fixRounds: 0,
+    testsRun: 0,
+  },
 };
 
 const TRACE_CAP = 50;
@@ -179,6 +201,44 @@ const GIT_COMMIT_PUSH_RE = /\bgit\s+(commit|push|merge)\b/;
 const GIT_DESTRUCTIVE_RE =
   /\bgit\s+(commit|push|merge|rebase|reset\s+--hard|force-push|checkout\s+--\s)\b/;
 
+// Destructive non-git bash commands — soft warning
+const DESTRUCTIVE_BASH_RE =
+  /(?:rm\s+(?:-[^\s]*r[^\s]*\s|--recursive\s)|chmod\s+(?:-R\s+)?777\s|curl\s[^|]*\|\s*(?:sudo\s+)?(?:bash|sh|zsh)|wget\s[^|]*\|\s*(?:sudo\s+)?(?:bash|sh|zsh)|dd\s+if=|mkfs\.|>\s*\/dev\/sd)/;
+
+// Secret/credential patterns — hard gate on git commit
+const SECRET_PATTERNS: RegExp[] = [
+  /AKIA[0-9A-Z]{16}/,
+  /(?:^|[\s'"=:])sk-[a-zA-Z0-9]{20,}/m,
+  /ghp_[a-zA-Z0-9]{36}/,
+  /gho_[a-zA-Z0-9]{36}/,
+  /glpat-[a-zA-Z0-9\-_]{20,}/,
+  /-----BEGIN\s+(?:RSA\s+|EC\s+|DSA\s+|OPENSSH\s+)?PRIVATE\s+KEY/,
+  /(?:password|passwd|pwd)\s*[:=]\s*['"][^'"]{8,}['"]/i,
+  /(?:api[_-]?key|apikey|secret[_-]?key|auth[_-]?token)\s*[:=]\s*['"][^'"]{12,}['"]/i,
+];
+
+// Skill → lifecycle phase mapping
+const SKILL_PHASE_MAP: Record<string, SessionState["currentPhase"]> = {
+  brainstorming: "brainstorming",
+  "proctor:brainstorming": "brainstorming",
+  "writing-plans": "planning",
+  "proctor:writing-plans": "planning",
+  "test-driven-development": "implementing",
+  "proctor:test-driven-development": "implementing",
+  "subagent-driven-development": "implementing",
+  "proctor:subagent-driven-development": "implementing",
+  "executing-plans": "implementing",
+  "proctor:executing-plans": "implementing",
+  "systematic-debugging": "implementing",
+  "proctor:systematic-debugging": "implementing",
+  "requesting-code-review": "reviewing",
+  "proctor:requesting-code-review": "reviewing",
+  "receiving-code-review": "reviewing",
+  "proctor:receiving-code-review": "reviewing",
+  "finishing-a-development-branch": "finishing",
+  "proctor:finishing-a-development-branch": "finishing",
+};
+
 // Planning-mode skills — these block implementation
 const PLANNING_SKILLS = new Set([
   "brainstorming",
@@ -224,7 +284,7 @@ function formatElapsed(ms: number): string {
   return `${hours}h${mins % 60}m`;
 }
 
-function buildSDDInjection(sdd: SDDState, stepBudget: number): string {
+function buildSDDInjection(sdd: SDDState, stepBudget: number, timeBudgetMs: number = 0): string {
   const completed = sdd.completedTasks;
   const rulingsSummary = sdd.rulings
     .map(
@@ -247,6 +307,9 @@ function buildSDDInjection(sdd: SDDState, stepBudget: number): string {
     `Resume from: Task ${completed.length > 0 ? Math.max(...completed) + 1 : 1}`,
     `Fix rounds this task: ${sdd.currentFixRound} | total: ${sdd.totalFixRounds}`,
     `Step budget: ${sdd.toolCallsThisTask}/${stepBudget} (${budgetPct}%)`,
+    timeBudgetMs > 0 && sdd.taskStartedAt > 0
+      ? `Time budget: ${formatElapsed(Date.now() - sdd.taskStartedAt)}/${formatElapsed(timeBudgetMs)} (${Math.round(((Date.now() - sdd.taskStartedAt) / timeBudgetMs) * 100)}%)`
+      : "",
     `Agents spawned: ${sdd.totalAgents}`,
     sdd.rulings.length > 0
       ? `Rulings made (${sdd.rulings.length}):\n${rulingsSummary}`
@@ -278,6 +341,8 @@ export const register: Register = (on, options) => {
   const FIX_ROUND_CAP = (options?.fixRoundCap as number) ?? 5;
   const STEP_BUDGET_PER_TASK =
     (options?.stepBudgetPerTask as number) ?? 100;
+  const TIME_BUDGET_PER_TASK_MS =
+    ((options?.timeBudgetPerTaskMinutes as number) ?? 30) * 60_000;
 
   // ───────────────────────────────────────────────────────────────────
   //  1. SESSION START — detect environment, initialize state
@@ -371,6 +436,7 @@ export const register: Register = (on, options) => {
       turnCount: 0,
       planningMode: false,
       planningSkill: null,
+      currentPhase: "idle",
     };
 
     await save($, KEYS.session, session);
@@ -402,7 +468,7 @@ export const register: Register = (on, options) => {
       const blocks: string[] = [];
 
       const sdd = await load<SDDState | null>($, KEYS.sdd, null);
-      if (sdd?.active) blocks.push(buildSDDInjection(sdd, STEP_BUDGET_PER_TASK));
+      if (sdd?.active) blocks.push(buildSDDInjection(sdd, STEP_BUDGET_PER_TASK, TIME_BUDGET_PER_TASK_MS));
 
       const test = await load<TestEvidence | null>($, KEYS.test, null);
       if (test) {
@@ -424,6 +490,23 @@ export const register: Register = (on, options) => {
             `Skill: ${session.planningSkill ?? "unknown"}. ` +
             `Write/Edit/NotebookEdit are BLOCKED until the design is ` +
             `approved and an implementation skill is invoked.`,
+        );
+      }
+
+      if (session && session.currentPhase !== "idle") {
+        blocks.push(
+          `[PROCTOR — PHASE] ${session.currentPhase}` +
+            (session.lastSkillName
+              ? ` (via ${session.lastSkillName})`
+              : ""),
+        );
+      }
+
+      if (session?.testCommand && !test) {
+        blocks.push(
+          `[PROCTOR — TEST HINT] Detected test command: \`${session.testCommand}\`. ` +
+            `No tests have been run this session — the git gate will ` +
+            `block commits until you run tests.`,
         );
       }
 
@@ -503,6 +586,40 @@ export const register: Register = (on, options) => {
       }
     }
 
+    // ── GATE: Secret/credential detection before git commit ────────
+    if (/\bgit\s+commit\b/.test(cmd)) {
+      try {
+        const diff = await $.process.run(["git", "diff", "--cached", "-U0"]);
+        const diffText: string = diff.stdout ?? "";
+        for (const pattern of SECRET_PATTERNS) {
+          if (pattern.test(diffText)) {
+            await trace($, "gate-deny", `secret-detected: ${pattern.source.substring(0, 30)}`);
+            const hist = await load<SessionHistory>($, KEYS.history, DEFAULT_HISTORY);
+            hist.qualityMetrics.gateDenials++;
+            await save($, KEYS.history, hist);
+            return {
+              deny:
+                `Proctor gate: potential credential/secret detected in staged changes. ` +
+                `Pattern: ${pattern.source.substring(0, 40)}...\n` +
+                `Review staged files with \`git diff --cached\` and remove ` +
+                `secrets before committing. Use environment variables or ` +
+                `a secrets manager instead of hardcoded credentials.`,
+            };
+          }
+        }
+      } catch {
+        // Diff unavailable — skip secret scan, other gates still apply
+      }
+    }
+
+    // ── SOFT: Destructive bash command awareness ──────────────────
+    if (DESTRUCTIVE_BASH_RE.test(cmd)) {
+      $.ui.log(
+        `Proctor: destructive command detected. Verify this is intentional.`,
+      );
+      await trace($, "destructive-cmd-warn", cmd.substring(0, 80));
+    }
+
     // ── SDD step budget tracking ───────────────────────────────────
     const sdd = await load<SDDState | null>($, KEYS.sdd, null);
     if (sdd?.active) {
@@ -567,6 +684,44 @@ export const register: Register = (on, options) => {
           await save($, KEYS.session, session);
           await trace($, "branch-change", `to=${session.branch}`);
         }
+      } catch {
+        // Non-critical
+      }
+    }
+
+    // ── POST: Diff size awareness after successful commit ─────────
+    if (/\bgit\s+commit\b/.test(cmd) && result.exitCode === 0) {
+      try {
+        const stat = await $.process.run(["git", "diff", "HEAD~1", "--stat"]);
+        const lines = (stat.stdout ?? "").split("\n");
+        const summary = lines[lines.length - 2] ?? "";
+        const insMatch = summary.match(/(\d+)\s+insertion/);
+        const delMatch = summary.match(/(\d+)\s+deletion/);
+        const total =
+          parseInt(insMatch?.[1] ?? "0", 10) +
+          parseInt(delMatch?.[1] ?? "0", 10);
+        if (total > 500) {
+          $.ui.log(
+            `Proctor: large commit (${total} lines changed). ` +
+              `Consider breaking into smaller, focused commits for easier review.`,
+          );
+          await trace($, "large-commit", `${total} lines`);
+        }
+        // Quality metrics
+        const hist = await load<SessionHistory>($, KEYS.history, DEFAULT_HISTORY);
+        hist.qualityMetrics.totalCommits++;
+        await save($, KEYS.history, hist);
+      } catch {
+        // Non-critical
+      }
+    }
+
+    // ── POST: Track test run count for quality metrics ─────────────
+    if (TEST_RUN_RE.test(cmd)) {
+      try {
+        const hist = await load<SessionHistory>($, KEYS.history, DEFAULT_HISTORY);
+        hist.qualityMetrics.testsRun++;
+        await save($, KEYS.history, hist);
       } catch {
         // Non-critical
       }
@@ -676,6 +831,14 @@ export const register: Register = (on, options) => {
         }
         session.planningMode = false;
         session.planningSkill = null;
+      }
+
+      // Phase lifecycle tracking
+      const phase = SKILL_PHASE_MAP[skillName];
+      if (phase && session.currentPhase !== phase) {
+        const prev = session.currentPhase;
+        session.currentPhase = phase;
+        await trace($, "phase-transition", `${prev} → ${phase} (${skillName})`);
       }
 
       await save($, KEYS.session, session);
@@ -842,6 +1005,7 @@ export const register: Register = (on, options) => {
           deferredMinors: [],
           toolCallsThisTask: 0,
           totalToolCalls: 0,
+          taskStartedAt: Date.now(),
         };
         sddChanged = true;
         $.ui.log("Proctor: SDD session started — state tracking active");
@@ -859,6 +1023,7 @@ export const register: Register = (on, options) => {
             sdd.currentTask = taskNum + 1;
             sdd.currentFixRound = 0;
             sdd.toolCallsThisTask = 0;
+            sdd.taskStartedAt = Date.now();
             sddChanged = true;
             await trace($, "sdd-task-complete", `task=${taskNum}`);
           }
@@ -872,6 +1037,12 @@ export const register: Register = (on, options) => {
           sdd.totalFixRounds++;
           sddChanged = true;
           await trace($, "sdd-fix-round", `task=${sdd.currentTask} round=${round}`);
+
+          try {
+            const hist = await load<SessionHistory>($, KEYS.history, DEFAULT_HISTORY);
+            hist.qualityMetrics.fixRounds++;
+            await save($, KEYS.history, hist);
+          } catch { /* non-critical */ }
 
           if (round >= FIX_ROUND_CAP) {
             contextAdditions.push(
@@ -911,6 +1082,41 @@ export const register: Register = (on, options) => {
               $,
               "budget-warning",
               `task=${sdd.currentTask} pct=${pct}`,
+            );
+          }
+        }
+
+        // ── Time budget enforcement ──────────────────────────────
+        if (TIME_BUDGET_PER_TASK_MS > 0 && sdd.taskStartedAt > 0) {
+          const taskElapsed = Date.now() - sdd.taskStartedAt;
+          const timePct = Math.round(
+            (taskElapsed / TIME_BUDGET_PER_TASK_MS) * 100,
+          );
+          if (timePct >= 100) {
+            contextAdditions.push(
+              `Proctor: time budget EXHAUSTED for Task ${sdd.currentTask} ` +
+                `(${formatElapsed(taskElapsed)} / ` +
+                `${formatElapsed(TIME_BUDGET_PER_TASK_MS)}). ` +
+                `Either: (1) adjudicate and complete with current state, ` +
+                `(2) record a ruling why more time is needed, or ` +
+                `(3) escalate to your human partner.`,
+            );
+            await trace(
+              $,
+              "time-budget-exhausted",
+              `task=${sdd.currentTask} elapsed=${formatElapsed(taskElapsed)}`,
+            );
+          } else if (timePct >= 80 && timePct < 100) {
+            contextAdditions.push(
+              `Proctor: time budget warning — Task ${sdd.currentTask} ` +
+                `at ${timePct}% (${formatElapsed(taskElapsed)} / ` +
+                `${formatElapsed(TIME_BUDGET_PER_TASK_MS)}). ` +
+                `Wrap up or prepare to adjudicate.`,
+            );
+            await trace(
+              $,
+              "time-budget-warning",
+              `task=${sdd.currentTask} pct=${timePct}`,
             );
           }
         }
@@ -964,6 +1170,19 @@ export const register: Register = (on, options) => {
           });
           sddChanged = true;
           await trace($, "ruling", rulingMatch[1]?.trim() ?? "");
+
+          // Persist ruling to cross-session history
+          try {
+            const hist = await load<SessionHistory>($, KEYS.history, DEFAULT_HISTORY);
+            hist.recentRulings.push({
+              text: rulingMatch[1]?.trim() ?? "",
+              ts: Date.now(),
+            });
+            if (hist.recentRulings.length > 20) {
+              hist.recentRulings = hist.recentRulings.slice(-20);
+            }
+            await save($, KEYS.history, hist);
+          } catch {}
         }
 
         // Detect deferred minors
@@ -1289,6 +1508,86 @@ export const register: Register = (on, options) => {
         await save($, KEYS.sdd, sdd);
         $.ui.log("Proctor: SDD session ended");
         await trace($, "sdd-end", `tasks=${sdd.completedTasks.length}/${sdd.totalTasks}`);
+      }
+    }
+
+    // Trace visibility: "proctor: show trace"
+    if (/\bproctor:\s*show\s+trace\b/i.test(text)) {
+      try {
+        const events = await load<TraceEvent[]>($, KEYS.trace, []);
+        const recent = events.slice(-25);
+        if (recent.length === 0) {
+          $.ui.log("Proctor trace: no events recorded yet.");
+        } else {
+          const lines = recent.map(
+            (ev) =>
+              `[${new Date(ev.ts).toISOString().substring(11, 19)}] ${ev.kind}: ${ev.detail}`,
+          );
+          $.ui.log(`Proctor trace (last ${recent.length}):\n${lines.join("\n")}`);
+        }
+      } catch {
+        $.ui.log("Proctor trace: unable to read trace log.");
+      }
+    }
+
+    // Status dashboard: "proctor: status"
+    if (/\bproctor:\s*status\b/i.test(text)) {
+      try {
+        const session = await load<SessionState | null>($, KEYS.session, null);
+        const sdd = await load<SDDState | null>($, KEYS.sdd, null);
+        const test = await load<TestEvidence | null>($, KEYS.test, null);
+        const hist = await load<SessionHistory>($, KEYS.history, DEFAULT_HISTORY);
+
+        const parts: string[] = ["─── Proctor Status ───"];
+
+        if (session) {
+          parts.push(`Phase: ${session.currentPhase}`);
+          parts.push(`Branch: ${session.branch ?? "unknown"}`);
+          parts.push(`Turn: ${session.turnCount}`);
+          parts.push(`Planning mode: ${session.planningMode ? "ON" : "off"}`);
+          parts.push(`Last skill: ${session.lastSkillName ?? "none"}`);
+        }
+
+        if (sdd?.active) {
+          const budgetPct = STEP_BUDGET_PER_TASK > 0
+            ? Math.round((sdd.toolCallsThisTask / STEP_BUDGET_PER_TASK) * 100)
+            : 0;
+          parts.push(
+            `SDD: Task ${sdd.currentTask}/${sdd.totalTasks} · ` +
+              `${sdd.completedTasks.length} complete · ` +
+              `Fix ${sdd.currentFixRound}/${FIX_ROUND_CAP} · ` +
+              `Steps ${budgetPct}% · ${sdd.totalAgents} agents · ` +
+              `${sdd.rulings.length} rulings · ` +
+              `${formatElapsed(Date.now() - sdd.startedAt)} elapsed`,
+          );
+        } else {
+          parts.push("SDD: inactive");
+        }
+
+        if (test) {
+          const age = Math.round((Date.now() - test.timestamp) / 60_000);
+          const fresh = (Date.now() - test.timestamp) < TEST_FRESHNESS_MS;
+          parts.push(
+            `Tests: ${test.exitCode === 0 ? "passing" : "FAILING"} · ` +
+              `${fresh ? "fresh" : "STALE"} · ${age}m ago`,
+          );
+        } else {
+          parts.push("Tests: no evidence");
+        }
+
+        const qm = hist.qualityMetrics;
+        parts.push(
+          `Quality: ${qm.totalCommits} commits · ` +
+            `${qm.gateDenials} denials · ` +
+            `${qm.fixRounds} fix rounds · ` +
+            `${qm.testsRun} test runs`,
+        );
+
+        parts.push(`Sessions: ${hist.sessionsCount}`);
+
+        $.ui.log(parts.join("\n"));
+      } catch {
+        $.ui.log("Proctor: unable to read status.");
       }
     }
 
