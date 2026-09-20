@@ -1,0 +1,22 @@
+{
+  "name": "proctor",
+  "description": "Hook-enforced development discipline for Claude Code. Skills teach methodology; hooks enforce compliance; store survives compaction.",
+  "version": "1.0.0",
+  "author": {
+    "name": "nalyk"
+  },
+  "homepage": "https://github.com/nalyk/proctor",
+  "repository": "https://github.com/nalyk/proctor",
+  "license": "MIT",
+  "keywords": [
+    "skills",
+    "hooks",
+    "function-hooks",
+    "tdd",
+    "debugging",
+    "verification",
+    "enforcement",
+    "subagent-driven-development",
+    "discipline"
+  ]
+}

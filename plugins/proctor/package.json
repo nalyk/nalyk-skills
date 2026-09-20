@@ -1,0 +1,17 @@
+{
+  "name": "proctor",
+  "version": "1.0.0",
+  "description": "Hook-enforced development discipline for Claude Code",
+  "license": "MIT",
+  "keywords": [
+    "claude-code",
+    "function-hooks",
+    "tdd",
+    "development-discipline",
+    "verification",
+    "subagent-driven-development"
+  ],
+  "engines": {
+    "claude-code": ">=2.1.260"
+  }
+}

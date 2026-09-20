@@ -1,6 +1,6 @@
 # nalyk-skills
 
-Personal Claude Code plugin marketplace. 8 plugins covering automation, orchestration, code review, debugging, multi-model debate, SEO analysis, and philosophical reasoning.
+Personal Claude Code plugin marketplace. 9 plugins covering automation, orchestration, code review, debugging, multi-model debate, SEO analysis, philosophical reasoning, and hook-enforced development discipline.
 
 ## Installation
 
@@ -207,6 +207,43 @@ Powerline-style status bar for Claude Code. Shows model badge, git status, conte
 **Requirements:** `jq`, terminal with Unicode support. Powerline font recommended.
 
 Auto-configures via `SessionStart` hook only when no statusLine is set; never overwrites an existing one. Restart Claude Code after install.
+
+---
+
+### proctor (v1.0.0)
+
+Hook-enforced development discipline for Claude Code. Skills teach methodology; hooks enforce compliance; store survives compaction. The first development discipline plugin where critical rules are enforced by code, not compliance.
+
+```bash
+/plugin install proctor@nalyk-skills
+```
+
+**Requirements:** Claude Code CLI >= 2.1.260, `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1`, a git repository.
+
+**Skills (13):**
+
+| Skill | Purpose |
+|-------|---------|
+| `using-proctor` | Bootstrap -- skill discovery and hook awareness |
+| `brainstorming` | Turn ideas into designs (spike/bounded/architectural) |
+| `test-driven-development` | Red-green-refactor with git gate enforcement |
+| `systematic-debugging` | Root cause before fixes, four-phase investigation |
+| `verification-before-completion` | Evidence before claims, mechanically enforced |
+| `subagent-driven-development` | Fresh agents per task with dashboard + state persistence |
+| `executing-plans` | Inline plan execution with same enforcement as SDD |
+| `writing-plans` | Create implementation plans from specs |
+| `requesting-code-review` | Dispatch reviewers with proper packages |
+| `receiving-code-review` | Evaluate feedback technically |
+| `finishing-a-development-branch` | Verify -> present options -> execute -> clean up |
+| `using-git-worktrees` | Workspace isolation with branch protection |
+| `dispatching-parallel-agents` | Independent concurrent tasks |
+| `writing-skills` | TDD applied to skill creation |
+
+**Hard gates:** Test evidence, test freshness, test passing, branch protection (all block git commit/push without compliance).
+
+**Soft enforcers:** Skill watchdog, model selection, fix-round cap, context pressure, ruling aggregation.
+
+Without `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1`, the skills still work as prose guidance but hooks do not fire.
 
 ---
 
