@@ -203,7 +203,7 @@ proctor/
 ├── .claude-plugin/plugin.json     # Plugin manifest
 ├── hooks/
 │   ├── hooks.json                 # Module registration
-│   └── proctor.ts                 # All hook registrations
+│   └── proctor.tsx                # All hook registrations
 ├── skills/                        # 14 methodology skills
 │   ├── using-proctor/
 │   ├── brainstorming/

@@ -1657,15 +1657,15 @@ export const register: Register = (on, options) => {
     if (quietMatch) {
       const session = await load<SessionState | null>($, KEYS.session, null);
       if (session) {
-        const on = quietMatch[1].toLowerCase() === "on";
-        session.quietMode = on;
+        const quietOn = quietMatch[1].toLowerCase() === "on";
+        session.quietMode = quietOn;
         await save($, KEYS.session, session);
         $.ui.log(
-          on
+          quietOn
             ? "Proctor: quiet mode ON — soft warnings suppressed, hard gates still enforce."
             : "Proctor: quiet mode OFF — all warnings active.",
         );
-        await trace($, "quiet-mode", on ? "on" : "off");
+        await trace($, "quiet-mode", quietOn ? "on" : "off");
       }
     }
 
