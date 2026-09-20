@@ -1519,7 +1519,7 @@ export const register: Register = (on, options) => {
       const sdd = await load<SDDState | null>($, KEYS.sdd, null);
       if (!sdd?.active) return next(e);
 
-      const t = await $.ui.resolve(e);
+      const { Box, Text } = await $.ui.resolve(e);
       const elapsed = formatElapsed(Date.now() - sdd.startedAt);
       const pct =
         sdd.totalTasks > 0
@@ -1554,9 +1554,9 @@ export const register: Register = (on, options) => {
       parts.push(elapsed);
 
       return (
-        <t.Box>
-          <t.Text>{parts.join(" │ ")}</t.Text>
-        </t.Box>
+        <Box>
+          <Text>{parts.join(" │ ")}</Text>
+        </Box>
       );
     },
   );
