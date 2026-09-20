@@ -14,8 +14,10 @@ compensates: the brief is the spec, the ledger is your memory, TDD is
 the per-task gate, the final reviewer is the second pair of eyes.
 
 **Hook enforcement:** Same as SDD — Proctor tracks task state, shows the
-progress dashboard, enforces the git gate, and persists recovery state.
-The `[PROCTOR — SDD STATE]` block appears after compaction.
+progress dashboard (including step budget usage), enforces the git gate
+and step budget (warning at 80%, forced adjudication at 100%), and
+persists recovery state. The `[PROCTOR — SDD STATE]` block appears
+after compaction. All transitions are traced to $.store.
 
 **Core principle:** The plan already did the thinking. Execute it exactly,
 prove each step with a test you watched fail and then pass, leave a record.

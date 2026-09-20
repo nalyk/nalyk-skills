@@ -1,8 +1,8 @@
 {
   "name": "proctor",
   "displayName": "Proctor",
-  "description": "Hook-enforced development discipline for Claude Code. Skills teach methodology; hooks enforce compliance; store survives compaction.",
-  "version": "1.0.0",
+  "description": "Hook-enforced development discipline for Claude Code. Skills teach methodology; hooks enforce compliance mechanically (git gates, planning mode, step budgets); store + tracing survive compaction.",
+  "version": "2.0.0",
   "author": {
     "name": "nalyk"
   },
@@ -20,7 +20,11 @@
     "subagent-driven-development",
     "discipline",
     "git-gates",
-    "branch-protection"
+    "branch-protection",
+    "planning-mode",
+    "step-budget",
+    "observability",
+    "tracing"
   ],
   "userConfig": {
     "protectedBranches": {
@@ -53,6 +57,14 @@
       "default": 5,
       "min": 2,
       "max": 15
+    },
+    "stepBudgetPerTask": {
+      "type": "number",
+      "title": "Step budget per task",
+      "description": "Maximum tool calls allowed per SDD task before forcing adjudication. Warns at 80%, blocks at 100%.",
+      "default": 100,
+      "min": 20,
+      "max": 500
     }
   }
 }

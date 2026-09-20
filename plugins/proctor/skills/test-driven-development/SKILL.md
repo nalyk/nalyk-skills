@@ -95,6 +95,12 @@ Keep tests green. Don't add behavior.
 | "TDD will slow me down" | TDD catches bugs before commit. "Shortcuts" mean debugging in production. |
 | "This is different because..." | No it isn't. Delete code. Start over with TDD. |
 
+## Cross-References
+
+- **When tests fail unexpectedly:** proctor:systematic-debugging
+- **Before claiming tests pass:** proctor:verification-before-completion
+- **When implementing a plan:** proctor:executing-plans loads this skill first
+
 ## Quick Reference
 
 | Phase | Action | Success Criteria |

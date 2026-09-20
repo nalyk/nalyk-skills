@@ -44,6 +44,21 @@ Not all feedback is equal. Classify each item before acting:
 | **Speculative** | Push back with evidence | "What if we need X in the future?" |
 | **Contradictory** | Flag the conflict, ask for resolution | Reviewer A says X, reviewer B says not-X |
 
+## Multi-Round Reviews
+
+When fixes generate new findings:
+
+1. Implement one finding at a time, test after each
+2. If a fix breaks something else, use proctor:systematic-debugging
+3. Track round count — if reviews aren't converging after 3 rounds,
+   escalate to your human partner
+
+## Cross-References
+
+- **Dispatching the reviewer:** proctor:requesting-code-review
+- **During SDD fix loops:** proctor:subagent-driven-development governs
+  the fix-loop cycle and cap
+
 ## After Implementation
 
 Run the full test suite after each change. Use

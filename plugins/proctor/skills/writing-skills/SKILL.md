@@ -72,3 +72,25 @@ Run adversarial pressure tests:
 2. Edge cases where the skill's rules are ambiguous
 3. Multi-session scenarios testing skill persistence
 4. Scenarios testing interaction with Proctor's hook enforcement
+
+## Structural Elements
+
+Skills can use XML elements for enforcement:
+
+- `<HARD-GATE>` — marks a point where the agent MUST stop and get
+  approval before proceeding. The brainstorming skill uses this.
+- `<SUBAGENT-STOP>` — prevents subagents from loading a skill meant
+  only for the controller. The using-proctor skill uses this.
+
+## File Conventions
+
+- Skill location: `plugins/<plugin>/skills/<skill-name>/SKILL.md`
+- Frontmatter is required: `name` and `description` fields
+- Description should state WHEN to use, not WHAT it does
+
+## Cross-References
+
+- **Testing methodology:** proctor:test-driven-development — the TDD
+  cycle this skill applies to process documentation
+- **Hook interaction:** Skills are tracked by the `skill.prompt` hook.
+  Proctor injects live discipline state into every skill prompt.

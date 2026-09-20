@@ -32,6 +32,16 @@ reference them. What they enforce:
   prompt showing completion percentage, task count, agent count, fix
   rounds, and elapsed time.
 - **Fix-round cap.** The hooks track fix rounds and warn at the cap.
+- **Planning mode gate.** When brainstorming or writing-plans is active,
+  Write/Edit tool calls for implementation files are mechanically blocked.
+  Design docs (.md) are allowed. Exit with an implementation skill or
+  "proctor: approve design".
+- **Step budget.** During SDD, each task has a configurable step budget
+  (tool call limit). The dashboard shows usage percentage. Warning at 80%,
+  forced adjudication at 100%.
+- **Structured tracing.** All gate denials, skill invocations, SDD
+  transitions, and agent spawns are logged to a ring buffer in $.store
+  for observability.
 - **Model selection nudge.** When spawning subagents without specifying a
   model, you are reminded that the session model may be unnecessarily
   expensive.
@@ -83,6 +93,8 @@ Proctor's enforcement thresholds are configurable via plugin settings:
   reminder fires (default: 4)
 - **Fix-round cap** — maximum fix attempts before forced adjudication
   (default: 5)
+- **Step budget per task** — tool call limit per SDD task before forced
+  adjudication (default: 100)
 
 These are set per-user via the plugin configuration UI. You do not need
 to manage them — the hooks read them automatically.

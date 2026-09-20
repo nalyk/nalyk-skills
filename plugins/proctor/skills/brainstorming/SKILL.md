@@ -9,6 +9,16 @@ Turn ideas into fully formed designs through collaborative dialogue.
 
 Classify the request, work through the path, get approval.
 
+## Overview
+
+**Core principle:** Intent before implementation. Understand what success
+looks like before writing a single line of code.
+
+**Hook enforcement:** Proctor's planning mode gate mechanically blocks
+Write/Edit tool calls for implementation files while this skill is active.
+Design docs (.md files) are allowed. Exit planning mode by invoking an
+implementation skill or saying "proctor: approve design".
+
 ## Establish Shared Understanding
 
 1. **Discover intent.** Identify the intended outcome, who it is for, and
@@ -62,6 +72,15 @@ When in doubt, take the heavier path. Nothing downgrades mid-task.
 | "Bounded because I know this kind of app" | Bounded measures the repo, not your familiarity. |
 | "The spike works, so I'll keep the code" | Spike output is an answer. Keeping the code is a new request. |
 | "It grew, but I'm almost done" | Hidden complexity upgrades the path. Stop and say so. |
+
+## Cross-References
+
+- **After Architectural design:** proctor:writing-plans creates the
+  implementation plan
+- **Implementation:** proctor:subagent-driven-development or
+  proctor:executing-plans
+- **When a Spike reveals complexity:** Upgrade to Bounded or Architectural
+  — nothing downgrades mid-task
 
 ## Checklist
 

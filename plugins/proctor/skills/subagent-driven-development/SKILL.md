@@ -17,10 +17,12 @@ for coordination.
 
 **Hook enforcement:** Proctor tracks your SDD state automatically. The
 progress dashboard above the prompt shows completion percentage, task
-count, agent count, fix rounds, and elapsed time. After compaction, the
-`[PROCTOR — SDD STATE]` block in your context shows the recovery point —
-which tasks are complete, which is current, and what rulings you made.
-The hooks enforce the fix-round cap and nudge model selection.
+count, agent count, fix rounds, step budget usage, and elapsed time.
+After compaction, the `[PROCTOR — SDD STATE]` block in your context
+shows the recovery point — which tasks are complete, which is current,
+and what rulings you made. The hooks enforce the fix-round cap, step
+budget (warning at 80%, forced adjudication at 100%), and nudge model
+selection. All transitions are traced to $.store for observability.
 
 **Narration:** between tool calls, narrate at most one short line.
 

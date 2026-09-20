@@ -210,9 +210,9 @@ Auto-configures via `SessionStart` hook only when no statusLine is set; never ov
 
 ---
 
-### proctor (v1.0.0)
+### proctor (v2.0.0)
 
-Hook-enforced development discipline for Claude Code. Skills teach methodology; hooks enforce compliance; store survives compaction. The first development discipline plugin where critical rules are enforced by code, not compliance.
+Hook-enforced development discipline for Claude Code. Skills teach methodology; hooks enforce compliance mechanically (git gates, planning mode, step budgets); store + tracing survive compaction.
 
 ```bash
 /plugin install proctor@nalyk-skills
@@ -220,7 +220,7 @@ Hook-enforced development discipline for Claude Code. Skills teach methodology; 
 
 **Requirements:** Claude Code CLI >= 2.1.260, `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1`, a git repository.
 
-**Skills (13):**
+**Skills (14):**
 
 | Skill | Purpose |
 |-------|---------|
@@ -239,9 +239,13 @@ Hook-enforced development discipline for Claude Code. Skills teach methodology; 
 | `dispatching-parallel-agents` | Independent concurrent tasks |
 | `writing-skills` | TDD applied to skill creation |
 
-**Hard gates:** Test evidence, test freshness, test passing, branch protection (all block git commit/push without compliance).
+**Hard gates:** Test evidence, test freshness, test passing, branch protection, planning mode (Write/Edit blocked during design phases).
 
-**Soft enforcers:** Skill watchdog, model selection, fix-round cap, context pressure, ruling aggregation.
+**Soft enforcers:** Skill watchdog, model selection, fix-round cap, step budget (per-task tool call limit), context pressure, ruling aggregation, rationalization detection ($.model.fork).
+
+**Observability:** Structured event tracing — gate denials, skill invocations, SDD transitions, agent spawns logged to a ring buffer in $.store.
+
+**Configuration (5 options):** Protected branches, test freshness window, skill watchdog threshold, fix-round cap, step budget per task — all configurable via the plugin settings UI.
 
 Without `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1`, the skills still work as prose guidance but hooks do not fire.
 
