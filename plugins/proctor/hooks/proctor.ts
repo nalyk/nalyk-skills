@@ -56,6 +56,8 @@ interface SDDState {
   stepWarned100: boolean;
   timeWarned80: boolean;
   timeWarned100: boolean;
+  failedApproaches: string[];
+  completedEvidence: Record<number, string>;
 }
 
 interface SessionState {
@@ -92,6 +94,7 @@ interface SessionHistory {
   qualityMetrics: {
     totalCommits: number;
     gateDenials: number;
+    gatesPassed: number;
     fixRounds: number;
     testsRun: number;
   };
@@ -126,6 +129,7 @@ const DEFAULT_HISTORY: SessionHistory = {
   qualityMetrics: {
     totalCommits: 0,
     gateDenials: 0,
+    gatesPassed: 0,
     fixRounds: 0,
     testsRun: 0,
   },
@@ -323,6 +327,12 @@ function buildSDDInjection(sdd: SDDState, stepBudget: number, timeBudgetMs: numb
       ? `Deferred minors: ${sdd.deferredMinors.map((m) => `[Task ${m.task}] ${m.finding}`).join("; ")}`
       : "",
     `Last implementer model: ${sdd.lastImplementerModel ?? "none"}`,
+    sdd.failedApproaches.length > 0
+      ? `DO NOT REDO — these approaches failed:\n${sdd.failedApproaches.map((a, i) => `  ${i + 1}. ${a}`).join("\n")}`
+      : "",
+    Object.keys(sdd.completedEvidence).length > 0
+      ? `Completed task evidence:\n${Object.entries(sdd.completedEvidence).map(([t, e]) => `  Task ${t}: ${e}`).join("\n")}`
+      : "",
   ]
     .filter(Boolean)
     .join("\n");
@@ -450,6 +460,18 @@ export const register: Register = (on, options) => {
     // Initialize trace log for this session
     await save($, KEYS.trace, []);
 
+    // SDD session recovery — resume if active state survives restart
+    const existingSDD = await load<SDDState | null>($, KEYS.sdd, null);
+    if (existingSDD?.active) {
+      $.ui.log(
+        `Proctor: recovering SDD session — ` +
+          `Task ${existingSDD.currentTask}/${existingSDD.totalTasks}, ` +
+          `${existingSDD.completedTasks.length} complete, ` +
+          `${formatElapsed(Date.now() - existingSDD.startedAt)} elapsed`,
+      );
+      await trace($, "sdd-recovery", `task=${existingSDD.currentTask}/${existingSDD.totalTasks}`);
+    }
+
     const env: string[] = [];
     if (testCommand) env.push(`tests: ${testCommand}`);
     if (branch) env.push(`branch: ${branch}`);
@@ -488,6 +510,10 @@ export const register: Register = (on, options) => {
             `${Math.round(age / 60_000)}m ago · ` +
             `cmd: ${test.command}`,
         );
+        if (test.exitCode !== 0 && test.tailOutput) {
+          const summary = test.tailOutput.substring(0, 300).trim();
+          lines.push(`Failure: ${summary}`);
+        }
       }
 
       if (session?.planningMode) {
@@ -539,12 +565,17 @@ export const register: Register = (on, options) => {
       if (!evidence) {
         await trace($, "gate-deny", `git-no-evidence: ${cmd.substring(0, 80)}`);
         const session = await load<SessionState | null>($, KEYS.session, null);
-        const hint = session?.testCommand
-          ? ` Run \`${session.testCommand}\` first.`
-          : " Run the project's test suite first.";
+        const hist = await load<SessionHistory>($, KEYS.history, DEFAULT_HISTORY);
+        hist.qualityMetrics.gateDenials++;
+        await save($, KEYS.history, hist);
+        const testCmd = session?.testCommand ?? "the project's test suite";
         return {
           deny:
-            `Proctor gate: no test evidence this session.${hint}`,
+            `Proctor gate: no test evidence this session.\n` +
+            `Next steps:\n` +
+            `  1. Run \`${testCmd}\`\n` +
+            `  2. Fix any failures\n` +
+            `  3. Re-run until passing, then retry this command`,
         };
       }
 
@@ -552,23 +583,42 @@ export const register: Register = (on, options) => {
       if (age > TEST_FRESHNESS_MS) {
         const mins = Math.round(age / 60_000);
         await trace($, "gate-deny", `git-stale-evidence: ${mins}m old`);
+        const hist = await load<SessionHistory>($, KEYS.history, DEFAULT_HISTORY);
+        hist.qualityMetrics.gateDenials++;
+        await save($, KEYS.history, hist);
         return {
           deny:
             `Proctor gate: test evidence is stale (${mins}m ago, ` +
-            `limit: ${TEST_FRESHNESS_MS / 60_000}m). ` +
-            `Re-run \`${evidence.command}\` before committing.`,
+            `limit: ${TEST_FRESHNESS_MS / 60_000}m).\n` +
+            `Next steps:\n` +
+            `  1. Re-run \`${evidence.command}\`\n` +
+            `  2. Verify tests pass\n` +
+            `  3. Retry this command immediately (within ${TEST_FRESHNESS_MS / 60_000}m)`,
         };
       }
 
       if (evidence.exitCode !== 0) {
         await trace($, "gate-deny", `git-failing-tests: exit ${evidence.exitCode}`);
+        const hist = await load<SessionHistory>($, KEYS.history, DEFAULT_HISTORY);
+        hist.qualityMetrics.gateDenials++;
+        await save($, KEYS.history, hist);
         return {
           deny:
-            `Proctor gate: tests are failing (exit ${evidence.exitCode}). ` +
-            `Fix the failures, then re-run \`${evidence.command}\`.\n` +
-            `Last output:\n${evidence.tailOutput}`,
+            `Proctor gate: tests are failing (exit ${evidence.exitCode}).\n` +
+            `Last output:\n${evidence.tailOutput}\n` +
+            `Next steps:\n` +
+            `  1. Diagnose failures from the output above\n` +
+            `  2. Fix the root cause\n` +
+            `  3. Re-run \`${evidence.command}\` until passing`,
         };
       }
+
+      // Gate passed — track it
+      try {
+        const hist = await load<SessionHistory>($, KEYS.history, DEFAULT_HISTORY);
+        hist.qualityMetrics.gatesPassed++;
+        await save($, KEYS.history, hist);
+      } catch { /* non-critical */ }
     }
 
     // ── GATE: Protected branch enforcement ─────────────────────────
@@ -578,13 +628,18 @@ export const register: Register = (on, options) => {
         const hasConsent = session.branchConsents?.[session.branch];
         if (!hasConsent) {
           await trace($, "gate-deny", `branch-protection: ${session.branch}`);
+          const hist = await load<SessionHistory>($, KEYS.history, DEFAULT_HISTORY);
+          hist.qualityMetrics.gateDenials++;
+          await save($, KEYS.history, hist);
           return {
             deny:
               `Proctor gate: destructive git operation blocked on ` +
-              `protected branch '${session.branch}'. ` +
-              `Create a feature branch first: git checkout -b <name>. ` +
-              `Your human partner can grant explicit consent for this ` +
-              `branch if needed ("proctor: allow ${session.branch}").`,
+              `protected branch '${session.branch}'.\n` +
+              `Next steps:\n` +
+              `  1. Create a feature branch: \`git checkout -b <name>\`\n` +
+              `  2. Make your changes on the feature branch\n` +
+              `  OR: ask your human partner to grant consent ` +
+              `("proctor: allow ${session.branch}")`,
           };
         }
       }
@@ -605,9 +660,11 @@ export const register: Register = (on, options) => {
               deny:
                 `Proctor gate: potential credential/secret detected in staged changes. ` +
                 `Pattern: ${pattern.source.substring(0, 40)}...\n` +
-                `Review staged files with \`git diff --cached\` and remove ` +
-                `secrets before committing. Use environment variables or ` +
-                `a secrets manager instead of hardcoded credentials.`,
+                `Next steps:\n` +
+                `  1. Run \`git diff --cached\` to identify the secret\n` +
+                `  2. Remove or replace with an environment variable\n` +
+                `  3. Unstage the file: \`git reset HEAD <file>\`\n` +
+                `  4. Re-stage clean version and retry commit`,
             };
           }
         }
@@ -773,13 +830,17 @@ export const register: Register = (on, options) => {
       // Allow writing design docs and plan files during planning
       if (!/\b(design|plan|spec|proposal|rfc)\b/i.test(path) && !/\.md$/.test(path)) {
         await trace($, "gate-deny", `planning-mode-write: ${path}`);
+        const hist = await load<SessionHistory>($, KEYS.history, DEFAULT_HISTORY);
+        hist.qualityMetrics.gateDenials++;
+        await save($, KEYS.history, hist);
         return {
           deny:
             `Proctor gate: Write blocked — planning mode active ` +
-            `(skill: ${session.planningSkill}). Complete the design ` +
-            `and get approval before writing implementation code. ` +
-            `Markdown design docs are allowed. To exit planning mode: ` +
-            `invoke an implementation skill or say "proctor: approve design".`,
+            `(skill: ${session.planningSkill}).\n` +
+            `Next steps:\n` +
+            `  1. Finish the design document (.md files are allowed)\n` +
+            `  2. Get approval: say "proctor: approve design"\n` +
+            `  3. OR invoke an implementation skill (TDD, SDD, etc.)`,
         };
       }
     }
@@ -799,13 +860,17 @@ export const register: Register = (on, options) => {
       const path: string = e.file_path ?? "";
       if (!/\b(design|plan|spec|proposal|rfc)\b/i.test(path) && !/\.md$/.test(path)) {
         await trace($, "gate-deny", `planning-mode-edit: ${path}`);
+        const hist = await load<SessionHistory>($, KEYS.history, DEFAULT_HISTORY);
+        hist.qualityMetrics.gateDenials++;
+        await save($, KEYS.history, hist);
         return {
           deny:
             `Proctor gate: Edit blocked — planning mode active ` +
-            `(skill: ${session.planningSkill}). Complete the design ` +
-            `and get approval before editing implementation code. ` +
-            `Markdown design docs are allowed. To exit planning mode: ` +
-            `invoke an implementation skill or say "proctor: approve design".`,
+            `(skill: ${session.planningSkill}).\n` +
+            `Next steps:\n` +
+            `  1. Finish the design document (.md files are allowed)\n` +
+            `  2. Get approval: say "proctor: approve design"\n` +
+            `  3. OR invoke an implementation skill (TDD, SDD, etc.)`,
         };
       }
     }
@@ -823,13 +888,17 @@ export const register: Register = (on, options) => {
     const session = await load<SessionState | null>($, KEYS.session, null);
     if (session?.planningMode) {
       await trace($, "gate-deny", "planning-mode-notebook");
+      const hist = await load<SessionHistory>($, KEYS.history, DEFAULT_HISTORY);
+      hist.qualityMetrics.gateDenials++;
+      await save($, KEYS.history, hist);
       return {
         deny:
           `Proctor gate: NotebookEdit blocked — planning mode active ` +
-          `(skill: ${session.planningSkill}). Complete the design ` +
-          `and get approval before editing notebooks. ` +
-          `To exit planning mode: invoke an implementation skill ` +
-          `or say "proctor: approve design".`,
+          `(skill: ${session.planningSkill}).\n` +
+          `Next steps:\n` +
+          `  1. Finish the design document\n` +
+          `  2. Get approval: say "proctor: approve design"\n` +
+          `  3. OR invoke an implementation skill (TDD, SDD, etc.)`,
       };
     }
     return next(e);
@@ -1040,6 +1109,8 @@ export const register: Register = (on, options) => {
           stepWarned100: false,
           timeWarned80: false,
           timeWarned100: false,
+          failedApproaches: [],
+          completedEvidence: {},
         };
         sddChanged = true;
         $.ui.log("Proctor: SDD session started — state tracking active");
@@ -1064,10 +1135,28 @@ export const register: Register = (on, options) => {
             sdd.timeWarned100 = false;
             sddChanged = true;
             await trace($, "sdd-task-complete", `task=${taskNum}`);
+
+            const evidenceMatch = answer.match(/(?:evidence|result|outcome|completed):\s*(.{10,150})/i);
+            sdd.completedEvidence[taskNum] = evidenceMatch?.[1]?.trim() ?? "marked complete";
+
+            if (taskNum < sdd.totalTasks) {
+              contextAdditions.push(
+                `Proctor: Task ${taskNum} complete ` +
+                  `(${sdd.completedTasks.length}/${sdd.totalTasks}). ` +
+                  `Next: Task ${taskNum + 1}. ` +
+                  `Budget reset — ${STEP_BUDGET_PER_TASK} steps available.`,
+              );
+            } else {
+              contextAdditions.push(
+                `Proctor: Task ${taskNum} complete — ` +
+                  `all ${sdd.totalTasks} tasks done. ` +
+                  `Next: run tests, then invoke finishing-a-development-branch.`,
+              );
+            }
           }
         }
 
-        // Detect fix rounds
+        // Detect fix rounds — capture failed approach for compaction resilience
         const fixMatch = answer.match(FIX_ROUND_RE);
         if (fixMatch) {
           const round = parseInt(fixMatch[2], 10);
@@ -1075,6 +1164,13 @@ export const register: Register = (on, options) => {
           sdd.totalFixRounds++;
           sddChanged = true;
           await trace($, "sdd-fix-round", `task=${sdd.currentTask} round=${round}`);
+
+          const approachMatch = answer.match(/(?:approach|tried|attempted|fix):\s*(.{10,120})/i);
+          if (approachMatch) {
+            sdd.failedApproaches.push(`Task ${sdd.currentTask} R${round}: ${approachMatch[1].trim()}`);
+          } else {
+            sdd.failedApproaches.push(`Task ${sdd.currentTask} R${round}: fix attempt failed`);
+          }
 
           try {
             const hist = await load<SessionHistory>($, KEYS.history, DEFAULT_HISTORY);
@@ -1592,6 +1688,200 @@ export const register: Register = (on, options) => {
       }
     }
 
+    // Pre-flight gate check: "proctor: check"
+    if (/\bproctor:\s*check\b/i.test(text)) {
+      try {
+        const session = await load<SessionState | null>($, KEYS.session, null);
+        const test = await load<TestEvidence | null>($, KEYS.test, null);
+        const parts: string[] = ["─── Proctor Pre-flight Check ───"];
+
+        // Test evidence gate
+        if (!test) {
+          parts.push("✗ Test evidence: NONE — commit will be blocked");
+          if (session?.testCommand) {
+            parts.push(`  → Run \`${session.testCommand}\``);
+          }
+        } else {
+          const age = Date.now() - test.timestamp;
+          const fresh = age < TEST_FRESHNESS_MS;
+          if (test.exitCode !== 0) {
+            parts.push(`✗ Tests: FAILING (exit ${test.exitCode}) — commit will be blocked`);
+            parts.push("  → Fix failures and re-run tests");
+          } else if (!fresh) {
+            parts.push(`✗ Tests: STALE (${Math.round(age / 60_000)}m ago) — commit will be blocked`);
+            parts.push(`  → Re-run \`${test.command}\``);
+          } else {
+            parts.push(`✓ Tests: passing, fresh (${Math.round(age / 60_000)}m ago)`);
+          }
+        }
+
+        // Branch protection gate
+        if (session?.branch) {
+          if (PROTECTED_BRANCHES.includes(session.branch)) {
+            const consent = session.branchConsents?.[session.branch];
+            if (consent) {
+              parts.push(`✓ Branch: ${session.branch} (protected, consent granted)`);
+            } else {
+              parts.push(`✗ Branch: ${session.branch} — PROTECTED, destructive ops blocked`);
+              parts.push(`  → Create a feature branch or "proctor: allow ${session.branch}"`);
+            }
+          } else {
+            parts.push(`✓ Branch: ${session.branch} (not protected)`);
+          }
+        }
+
+        // Planning mode gate
+        if (session?.planningMode) {
+          parts.push(`✗ Planning mode: ON — code writes blocked`);
+          parts.push(`  → "proctor: approve design" or invoke implementation skill`);
+        } else {
+          parts.push("✓ Planning mode: off");
+        }
+
+        // Secret scan (quick staged diff check)
+        try {
+          const diff = await $.process.run(["git", "diff", "--cached", "-U0"]);
+          const diffText: string = diff.stdout ?? "";
+          let secretFound = false;
+          for (const pattern of SECRET_PATTERNS) {
+            if (pattern.test(diffText)) {
+              secretFound = true;
+              break;
+            }
+          }
+          if (diffText.length > 0) {
+            parts.push(secretFound
+              ? "✗ Staged diff: potential secret detected — commit will be blocked"
+              : "✓ Staged diff: no secrets detected");
+          } else {
+            parts.push("· Staged diff: nothing staged");
+          }
+        } catch {
+          parts.push("· Staged diff: unable to check");
+        }
+
+        $.ui.log(parts.join("\n"));
+        await trace($, "preflight-check", "user requested");
+      } catch {
+        $.ui.log("Proctor: unable to run pre-flight check.");
+      }
+    }
+
+    // SDD scope update: "proctor: tasks N"
+    const tasksMatch = text.match(/\bproctor:\s*tasks\s+(\d+)\b/i);
+    if (tasksMatch) {
+      const newTotal = parseInt(tasksMatch[1], 10);
+      const sdd = await load<SDDState | null>($, KEYS.sdd, null);
+      if (sdd?.active) {
+        const oldTotal = sdd.totalTasks;
+        sdd.totalTasks = newTotal;
+        await save($, KEYS.sdd, sdd);
+        $.ui.log(`Proctor: SDD task count updated ${oldTotal} → ${newTotal}`);
+        await trace($, "sdd-scope-update", `${oldTotal} → ${newTotal}`);
+      } else {
+        $.ui.log("Proctor: no active SDD session — nothing to update.");
+      }
+    }
+
+    // Also detect "Task N: added" in user input for scope updates
+    const taskAddedMatch = text.match(/Task\s+(\d+)\s*:\s*added\b/i);
+    if (taskAddedMatch) {
+      const addedTask = parseInt(taskAddedMatch[1], 10);
+      const sdd = await load<SDDState | null>($, KEYS.sdd, null);
+      if (sdd?.active && addedTask > sdd.totalTasks) {
+        sdd.totalTasks = addedTask;
+        await save($, KEYS.sdd, sdd);
+        $.ui.log(`Proctor: SDD scope expanded to ${addedTask} tasks`);
+        await trace($, "sdd-scope-expand", `new total=${addedTask}`);
+      }
+    }
+
+    // Self-diagnosis: "proctor: diagnose"
+    if (/\bproctor:\s*diagnose\b/i.test(text)) {
+      try {
+        const events = await load<TraceEvent[]>($, KEYS.trace, []);
+        const hist = await load<SessionHistory>($, KEYS.history, DEFAULT_HISTORY);
+        const session = await load<SessionState | null>($, KEYS.session, null);
+        const sdd = await load<SDDState | null>($, KEYS.sdd, null);
+
+        const parts: string[] = ["─── Proctor Diagnosis ───"];
+
+        // Gate denial analysis
+        const denials = events.filter((ev) => ev.kind === "gate-deny");
+        const passes = hist.qualityMetrics.gatesPassed;
+        const totalGateEvents = denials.length + passes;
+        if (totalGateEvents > 0) {
+          const autonomyRate = Math.round((passes / totalGateEvents) * 100);
+          parts.push(
+            `Gate autonomy: ${autonomyRate}% ` +
+              `(${passes} passed / ${denials.length} denied)`,
+          );
+          if (autonomyRate < 70) {
+            parts.push("  → Low autonomy — run tests more frequently before commit attempts");
+          }
+        }
+
+        // Fix round analysis
+        const fixEvents = events.filter((ev) => ev.kind === "sdd-fix-round");
+        if (fixEvents.length > 0) {
+          parts.push(`Fix rounds this session: ${fixEvents.length}`);
+          if (fixEvents.length > 5) {
+            parts.push("  → High fix rate — consider invoking systematic-debugging");
+          }
+        }
+
+        // Rationalization detection history
+        const ratEvents = events.filter((ev) => ev.kind === "rationalization-detected");
+        if (ratEvents.length > 0) {
+          parts.push(`Rationalization warnings: ${ratEvents.length}`);
+          parts.push("  → Agent may be in guess-and-check loops");
+        }
+
+        // Skill usage pattern
+        if (session && !session.skillInvoked && session.turnCount > 3) {
+          parts.push(`No skill invoked in ${session.turnCount} turns`);
+          parts.push("  → Invoke a relevant skill for structured approach");
+        }
+
+        // SDD health
+        if (sdd?.active) {
+          const avgStepsPerCompleted = sdd.completedTasks.length > 0
+            ? Math.round(sdd.totalToolCalls / sdd.completedTasks.length)
+            : sdd.totalToolCalls;
+          parts.push(`SDD avg steps/task: ${avgStepsPerCompleted}`);
+          if (avgStepsPerCompleted > STEP_BUDGET_PER_TASK * 0.8) {
+            parts.push("  → Tasks are using most of the step budget — break into smaller tasks");
+          }
+
+          if (sdd.failedApproaches.length > 0) {
+            parts.push(`Failed approaches tracked: ${sdd.failedApproaches.length}`);
+          }
+        }
+
+        // Recommendations
+        const recommendations: string[] = [];
+        if (denials.length > 3) {
+          recommendations.push("Run tests before every commit attempt");
+        }
+        if (!session?.skillInvoked) {
+          recommendations.push("Check available skills before starting work");
+        }
+        if (sdd?.active && sdd.currentFixRound >= 3) {
+          recommendations.push("Use systematic-debugging instead of more fix rounds");
+        }
+
+        if (recommendations.length > 0) {
+          parts.push(`\nRecommendations:`);
+          recommendations.forEach((r, i) => parts.push(`  ${i + 1}. ${r}`));
+        }
+
+        $.ui.log(parts.join("\n"));
+        await trace($, "self-diagnosis", "user requested");
+      } catch {
+        $.ui.log("Proctor: unable to run diagnosis.");
+      }
+    }
+
     // Status dashboard: "proctor: status"
     if (/\bproctor:\s*status\b/i.test(text)) {
       try {
@@ -1639,12 +1929,18 @@ export const register: Register = (on, options) => {
         }
 
         const qm = hist.qualityMetrics;
+        const totalGateEvents = (qm.gatesPassed ?? 0) + qm.gateDenials;
+        const autonomyRate = totalGateEvents > 0
+          ? Math.round(((qm.gatesPassed ?? 0) / totalGateEvents) * 100)
+          : 100;
         parts.push(
           `Quality: ${qm.totalCommits} commits · ` +
             `${qm.gateDenials} denials · ` +
+            `${qm.gatesPassed ?? 0} passed · ` +
             `${qm.fixRounds} fix rounds · ` +
             `${qm.testsRun} test runs`,
         );
+        parts.push(`Autonomy rate: ${autonomyRate}%`);
 
         parts.push(`Sessions: ${hist.sessionsCount}`);
 

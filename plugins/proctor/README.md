@@ -121,20 +121,24 @@ Hard gates always enforce regardless of quiet mode.
 | **Diff size** | >500 lines staged (pre-commit) | "Consider splitting into smaller commits" |
 | **Test hint** | No tests run this session | Shows detected test command with actionable next step |
 | **Phase indicator** | Skill invocation changes lifecycle phase | Shows current phase in context |
+| **Task advance** | SDD task marked complete | "Next: Task N" with budget reset notification |
 
 ### Infrastructure (invisible — the agent doesn't manage these)
 
 | Feature | What it does |
 |---------|-------------|
-| **SDD state persistence** | Task completion, fix rounds, rulings tracked in `$.store` |
-| **Compaction recovery** | `[PROCTOR — SDD STATE]` block injected into context post-compaction |
+| **SDD state persistence** | Task completion, fix rounds, rulings, failed approaches tracked in `$.store` |
+| **Compaction recovery** | `[PROCTOR — SDD STATE]` block injected into context post-compaction with "DO NOT REDO" section |
+| **SDD session recovery** | Active SDD state detected and resumed on session restart |
+| **Failed approach tracking** | Fix round descriptions captured and injected post-compaction to prevent retries |
+| **Task completion evidence** | Completion evidence recorded per task for audit trail |
 | **Progress dashboard** | Status bar above prompt during SDD |
 | **Test run tracking** | Records every test execution for the git gate |
 | **Branch tracking** | Detects branch changes for protection enforcement |
 | **Agent counting** | Tracks agents spawned for dashboard and diagnostics |
 | **Commit attribution** | Appends task references and test evidence to commit messages |
 | **Phase lifecycle** | Tracks idle → brainstorming → planning → implementing → reviewing → finishing |
-| **Quality metrics** | Cross-session counters: commits, gate denials, fix rounds, test runs |
+| **Quality metrics** | Cross-session counters: commits, gate denials, gates passed, fix rounds, test runs, autonomy rate |
 | **Ruling persistence** | Last 20 rulings preserved across sessions |
 
 ### Operator Commands
@@ -147,6 +151,9 @@ Hard gates always enforce regardless of quiet mode.
 | `proctor: approve design` | Exit planning mode |
 | `proctor: quiet on` | Suppress soft warnings (hard gates still enforce) |
 | `proctor: quiet off` | Re-enable all warnings |
+| `proctor: check` | Pre-flight gate status: test evidence, branch protection, planning mode, secret scan |
+| `proctor: diagnose` | Self-analysis: gate autonomy rate, fix round patterns, recommendations |
+| `proctor: tasks N` | Update SDD total task count (scope change) |
 | `sdd done` / `proctor: sdd stop` | Deactivate SDD session |
 
 ## Skills

@@ -71,6 +71,25 @@ reference them. What they enforce:
   unblocked". After tests fail, you are told exactly what's blocked.
 - **SDD completion summary.** When an SDD session ends, you see task
   count, elapsed time, fix rounds, agents, rulings, and deferred items.
+- **Failed approach tracking.** When fix rounds increment, the failed
+  approach is captured. After compaction, a "DO NOT REDO" section lists
+  every failed approach so you never retry what already failed.
+- **Task completion evidence.** When a task completes, evidence is
+  recorded and a "Next:" guidance message tells you what to do next.
+- **SDD session recovery.** On session restart, if an active SDD state
+  exists, it is detected and resumed automatically with a status message.
+- **Pre-flight gate check.** Type `proctor: check` before attempting a
+  commit to see which gates will pass and which will block, with
+  specific remediation steps for each failing gate.
+- **Self-diagnosis.** Type `proctor: diagnose` for actionable analysis
+  of gate autonomy rate, fix round patterns, rationalization warnings,
+  and skill usage recommendations.
+- **SDD scope update.** Say `proctor: tasks N` to update the total task
+  count when scope changes. Also auto-detects "Task N: added" patterns.
+- **Autonomy metrics.** Gate passes are tracked alongside denials.
+  `proctor: status` shows your autonomy rate (passes / total gate events).
+- **Test failure context.** When tests are failing, the compaction block
+  includes a summary of the failure output for faster diagnosis.
 - **Phase lifecycle tracking.** Your current development phase (idle →
   brainstorming → planning → implementing → reviewing → finishing) is
   tracked automatically based on skill invocations. It survives
@@ -79,7 +98,7 @@ reference them. What they enforce:
   denials, fix rounds, and test runs. View with `proctor: status`.
 - **Trace visibility.** Type `proctor: show trace` to see the last 25
   structured events with timestamps. Type `proctor: status` for a full
-  dashboard (includes quiet mode state).
+  dashboard (includes quiet mode state, autonomy rate).
 
 ## The Rule
 

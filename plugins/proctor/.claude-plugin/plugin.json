@@ -1,8 +1,8 @@
 {
   "name": "proctor",
   "displayName": "Proctor",
-  "description": "Hook-enforced development discipline for Claude Code. Skills teach methodology; hooks enforce compliance mechanically (git gates, planning mode, step budgets, quiet mode); store + tracing survive compaction.",
-  "version": "2.2.0",
+  "description": "Hook-enforced development discipline for Claude Code. Skills teach methodology; hooks enforce compliance mechanically (git gates, planning mode, step budgets, quiet mode, pre-flight checks, self-diagnosis, autonomy metrics); store + tracing survive compaction.",
+  "version": "2.3.0",
   "author": {
     "name": "nalyk"
   },
@@ -29,7 +29,13 @@
     "secret-detection",
     "quality-metrics",
     "phase-lifecycle",
-    "quiet-mode"
+    "quiet-mode",
+    "pre-flight-check",
+    "self-diagnosis",
+    "autonomy-metrics",
+    "compaction-resilience",
+    "failed-approach-tracking",
+    "sdd-recovery"
   ],
   "userConfig": {
     "protectedBranches": {
