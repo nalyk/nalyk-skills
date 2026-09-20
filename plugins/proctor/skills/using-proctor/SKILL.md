@@ -54,15 +54,23 @@ reference them. What they enforce:
   or hardcoded passwords. This is irreversible — credentials cannot be
   un-pushed.
 - **Destructive command warning.** `rm -rf`, `chmod 777`, pipe-to-shell,
-  `dd if=`, and `mkfs` commands trigger a soft warning so you verify
-  intent before proceeding.
+  `dd if=`, and `mkfs` commands trigger a soft warning showing the
+  actual command so you can verify intent before proceeding.
 - **Time budget.** During SDD, each task has a configurable wall-clock
-  limit. Warning at 80%, forced adjudication at 100%.
-- **Diff size awareness.** After a successful commit, a warning fires if
-  >500 lines changed, suggesting smaller focused commits.
+  limit. Warning at 80% (once), wrap-up at 100% (once per task).
+- **Diff size awareness.** Before a commit, a warning fires if >500
+  lines are staged, suggesting smaller focused commits.
 - **Test command hint.** If a test command has been detected but no tests
-  have been run this session, a hint is injected reminding you to run
-  tests before the git gate blocks you.
+  have been run this session, a hint is injected with the exact command
+  to run before the git gate blocks you.
+- **Quiet mode.** Your human partner can say `proctor: quiet on` to
+  suppress soft warnings (destructive cmd, large commit, watchdog,
+  model selection, context pressure). Hard gates always enforce. Toggle
+  back with `proctor: quiet off`.
+- **Success signals.** After tests pass, you are told "git commit is
+  unblocked". After tests fail, you are told exactly what's blocked.
+- **SDD completion summary.** When an SDD session ends, you see task
+  count, elapsed time, fix rounds, agents, rulings, and deferred items.
 - **Phase lifecycle tracking.** Your current development phase (idle →
   brainstorming → planning → implementing → reviewing → finishing) is
   tracked automatically based on skill invocations. It survives
@@ -71,7 +79,7 @@ reference them. What they enforce:
   denials, fix rounds, and test runs. View with `proctor: status`.
 - **Trace visibility.** Type `proctor: show trace` to see the last 25
   structured events with timestamps. Type `proctor: status` for a full
-  dashboard.
+  dashboard (includes quiet mode state).
 
 ## The Rule
 

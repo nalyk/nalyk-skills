@@ -105,18 +105,21 @@ protection, SDD dashboard, state persistence — do not fire.
 
 ### Soft Enforcers (context injection — the agent is reminded)
 
+All soft enforcers are suppressed in quiet mode (`proctor: quiet on`).
+Hard gates always enforce regardless of quiet mode.
+
 | Enforcer | When it fires | What it says |
 |----------|--------------|-------------|
-| **Skill watchdog** | 4+ turns without invoking a skill | "If a skill applies, invoke it now" (once) |
-| **Model selection** | Agent spawn without explicit model during SDD | "Session model may be unnecessarily expensive" |
-| **Fix-round cap** | Round N of 5 reached | "Adjudicate — do not dispatch another round" |
-| **Step budget** | 80% / 100% of tool call limit per task | Warning at 80%, forced adjudication at 100% |
-| **Time budget** | 80% / 100% of wall-clock limit per task | Warning at 80%, forced adjudication at 100% |
-| **Context pressure** | Turn 60, 80 | "SDD state survives compaction — verify ledger" |
+| **Skill watchdog** | 4+ turns without invoking a skill | "Check if brainstorming, TDD, debugging, or review applies" (once) |
+| **Model selection** | Agent spawn without explicit model during SDD | "Consider a cheaper model for mechanical tasks" |
+| **Fix-round cap** | Round N of 5 reached | "Decide on each open finding — skip debatable ones, resolve critical ones" |
+| **Step budget** | 80% / 100% of tool call limit per task | Warning at 80% (once), wrap-up at 100% (once per task) |
+| **Time budget** | 80% / 100% of wall-clock limit per task | Warning at 80% (once), wrap-up at 100% (once per task) |
+| **Context pressure** | Turn 50, 70, 90 | "Progress preserved automatically — focus on current task" |
 | **Ruling aggregation** | Session completion detected | Full list of rulings and deferred minors |
-| **Destructive command** | `rm -rf`, `chmod 777`, `curl\|bash`, etc. | "Verify this is intentional" |
-| **Diff size** | Commit exceeds 500 lines changed | "Consider breaking into smaller commits" |
-| **Test hint** | No tests run this session | Injects detected test command |
+| **Destructive command** | `rm -rf`, `chmod 777`, `curl\|bash`, etc. | Shows the actual command — "verify this is intentional" |
+| **Diff size** | >500 lines staged (pre-commit) | "Consider splitting into smaller commits" |
+| **Test hint** | No tests run this session | Shows detected test command with actionable next step |
 | **Phase indicator** | Skill invocation changes lifecycle phase | Shows current phase in context |
 
 ### Infrastructure (invisible — the agent doesn't manage these)
@@ -138,10 +141,12 @@ protection, SDD dashboard, state persistence — do not fire.
 
 | Command | What it does |
 |---------|-------------|
-| `proctor: status` | Full status dashboard: phase, branch, SDD state, test evidence, quality metrics |
+| `proctor: status` | Full status dashboard: phase, branch, quiet mode, SDD state, test evidence, quality metrics |
 | `proctor: show trace` | Last 25 structured trace events with timestamps |
 | `proctor: allow <branch>` | Grant consent for protected branch operations |
 | `proctor: approve design` | Exit planning mode |
+| `proctor: quiet on` | Suppress soft warnings (hard gates still enforce) |
+| `proctor: quiet off` | Re-enable all warnings |
 | `sdd done` / `proctor: sdd stop` | Deactivate SDD session |
 
 ## Skills
@@ -179,6 +184,10 @@ Plugin options (via `plugin.json` `userConfig`):
 | `fixRoundCap` | `5` | Maximum fix-loop rounds in SDD |
 | `stepBudgetPerTask` | `100` | Tool call limit per SDD task (warn 80%, block 100%) |
 | `timeBudgetPerTaskMinutes` | `30` | Wall-clock limit per SDD task in minutes (warn 80%, block 100%) |
+
+Quiet mode is toggled at runtime via `proctor: quiet on/off` — it
+suppresses soft warnings while hard gates continue to enforce. This
+is session-scoped and does not persist across sessions.
 
 ## Architecture
 

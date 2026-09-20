@@ -52,6 +52,10 @@ interface SDDState {
   toolCallsThisTask: number;
   totalToolCalls: number;
   taskStartedAt: number;
+  stepWarned80: boolean;
+  stepWarned100: boolean;
+  timeWarned80: boolean;
+  timeWarned100: boolean;
 }
 
 interface SessionState {
@@ -76,6 +80,7 @@ interface SessionState {
     | "implementing"
     | "reviewing"
     | "finishing";
+  quietMode: boolean;
 }
 
 interface SessionHistory {
@@ -437,6 +442,7 @@ export const register: Register = (on, options) => {
       planningMode: false,
       planningSkill: null,
       currentPhase: "idle",
+      quietMode: false,
     };
 
     await save($, KEYS.session, session);
@@ -465,53 +471,49 @@ export const register: Register = (on, options) => {
     "prompt.section",
     { section: "context" },
     async ($: any, e: any, next: any) => {
-      const blocks: string[] = [];
+      const lines: string[] = [];
 
       const sdd = await load<SDDState | null>($, KEYS.sdd, null);
-      if (sdd?.active) blocks.push(buildSDDInjection(sdd, STEP_BUDGET_PER_TASK, TIME_BUDGET_PER_TASK_MS));
+      if (sdd?.active) lines.push(buildSDDInjection(sdd, STEP_BUDGET_PER_TASK, TIME_BUDGET_PER_TASK_MS));
 
       const test = await load<TestEvidence | null>($, KEYS.test, null);
+      const session = await load<SessionState | null>($, KEYS.session, null);
+
       if (test) {
         const age = Date.now() - test.timestamp;
         const fresh = age < TEST_FRESHNESS_MS;
-        blocks.push(
-          `[PROCTOR — TEST STATE] ` +
-            `${fresh ? "✓ fresh" : "✗ STALE"} · ` +
+        lines.push(
+          `Tests: ${fresh ? "✓ fresh" : "✗ STALE"} · ` +
             `exit ${test.exitCode} · ` +
             `${Math.round(age / 60_000)}m ago · ` +
             `cmd: ${test.command}`,
         );
       }
 
-      const session = await load<SessionState | null>($, KEYS.session, null);
       if (session?.planningMode) {
-        blocks.push(
-          `[PROCTOR — PLANNING MODE ACTIVE] ` +
-            `Skill: ${session.planningSkill ?? "unknown"}. ` +
-            `Write/Edit/NotebookEdit are BLOCKED until the design is ` +
-            `approved and an implementation skill is invoked.`,
+        lines.push(
+          `Planning: ON (${session.planningSkill ?? "unknown"}) — ` +
+            `Write/Edit/NotebookEdit BLOCKED until design approved`,
         );
       }
 
       if (session && session.currentPhase !== "idle") {
-        blocks.push(
-          `[PROCTOR — PHASE] ${session.currentPhase}` +
-            (session.lastSkillName
-              ? ` (via ${session.lastSkillName})`
-              : ""),
+        lines.push(
+          `Phase: ${session.currentPhase}` +
+            (session.lastSkillName ? ` (${session.lastSkillName})` : ""),
         );
       }
 
       if (session?.testCommand && !test) {
-        blocks.push(
-          `[PROCTOR — TEST HINT] Detected test command: \`${session.testCommand}\`. ` +
-            `No tests have been run this session — the git gate will ` +
-            `block commits until you run tests.`,
+        lines.push(
+          `No tests run — \`${session.testCommand}\` required before commit`,
         );
       }
 
-      if (blocks.length === 0) return next(e);
-      return next({ ...e, text: e.text + "\n\n" + blocks.join("\n\n") });
+      if (lines.length === 0) return next(e);
+
+      const block = `[PROCTOR]\n${lines.join("\n")}`;
+      return next({ ...e, text: e.text + "\n\n" + block });
     },
   );
 
@@ -536,11 +538,13 @@ export const register: Register = (on, options) => {
 
       if (!evidence) {
         await trace($, "gate-deny", `git-no-evidence: ${cmd.substring(0, 80)}`);
+        const session = await load<SessionState | null>($, KEYS.session, null);
+        const hint = session?.testCommand
+          ? ` Run \`${session.testCommand}\` first.`
+          : " Run the project's test suite first.";
         return {
           deny:
-            "Proctor gate: no test evidence in this session. " +
-            "Run the project's test suite before committing. " +
-            "This is a mechanical gate — no override exists without tests.",
+            `Proctor gate: no test evidence this session.${hint}`,
         };
       }
 
@@ -550,9 +554,9 @@ export const register: Register = (on, options) => {
         await trace($, "gate-deny", `git-stale-evidence: ${mins}m old`);
         return {
           deny:
-            `Proctor gate: last test run was ${mins}m ago ` +
-            `(freshness window: ${TEST_FRESHNESS_MS / 60_000}m). ` +
-            `Run the test suite again before committing.`,
+            `Proctor gate: test evidence is stale (${mins}m ago, ` +
+            `limit: ${TEST_FRESHNESS_MS / 60_000}m). ` +
+            `Re-run \`${evidence.command}\` before committing.`,
         };
       }
 
@@ -560,8 +564,8 @@ export const register: Register = (on, options) => {
         await trace($, "gate-deny", `git-failing-tests: exit ${evidence.exitCode}`);
         return {
           deny:
-            `Proctor gate: last test run failed (exit ${evidence.exitCode}). ` +
-            `Fix the failures before committing.\n` +
+            `Proctor gate: tests are failing (exit ${evidence.exitCode}). ` +
+            `Fix the failures, then re-run \`${evidence.command}\`.\n` +
             `Last output:\n${evidence.tailOutput}`,
         };
       }
@@ -614,10 +618,40 @@ export const register: Register = (on, options) => {
 
     // ── SOFT: Destructive bash command awareness ──────────────────
     if (DESTRUCTIVE_BASH_RE.test(cmd)) {
-      $.ui.log(
-        `Proctor: destructive command detected. Verify this is intentional.`,
-      );
+      const sess = await load<SessionState | null>($, KEYS.session, null);
+      if (!sess?.quietMode) {
+        const snippet = cmd.length > 80 ? cmd.substring(0, 77) + "..." : cmd;
+        $.ui.log(
+          `Proctor: destructive command — \`${snippet}\`. Verify this is intentional.`,
+        );
+      }
       await trace($, "destructive-cmd-warn", cmd.substring(0, 80));
+    }
+
+    // ── SOFT: Diff size awareness BEFORE commit ───────────────────
+    if (/\bgit\s+commit\b/.test(cmd)) {
+      try {
+        const stat = await $.process.run(["git", "diff", "--cached", "--stat"]);
+        const lines = (stat.stdout ?? "").split("\n");
+        const summary = lines[lines.length - 2] ?? "";
+        const insMatch = summary.match(/(\d+)\s+insertion/);
+        const delMatch = summary.match(/(\d+)\s+deletion/);
+        const total =
+          parseInt(insMatch?.[1] ?? "0", 10) +
+          parseInt(delMatch?.[1] ?? "0", 10);
+        if (total > 500) {
+          const sess = await load<SessionState | null>($, KEYS.session, null);
+          if (!sess?.quietMode) {
+            $.ui.log(
+              `Proctor: ${total} lines staged — consider splitting into ` +
+                `smaller commits for easier review. Proceeding with commit.`,
+            );
+          }
+          await trace($, "large-commit-warn", `${total} lines staged`);
+        }
+      } catch {
+        // Non-critical
+      }
     }
 
     // ── SDD step budget tracking ───────────────────────────────────
@@ -649,6 +683,16 @@ export const register: Register = (on, options) => {
         "test-run",
         `exit=${evidence.exitCode} cmd=${evidence.command.substring(0, 60)}`,
       );
+
+      // Success signal — proactive readiness notification
+      if (evidence.exitCode === 0) {
+        $.ui.log("Proctor: ✓ tests passing — git commit is unblocked.");
+      } else {
+        $.ui.log(
+          `Proctor: ✗ tests failing (exit ${evidence.exitCode}) — ` +
+            `git commit blocked until fixed.`,
+        );
+      }
 
       // Cross-session learning: remember working test commands
       if (evidence.exitCode === 0) {
@@ -689,25 +733,9 @@ export const register: Register = (on, options) => {
       }
     }
 
-    // ── POST: Diff size awareness after successful commit ─────────
+    // ── POST: Quality metrics after successful commit ──────────────
     if (/\bgit\s+commit\b/.test(cmd) && result.exitCode === 0) {
       try {
-        const stat = await $.process.run(["git", "diff", "HEAD~1", "--stat"]);
-        const lines = (stat.stdout ?? "").split("\n");
-        const summary = lines[lines.length - 2] ?? "";
-        const insMatch = summary.match(/(\d+)\s+insertion/);
-        const delMatch = summary.match(/(\d+)\s+deletion/);
-        const total =
-          parseInt(insMatch?.[1] ?? "0", 10) +
-          parseInt(delMatch?.[1] ?? "0", 10);
-        if (total > 500) {
-          $.ui.log(
-            `Proctor: large commit (${total} lines changed). ` +
-              `Consider breaking into smaller, focused commits for easier review.`,
-          );
-          await trace($, "large-commit", `${total} lines`);
-        }
-        // Quality metrics
         const hist = await load<SessionHistory>($, KEYS.history, DEFAULT_HISTORY);
         hist.qualityMetrics.totalCommits++;
         await save($, KEYS.history, hist);
@@ -799,7 +827,9 @@ export const register: Register = (on, options) => {
         deny:
           `Proctor gate: NotebookEdit blocked — planning mode active ` +
           `(skill: ${session.planningSkill}). Complete the design ` +
-          `and get approval before editing notebooks.`,
+          `and get approval before editing notebooks. ` +
+          `To exit planning mode: invoke an implementation skill ` +
+          `or say "proctor: approve design".`,
       };
     }
     return next(e);
@@ -969,12 +999,12 @@ export const register: Register = (on, options) => {
         session.turnsSinceSkill >= WATCHDOG_TURN_THRESHOLD
       ) {
         session.watchdogNudgeSent = true;
-        contextAdditions.push(
-          "Proctor watchdog: you have worked for several turns " +
-            "without invoking a skill. If brainstorming, TDD, debugging, " +
-            "or another proctor skill applies, invoke it now. " +
-            "If you have considered and rejected all skills, carry on.",
-        );
+        if (!session.quietMode) {
+          contextAdditions.push(
+            `Proctor: ${session.turnsSinceSkill} turns without a skill. ` +
+              `Check if brainstorming, TDD, debugging, or review applies.`,
+          );
+        }
         await trace($, "watchdog-nudge", `turns=${session.turnsSinceSkill}`);
       }
     }
@@ -1006,6 +1036,10 @@ export const register: Register = (on, options) => {
           toolCallsThisTask: 0,
           totalToolCalls: 0,
           taskStartedAt: Date.now(),
+          stepWarned80: false,
+          stepWarned100: false,
+          timeWarned80: false,
+          timeWarned100: false,
         };
         sddChanged = true;
         $.ui.log("Proctor: SDD session started — state tracking active");
@@ -1024,6 +1058,10 @@ export const register: Register = (on, options) => {
             sdd.currentFixRound = 0;
             sdd.toolCallsThisTask = 0;
             sdd.taskStartedAt = Date.now();
+            sdd.stepWarned80 = false;
+            sdd.stepWarned100 = false;
+            sdd.timeWarned80 = false;
+            sdd.timeWarned100 = false;
             sddChanged = true;
             await trace($, "sdd-task-complete", `task=${taskNum}`);
           }
@@ -1046,37 +1084,39 @@ export const register: Register = (on, options) => {
 
           if (round >= FIX_ROUND_CAP) {
             contextAdditions.push(
-              `Proctor: fix-round cap reached (${round}/${FIX_ROUND_CAP}). ` +
-                `Adjudicate each open finding — park contestable ones, ` +
-                `rule on load-bearing ones. Do not dispatch another fix round.`,
+              `Proctor: fix-round limit reached (${round}/${FIX_ROUND_CAP}). ` +
+                `Decide on each open finding — skip debatable ones, ` +
+                `resolve the critical ones. No more fix rounds.`,
             );
           }
         }
 
-        // ── Step budget enforcement ───────────────────────────────
+        // ── Step budget enforcement (fires once per threshold) ────
         if (STEP_BUDGET_PER_TASK > 0) {
           const pct = Math.round(
             (sdd.toolCallsThisTask / STEP_BUDGET_PER_TASK) * 100,
           );
-          if (pct >= 100) {
+          if (pct >= 100 && !sdd.stepWarned100) {
+            sdd.stepWarned100 = true;
+            sddChanged = true;
             contextAdditions.push(
-              `Proctor: step budget EXHAUSTED for Task ${sdd.currentTask} ` +
+              `Proctor: step budget exhausted for Task ${sdd.currentTask} ` +
                 `(${sdd.toolCallsThisTask}/${STEP_BUDGET_PER_TASK}). ` +
-                `STOP implementation. Either: (1) adjudicate and mark ` +
-                `the task complete with current state, (2) record a ` +
-                `ruling explaining why more steps are needed and reset, ` +
-                `or (3) escalate to your human partner.`,
+                `Wrap up: finish with current state, note your decision ` +
+                `if more steps are needed, or ask your human partner.`,
             );
             await trace(
               $,
               "budget-exhausted",
               `task=${sdd.currentTask} steps=${sdd.toolCallsThisTask}`,
             );
-          } else if (pct >= 80 && pct < 100) {
+          } else if (pct >= 80 && pct < 100 && !sdd.stepWarned80) {
+            sdd.stepWarned80 = true;
+            sddChanged = true;
             contextAdditions.push(
-              `Proctor: step budget warning — Task ${sdd.currentTask} ` +
-                `at ${pct}% (${sdd.toolCallsThisTask}/${STEP_BUDGET_PER_TASK}). ` +
-                `Wrap up or prepare to adjudicate.`,
+              `Proctor: step budget at ${pct}% for Task ${sdd.currentTask} ` +
+                `(${sdd.toolCallsThisTask}/${STEP_BUDGET_PER_TASK}). ` +
+                `Start wrapping up.`,
             );
             await trace(
               $,
@@ -1086,32 +1126,35 @@ export const register: Register = (on, options) => {
           }
         }
 
-        // ── Time budget enforcement ──────────────────────────────
+        // ── Time budget enforcement (fires once per threshold) ───
         if (TIME_BUDGET_PER_TASK_MS > 0 && sdd.taskStartedAt > 0) {
           const taskElapsed = Date.now() - sdd.taskStartedAt;
           const timePct = Math.round(
             (taskElapsed / TIME_BUDGET_PER_TASK_MS) * 100,
           );
-          if (timePct >= 100) {
+          if (timePct >= 100 && !sdd.timeWarned100) {
+            sdd.timeWarned100 = true;
+            sddChanged = true;
             contextAdditions.push(
-              `Proctor: time budget EXHAUSTED for Task ${sdd.currentTask} ` +
+              `Proctor: time budget exhausted for Task ${sdd.currentTask} ` +
                 `(${formatElapsed(taskElapsed)} / ` +
                 `${formatElapsed(TIME_BUDGET_PER_TASK_MS)}). ` +
-                `Either: (1) adjudicate and complete with current state, ` +
-                `(2) record a ruling why more time is needed, or ` +
-                `(3) escalate to your human partner.`,
+                `Wrap up: finish with current state, note your decision ` +
+                `if more time is needed, or ask your human partner.`,
             );
             await trace(
               $,
               "time-budget-exhausted",
               `task=${sdd.currentTask} elapsed=${formatElapsed(taskElapsed)}`,
             );
-          } else if (timePct >= 80 && timePct < 100) {
+          } else if (timePct >= 80 && timePct < 100 && !sdd.timeWarned80) {
+            sdd.timeWarned80 = true;
+            sddChanged = true;
             contextAdditions.push(
-              `Proctor: time budget warning — Task ${sdd.currentTask} ` +
-                `at ${timePct}% (${formatElapsed(taskElapsed)} / ` +
+              `Proctor: time budget at ${timePct}% for Task ${sdd.currentTask} ` +
+                `(${formatElapsed(taskElapsed)} / ` +
                 `${formatElapsed(TIME_BUDGET_PER_TASK_MS)}). ` +
-                `Wrap up or prepare to adjudicate.`,
+                `Start wrapping up.`,
             );
             await trace(
               $,
@@ -1141,11 +1184,10 @@ export const register: Register = (on, options) => {
             const parsed = JSON.parse(raw);
             if (parsed.looping) {
               contextAdditions.push(
-                `Proctor: guess-and-check loop detected — ` +
-                  `"${parsed.signal}". STOP fixing. Return to ` +
-                  `proctor:systematic-debugging Phase 1 (root cause ` +
-                  `investigation). Fix-round: ${sdd.currentFixRound}` +
-                  `/${FIX_ROUND_CAP}.`,
+                `Proctor: repeated fix pattern detected — ` +
+                  `"${parsed.signal}". Stop guessing. Investigate the ` +
+                  `root cause first (proctor:systematic-debugging). ` +
+                  `Fix round ${sdd.currentFixRound}/${FIX_ROUND_CAP}.`,
               );
               await trace($, "rationalization-detected", parsed.signal);
             }
@@ -1200,14 +1242,13 @@ export const register: Register = (on, options) => {
     }
 
     // ── Context pressure warning ────────────────────────────────────
-    if (session && sdd?.active) {
+    if (session && sdd?.active && !session.quietMode) {
       const tc = session.turnCount;
       if (tc === 50 || tc === 70 || tc === 90) {
         contextAdditions.push(
-          `Proctor: turn ${tc} — context pressure increasing. ` +
-            `SDD state is persisted in $.store and survives compaction. ` +
-            `Verify the ledger file is current. After compaction, the ` +
-            `[PROCTOR — SDD STATE] block shows your recovery point.`,
+          `Proctor: turn ${tc} — long session. Your progress is ` +
+            `preserved automatically. Focus on finishing the current ` +
+            `task before starting new ones.`,
         );
       }
     }
@@ -1336,32 +1377,27 @@ export const register: Register = (on, options) => {
     const contextAdditions: string[] = [];
 
     // Model selection nudge during SDD
-    if (!e.model && sdd?.active) {
+    if (!e.model && sdd?.active && !session?.quietMode) {
       try {
         const sessionModel = await $.session.model();
         contextAdditions.push(
-          `Proctor SDD: no model specified for this subagent — it will ` +
-            `inherit the session model (${sessionModel}). For mechanical ` +
-            `implementation tasks, specify a cheaper model explicitly. ` +
-            `Reserve the session model for judgment-heavy work.`,
+          `Proctor: subagent inheriting session model (${sessionModel}). ` +
+            `Consider a cheaper model for mechanical tasks.`,
         );
       } catch {
         contextAdditions.push(
-          `Proctor SDD: no model specified for this subagent. ` +
-            `Specify the model explicitly for cost control.`,
+          `Proctor: no model specified for subagent — specify explicitly.`,
         );
       }
     }
 
     // Fix-loop escalation enforcement
-    if (sdd?.active && sdd.currentFixRound >= 4 && e.model) {
+    if (sdd?.active && sdd.currentFixRound >= 4 && e.model && !session?.quietMode) {
       const lastModel = sdd.lastImplementerModel;
       if (lastModel && e.model === lastModel) {
         contextAdditions.push(
-          `Proctor SDD: fix-loop round ${sdd.currentFixRound}/` +
-            `${FIX_ROUND_CAP}. Dispatching with the same model ` +
-            `(${lastModel}) that got stuck. Escalate to a more capable ` +
-            `model for rounds 4-5.`,
+          `Proctor: fix round ${sdd.currentFixRound}/${FIX_ROUND_CAP} ` +
+            `with same model (${lastModel}). Try a more capable model.`,
         );
       }
     }
@@ -1506,8 +1542,34 @@ export const register: Register = (on, options) => {
       if (sdd?.active) {
         sdd.active = false;
         await save($, KEYS.sdd, sdd);
-        $.ui.log("Proctor: SDD session ended");
+        const elapsed = formatElapsed(Date.now() - sdd.startedAt);
+        $.ui.log(
+          `Proctor: SDD session complete.\n` +
+            `  Tasks: ${sdd.completedTasks.length}/${sdd.totalTasks} done\n` +
+            `  Time: ${elapsed}\n` +
+            `  Fix rounds: ${sdd.totalFixRounds}\n` +
+            `  Agents: ${sdd.totalAgents}\n` +
+            `  Rulings: ${sdd.rulings.length}\n` +
+            `  Deferred: ${sdd.deferredMinors.length}`,
+        );
         await trace($, "sdd-end", `tasks=${sdd.completedTasks.length}/${sdd.totalTasks}`);
+      }
+    }
+
+    // Quiet mode toggle: "proctor: quiet on/off"
+    const quietMatch = text.match(/\bproctor:\s*quiet\s+(on|off)\b/i);
+    if (quietMatch) {
+      const session = await load<SessionState | null>($, KEYS.session, null);
+      if (session) {
+        const on = quietMatch[1].toLowerCase() === "on";
+        session.quietMode = on;
+        await save($, KEYS.session, session);
+        $.ui.log(
+          on
+            ? "Proctor: quiet mode ON — soft warnings suppressed, hard gates still enforce."
+            : "Proctor: quiet mode OFF — all warnings active.",
+        );
+        await trace($, "quiet-mode", on ? "on" : "off");
       }
     }
 
@@ -1545,6 +1607,7 @@ export const register: Register = (on, options) => {
           parts.push(`Branch: ${session.branch ?? "unknown"}`);
           parts.push(`Turn: ${session.turnCount}`);
           parts.push(`Planning mode: ${session.planningMode ? "ON" : "off"}`);
+          parts.push(`Quiet mode: ${session.quietMode ? "ON" : "off"}`);
           parts.push(`Last skill: ${session.lastSkillName ?? "none"}`);
         }
 
