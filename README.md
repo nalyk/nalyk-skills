@@ -210,9 +210,9 @@ Auto-configures via `SessionStart` hook only when no statusLine is set; never ov
 
 ---
 
-### proctor (v2.0.0)
+### proctor (v2.3.0)
 
-Hook-enforced development discipline for Claude Code. Skills teach methodology; hooks enforce compliance mechanically (git gates, planning mode, step budgets); store + tracing survive compaction.
+Hook-enforced development discipline for Claude Code. Skills teach methodology; hooks enforce compliance mechanically (git gates, planning mode, step/time budgets, quiet mode, pre-flight checks, self-diagnosis, autonomy metrics); store + tracing survive compaction.
 
 ```bash
 /plugin install proctor@nalyk-skills
@@ -239,13 +239,17 @@ Hook-enforced development discipline for Claude Code. Skills teach methodology; 
 | `dispatching-parallel-agents` | Independent concurrent tasks |
 | `writing-skills` | TDD applied to skill creation |
 
-**Hard gates:** Test evidence, test freshness, test passing, branch protection, planning mode (Write/Edit blocked during design phases).
+**Hard gates (5):** Test evidence, test freshness, test passing, branch protection, secret/credential detection. Planning mode blocks Write/Edit during design phases.
 
-**Soft enforcers:** Skill watchdog, model selection, fix-round cap, step budget (per-task tool call limit), context pressure, ruling aggregation, rationalization detection ($.model.fork).
+**Soft enforcers (12):** Skill watchdog, model selection, fix-round cap, step budget, time budget, context pressure, ruling aggregation, rationalization detection, destructive command warning, diff size awareness, test hint, task advance guidance.
 
-**Observability:** Structured event tracing — gate denials, skill invocations, SDD transitions, agent spawns logged to a ring buffer in $.store.
+**Operator commands (8):** `proctor: status`, `proctor: show trace`, `proctor: check` (pre-flight gate status), `proctor: diagnose` (self-analysis), `proctor: tasks N` (scope update), `proctor: quiet on/off`, `proctor: allow <branch>`, `proctor: approve design`.
 
-**Configuration (5 options):** Protected branches, test freshness window, skill watchdog threshold, fix-round cap, step budget per task — all configurable via the plugin settings UI.
+**Autonomy features:** Failed approach tracking with "DO NOT REDO" compaction injection, SDD session recovery, task completion evidence, structured "Next steps:" on all gate denials, autonomy metrics (gate pass/deny ratio).
+
+**Observability:** Structured event tracing, cross-session quality metrics, phase lifecycle tracking, real-time SDD progress dashboard.
+
+**Configuration (6 options):** Protected branches, test freshness window, skill watchdog threshold, fix-round cap, step budget per task, time budget per task — all configurable via the plugin settings UI.
 
 Without `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1`, the skills still work as prose guidance but hooks do not fire.
 
