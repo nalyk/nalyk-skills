@@ -97,7 +97,7 @@ protection, SDD dashboard, state persistence — do not fire.
 
 | Gate | What it blocks | What it requires |
 |------|---------------|-----------------|
-| **Test evidence** | `git commit`, `git push` | Fresh passing test run in this session |
+| **Test evidence** | `git commit`, `git push` | Fresh passing test run in this session — unless the project has no test suite, the change is prose-only, or you said `proctor: no tests` |
 | **Test freshness** | `git commit`, `git push` | Test run within 5 minutes (configurable) |
 | **Test passing** | `git commit`, `git push` | Last test run exit code 0 |
 | **Branch protection** | `git commit/push/merge/rebase/reset` on main/master | Feature branch or explicit human consent |
@@ -149,6 +149,7 @@ Hard gates always enforce regardless of quiet mode.
 | `proctor: show trace` | Last 25 structured trace events with timestamps |
 | `proctor: allow <branch>` | Grant consent for protected branch operations |
 | `proctor: approve design` | Exit planning mode |
+| `proctor: no tests` | Stand the test gate down for this session — for projects that genuinely have no suite |
 | `proctor: quiet on` | Suppress soft warnings (hard gates still enforce) |
 | `proctor: quiet off` | Re-enable all warnings |
 | `proctor: check` | Pre-flight gate status: test evidence, branch protection, planning mode, secret scan |

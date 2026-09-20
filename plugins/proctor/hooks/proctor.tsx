@@ -75,6 +75,8 @@ interface SessionState {
   turnCount: number;
   planningMode: boolean;
   planningSkill: string | null;
+  hasTestInfrastructure: boolean;
+  testsAcknowledgedAbsent: boolean;
   currentPhase:
     | "idle"
     | "brainstorming"
@@ -205,10 +207,75 @@ const TEST_PATTERNS: Array<{ file: string; command: string }> = [
 const TEST_RUN_RE =
   /\b(npm\s+test|npx\s+(jest|vitest|mocha|playwright|cypress)|yarn\s+test|pnpm\s+test|bun\s+test|deno\s+test|pytest|py\.test|python\s+-m\s+(pytest|unittest)|cargo\s+test|go\s+test|bundle\s+exec\s+rspec|mix\s+test|make\s+test|gradle\w*\s+test|mvn\s+test|dotnet\s+test|swift\s+test|ctest|rake\s+test|jest|vitest|mocha|phpunit|vendor\/bin\/phpunit|dart\s+test|flutter\s+test|zig\s+build\s+test|lein\s+test|sbt\s+test|stack\s+test|cabal\s+test|nim\s+c\s+-r|nimble\s+test|rspec|elixir\s+-S\s+mix\s+test)\b/;
 
-const GIT_COMMIT_PUSH_RE = /\bgit\s+(commit|push|merge)\b/;
+// Global options sit between `git` and its subcommand: `git -c k=v commit`,
+// `git -C dir push`, `git --git-dir=... merge`. Matching `git\s+commit`
+// alone lets every one of those slip past the gates untouched.
+const GIT_OPTS = String.raw`(?:-[cC]\s+\S+\s+|--(?:git-dir|work-tree|namespace|exec-path|config-env)(?:=\S+|\s+\S+)\s+|--\S+\s+)*`;
 
-const GIT_DESTRUCTIVE_RE =
-  /\bgit\s+(commit|push|merge|rebase|reset\s+--hard|force-push|checkout\s+--\s)\b/;
+const GIT_COMMIT_PUSH_RE = new RegExp(
+  String.raw`\bgit\s+` + GIT_OPTS + String.raw`(commit|push|merge)\b`,
+);
+
+// Files that carry no behaviour: prose, assets and licences. A change
+// confined to these cannot break a test, so the commit gate lets it by.
+const PROSE_FILE_RE =
+  /(\.(md|markdown|mdx|txt|rst|adoc|asciidoc|org|tex|csv|svg|png|jpe?g|gif|webp|ico|pdf|woff2?|ttf|otf)$|^(LICENSE|COPYING|NOTICE|AUTHORS|CONTRIBUTORS|CHANGELOG|CODEOWNERS)([.\-][\w.\-]*)?$|(^|\/)docs?\/)/i;
+
+/**
+ * Paths git reports as changed, staged or not, plus untracked files.
+ * Returns null when git cannot be read, so callers can tell "nothing
+ * changed" apart from "could not tell".
+ */
+async function changedPaths($: any): Promise<string[] | null> {
+  try {
+    const res = await $.process.run(["git", "status", "--porcelain"]);
+    if (res.exitCode !== 0) return null;
+    return res.stdout
+      .split("\n")
+      .map((l: string) => l.slice(3).trim())
+      .filter(Boolean)
+      .map((p: string) => {
+        // Renames read "old -> new"; the destination is what matters.
+        const arrow = p.indexOf(" -> ");
+        return arrow === -1 ? p : p.slice(arrow + 4);
+      });
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * A shell command with its heredoc bodies and quoted literals blanked out,
+ * so the command regexes match commands actually being run rather than text
+ * that merely mentions one. Without this, a commit whose message says
+ * "make test" is recorded as passing test evidence, and editing a document
+ * that quotes a git subcommand is treated as running it.
+ */
+function commandSkeleton(cmd: string): string {
+  let out = cmd;
+
+  // Heredoc bodies: <<EOF / <<-'EOF' / <<"EOF" up to the terminator.
+  out = out.replace(
+    /<<-?\s*(['"]?)([A-Za-z_][A-Za-z0-9_]*)\1[\s\S]*?^\s*\2\s*$/gm,
+    "<<HEREDOC",
+  );
+  // An unterminated heredoc still hides everything after it.
+  out = out.replace(
+    /<<-?\s*(['"]?)[A-Za-z_][A-Za-z0-9_]*\1[\s\S]*$/,
+    "<<HEREDOC",
+  );
+  // Quoted literals, escapes respected.
+  out = out.replace(/'(?:[^'\\]|\\.)*'/g, "''");
+  out = out.replace(/"(?:[^"\\]|\\.)*"/g, '""');
+
+  return out;
+}
+
+const GIT_DESTRUCTIVE_RE = new RegExp(
+  String.raw`\bgit\s+` +
+    GIT_OPTS +
+    String.raw`(commit|push|merge|rebase|reset\s+--hard|force-push|checkout\s+--\s)\b`,
+);
 
 // Destructive non-git bash commands — soft warning
 const DESTRUCTIVE_BASH_RE =
@@ -416,6 +483,11 @@ export const register: Register = (on, options) => {
       // Non-critical — cwd detection failed
     }
 
+    // No marker file and nothing remembered means this project has no test
+    // suite to run — a docs, notes or config repo. The commit gate steps
+    // aside there rather than demanding a suite that cannot exist.
+    const hasTestInfrastructure = testCommand !== null;
+
     let branch: string | null = null;
     let isWorktree = false;
     try {
@@ -459,6 +531,8 @@ export const register: Register = (on, options) => {
       turnCount: 0,
       planningMode: false,
       planningSkill: null,
+      hasTestInfrastructure,
+      testsAcknowledgedAbsent: false,
       currentPhase: "idle",
       quietMode: false,
     };
@@ -565,14 +639,44 @@ export const register: Register = (on, options) => {
 
   on("tool.call", { tool: "Bash" }, async ($: any, e: any, next: any) => {
     const cmd: string = e.command ?? "";
+    const skel = commandSkeleton(cmd);
 
     // ── GATE: Git commit/push requires fresh passing test evidence ──
-    if (GIT_COMMIT_PUSH_RE.test(cmd)) {
+    if (GIT_COMMIT_PUSH_RE.test(skel)) {
+      const session = await load<SessionState | null>($, KEYS.session, null);
+
+      // The gate exists to stop code shipping untested. Three cases are not
+      // that, and enforcing against them only deadlocks the commit:
+      //   1. the human said this project has no tests
+      //   2. no test marker file anywhere — a docs, notes or config repo
+      //   3. the change touches only prose and assets
+      // Checked before the evidence itself, so a README fix is not held up
+      // by evidence that went stale either.
+      let steppedAside: string | null = null;
+
+      if (session?.testsAcknowledgedAbsent) {
+        steppedAside = "acknowledged: no test suite in this project";
+      } else if (session && !session.hasTestInfrastructure) {
+        steppedAside = "no test suite detected in this project";
+      } else {
+        const paths = await changedPaths($);
+        if (paths && paths.length > 0 && paths.every((f) => PROSE_FILE_RE.test(f))) {
+          steppedAside = `prose-only change (${paths.length} file${paths.length === 1 ? "" : "s"})`;
+        }
+      }
+
+      if (steppedAside) {
+        await trace($, "gate-skip", `git-no-tests-needed: ${steppedAside}`);
+        if (!session?.quietMode) {
+          $.ui.log(`Proctor: test gate stepped aside — ${steppedAside}.`);
+        }
+        return next(e);
+      }
+
       const evidence = await load<TestEvidence | null>($, KEYS.test, null);
 
       if (!evidence) {
         await trace($, "gate-deny", `git-no-evidence: ${cmd.substring(0, 80)}`);
-        const session = await load<SessionState | null>($, KEYS.session, null);
         const hist = await load<SessionHistory>($, KEYS.history, DEFAULT_HISTORY);
         hist.qualityMetrics.gateDenials++;
         await save($, KEYS.history, hist);
@@ -583,7 +687,9 @@ export const register: Register = (on, options) => {
             `Next steps:\n` +
             `  1. Run \`${testCmd}\`\n` +
             `  2. Fix any failures\n` +
-            `  3. Re-run until passing, then retry this command`,
+            `  3. Re-run until passing, then retry this command\n` +
+            `If this project genuinely has no test suite, say ` +
+            `\`proctor: no tests\` and the gate will stand down for the session.`,
         };
       }
 
@@ -630,7 +736,7 @@ export const register: Register = (on, options) => {
     }
 
     // ── GATE: Protected branch enforcement ─────────────────────────
-    if (GIT_DESTRUCTIVE_RE.test(cmd)) {
+    if (GIT_DESTRUCTIVE_RE.test(skel)) {
       const session = await load<SessionState | null>($, KEYS.session, null);
       if (session?.branch && PROTECTED_BRANCHES.includes(session.branch)) {
         const hasConsent = session.branchConsents?.[session.branch];
@@ -731,7 +837,7 @@ export const register: Register = (on, options) => {
     const result = await next(e);
 
     // ── POST: Track test runs ───────────────────────────────────────
-    if (TEST_RUN_RE.test(cmd)) {
+    if (TEST_RUN_RE.test(skel)) {
       const stdout: string = result.stdout ?? "";
       const stderr: string = result.stderr ?? "";
       const output = stdout + stderr;
@@ -810,7 +916,7 @@ export const register: Register = (on, options) => {
     }
 
     // ── POST: Track test run count for quality metrics ─────────────
-    if (TEST_RUN_RE.test(cmd)) {
+    if (TEST_RUN_RE.test(skel)) {
       try {
         const hist = await load<SessionHistory>($, KEYS.history, DEFAULT_HISTORY);
         hist.qualityMetrics.testsRun++;
@@ -1657,6 +1763,20 @@ export const register: Register = (on, options) => {
             `  Deferred: ${sdd.deferredMinors.length}`,
         );
         await trace($, "sdd-end", `tasks=${sdd.completedTasks.length}/${sdd.totalTasks}`);
+      }
+    }
+
+    // Declare the project test-free: "proctor: no tests"
+    if (/\bproctor:\s*no\s+tests\b/i.test(text)) {
+      const session = await load<SessionState | null>($, KEYS.session, null);
+      if (session) {
+        session.testsAcknowledgedAbsent = true;
+        await save($, KEYS.session, session);
+        $.ui.log(
+          "Proctor: test gate stood down for this session — " +
+            "no test suite in this project. Other gates still enforce.",
+        );
+        await trace($, "tests-absent-ack", "human");
       }
     }
 
