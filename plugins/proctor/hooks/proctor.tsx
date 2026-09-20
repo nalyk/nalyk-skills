@@ -77,6 +77,7 @@ interface SessionState {
   planningSkill: string | null;
   hasTestInfrastructure: boolean;
   testsAcknowledgedAbsent: boolean;
+  executableDocs: boolean;
   currentPhase:
     | "idle"
     | "brainstorming"
@@ -210,16 +211,63 @@ const TEST_RUN_RE =
 // Global options sit between `git` and its subcommand: `git -c k=v commit`,
 // `git -C dir push`, `git --git-dir=... merge`. Matching `git\s+commit`
 // alone lets every one of those slip past the gates untouched.
-const GIT_OPTS = String.raw`(?:-[cC]\s+\S+\s+|--(?:git-dir|work-tree|namespace|exec-path|config-env)(?:=\S+|\s+\S+)\s+|--\S+\s+)*`;
+const GIT_OPTS = String.raw`(?:` +
+  [
+    String.raw`-[cC]\s+\S+\s+`,
+    String.raw`--(?:git-dir|work-tree|namespace|exec-path|config-env|attr-source|super-prefix)(?:=\S+|\s+\S+)\s+`,
+    String.raw`--(?:paginate|no-pager|bare|no-replace-objects|no-lazy-fetch|no-optional-locks|literal-pathspecs|glob-pathspecs|noglob-pathspecs|icase-pathspecs|no-advice)\s+`,
+    String.raw`-[pP]\s+`,
+  ].join("|") +
+  String.raw`)*`;
 
 const GIT_COMMIT_PUSH_RE = new RegExp(
   String.raw`\bgit\s+` + GIT_OPTS + String.raw`(commit|push|merge)\b`,
 );
 
-// Files that carry no behaviour: prose, assets and licences. A change
-// confined to these cannot break a test, so the commit gate lets it by.
+// Files that normally carry no behaviour: prose, assets and licences.
+// Extension alone is not enough to conclude that, so BEHAVIORAL_DOC_RE and
+// the executable-doc checks below can each take a file back out of this set.
 const PROSE_FILE_RE =
-  /(\.(md|markdown|mdx|txt|rst|adoc|asciidoc|org|tex|csv|svg|png|jpe?g|gif|webp|ico|pdf|woff2?|ttf|otf)$|^(LICENSE|COPYING|NOTICE|AUTHORS|CONTRIBUTORS|CHANGELOG|CODEOWNERS)([.\-][\w.\-]*)?$|(^|\/)docs?\/)/i;
+  /(\.(md|markdown|mdx|txt|rst|adoc|asciidoc|org|tex|svg|png|jpe?g|gif|webp|ico|pdf|woff2?|ttf|otf)$|^(LICENSE|COPYING|NOTICE|AUTHORS|CONTRIBUTORS|CHANGELOG|CODEOWNERS)([.\-][\w.\-]*)?$)/i;
+
+// Prose-shaped files that are nothing of the sort: a runbook something
+// runs, instructions an agent reads as its prompt, a fixture or snapshot a
+// test compares against. Editing one changes behaviour, so the commit gate
+// keeps enforcing even though the extension says prose.
+const BEHAVIORAL_DOC_RE = new RegExp(
+  [
+    // Read by tools and agents as instructions, not by people as prose.
+    String.raw`(^|/)(SKILL|CLAUDE|AGENTS?|GEMINI|CURSOR|COPILOT[-_]INSTRUCTIONS|WARP|RUNBOOK|PLAYBOOK)\.[^/]*$`,
+    // A tool's own directory: its contents are configuration.
+    String.raw`(^|/)\.(claude|cursor|github|gitlab|gemini|aider|continue|devcontainer)/`,
+    // Anything a test can read: fixtures, snapshots, golden files.
+    String.raw`(^|/)(tests?|spec|specs|fixtures?|testdata|__tests__|__snapshots__|__fixtures__|e2e|integration|golden|snapshots?)/`,
+    // Runbooks and playbooks kept together by folder.
+    String.raw`(^|/)(runbooks?|playbooks?)/`,
+  ].join("|"),
+  "i",
+);
+
+// Prose formats a documentation toolchain executes or compiles rather than
+// merely renders. Only treated as behaviour when the repo actually has such
+// a toolchain — see EXECUTABLE_DOC_MARKERS.
+const EXECUTABLE_DOC_EXT_RE = /\.(md|markdown|mdx|rst|adoc|asciidoc|org|qmd|ipynb)$/i;
+
+// A repo holding one of these runs, tests or builds its prose, so a change
+// to that prose can break the build the same way code can.
+const EXECUTABLE_DOC_MARKERS = [
+  "book.toml",
+  "_quarto.yml",
+  "_quarto.yaml",
+  "quarto.yml",
+  "runme.yaml",
+  "runme.yml",
+  "jupytext.toml",
+  "mkdocs.yml",
+  "mkdocs.yaml",
+  "docusaurus.config.js",
+  "docusaurus.config.ts",
+];
 
 /**
  * Paths git reports as changed, staged or not, plus untracked files.
@@ -238,7 +286,12 @@ async function changedPaths($: any): Promise<string[] | null> {
         // Renames read "old -> new"; the destination is what matters.
         const arrow = p.indexOf(" -> ");
         return arrow === -1 ? p : p.slice(arrow + 4);
-      });
+      })
+      // git quotes any path needing it (spaces, non-ASCII under
+      // core.quotepath). Unquote so extension matching still works.
+      .map((p: string) =>
+        p.startsWith('"') && p.endsWith('"') ? p.slice(1, -1) : p,
+      );
   } catch {
     return null;
   }
@@ -264,12 +317,42 @@ function commandSkeleton(cmd: string): string {
     /<<-?\s*(['"]?)[A-Za-z_][A-Za-z0-9_]*\1[\s\S]*$/,
     "<<HEREDOC",
   );
+  // A shell's -c payload is a command, not a literal: unwrap it so what
+  // it runs is still seen. Only shells — `python3 -c "..."` stays opaque.
+  out = out.replace(
+    /\b(?:(?:ba|z|k|da)?sh|fish)\s+(?:-[a-zA-Z]+\s+)*-c\s+('(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*")/g,
+    (_m: string, q: string) => ` ${q.slice(1, -1)} `,
+  );
+
   // Quoted literals, escapes respected.
   out = out.replace(/'(?:[^'\\]|\\.)*'/g, "''");
   out = out.replace(/"(?:[^"\\]|\\.)*"/g, '""');
 
   return out;
 }
+
+const GIT_COMMIT_RE = new RegExp(
+  String.raw`\bgit\s+` + GIT_OPTS + String.raw`commit\b`,
+);
+
+const GIT_BRANCH_SWITCH_RE = new RegExp(
+  String.raw`\bgit\s+` + GIT_OPTS + String.raw`(checkout|switch)\b`,
+);
+
+// Commands that stage as they go: `git add -A && git commit`, or
+// `git commit -am`. The hook runs before any of it, so at scan time the
+// index does not yet hold what is about to be committed.
+const GIT_STAGING_RE = new RegExp(
+  String.raw`\bgit\s+` +
+    GIT_OPTS +
+    String.raw`(?:add|stage)\b|\bgit\s+` +
+    GIT_OPTS +
+    String.raw`commit\b[^\n;&|]*\s-[a-zA-Z]*a`,
+);
+
+// Untracked files read per scan, so a large working tree cannot stall a
+// commit while the gate reads it.
+const MAX_UNTRACKED_SCAN = 50;
 
 const GIT_DESTRUCTIVE_RE = new RegExp(
   String.raw`\bgit\s+` +
@@ -424,6 +507,30 @@ export const register: Register = (on, options) => {
   const PROTECTED_BRANCHES = configuredBranches.length
     ? configuredBranches
     : ["main", "master", "production", "release"];
+  // Paths the human declares behavioural whatever their extension, as
+  // globs against the repo-relative path: `runbooks/**`, `*.runbook.md`.
+  const EXECUTABLE_DOC_PATTERNS = (
+    Array.isArray(options?.executableDocPatterns)
+      ? (options.executableDocPatterns as unknown[])
+      : String(options?.executableDocPatterns ?? "").split(/[,\s]+/)
+  )
+    .map((g) => String(g).trim())
+    .filter(Boolean)
+    .map(
+      (g) =>
+        new RegExp(
+          "^" +
+            g
+              .replace(/[.+^${}()|[\]\\]/g, "\\$&")
+              .replace(/\*\*\//g, "\u0000")
+              .replace(/\*/g, "[^/]*")
+              .replace(/\u0000/g, "(?:.*/)?")
+              .replace(/\?/g, "[^/]") +
+            "$",
+          "i",
+        ),
+    );
+
   const TEST_FRESHNESS_MS =
     ((options?.testFreshnessMinutes as number) ?? 5) * 60_000;
   const WATCHDOG_TURN_THRESHOLD =
@@ -488,6 +595,20 @@ export const register: Register = (on, options) => {
     // aside there rather than demanding a suite that cannot exist.
     const hasTestInfrastructure = testCommand !== null;
 
+    // Does this repo run, test or build its prose? If so, a change to a
+    // .md is a change to behaviour and the commit gate keeps enforcing.
+    let executableDocs = false;
+    for (const marker of EXECUTABLE_DOC_MARKERS) {
+      try {
+        if (await $.fs.exists(marker)) {
+          executableDocs = true;
+          break;
+        }
+      } catch {
+        // Unreadable path — keep looking.
+      }
+    }
+
     let branch: string | null = null;
     let isWorktree = false;
     try {
@@ -533,6 +654,7 @@ export const register: Register = (on, options) => {
       planningSkill: null,
       hasTestInfrastructure,
       testsAcknowledgedAbsent: false,
+      executableDocs,
       currentPhase: "idle",
       quietMode: false,
     };
@@ -659,8 +781,16 @@ export const register: Register = (on, options) => {
       } else if (session && !session.hasTestInfrastructure) {
         steppedAside = "no test suite detected in this project";
       } else {
+        // Inert prose: prose-shaped, and not behavioural by name, path,
+        // repo toolchain or the human's own declaration.
+        const isInertProse = (f: string) =>
+          PROSE_FILE_RE.test(f) &&
+          !BEHAVIORAL_DOC_RE.test(f) &&
+          !(session?.executableDocs && EXECUTABLE_DOC_EXT_RE.test(f)) &&
+          !EXECUTABLE_DOC_PATTERNS.some((re) => re.test(f));
+
         const paths = await changedPaths($);
-        if (paths && paths.length > 0 && paths.every((f) => PROSE_FILE_RE.test(f))) {
+        if (paths && paths.length > 0 && paths.every(isInertProse)) {
           steppedAside = `prose-only change (${paths.length} file${paths.length === 1 ? "" : "s"})`;
         }
       }
@@ -670,12 +800,13 @@ export const register: Register = (on, options) => {
         if (!session?.quietMode) {
           $.ui.log(`Proctor: test gate stepped aside — ${steppedAside}.`);
         }
-        return next(e);
       }
 
-      const evidence = await load<TestEvidence | null>($, KEYS.test, null);
+      const evidence = steppedAside
+        ? null
+        : await load<TestEvidence | null>($, KEYS.test, null);
 
-      if (!evidence) {
+      if (!evidence && !steppedAside) {
         await trace($, "gate-deny", `git-no-evidence: ${cmd.substring(0, 80)}`);
         const hist = await load<SessionHistory>($, KEYS.history, DEFAULT_HISTORY);
         hist.qualityMetrics.gateDenials++;
@@ -693,8 +824,8 @@ export const register: Register = (on, options) => {
         };
       }
 
-      const age = Date.now() - evidence.timestamp;
-      if (age > TEST_FRESHNESS_MS) {
+      const age = evidence ? Date.now() - evidence.timestamp : 0;
+      if (evidence && age > TEST_FRESHNESS_MS) {
         const mins = Math.round(age / 60_000);
         await trace($, "gate-deny", `git-stale-evidence: ${mins}m old`);
         const hist = await load<SessionHistory>($, KEYS.history, DEFAULT_HISTORY);
@@ -711,7 +842,7 @@ export const register: Register = (on, options) => {
         };
       }
 
-      if (evidence.exitCode !== 0) {
+      if (evidence && evidence.exitCode !== 0) {
         await trace($, "gate-deny", `git-failing-tests: exit ${evidence.exitCode}`);
         const hist = await load<SessionHistory>($, KEYS.history, DEFAULT_HISTORY);
         hist.qualityMetrics.gateDenials++;
@@ -727,12 +858,15 @@ export const register: Register = (on, options) => {
         };
       }
 
-      // Gate passed — track it
-      try {
-        const hist = await load<SessionHistory>($, KEYS.history, DEFAULT_HISTORY);
-        hist.qualityMetrics.gatesPassed++;
-        await save($, KEYS.history, hist);
-      } catch { /* non-critical */ }
+      // Gate satisfied by real evidence — track it. A gate that stepped
+      // aside was not satisfied, so it is not counted as passed.
+      if (evidence) {
+        try {
+          const hist = await load<SessionHistory>($, KEYS.history, DEFAULT_HISTORY);
+          hist.qualityMetrics.gatesPassed++;
+          await save($, KEYS.history, hist);
+        } catch { /* non-critical */ }
+      }
     }
 
     // ── GATE: Protected branch enforcement ─────────────────────────
@@ -760,10 +894,42 @@ export const register: Register = (on, options) => {
     }
 
     // ── GATE: Secret/credential detection before git commit ────────
-    if (/\bgit\s+commit\b/.test(cmd)) {
+    if (GIT_COMMIT_RE.test(skel)) {
       try {
-        const diff = await $.process.run(["git", "diff", "--cached", "-U0"]);
-        const diffText: string = diff.stdout ?? "";
+        const chunks: string[] = [];
+
+        const cached = await $.process.run(["git", "diff", "--cached", "-U0"]);
+        chunks.push(cached.stdout ?? "");
+
+        // `git add -A && git commit` is a single tool call: nothing is
+        // staged yet when this runs, so the staged diff is empty and a
+        // secret would sail through. Scan what is about to be staged too.
+        if (GIT_STAGING_RE.test(skel)) {
+          const tracked = await $.process.run(["git", "diff", "HEAD", "-U0"]);
+          chunks.push(tracked.stdout ?? "");
+
+          const untracked = await $.process.run([
+            "git",
+            "ls-files",
+            "--others",
+            "--exclude-standard",
+          ]);
+          const files = (untracked.stdout ?? "")
+            .split("\n")
+            .map((f: string) => f.trim())
+            .filter(Boolean)
+            .slice(0, MAX_UNTRACKED_SCAN);
+
+          for (const f of files) {
+            try {
+              chunks.push(await $.fs.read(f));
+            } catch {
+              // Binary or unreadable — nothing to scan.
+            }
+          }
+        }
+
+        const diffText: string = chunks.join("\n");
         for (const pattern of SECRET_PATTERNS) {
           if (pattern.test(diffText)) {
             await trace($, "gate-deny", `secret-detected: ${pattern.source.substring(0, 30)}`);
@@ -788,7 +954,7 @@ export const register: Register = (on, options) => {
     }
 
     // ── SOFT: Destructive bash command awareness ──────────────────
-    if (DESTRUCTIVE_BASH_RE.test(cmd)) {
+    if (DESTRUCTIVE_BASH_RE.test(skel)) {
       const sess = await load<SessionState | null>($, KEYS.session, null);
       if (!sess?.quietMode) {
         const snippet = cmd.length > 80 ? cmd.substring(0, 77) + "..." : cmd;
@@ -800,7 +966,7 @@ export const register: Register = (on, options) => {
     }
 
     // ── SOFT: Diff size awareness BEFORE commit ───────────────────
-    if (/\bgit\s+commit\b/.test(cmd)) {
+    if (GIT_COMMIT_RE.test(skel)) {
       try {
         const stat = await $.process.run(["git", "diff", "--cached", "--stat"]);
         const lines = (stat.stdout ?? "").split("\n");
@@ -882,7 +1048,7 @@ export const register: Register = (on, options) => {
     }
 
     // ── POST: Track branch changes ──────────────────────────────────
-    if (/\bgit\s+(checkout|switch)\b/.test(cmd) && result.exitCode === 0) {
+    if (GIT_BRANCH_SWITCH_RE.test(skel) && result.exitCode === 0) {
       try {
         const branchResult = await $.process.run([
           "git",
@@ -905,7 +1071,7 @@ export const register: Register = (on, options) => {
     }
 
     // ── POST: Quality metrics after successful commit ──────────────
-    if (/\bgit\s+commit\b/.test(cmd) && result.exitCode === 0) {
+    if (GIT_COMMIT_RE.test(skel) && result.exitCode === 0) {
       try {
         const hist = await load<SessionHistory>($, KEYS.history, DEFAULT_HISTORY);
         hist.qualityMetrics.totalCommits++;

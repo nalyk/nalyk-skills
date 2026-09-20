@@ -187,11 +187,36 @@ Plugin options (via `plugin.json` `userConfig`):
 | Option | Default | Description |
 |--------|---------|-------------|
 | `protectedBranches` | `["main","master","production","release"]` | Branches protected from destructive git ops |
+| `executableDocPatterns` | `[]` | Globs for prose-shaped files that are really behaviour, e.g. `runbooks/**` |
 | `testFreshnessMinutes` | `5` | How many minutes before test evidence expires |
 | `watchdogTurnThreshold` | `4` | Turns without a skill before the watchdog fires |
 | `fixRoundCap` | `5` | Maximum fix-loop rounds in SDD |
 | `stepBudgetPerTask` | `100` | Tool call limit per SDD task (warn 80%, block 100%) |
 | `timeBudgetPerTaskMinutes` | `30` | Wall-clock limit per SDD task in minutes (warn 80%, block 100%) |
+
+### When the test gate stands down
+
+A project with no test suite could otherwise never commit, so the gate
+steps aside — visibly, with a line in the transcript — when:
+
+- **no test marker file exists** anywhere in the repo (a docs, notes or
+  config repo: there is no suite to run), or
+- **the change is inert prose only**, or
+- you said **`proctor: no tests`** this session.
+
+Every other gate keeps enforcing regardless: branch protection, secret
+detection and planning mode are untouched by this.
+
+"Inert prose" is narrower than "a .md file". These stay behaviour and
+keep the gate enforcing:
+
+| Kind | Examples |
+|------|----------|
+| Agent and tool instructions | `SKILL.md`, `CLAUDE.md`, `AGENTS.md`, anything under `.claude/`, `.cursor/`, `.github/` |
+| Runbooks and playbooks | `RUNBOOK.md`, `runbooks/**`, `playbooks/**` |
+| Anything a test reads | `tests/`, `spec/`, `fixtures/`, `testdata/`, `__snapshots__/`, `e2e/`, `golden/` |
+| Prose a toolchain executes | every `.md`/`.rst`/`.qmd` in a repo holding `book.toml`, `_quarto.yml`, `runme.yaml`, `mkdocs.yml`, `jupytext.toml` or a Docusaurus config |
+| Whatever you declare | `executableDocPatterns` |
 
 Quiet mode is toggled at runtime via `proctor: quiet on/off` — it
 suppresses soft warnings while hard gates continue to enforce. This

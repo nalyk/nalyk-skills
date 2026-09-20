@@ -20,17 +20,25 @@ const pick = (re, what) => {
 
 const fn = pick(/function commandSkeleton[\s\S]*?\n}\n/, "commandSkeleton");
 const testRe = pick(/const TEST_RUN_RE =\n([\s\S]*?);\n/, "TEST_RUN_RE").trim();
-const gitOpts = pick(/const GIT_OPTS = (.*);/, "GIT_OPTS");
+const gitOpts = pick(/const GIT_OPTS =\s([\s\S]*?);\n/, "GIT_OPTS");
 const gitRe = pick(/const GIT_COMMIT_PUSH_RE = new RegExp\(\n([\s\S]*?)\n\);/, "GIT_COMMIT_PUSH_RE");
 const destrRe = pick(/const GIT_DESTRUCTIVE_RE = new RegExp\(\n([\s\S]*?)\n\);/, "GIT_DESTRUCTIVE_RE");
+const commitRe = pick(/const GIT_COMMIT_RE = new RegExp\(\n([\s\S]*?)\n\);/, "GIT_COMMIT_RE");
+const switchRe = pick(/const GIT_BRANCH_SWITCH_RE = new RegExp\(\n([\s\S]*?)\n\);/, "GIT_BRANCH_SWITCH_RE");
 const proseRe = pick(/const PROSE_FILE_RE =\n([\s\S]*?);\n/, "PROSE_FILE_RE").trim();
+const behavRe = pick(/const BEHAVIORAL_DOC_RE = new RegExp\(\n([\s\S]*?)\n\);/, "BEHAVIORAL_DOC_RE");
+const execExtRe = pick(/const EXECUTABLE_DOC_EXT_RE = (.*);/, "EXECUTABLE_DOC_EXT_RE");
 
 const {
   commandSkeleton,
   TEST_RUN_RE,
   GIT_COMMIT_PUSH_RE,
   GIT_DESTRUCTIVE_RE,
+  GIT_COMMIT_RE,
+  GIT_BRANCH_SWITCH_RE,
   PROSE_FILE_RE,
+  BEHAVIORAL_DOC_RE,
+  EXECUTABLE_DOC_EXT_RE,
 } = await import(
   "data:text/javascript," +
     encodeURIComponent(
@@ -39,7 +47,11 @@ const {
         `\nexport const TEST_RUN_RE = ${testRe};` +
         `\nexport const GIT_COMMIT_PUSH_RE = new RegExp(${gitRe});` +
         `\nexport const GIT_DESTRUCTIVE_RE = new RegExp(${destrRe});` +
+        `\nexport const GIT_COMMIT_RE = new RegExp(${commitRe});` +
+        `\nexport const GIT_BRANCH_SWITCH_RE = new RegExp(${switchRe});` +
         `\nexport const PROSE_FILE_RE = ${proseRe};` +
+        `\nexport const BEHAVIORAL_DOC_RE = new RegExp(${behavRe});` +
+        `\nexport const EXECUTABLE_DOC_EXT_RE = ${execExtRe};` +
         `\nexport { commandSkeleton };`,
     )
 );
@@ -73,11 +85,47 @@ for (const [name, cmd] of [
 ]) {
   check(`gated through ${name}`, GIT_COMMIT_PUSH_RE.test(commandSkeleton(cmd)), true);
   check(`destructive through ${name}`, GIT_DESTRUCTIVE_RE.test(commandSkeleton(cmd)), true);
+  // The secret scan and the commit trackers key off GIT_COMMIT_RE; they
+  // had their own inline copy of the pattern and evaded the same way.
+  if (!cmd.includes("push"))
+    check(`secret scan through ${name}`, GIT_COMMIT_RE.test(commandSkeleton(cmd)), true);
 }
 
-// Harmless git must stay ungated.
-for (const c of ["git status", "git add -A", "git log --oneline", "git diff --stat"])
+check(
+  "branch switch tracked through -c",
+  GIT_BRANCH_SWITCH_RE.test(commandSkeleton("git -c advice.detachedHead=false checkout main")),
+  true,
+);
+
+// Harmless git must stay ungated, including when a subcommand option
+// happens to be followed by a word the gate cares about.
+for (const c of [
+  "git status",
+  "git add -A",
+  "git log --oneline",
+  "git diff --stat",
+  "git log --oneline commit",
+  "git show --stat merge",
+  "git branch --list push",
+])
   check(`not gated: ${c}`, GIT_COMMIT_PUSH_RE.test(commandSkeleton(c)), false);
+
+// A shell's -c payload is a command, not a literal.
+check(
+  "bash -c payload is still a commit",
+  GIT_COMMIT_PUSH_RE.test(commandSkeleton(`bash -c "${GIT} -m x"`)),
+  true,
+);
+check(
+  "sh -c payload is still a test run",
+  TEST_RUN_RE.test(commandSkeleton(`sh -c '${MAKETEST}'`)),
+  true,
+);
+check(
+  "python -c payload stays opaque",
+  GIT_COMMIT_PUSH_RE.test(commandSkeleton(`python3 -c "print('${GIT}')"`)),
+  false,
+);
 
 // Mentions must not be.
 check(
@@ -106,7 +154,14 @@ check(
   false,
 );
 
-// Prose classification drives the docs-only skip.
+// Prose classification drives the docs-only skip. `inert` is the gate's
+// own composition: prose-shaped, and behavioural by nothing.
+const inert = (f, { executableDocs = false } = {}) =>
+  PROSE_FILE_RE.test(f) &&
+  !BEHAVIORAL_DOC_RE.test(f) &&
+  !(executableDocs && EXECUTABLE_DOC_EXT_RE.test(f));
+
+// Genuinely inert.
 for (const f of [
   "README.md",
   "docs/guide.rst",
@@ -114,16 +169,49 @@ for (const f of [
   "notes.txt",
   "img/logo.png",
   "CHANGELOG.md",
+  "COPYING",
 ])
-  check(`prose: ${f}`, PROSE_FILE_RE.test(f), true);
+  check(`inert prose: ${f}`, inert(f), true);
 
+// Code is never inert.
 for (const f of [
   "src/index.ts",
   "Makefile",
   "package.json",
   "hooks/proctor.tsx",
   "build.zig",
+  "docs/deploy.sh",
+  "docs/Makefile",
+  "data/seed.csv",
 ])
-  check(`code: ${f}`, PROSE_FILE_RE.test(f), false);
+  check(`not inert, code: ${f}`, inert(f), false);
+
+// Prose-shaped but behavioural: a runbook a tool runs, instructions an
+// agent reads as its prompt, a fixture or snapshot a test compares to.
+for (const f of [
+  "plugins/proctor/skills/brainstorming/SKILL.md",
+  "SKILL.md",
+  "CLAUDE.md",
+  "AGENTS.md",
+  "GEMINI.md",
+  ".claude/commands/deploy.md",
+  ".github/pull_request_template.md",
+  "runbooks/failover.md",
+  "playbooks/oncall.md",
+  "tests/fixtures/expected.md",
+  "__snapshots__/render.md",
+  "spec/golden/output.txt",
+  "e2e/cases/login.md",
+  "testdata/sample.txt",
+  "RUNBOOK.md",
+])
+  check(`not inert, behavioural: ${f}`, inert(f), false);
+
+// A repo whose toolchain executes its prose: markdown stops being inert,
+// assets stay inert.
+check("mdbook repo: README.md is not inert", inert("README.md", { executableDocs: true }), false);
+check("mdbook repo: guide.rst is not inert", inert("docs/guide.rst", { executableDocs: true }), false);
+check("mdbook repo: logo.png stays inert", inert("img/logo.png", { executableDocs: true }), true);
+check("mdbook repo: LICENSE stays inert", inert("LICENSE", { executableDocs: true }), true);
 
 process.exit(failed === 0 ? 0 : 1);
