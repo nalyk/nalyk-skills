@@ -65,6 +65,13 @@ interface SessionState {
   turnCount: number;
 }
 
+interface SessionHistory {
+  lastTestCommand: string | null;
+  projectPath: string | null;
+  skillUsage: Record<string, number>;
+  sessionsCount: number;
+}
+
 // ─────────────────────────────────────────────────────────────────────
 //  Store helpers — $.store is JSON-backed KV under
 //  ~/.claude/plugins/store/, persisting across sessions.
@@ -75,7 +82,15 @@ const KEYS = {
   session: "proctor:session",
   test: "proctor:test-evidence",
   sdd: "proctor:sdd-state",
+  history: "proctor:history",
 } as const;
+
+const DEFAULT_HISTORY: SessionHistory = {
+  lastTestCommand: null,
+  projectPath: null,
+  skillUsage: {},
+  sessionsCount: 0,
+};
 
 async function load<T>(
   $: any,
@@ -227,6 +242,25 @@ export const register: Register = (on, options) => {
       }
     }
 
+    // Cross-session learning: use remembered test command if file
+    // heuristics didn't find one, or validate the remembered one
+    const history = await load<SessionHistory>(
+      $,
+      KEYS.history,
+      DEFAULT_HISTORY,
+    );
+    try {
+      const cwd = await $.session.cwd();
+      if (!testCommand && history.lastTestCommand && history.projectPath === cwd) {
+        testCommand = history.lastTestCommand;
+      }
+      history.projectPath = cwd;
+      history.sessionsCount++;
+      await save($, KEYS.history, history);
+    } catch {
+      // Non-critical — cwd detection failed
+    }
+
     let branch: string | null = null;
     let isWorktree = false;
     try {
@@ -293,11 +327,26 @@ export const register: Register = (on, options) => {
     "prompt.section",
     { section: "context" },
     async ($: any, e: any, next: any) => {
-      const sdd = await load<SDDState | null>($, KEYS.sdd, null);
-      if (!sdd?.active) return next(e);
+      const blocks: string[] = [];
 
-      const injection = buildSDDInjection(sdd);
-      return next({ ...e, text: e.text + "\n\n" + injection });
+      const sdd = await load<SDDState | null>($, KEYS.sdd, null);
+      if (sdd?.active) blocks.push(buildSDDInjection(sdd));
+
+      const test = await load<TestEvidence | null>($, KEYS.test, null);
+      if (test) {
+        const age = Date.now() - test.timestamp;
+        const fresh = age < TEST_FRESHNESS_MS;
+        blocks.push(
+          `[PROCTOR — TEST STATE] ` +
+            `${fresh ? "✓ fresh" : "✗ STALE"} · ` +
+            `exit ${test.exitCode} · ` +
+            `${Math.round(age / 60_000)}m ago · ` +
+            `cmd: ${test.command}`,
+        );
+      }
+
+      if (blocks.length === 0) return next(e);
+      return next({ ...e, text: e.text + "\n\n" + blocks.join("\n\n") });
     },
   );
 
@@ -384,6 +433,21 @@ export const register: Register = (on, options) => {
         tailOutput: tail,
       };
       await save($, KEYS.test, evidence);
+
+      // Cross-session learning: remember working test commands
+      if (evidence.exitCode === 0) {
+        try {
+          const hist = await load<SessionHistory>(
+            $,
+            KEYS.history,
+            DEFAULT_HISTORY,
+          );
+          hist.lastTestCommand = evidence.command;
+          await save($, KEYS.history, hist);
+        } catch {
+          // Non-critical
+        }
+      }
     }
 
     // ── POST: Track branch changes ──────────────────────────────────
@@ -425,6 +489,71 @@ export const register: Register = (on, options) => {
       session.lastSkillName = e.skill ?? null;
       await save($, KEYS.session, session);
     }
+
+    // Cross-session skill usage tracking
+    try {
+      const hist = await load<SessionHistory>(
+        $,
+        KEYS.history,
+        DEFAULT_HISTORY,
+      );
+      const name = e.skill ?? "unknown";
+      hist.skillUsage[name] = (hist.skillUsage[name] ?? 0) + 1;
+      await save($, KEYS.history, hist);
+    } catch {
+      // Non-critical
+    }
+
+    // ── REWRITE: inject live discipline state into every skill ──
+    // This is the universal architecture enforcer pattern — every
+    // skill becomes context-aware without modifying the skill itself.
+    const sdd = await load<SDDState | null>($, KEYS.sdd, null);
+    const test = await load<TestEvidence | null>($, KEYS.test, null);
+
+    const lines: string[] = [];
+
+    if (sdd?.active) {
+      lines.push(
+        `[PROCTOR — LIVE STATE]`,
+        `Task ${sdd.currentTask}/${sdd.totalTasks} · ` +
+          `${sdd.completedTasks.length} complete · ` +
+          `Fix round ${sdd.currentFixRound}/${FIX_ROUND_CAP} · ` +
+          `${sdd.totalAgents} agents · ` +
+          `${formatElapsed(Date.now() - sdd.startedAt)} elapsed`,
+      );
+      if (sdd.rulings.length > 0) {
+        lines.push(
+          `Active rulings: ${sdd.rulings.map((r) => r.text).join("; ")}`,
+        );
+      }
+    }
+
+    if (test) {
+      const age = Date.now() - test.timestamp;
+      const fresh = age < TEST_FRESHNESS_MS;
+      const status = test.exitCode === 0 ? "passing" : "FAILING";
+      lines.push(
+        `Test evidence: ${fresh ? "✓ fresh" : "✗ STALE"} · ` +
+          `${status} · ${Math.round(age / 60_000)}m ago`,
+      );
+    } else {
+      lines.push(
+        `Test evidence: ✗ NONE — git gate will block commits`,
+      );
+    }
+
+    if (session?.branch) {
+      const guarded = PROTECTED_BRANCHES.includes(session.branch);
+      lines.push(
+        `Branch: ${session.branch}${guarded ? " ⚠ PROTECTED" : ""}`,
+      );
+    }
+
+    if (lines.length > 0) {
+      const prompt: string = e.prompt ?? "";
+      return next({ ...e, prompt: prompt + "\n\n" + lines.join("\n") });
+    }
+
     return next(e);
   });
 
@@ -540,6 +669,42 @@ export const register: Register = (on, options) => {
                 `Adjudicate each open finding — park contestable ones, ` +
                 `rule on load-bearing ones. Do not dispatch another fix round.`,
             );
+          }
+        }
+
+        // ── Rationalization detection via $.model.fork ─────────────
+        // At fix round >= 3, cheaply analyze the conversation for
+        // guess-and-check loops. Fork shares the session prompt cache
+        // so this is nearly free. Catches rationalizing agents 2
+        // rounds before the hard cap — coach, not bouncer.
+        if (
+          sdd.currentFixRound >= 3 &&
+          sdd.currentFixRound < FIX_ROUND_CAP &&
+          answer.length > 100
+        ) {
+          try {
+            const raw = await $.model.fork({
+              prompt:
+                "You are Proctor, a discipline enforcement system. " +
+                "Based on the conversation, is the agent in a " +
+                "guess-and-check loop — trying fixes without " +
+                "root-cause investigation? Answer ONLY with JSON: " +
+                '{"looping":true,"signal":"one sentence"} or ' +
+                '{"looping":false}',
+              maxTokens: 80,
+            });
+            const parsed = JSON.parse(raw);
+            if (parsed.looping) {
+              contextAdditions.push(
+                `Proctor: guess-and-check loop detected — ` +
+                  `"${parsed.signal}". STOP fixing. Return to ` +
+                  `proctor:systematic-debugging Phase 1 (root cause ` +
+                  `investigation). Fix-round: ${sdd.currentFixRound}` +
+                  `/${FIX_ROUND_CAP}.`,
+              );
+            }
+          } catch {
+            // Fork unavailable or unparseable — rely on hard cap
           }
         }
 
@@ -836,6 +1001,34 @@ export const register: Register = (on, options) => {
       return {
         ...result,
         description: description + gateNotice,
+      };
+    },
+  );
+
+  // ───────────────────────────────────────────────────────────────────
+  //  11. TOOL DESCRIPTIONS — Agent tool awareness
+  //      Cached per session — use for static discipline awareness,
+  //      not dynamic state (dynamic state goes through skill.prompt
+  //      and agent.spawn hooks instead).
+  // ───────────────────────────────────────────────────────────────────
+
+  on(
+    "tool.describe",
+    { tool: "Agent" },
+    async ($: any, e: any, next: any) => {
+      const result = await next(e);
+
+      const notice =
+        "\n[Proctor] When dispatching subagents, always specify " +
+        "`model` explicitly — cheap models for mechanical " +
+        "implementation, capable models for judgment tasks. " +
+        "Proctor tracks agent count, model selection, and " +
+        "fix-round state. During SDD sessions, each dispatch " +
+        "is counted and reflected in the progress dashboard.";
+
+      return {
+        ...result,
+        description: (result.description ?? "") + notice,
       };
     },
   );
