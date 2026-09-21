@@ -41,6 +41,9 @@ interface DeferredMinor {
 
 interface SDDState {
   active: boolean;
+  /** Project the run belongs to. A run does not follow the store into
+   *  another repo. */
+  cwd: string | null;
   plan: string;
   startedAt: number;
   totalTasks: number;
@@ -184,6 +187,35 @@ async function loadHistory($: any): Promise<SessionHistory> {
   };
 }
 
+// One in-flight write per key. Every hook did load-whole-object, mutate
+// one field, save-whole-object, so two hooks running for the same
+// assistant message (three parallel Edits, or a Bash and a Read) both read
+// the same snapshot and the second write erased the first. Lost that way:
+// step-budget increments, a branch change, and planningMode being set.
+const writeQueues = new Map<string, Promise<unknown>>();
+
+/**
+ * Read, mutate and write a key with no other mutation interleaved.
+ * `fn` may mutate its argument in place or return a replacement.
+ */
+async function mutate<T>(
+  $: any,
+  key: string,
+  fallback: T,
+  fn: (value: T) => T | void,
+): Promise<T> {
+  const queued = (writeQueues.get(key) ?? Promise.resolve()).then(async () => {
+    const current = await load<T>($, key, fallback);
+    const updated = (fn(current) ?? current) as T;
+    await save($, key, updated);
+    return updated;
+  });
+
+  // Keep the chain alive even if one link rejects.
+  writeQueues.set(key, queued.catch(() => undefined));
+  return queued;
+}
+
 async function save($: any, key: string, value: unknown): Promise<void> {
   await $.store.set(key, JSON.stringify(value));
 }
@@ -314,7 +346,7 @@ const GIT_COMMIT_PUSH_RE = new RegExp(
 // Extension alone is not enough to conclude that, so BEHAVIORAL_DOC_RE and
 // the executable-doc checks below can each take a file back out of this set.
 const PROSE_FILE_RE =
-  /(\.(md|markdown|mdx|txt|rst|adoc|asciidoc|org|tex|svg|png|jpe?g|gif|webp|ico|pdf|woff2?|ttf|otf)$|^(LICENSE|COPYING|NOTICE|AUTHORS|CONTRIBUTORS|CHANGELOG|CODEOWNERS)([.\-][\w.\-]*)?$)/i;
+  /(\.(md|markdown|mdx|txt|rst|adoc|asciidoc|org|tex|svg|png|jpe?g|gif|webp|ico|pdf|woff2?|ttf|otf)$|^(LICENSE|COPYING|NOTICE|AUTHORS|CONTRIBUTORS|CHANGELOG|CODEOWNERS)([.\-](?:md|markdown|txt|rst|adoc))?$)/i;
 
 // Prose-shaped files that are nothing of the sort: a runbook something
 // runs, instructions an agent reads as its prompt, a fixture or snapshot a
@@ -324,6 +356,8 @@ const BEHAVIORAL_DOC_RE = new RegExp(
   [
     // Read by tools and agents as instructions, not by people as prose.
     String.raw`(^|/)(SKILL|CLAUDE|AGENTS?|GEMINI|CURSOR|COPILOT[-_]INSTRUCTIONS|WARP|RUNBOOK|PLAYBOOK)\.[^/]*$`,
+    // A plugin's own behaviour lives in these folders as markdown.
+    String.raw`(^|/)(commands|agents|skills|prompts|references|templates)/`,
     // A tool's own directory: its contents are configuration.
     String.raw`(^|/)\.(claude|cursor|github|gitlab|gemini|aider|continue|devcontainer)/`,
     // Anything a test can read: fixtures, snapshots, golden files.
@@ -482,6 +516,43 @@ function globToRegExp(glob: string): RegExp {
 }
 
 /**
+ * A design document, which planning mode allows writing. Matched against
+ * the BASENAME: matching the whole path meant one ancestor directory
+ * named design/, plan/, spec/, proposal/ or rfc/ exempted every file in
+ * the repo and switched the planning hard-gate off wholesale.
+ */
+function isDesignDoc(path: string): boolean {
+  const base = path.split("/").pop() ?? path;
+
+  // A prose extension is a design doc outright.
+  if (/\.(md|markdown|mdx|rst|adoc|txt)$/i.test(base)) return true;
+
+  // Any other extension is code or data, whatever the name says —
+  // `Plan.tsx` and `api-spec.go` are implementation files.
+  if (/\.[A-Za-z0-9]+$/.test(base)) return false;
+
+  // Extensionless, so judge by name: DESIGN, rfc-0001, SPEC.
+  return /\b(design|plan|spec|proposal|rfc)\b/i.test(base);
+}
+
+/**
+ * The branch HEAD is on right now. The gate used to trust the branch
+ * cached at session start, which a `git checkout main && git merge feat`
+ * in one command line has not updated yet — and which was never updated
+ * at all while the post-hook that maintained it was unreachable (S25).
+ * Falls back to the cached value when git cannot be read.
+ */
+async function currentBranch($: any, cached: string | null): Promise<string | null> {
+  try {
+    const res = await $.process.run(["git", "branch", "--show-current"]);
+    const live = (res.stdout ?? "").trim();
+    return live || cached;
+  } catch {
+    return cached;
+  }
+}
+
+/**
  * A tool.call result reports failure through `isError` and carries its
  * output as text. It has no exitCode, stdout or stderr — those belong to
  * `$.process.run`, which is a different shape. Reading them here recorded
@@ -503,12 +574,16 @@ function toolOutput(result: any): string {
   return String(result?.text ?? result?.result ?? "");
 }
 
+// Shell forms that write a file: a redirection, or an in-place edit.
+const SHELL_WRITE_RE =
+  /(?:>>?\s*(['"]?[\w./~@-]+['"]?)|\b(?:sed|perl|ruby)\s+(?:-\S+\s+)*-i\S*\s+(?:-\S+\s+)*(?:'[^']*'|"[^"]*"|\S+)\s+(['"]?[\w./~@-]+['"]?)|\btee\s+(?:-\S+\s+)*(['"]?[\w./~@-]+['"]?))/;
+
 const MAX_UNTRACKED_SCAN = 50;
 
 const GIT_DESTRUCTIVE_RE = new RegExp(
   String.raw`\bgit\s+` +
     GIT_OPTS +
-    String.raw`(commit|push|merge|rebase|reset\s+--hard|force-push|checkout\s+--\s)\b`,
+    String.raw`(?:(commit|push|merge|rebase|force-push)\b|reset\s+--hard\b|(?:checkout|restore)\s+(?:--\s+)?[.*]|checkout\s+--\s)`,
 );
 
 // Destructive non-git bash commands — soft warning
@@ -619,12 +694,35 @@ const IMPLEMENTATION_SKILLS = new Set([
 const SDD_START_RE =
   /\b(subagent[- ]driven[- ]development|proctor:subagent|sdd\s+session)\b/i;
 
-const TASK_COMPLETE_RE = /Task\s+(\d+)\s*:\s*complete\b/i;
+const TASK_COMPLETE_RE =
+  /Task\s+(\d+)\s*(?::|\u2014|\u2013|-|\s)\s*(?:is\s+)?(?:complete|completed|done|finished)\b/gi;
 
-const FIX_ROUND_RE = /Task\s+(\d+)\s*:\s*fix\s+round\s+(\d+)/i;
+const FIX_ROUND_RE =
+  /Task\s+(\d+)\s*(?::|\u2014|\u2013|-|\s)\s*fix[\s-]*round\s*(\d+)/gi;
 
-const RULING_RE =
-  /Ruling:\s*(.+?)(?:\s*--\s*(.+?))?(?:\s*--\s*cost\s+if\s+wrong:\s*(.+))?$/im;
+// The separator the skills actually instruct is an EM DASH
+// (`Ruling: <what> — <why> — <cost if wrong>`); the parser only split on
+// ASCII `--`, so group 1 swallowed the whole line and every ruling was
+// stored with `costIfWrong: "unknown"`. Segments are now split after the
+// match, which also fixes the two-part form putting the cost in a group
+// nothing read.
+const RULING_SEPARATOR_RE = /\s+(?:--|\u2014|\u2013)\s+/;
+const RULING_RE = /^.*?\bRuling:\s*(.+?)\s*$/gim;
+const RULING_COST_RE = /^cost\s+if\s+wrong:\s*(.+)$/i;
+
+const MINOR_DEFERRED_RE = /\bminor\s*\(deferred\):\s*(.+)/gi;
+
+/**
+ * Every match of a sticky pattern, with its lastIndex reset first. The
+ * SDD signals used `String.match()` on non-global patterns, so only the
+ * FIRST `Task N: complete`, fix round, ruling or deferred minor in a turn
+ * was ever recorded — completedTasks then trailed forever and the
+ * done-check could never pass.
+ */
+function allMatches(re: RegExp, text: string): RegExpMatchArray[] {
+  re.lastIndex = 0;
+  return [...text.matchAll(re)];
+}
 
 // ─────────────────────────────────────────────────────────────────────
 //  Helpers
@@ -848,13 +946,39 @@ export const register: Register = (on, options) => {
 
     // SDD session recovery — resume if active state survives restart
     const existingSDD = await load<SDDState | null>($, KEYS.sdd, null);
-    if (existingSDD?.active) {
+
+    // A run belonging to another project is not this project's business.
+    let here: string | null = null;
+    try {
+      here = await $.session.cwd();
+    } catch {
+      here = null;
+    }
+
+    if (existingSDD?.active && existingSDD.cwd && here && existingSDD.cwd !== here) {
+      await trace($, "sdd-foreign", existingSDD.cwd.substring(0, 60));
+      existingSDD.active = false;
+      await save($, KEYS.sdd, existingSDD);
+    } else if (existingSDD?.active) {
       $.ui.log(
         `Proctor: recovering SDD session — ` +
           `Task ${existingSDD.currentTask}/${existingSDD.totalTasks}, ` +
           `${existingSDD.completedTasks.length} complete, ` +
           `${formatElapsed(Date.now() - existingSDD.startedAt)} elapsed`,
       );
+
+      // The task clock was left running across the closed session, so a
+      // task resumed the next morning reported "15h0m / 30m" and blew its
+      // time budget before any work happened. Restart it, and clear the
+      // one-shot warnings it already spent, so the resumed task gets a
+      // budget rather than an instant verdict.
+      existingSDD.taskStartedAt = Date.now();
+      existingSDD.timeWarned80 = false;
+      existingSDD.timeWarned100 = false;
+      existingSDD.toolCallsThisTask = 0;
+      existingSDD.stepWarned80 = false;
+      existingSDD.stepWarned100 = false;
+      await save($, KEYS.sdd, existingSDD);
       await trace($, "sdd-recovery", `task=${existingSDD.currentTask}/${existingSDD.totalTasks}`);
     }
 
@@ -1011,9 +1135,9 @@ export const register: Register = (on, options) => {
 
       if (!evidence && !steppedAside) {
         await trace($, "gate-deny", `git-no-evidence: ${cmd.substring(0, 80)}`);
-        const hist = await loadHistory($);
-        hist.qualityMetrics.gateDenials++;
-        await save($, KEYS.history, hist);
+        await mutate($, KEYS.history, DEFAULT_HISTORY, (h: SessionHistory) => {
+          h.qualityMetrics.gateDenials++;
+        });
         const testCmd = session?.testCommand ?? "the project's test suite";
         return {
           deny:
@@ -1031,9 +1155,9 @@ export const register: Register = (on, options) => {
       if (evidence && age > TEST_FRESHNESS_MS) {
         const mins = Math.round(age / 60_000);
         await trace($, "gate-deny", `git-stale-evidence: ${mins}m old`);
-        const hist = await loadHistory($);
-        hist.qualityMetrics.gateDenials++;
-        await save($, KEYS.history, hist);
+        await mutate($, KEYS.history, DEFAULT_HISTORY, (h: SessionHistory) => {
+          h.qualityMetrics.gateDenials++;
+        });
         return {
           deny:
             `Proctor gate: test evidence is stale (${mins}m ago, ` +
@@ -1047,9 +1171,9 @@ export const register: Register = (on, options) => {
 
       if (evidence && evidence.exitCode !== 0) {
         await trace($, "gate-deny", `git-failing-tests: exit ${evidence.exitCode}`);
-        const hist = await loadHistory($);
-        hist.qualityMetrics.gateDenials++;
-        await save($, KEYS.history, hist);
+        await mutate($, KEYS.history, DEFAULT_HISTORY, (h: SessionHistory) => {
+          h.qualityMetrics.gateDenials++;
+        });
         return {
           deny:
             `Proctor gate: tests are failing (exit ${evidence.exitCode}).\n` +
@@ -1065,32 +1189,72 @@ export const register: Register = (on, options) => {
       // aside was not satisfied, so it is not counted as passed.
       if (evidence) {
         try {
-          const hist = await loadHistory($);
-          hist.qualityMetrics.gatesPassed++;
-          await save($, KEYS.history, hist);
+          await mutate($, KEYS.history, DEFAULT_HISTORY, (h: SessionHistory) => {
+            h.qualityMetrics.gatesPassed++;
+          });
         } catch { /* non-critical */ }
+      }
+    }
+
+    // ── GATE: Planning mode also covers writes made through Bash ───
+    // The gate was registered for Write/Edit/NotebookEdit only, so
+    // `cat > src/x.ts <<EOF` and `sed -i` wrote implementation files
+    // during a design phase while the identical Write call was blocked.
+    const shellWrite = skel.match(SHELL_WRITE_RE);
+    if (shellWrite) {
+      const target = (shellWrite[1] ?? shellWrite[2] ?? "").replace(/^['"]|['"]$/g, "");
+      if (target && !isDesignDoc(target)) {
+        const sess = await load<SessionState | null>($, KEYS.session, null);
+        if (sess?.planningMode) {
+          await trace($, "gate-deny", `planning-mode-bash: ${target}`);
+          await mutate($, KEYS.history, DEFAULT_HISTORY, (h: SessionHistory) => {
+            h.qualityMetrics.gateDenials++;
+          });
+          return {
+            deny:
+              `Proctor gate: Bash write to '${target}' blocked — planning ` +
+              `mode active (${sess.planningSkill ?? "design phase"}).\n` +
+              `Only design docs may be written while planning.\n` +
+              `Next steps:\n` +
+              `  1. Finish the design\n` +
+              `  2. Invoke an implementation skill, or say ` +
+              `"proctor: approve design"`,
+          };
+        }
       }
     }
 
     // ── GATE: Protected branch enforcement ─────────────────────────
     if (GIT_DESTRUCTIVE_RE.test(skel)) {
       const session = await load<SessionState | null>($, KEYS.session, null);
-      if (session?.branch && PROTECTED_BRANCHES.includes(session.branch)) {
-        const hasConsent = session.branchConsents?.[session.branch];
+
+      // Read the branch now rather than trusting the session's copy: the
+      // same command line may have switched onto a protected branch a
+      // moment ago, and the tracker that refreshed the cache was itself
+      // unreachable until S25 was fixed.
+      const branch = await currentBranch($, session?.branch ?? null);
+
+      if (session && branch && branch !== session.branch) {
+        session.branch = branch;
+        await save($, KEYS.session, session);
+      }
+
+      if (branch && PROTECTED_BRANCHES.includes(branch)) {
+        const hasConsent = session?.branchConsents?.[branch];
         if (!hasConsent) {
-          await trace($, "gate-deny", `branch-protection: ${session.branch}`);
-          const hist = await loadHistory($);
-          hist.qualityMetrics.gateDenials++;
-          await save($, KEYS.history, hist);
+          await trace($, "gate-deny", `branch-protection: ${branch}`);
+          await mutate($, KEYS.history, DEFAULT_HISTORY, (h: SessionHistory) => {
+            h.qualityMetrics.gateDenials++;
+          });
           return {
             deny:
               `Proctor gate: destructive git operation blocked on ` +
-              `protected branch '${session.branch}'.\n` +
+              `protected branch '${branch}'.\n` +
               `Next steps:\n` +
               `  1. Create a feature branch: \`git checkout -b <name>\`\n` +
               `  2. Make your changes on the feature branch\n` +
               `  OR: ask your human partner to grant consent ` +
-              `("proctor: allow ${session.branch}")`,
+              `("proctor: allow ${branch}")`,
           };
         }
       }
@@ -1142,9 +1306,9 @@ export const register: Register = (on, options) => {
         const hit = containsSecret(diffText);
         if (hit) {
           await trace($, "gate-deny", `secret-detected: ${hit.source.substring(0, 30)}`);
-          const hist = await loadHistory($);
-          hist.qualityMetrics.gateDenials++;
-          await save($, KEYS.history, hist);
+          await mutate($, KEYS.history, DEFAULT_HISTORY, (h: SessionHistory) => {
+            h.qualityMetrics.gateDenials++;
+          });
           return {
             deny:
               `Proctor gate: potential credential/secret detected in staged changes. ` +
@@ -1199,12 +1363,51 @@ export const register: Register = (on, options) => {
       }
     }
 
-    // ── SDD step budget tracking ───────────────────────────────────
+    // ── SDD budgets: warn on the way up, block at the ceiling ──────
+    // README has always documented "warn 80%, block 100%". Only the
+    // warning existed: at 100% the turn-complete handler appended a
+    // sentence to the next turn's context and nothing stopped.
     const sdd = await load<SDDState | null>($, KEYS.sdd, null);
     if (sdd?.active) {
-      sdd.toolCallsThisTask++;
-      sdd.totalToolCalls++;
-      await save($, KEYS.sdd, sdd);
+      const overSteps =
+        STEP_BUDGET_PER_TASK > 0 && sdd.toolCallsThisTask >= STEP_BUDGET_PER_TASK;
+      const overTime =
+        TIME_BUDGET_PER_TASK_MS > 0 &&
+        sdd.taskStartedAt > 0 &&
+        Date.now() - sdd.taskStartedAt >= TIME_BUDGET_PER_TASK_MS;
+
+      if (overSteps || overTime) {
+        const which = overSteps
+          ? `step budget (${sdd.toolCallsThisTask}/${STEP_BUDGET_PER_TASK} tool calls)`
+          : `time budget (${formatElapsed(Date.now() - sdd.taskStartedAt)}/` +
+            `${formatElapsed(TIME_BUDGET_PER_TASK_MS)})`;
+
+        await trace($, "gate-deny", `budget-exhausted: ${which}`);
+        await mutate($, KEYS.history, DEFAULT_HISTORY, (h: SessionHistory) => {
+          h.qualityMetrics.gateDenials++;
+        });
+
+        return {
+          deny:
+            `Proctor gate: Task ${sdd.currentTask} has exhausted its ` +
+            `${which}.\n` +
+            `Adjudicate before spending more:\n` +
+            `  1. State what is done and what remains\n` +
+            `  2. Decide: finish, split the task, or stop\n` +
+            `  3. Then one of:\n` +
+            `     \`Task ${sdd.currentTask}: complete\` — resets the budget ` +
+            `and moves on\n` +
+            `     \`proctor: budget extend\` — one more full budget for ` +
+            `this task\n` +
+            `     \`proctor: sdd stop\` — leave SDD mode entirely`,
+        };
+      }
+
+      await mutate<SDDState | null>($, KEYS.sdd, null, (live) => {
+        if (!live?.active) return;
+        live.toolCallsThisTask++;
+        live.totalToolCalls++;
+      });
     }
 
     // ── Execute the command ─────────────────────────────────────────
@@ -1285,9 +1488,9 @@ export const register: Register = (on, options) => {
     // ── POST: Quality metrics after successful commit ──────────────
     if (GIT_COMMIT_RE.test(skel) && !toolFailed(result)) {
       try {
-        const hist = await loadHistory($);
-        hist.qualityMetrics.totalCommits++;
-        await save($, KEYS.history, hist);
+        await mutate($, KEYS.history, DEFAULT_HISTORY, (h: SessionHistory) => {
+          h.qualityMetrics.totalCommits++;
+        });
       } catch {
         // Non-critical
       }
@@ -1296,9 +1499,9 @@ export const register: Register = (on, options) => {
     // ── POST: Track test run count for quality metrics ─────────────
     if (isTestRun(skel)) {
       try {
-        const hist = await loadHistory($);
-        hist.qualityMetrics.testsRun++;
-        await save($, KEYS.history, hist);
+        await mutate($, KEYS.history, DEFAULT_HISTORY, (h: SessionHistory) => {
+          h.qualityMetrics.testsRun++;
+        });
       } catch {
         // Non-critical
       }
@@ -1320,11 +1523,11 @@ export const register: Register = (on, options) => {
     if (session?.planningMode) {
       const path: string = e.file_path ?? "";
       // Allow writing design docs and plan files during planning
-      if (!/\b(design|plan|spec|proposal|rfc)\b/i.test(path) && !/\.md$/.test(path)) {
+      if (!isDesignDoc(path)) {
         await trace($, "gate-deny", `planning-mode-write: ${path}`);
-        const hist = await loadHistory($);
-        hist.qualityMetrics.gateDenials++;
-        await save($, KEYS.history, hist);
+        await mutate($, KEYS.history, DEFAULT_HISTORY, (h: SessionHistory) => {
+          h.qualityMetrics.gateDenials++;
+        });
         return {
           deny:
             `Proctor gate: Write blocked — planning mode active ` +
@@ -1339,9 +1542,11 @@ export const register: Register = (on, options) => {
     // SDD step budget
     const sdd = await load<SDDState | null>($, KEYS.sdd, null);
     if (sdd?.active) {
-      sdd.toolCallsThisTask++;
-      sdd.totalToolCalls++;
-      await save($, KEYS.sdd, sdd);
+      await mutate<SDDState | null>($, KEYS.sdd, null, (live) => {
+        if (!live?.active) return;
+        live.toolCallsThisTask++;
+        live.totalToolCalls++;
+      });
     }
     return next(e);
   });
@@ -1350,11 +1555,11 @@ export const register: Register = (on, options) => {
     const session = await load<SessionState | null>($, KEYS.session, null);
     if (session?.planningMode) {
       const path: string = e.file_path ?? "";
-      if (!/\b(design|plan|spec|proposal|rfc)\b/i.test(path) && !/\.md$/.test(path)) {
+      if (!isDesignDoc(path)) {
         await trace($, "gate-deny", `planning-mode-edit: ${path}`);
-        const hist = await loadHistory($);
-        hist.qualityMetrics.gateDenials++;
-        await save($, KEYS.history, hist);
+        await mutate($, KEYS.history, DEFAULT_HISTORY, (h: SessionHistory) => {
+          h.qualityMetrics.gateDenials++;
+        });
         return {
           deny:
             `Proctor gate: Edit blocked — planning mode active ` +
@@ -1369,9 +1574,11 @@ export const register: Register = (on, options) => {
     // SDD step budget
     const sdd = await load<SDDState | null>($, KEYS.sdd, null);
     if (sdd?.active) {
-      sdd.toolCallsThisTask++;
-      sdd.totalToolCalls++;
-      await save($, KEYS.sdd, sdd);
+      await mutate<SDDState | null>($, KEYS.sdd, null, (live) => {
+        if (!live?.active) return;
+        live.toolCallsThisTask++;
+        live.totalToolCalls++;
+      });
     }
     return next(e);
   });
@@ -1380,9 +1587,9 @@ export const register: Register = (on, options) => {
     const session = await load<SessionState | null>($, KEYS.session, null);
     if (session?.planningMode) {
       await trace($, "gate-deny", "planning-mode-notebook");
-      const hist = await loadHistory($);
-      hist.qualityMetrics.gateDenials++;
-      await save($, KEYS.history, hist);
+      await mutate($, KEYS.history, DEFAULT_HISTORY, (h: SessionHistory) => {
+        h.qualityMetrics.gateDenials++;
+      });
       return {
         deny:
           `Proctor gate: NotebookEdit blocked — planning mode active ` +
@@ -1409,6 +1616,7 @@ export const register: Register = (on, options) => {
     if (session) {
       session.skillInvoked = true;
       session.turnsSinceSkill = 0;
+      session.watchdogNudgeSent = false;
       session.lastSkillName = skillName;
 
       // Planning mode transitions
@@ -1551,7 +1759,6 @@ export const register: Register = (on, options) => {
       sessionChanged = true;
 
       if (
-        !session.skillInvoked &&
         !session.watchdogNudgeSent &&
         session.turnsSinceSkill >= WATCHDOG_TURN_THRESHOLD
       ) {
@@ -1577,8 +1784,16 @@ export const register: Register = (on, options) => {
           /(\d+)\s*(?:tasks?|todos?)/i,
         );
 
+        let sddCwd: string | null = null;
+        try {
+          sddCwd = await $.session.cwd();
+        } catch {
+          sddCwd = null;
+        }
+
         sdd = {
           active: true,
+          cwd: sddCwd,
           plan: planMatch?.[1] ?? "unknown",
           startedAt: Date.now(),
           totalTasks: taskCountMatch ? parseInt(taskCountMatch[1], 10) : 0,
@@ -1607,16 +1822,38 @@ export const register: Register = (on, options) => {
 
       if (sdd?.active) {
         // Detect task completions
-        const completeMatch = answer.match(TASK_COMPLETE_RE);
-        if (completeMatch) {
+        for (const completeMatch of allMatches(TASK_COMPLETE_RE, answer)) {
           const taskNum = parseInt(completeMatch[1], 10);
           if (!sdd.completedTasks.includes(taskNum)) {
             sdd.completedTasks.push(taskNum);
             sdd.completedTasks.sort((a, b) => a - b);
-            sdd.currentTask = taskNum + 1;
+            // Clamp: after the last task of five, `currentTask` used to
+            // read 6, and that number reached the dashboard, the injected
+            // banner, `proctor: status` and every commit message.
+            sdd.currentTask =
+              sdd.totalTasks > 0
+                ? Math.min(taskNum + 1, sdd.totalTasks)
+                : taskNum + 1;
             sdd.currentFixRound = 0;
             sdd.toolCallsThisTask = 0;
             sdd.taskStartedAt = Date.now();
+            // Every task done means the run is over. Nothing used to
+            // clear `active`, so the dashboard, the injected banner and
+            // every later commit message kept reporting a finished run.
+            if (
+              sdd.totalTasks > 0 &&
+              sdd.completedTasks.length >= sdd.totalTasks
+            ) {
+              sdd.active = false;
+              await trace($, "sdd-complete", `${sdd.totalTasks} tasks`);
+              if (!session?.quietMode) {
+                $.ui.log(
+                  `Proctor: SDD run complete — ${sdd.totalTasks} tasks, ` +
+                    `${formatElapsed(Date.now() - sdd.startedAt)} elapsed.`,
+                );
+              }
+            }
+
             sdd.stepWarned80 = false;
             sdd.stepWarned100 = false;
             sdd.timeWarned80 = false;
@@ -1645,25 +1882,29 @@ export const register: Register = (on, options) => {
         }
 
         // Detect fix rounds — capture failed approach for compaction resilience
-        const fixMatch = answer.match(FIX_ROUND_RE);
-        if (fixMatch) {
+        for (const fixMatch of allMatches(FIX_ROUND_RE, answer)) {
           const round = parseInt(fixMatch[2], 10);
+          // The task the agent named, not whatever currentTask happens to
+          // be: a failed approach filed under the wrong task is injected
+          // as "DO NOT REDO" against work that never tried it.
+          const fixTask = parseInt(fixMatch[1], 10) || sdd.currentTask;
+          if (round === sdd.currentFixRound && fixTask === sdd.currentTask) continue;
           sdd.currentFixRound = round;
           sdd.totalFixRounds++;
           sddChanged = true;
-          await trace($, "sdd-fix-round", `task=${sdd.currentTask} round=${round}`);
+          await trace($, "sdd-fix-round", `task=${fixTask} round=${round}`);
 
           const approachMatch = answer.match(/(?:approach|tried|attempted|fix):\s*(.{10,120})/i);
           if (approachMatch) {
-            sdd.failedApproaches.push(`Task ${sdd.currentTask} R${round}: ${approachMatch[1].trim()}`);
+            sdd.failedApproaches.push(`Task ${fixTask} R${round}: ${approachMatch[1].trim()}`);
           } else {
-            sdd.failedApproaches.push(`Task ${sdd.currentTask} R${round}: fix attempt failed`);
+            sdd.failedApproaches.push(`Task ${fixTask} R${round}: fix attempt failed`);
           }
 
           try {
-            const hist = await loadHistory($);
-            hist.qualityMetrics.fixRounds++;
-            await save($, KEYS.history, hist);
+            await mutate($, KEYS.history, DEFAULT_HISTORY, (h: SessionHistory) => {
+              h.qualityMetrics.fixRounds++;
+            });
           } catch { /* non-critical */ }
 
           if (round >= FIX_ROUND_CAP) {
@@ -1781,12 +2022,26 @@ export const register: Register = (on, options) => {
         }
 
         // Detect rulings
-        const rulingMatch = answer.match(RULING_RE);
-        if (rulingMatch) {
+        for (const rulingMatch of allMatches(RULING_RE, answer)) {
+          const segments = (rulingMatch[1] ?? "")
+            .split(RULING_SEPARATOR_RE)
+            .map((seg) => seg.trim())
+            .filter(Boolean);
+
+          // The cost is the segment that says so, wherever it sits; the
+          // last segment otherwise, when there is more than one.
+          const costSegment =
+            segments.find((seg) => RULING_COST_RE.test(seg)) ??
+            (segments.length > 2 ? segments[segments.length - 1] : undefined);
+
+          const costText = costSegment
+            ? (costSegment.match(RULING_COST_RE)?.[1] ?? costSegment).trim()
+            : "unknown";
+
           sdd.rulings.push({
             task: sdd.currentTask,
-            text: rulingMatch[1]?.trim() ?? "",
-            costIfWrong: rulingMatch[3]?.trim() ?? "unknown",
+            text: segments[0] ?? "",
+            costIfWrong: costText,
             phase:
               sdd.currentFixRound > 0
                 ? "fix-loop"
@@ -1811,11 +2066,8 @@ export const register: Register = (on, options) => {
           } catch {}
         }
 
-        // Detect deferred minors
-        const minorMatch = answer.match(
-          /minor\s*\(deferred\):\s*(.+)/i,
-        );
-        if (minorMatch) {
+        // Detect deferred minors — every one in the turn, not the first.
+        for (const minorMatch of allMatches(MINOR_DEFERRED_RE, answer)) {
           sdd.deferredMinors.push({
             task: sdd.currentTask,
             finding: minorMatch[1].trim(),
@@ -2065,7 +2317,17 @@ export const register: Register = (on, options) => {
     if (sdd.currentTask > 0) {
       additions.push(`[SDD Task ${sdd.currentTask}/${sdd.totalTasks}]`);
     }
-    if (evidence && evidence.exitCode === 0) {
+
+    // Every other consumer of the evidence checks its age; this one did
+    // not, so a commit could be stamped "[Tests: ✓]" from a run hours
+    // earlier — or, before the record carried a project, from a different
+    // repo. A commit message is a claim; only make it if it is true now.
+    const fresh =
+      evidence !== null &&
+      evidence.exitCode === 0 &&
+      Date.now() - evidence.timestamp <= TEST_FRESHNESS_MS;
+
+    if (fresh) {
       additions.push(`[Tests: ✓]`);
     }
     if (sdd.rulings.length > 0) {
@@ -2137,6 +2399,29 @@ export const register: Register = (on, options) => {
             `  Deferred: ${sdd.deferredMinors.length}`,
         );
         await trace($, "sdd-end", `tasks=${sdd.completedTasks.length}/${sdd.totalTasks}`);
+      }
+    }
+
+    // Grant one more budget for the current task: "proctor: budget extend"
+    // The budget gate blocks at 100%; without an escape the only ways out
+    // were completing the task or leaving SDD entirely.
+    if (/\bproctor:\s*budget\s+extend\b/i.test(text)) {
+      const sdd = await load<SDDState | null>($, KEYS.sdd, null);
+      if (sdd?.active) {
+        sdd.toolCallsThisTask = 0;
+        sdd.taskStartedAt = Date.now();
+        sdd.stepWarned80 = false;
+        sdd.stepWarned100 = false;
+        sdd.timeWarned80 = false;
+        sdd.timeWarned100 = false;
+        await save($, KEYS.sdd, sdd);
+        $.ui.log(
+          `Proctor: budget extended for Task ${sdd.currentTask} — ` +
+            `steps and clock reset.`,
+        );
+        await trace($, "budget-extend", `task=${sdd.currentTask}`);
+      } else {
+        $.ui.log("Proctor: no active SDD task to extend.");
       }
     }
 
@@ -2302,10 +2587,14 @@ export const register: Register = (on, options) => {
 
         const parts: string[] = ["─── Proctor Diagnosis ───"];
 
-        // Gate denial analysis
-        const denials = events.filter((ev) => ev.kind === "gate-deny");
+        // Gate denial analysis. Both numbers come from the lifetime
+        // counters: `denials` used to be counted from the trace log, which
+        // session.start wipes and TRACE_CAP trims to 50, while `passes`
+        // was cumulative — so autonomy converged on 100% and the advice
+        // below could never fire.
+        const denials = hist.qualityMetrics.gateDenials;
         const passes = hist.qualityMetrics.gatesPassed;
-        const totalGateEvents = denials.length + passes;
+        const totalGateEvents = denials + passes;
         if (totalGateEvents > 0) {
           const autonomyRate = Math.round((passes / totalGateEvents) * 100);
           parts.push(
@@ -2439,6 +2728,34 @@ export const register: Register = (on, options) => {
         parts.push(`Autonomy rate: ${autonomyRate}%`);
 
         parts.push(`Sessions: ${hist.sessionsCount}`);
+
+        // State that was written every session and read by nothing:
+        // agentsSpawned, isWorktree, skillUsage and recentRulings were all
+        // maintained and then silently dropped. Surfacing them is the
+        // smaller change — and the cross-session ruling memory was the
+        // point of keeping them.
+        if (session) {
+          parts.push(
+            `Agents spawned: ${session.agentsSpawned}` +
+              (session.isWorktree ? " · in a git worktree" : ""),
+          );
+        }
+
+        const topSkills = Object.entries(hist.skillUsage)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 3)
+          .map(([name, n]) => `${name.replace(/^proctor:/, "")} ×${n}`);
+        if (topSkills.length > 0) {
+          parts.push(`Most used skills: ${topSkills.join(", ")}`);
+        }
+
+        if (hist.recentRulings.length > 0) {
+          const recent = hist.recentRulings[hist.recentRulings.length - 1];
+          parts.push(
+            `Rulings remembered: ${hist.recentRulings.length} · ` +
+              `latest "${recent.text.substring(0, 50)}"`,
+          );
+        }
 
         $.ui.log(parts.join("\n"));
       } catch {

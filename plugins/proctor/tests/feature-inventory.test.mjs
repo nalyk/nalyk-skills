@@ -58,6 +58,8 @@ for (const gate of [
   "Proctor gate: Write blocked — planning mode active",
   "Proctor gate: Edit blocked — planning mode active",
   "Proctor gate: NotebookEdit blocked — planning mode active",
+  "Proctor gate: Bash write to",
+  "has exhausted its",
 ])
   has(`gate: ${gate.replace("Proctor gate: ", "")}`, gate);
 
@@ -75,6 +77,7 @@ for (const [label, literal] of [
   ["tasks N", String.raw`proctor:\s*tasks\s+(\d+)\b`],
   ["sdd stop", String.raw`proctor:\s*sdd\s+stop`],
   ["no tests", String.raw`proctor:\s*no\s+tests\b`],
+  ["budget extend", String.raw`proctor:\s*budget\s+extend\b`],
 ])
   check(`command: proctor: ${label}`, src.includes(literal));
 

@@ -22,6 +22,13 @@ const fn = pick(/function commandSkeleton[\s\S]*?\n}\n/, "commandSkeleton");
 const testRe = pick(/const TEST_RUN_RE = new RegExp\(\n([\s\S]*?)\n\);/, "TEST_RUN_RE");
 const isTestRunFn = pick(/function isTestRun[\s\S]*?\n}\n/, "isTestRun");
 const testPatternsBlock = pick(/const TEST_PATTERNS[\s\S]*?\n\];/, "TEST_PATTERNS");
+const designFn = pick(/function isDesignDoc[\s\S]*?\n}\n/, "isDesignDoc");
+const allMatchesFn = pick(/function allMatches[\s\S]*?\n}\n/, "allMatches");
+const taskRe = pick(/const TASK_COMPLETE_RE =\n([\s\S]*?);\n/, "TASK_COMPLETE_RE");
+const rulingRe = pick(/const RULING_RE = (.*);/, "RULING_RE");
+const rulingSepRe = pick(/const RULING_SEPARATOR_RE = (.*);/, "RULING_SEPARATOR_RE");
+const rulingCostRe = pick(/const RULING_COST_RE = (.*);/, "RULING_COST_RE");
+const shellWriteRe = pick(/const SHELL_WRITE_RE =\n([\s\S]*?);\n/, "SHELL_WRITE_RE");
 const toolFns = pick(/function toolFailed[\s\S]*?\nfunction toolOutput[\s\S]*?\n}\n/, "tool result helpers");
 const secretsBlock = pick(/const SECRET_PLACEHOLDER_RE =[\s\S]*?\nfunction containsSecret[\s\S]*?\n}\n/, "containsSecret");
 const gitOpts = pick(/const GIT_OPTS =\s([\s\S]*?);\n/, "GIT_OPTS");
@@ -40,6 +47,13 @@ const {
   containsSecret,
   toolFailed,
   toolOutput,
+  isDesignDoc,
+  allMatches,
+  TASK_COMPLETE_RE,
+  RULING_RE,
+  RULING_SEPARATOR_RE,
+  RULING_COST_RE,
+  SHELL_WRITE_RE,
   TEST_RUN_RE,
   GIT_COMMIT_PUSH_RE,
   GIT_DESTRUCTIVE_RE,
@@ -58,7 +72,14 @@ const {
         `\n${isTestRunFn.replace(/:\s*string/g, "").replace(/:\s*boolean/g, "")}` +
         `\n${secretsBlock.replace(/:\s*RegExp\[\]/g, "").replace(/\(text: string\)/g, "(text)").replace(/:\s*RegExp \| null/g, "")}` +
         `\n${toolFns.replace(/result: any/g, "result").replace(/:\s*boolean/g, "").replace(/:\s*string/g, "")}` +
-        `\nexport { isTestRun, containsSecret, toolFailed, toolOutput };` +
+        `\n${designFn.replace(/:\s*string/g, "").replace(/:\s*boolean/g, "")}` +
+        `\n${allMatchesFn.replace(/re: RegExp/g, "re").replace(/text: string/g, "text").replace(/:\s*RegExpMatchArray\[\]/g, "")}` +
+        `\nexport const TASK_COMPLETE_RE = ${taskRe.trim()};` +
+        `\nexport const RULING_RE = ${rulingRe};` +
+        `\nexport const RULING_SEPARATOR_RE = ${rulingSepRe};` +
+        `\nexport const RULING_COST_RE = ${rulingCostRe};` +
+        `\nexport const SHELL_WRITE_RE = ${shellWriteRe.trim()};` +
+        `\nexport { isTestRun, containsSecret, toolFailed, toolOutput, isDesignDoc, allMatches };` +
         `\nexport const GIT_COMMIT_PUSH_RE = new RegExp(${gitRe});` +
         `\nexport const GIT_DESTRUCTIVE_RE = new RegExp(${destrRe});` +
         `\nexport const GIT_COMMIT_RE = new RegExp(${commitRe});` +
@@ -356,5 +377,99 @@ check("S25 output comes from text", toolOutput({ text: "1 failing", isError: tru
 check("S25 output falls back to result", toolOutput({ result: "done" }), "done");
 check("S25 stdout/stderr still honoured", toolOutput({ stdout: "a", stderr: "b" }), "ab");
 check("S25 missing output is empty", toolOutput({}), "");
+
+// ── Silent-bug regressions (audit tiers 2 and 3) ──────────────────────
+
+// S8: the planning exemption is about the file, not its ancestors.
+for (const f of ["docs/design.md", "PLAN.md", "notes.txt", "rfc/0001-x.md"])
+  check(`S8 design doc: ${f}`, isDesignDoc(f), true);
+for (const f of [
+  "design-system/src/index.ts",
+  "src/api-spec/handler.go",
+  "/data/repo/rfc/lib.rs",
+  "src/components/Plan.tsx",
+])
+  check(`S8 not a design doc: ${f}`, isDesignDoc(f), false);
+
+// S10: discard-everything is destructive; switching branches is not.
+for (const c of ["git checkout -- .", "git checkout .", "git restore .", "git checkout -- src/a.ts"])
+  check(`S10 destructive: ${c}`, GIT_DESTRUCTIVE_RE.test(commandSkeleton(c)), true);
+for (const c of ["git checkout -b feat", "git checkout main", "git status"])
+  check(`S10 not destructive: ${c}`, GIT_DESTRUCTIVE_RE.test(commandSkeleton(c)), false);
+
+// S13: the phrasings that used to stall the SDD machine.
+for (const t of [
+  "Task 3: complete",
+  "Task 3 complete",
+  "Task 3: completed",
+  "Task 3 — done",
+  "**Task 12: complete**",
+  "Task 4 is finished",
+])
+  check(`S13 completion recognised: ${t}`, allMatches(TASK_COMPLETE_RE, t).length, 1);
+
+// S15: every signal in a turn, not just the first.
+check(
+  "S15 two completions in one answer",
+  allMatches(TASK_COMPLETE_RE, "Task 3: complete\nThen Task 4: complete").map((m) => m[1]).join(","),
+  "3,4",
+);
+
+// S14: rulings written with an em dash, as three skills instruct.
+const parseRuling = (line) => {
+  const m = allMatches(RULING_RE, line)[0];
+  const segments = (m?.[1] ?? "").split(RULING_SEPARATOR_RE).map((x) => x.trim()).filter(Boolean);
+  const costSeg =
+    segments.find((x) => RULING_COST_RE.test(x)) ??
+    (segments.length > 2 ? segments[segments.length - 1] : undefined);
+  return {
+    text: segments[0] ?? "",
+    cost: costSeg ? (costSeg.match(RULING_COST_RE)?.[1] ?? costSeg).trim() : "unknown",
+  };
+};
+
+const emDash = parseRuling("Ruling: use cache \u2014 simpler \u2014 cost if wrong: perf");
+check("S14 em-dash ruling text", emDash.text, "use cache");
+check("S14 em-dash ruling cost", emDash.cost, "perf");
+
+const ascii = parseRuling("Ruling: use cache -- simpler -- cost if wrong: perf");
+check("S14 ascii ruling cost", ascii.cost, "perf");
+
+const twoPart = parseRuling("Ruling: use cache -- cost if wrong: perf");
+check("S14 two-part ruling cost", twoPart.cost, "perf");
+
+check(
+  "S15 two rulings in one answer",
+  allMatches(RULING_RE, "Ruling: A -- cost if wrong: x\nRuling: B -- cost if wrong: y").length,
+  2,
+);
+
+// S9: shell writes the planning gate must see.
+for (const [c, target] of [
+  ["cat > src/index.ts <<EOF", "src/index.ts"],
+  ["echo x >> src/app.js", "src/app.js"],
+  ["sed -i 's/a/b/' src/app.ts", "src/app.ts"],
+  ["tee src/out.ts", "src/out.ts"],
+]) {
+  const m = commandSkeleton(c).match(SHELL_WRITE_RE);
+  const got = (m?.[1] ?? m?.[2] ?? m?.[3] ?? "").replace(/^['"]|['"]$/g, "");
+  check(`S9 shell write target: ${c}`, got, target);
+}
+check("S9 a read is not a write", SHELL_WRITE_RE.test(commandSkeleton("cat src/index.ts")), false);
+
+// S22: classification gaps closed.
+for (const f of [
+  "plugins/proctor/commands/ship.md",
+  "plugins/debate/agents/reviewer.md",
+  "plugins/debate/references/x.md",
+  "plugins/debate/templates/y.md",
+])
+  check(`S22 plugin behaviour, not prose: ${f}`, PROSE_FILE_RE.test(f) && !BEHAVIORAL_DOC_RE.test(f), false);
+
+for (const f of ["changelog.py", "license.js", "notice.ts"])
+  check(`S22 code, not prose: ${f}`, PROSE_FILE_RE.test(f), false);
+
+for (const f of ["CHANGELOG.md", "LICENSE", "LICENSE.txt", "COPYING"])
+  check(`S22 still prose: ${f}`, PROSE_FILE_RE.test(f) && !BEHAVIORAL_DOC_RE.test(f), true);
 
 process.exit(failed === 0 ? 0 : 1);

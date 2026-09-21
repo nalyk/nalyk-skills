@@ -210,7 +210,7 @@ Auto-configures via `SessionStart` hook only when no statusLine is set; never ov
 
 ---
 
-### proctor (v2.6.0)
+### proctor (v2.7.0)
 
 Hook-enforced development discipline for Claude Code. Skills teach methodology; hooks enforce compliance mechanically (git gates, planning mode, step/time budgets, quiet mode, pre-flight checks, self-diagnosis, autonomy metrics); store + tracing survive compaction.
 

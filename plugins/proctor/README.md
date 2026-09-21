@@ -101,7 +101,10 @@ protection, SDD dashboard, state persistence — do not fire.
 | **Test freshness** | `git commit`, `git push` | Test run within 5 minutes (configurable) |
 | **Test passing** | `git commit`, `git push` | Last test run exit code 0 |
 | **Branch protection** | `git commit/push/merge/rebase/reset` on main/master | Feature branch or explicit human consent |
-| **Secret detection** | `git commit` with staged credentials | No AWS keys, API tokens, private keys, or hardcoded passwords in diff |
+| **Step budget** | Any tool call once an SDD task hits 100% of its step budget | Complete the task, `proctor: budget extend`, or `proctor: sdd stop` |
+| **Time budget** | Any tool call once an SDD task hits 100% of its time budget | Same three exits |
+| **Planning mode (Bash)** | Shell writes to implementation files during a design phase | A design doc, or exit planning mode |
+| **Secret detection** | `git commit` with staged credentials | No AWS/OpenAI/GitHub/GitLab/Slack tokens, private keys, or password-shaped assignments (quoted or not) in the diff |
 
 ### Soft Enforcers (context injection — the agent is reminded)
 
@@ -150,6 +153,7 @@ Hard gates always enforce regardless of quiet mode.
 | `proctor: allow <branch>` | Grant consent for protected branch operations |
 | `proctor: approve design` | Exit planning mode |
 | `proctor: no tests` | Stand the test gate down for this session — for projects that genuinely have no suite |
+| `proctor: budget extend` | Grant the current SDD task one more full step and time budget |
 | `proctor: quiet on` | Suppress soft warnings (hard gates still enforce) |
 | `proctor: quiet off` | Re-enable all warnings |
 | `proctor: check` | Pre-flight gate status: test evidence, branch protection, planning mode, secret scan |
@@ -215,6 +219,7 @@ keep the gate enforcing:
 | Agent and tool instructions | `SKILL.md`, `CLAUDE.md`, `AGENTS.md`, anything under `.claude/`, `.cursor/`, `.github/` |
 | Runbooks and playbooks | `RUNBOOK.md`, `runbooks/**`, `playbooks/**` |
 | Anything a test reads | `tests/`, `spec/`, `fixtures/`, `testdata/`, `__snapshots__/`, `e2e/`, `golden/` |
+| A plugin's own behaviour | `commands/`, `agents/`, `skills/`, `prompts/`, `references/`, `templates/` |
 | Prose a toolchain executes | every `.md`/`.rst`/`.qmd` in a repo holding `book.toml`, `_quarto.yml`, `runme.yaml`, `mkdocs.yml`, `jupytext.toml` or a Docusaurus config |
 | Whatever you declare | `executableDocPatterns` |
 
