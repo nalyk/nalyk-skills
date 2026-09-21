@@ -84,13 +84,33 @@ const block = (name) =>
 
 const secrets = (block("SECRET_PATTERNS").match(/^\s+\//gm) || []).length;
 const testMarkers = (block("TEST_PATTERNS").match(/file:/g) || []).length;
-const runners =
-  (((src.match(/const TEST_RUN_RE =\n([\s\S]*?);\n/) || ["", ""])[1].match(/\|/g) || [])
-    .length) + 1;
+// TEST_RUN_RE is an anchored alternation built from an array of runner
+// patterns; count the entries, not the pipes.
+const runners = (
+  (src.match(/const TEST_RUN_RE = new RegExp\(\n([\s\S]*?)\n\);/) || ["", ""])[1]
+    .match(/String\.raw`/g) || []
+).length;
 
 check(`SECRET_PATTERNS >= 8 (have ${secrets})`, secrets >= 8);
 check(`TEST_PATTERNS >= 26 (have ${testMarkers})`, testMarkers >= 26);
-check(`TEST_RUN_RE runners >= 30 (have ${runners})`, runners >= 30);
+// Floor is 29 entries, not the old 31 pipe-separated alternatives: each
+// entry now covers several invocation forms (`npm test`, `npm run test:x`,
+// `npm t` are one entry). Real coverage is asserted in
+// command-matching.test.mjs, which runs every TEST_PATTERNS command
+// through isTestRun — that is the check that matters.
+check(`TEST_RUN_RE runners >= 29 (have ${runners})`, runners >= 29);
+
+// ── Load-bearing helpers ───────────────────────────────────────────────
+// Each of these fixes a silent bug; losing one brings the bug back.
+for (const [name, why] of [
+  ["commandSkeleton", "text that mentions a command is not that command"],
+  ["isTestRun", "naming a test tool is not running one"],
+  ["containsSecret", "unquoted .env secrets are still secrets"],
+  ["loadHistory", "a stale stored history must not throw in a gate"],
+  ["globToRegExp", "executableDocPatterns must actually match"],
+  ["changedPaths", "the prose skip needs to know what changed"],
+])
+  has(`helper: ${name} (${why})`, new RegExp(String.raw`function ${name}\b`));
 
 // ── Observability and state ────────────────────────────────────────────
 for (const key of [

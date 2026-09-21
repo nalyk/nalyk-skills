@@ -22,6 +22,9 @@ interface TestEvidence {
   timestamp: number;
   exitCode: number;
   tailOutput: string;
+  /** Project the run happened in. Evidence from another project must not
+   *  unblock this one's commit gate. */
+  cwd: string | null;
 }
 
 interface Ruling {
@@ -154,6 +157,33 @@ async function load<T>(
   }
 }
 
+/**
+ * SessionHistory with every field the current code expects, merged over
+ * whatever the store holds. `load` returns a stored object verbatim, so a
+ * history written by an older version is missing fields added since — and
+ * `hist.qualityMetrics.x++` on it throws. A throwing hook is skipped
+ * entirely, which silently disabled every gate it contained, because only
+ * the DENIAL paths mutate those counters outside a try.
+ */
+async function loadHistory($: any): Promise<SessionHistory> {
+  const stored = await load<Partial<SessionHistory> | null>(
+    $,
+    KEYS.history,
+    null,
+  );
+
+  return {
+    ...structuredClone(DEFAULT_HISTORY),
+    ...(stored ?? {}),
+    skillUsage: { ...(stored?.skillUsage ?? {}) },
+    recentRulings: [...(stored?.recentRulings ?? [])],
+    qualityMetrics: {
+      ...DEFAULT_HISTORY.qualityMetrics,
+      ...(stored?.qualityMetrics ?? {}),
+    },
+  };
+}
+
 async function save($: any, key: string, value: unknown): Promise<void> {
   await $.store.set(key, JSON.stringify(value));
 }
@@ -205,8 +235,64 @@ const TEST_PATTERNS: Array<{ file: string; command: string }> = [
   { file: "cabal.project", command: "cabal test" },
 ];
 
-const TEST_RUN_RE =
-  /\b(npm\s+test|npx\s+(jest|vitest|mocha|playwright|cypress)|yarn\s+test|pnpm\s+test|bun\s+test|deno\s+test|pytest|py\.test|python\s+-m\s+(pytest|unittest)|cargo\s+test|go\s+test|bundle\s+exec\s+rspec|mix\s+test|make\s+test|gradle\w*\s+test|mvn\s+test|dotnet\s+test|swift\s+test|ctest|rake\s+test|jest|vitest|mocha|phpunit|vendor\/bin\/phpunit|dart\s+test|flutter\s+test|zig\s+build\s+test|lein\s+test|sbt\s+test|stack\s+test|cabal\s+test|nim\s+c\s+-r|nimble\s+test|rspec|elixir\s+-S\s+mix\s+test)\b/;
+// Runners anchored to the START of a command segment. The old pattern
+// matched a bare `pytest|jest|vitest|...` anywhere, so `pip install
+// pytest`, `cat jest.config.js` or `echo pytest` were all recorded as
+// passing test runs and satisfied the commit gate with nothing run.
+const TEST_RUN_RE = new RegExp(
+  "^(?:" +
+    [
+      String.raw`npm\s+(?:run\s+[\w:.-]*test[\w:.-]*|test|t)\b`,
+      String.raw`(?:yarn|pnpm|bun)\s+(?:run\s+[\w:.-]*test[\w:.-]*|test)\b`,
+      String.raw`npx\s+(?:jest|vitest|mocha|playwright|cypress|ava|tap)\b`,
+      String.raw`(?:jest|vitest|mocha|ava|tap|cypress|playwright)\b`,
+      String.raw`deno\s+test\b`,
+      String.raw`(?:pytest|py\.test)\b`,
+      String.raw`python[0-9.]*\s+-m\s+(?:pytest|unittest)\b`,
+      String.raw`(?:poetry|uv|pipenv|hatch|rye|pdm)\s+run\s+\S*(?:pytest|test)\S*\b`,
+      String.raw`tox\b`,
+      String.raw`cargo\s+(?:test|nextest\s+run)\b`,
+      String.raw`go\s+test\b`,
+      String.raw`(?:bundle\s+exec\s+)?rspec\b`,
+      String.raw`rake\s+[\w:]*test[\w:]*\b`,
+      String.raw`(?:elixir\s+-S\s+)?mix\s+test\b`,
+      String.raw`make\s+[\w-]*test[\w-]*\b`,
+      String.raw`(?:\./)?gradlew?\s+[\w:]*test\b`,
+      String.raw`gradle\w*\s+[\w:]*test\b`,
+      String.raw`mvn\s+(?:-\S+\s+)*test\b`,
+      String.raw`dotnet\s+test\b`,
+      String.raw`swift\s+test\b`,
+      String.raw`ctest\b`,
+      String.raw`(?:vendor/bin/)?phpunit\b`,
+      String.raw`(?:dart|flutter)\s+test\b`,
+      String.raw`zig\s+build\s+test\b`,
+      String.raw`(?:lein|sbt|stack|cabal)\s+test\b`,
+      String.raw`nimble\s+test\b`,
+      String.raw`nim\s+c\s+-r\b`,
+      String.raw`busted\b`,
+      String.raw`bazel\s+test\b`,
+    ].join("|") +
+    ")",
+);
+
+/**
+ * True when the command actually runs a test suite. Splits on shell
+ * separators and checks each segment's FIRST word, after stripping
+ * leading env assignments and wrappers, so `cd x && npm test` counts and
+ * `grep -rn vitest src/` does not.
+ */
+function isTestRun(skel: string): boolean {
+  return skel
+    .split(/(?:&&|\|\||[;|&\n])+/)
+    .map((seg) =>
+      seg
+        .trim()
+        .replace(/^\(+\s*/, "")
+        .replace(/^(?:[A-Za-z_][A-Za-z0-9_]*=\S*\s+)*/, "")
+        .replace(/^(?:time|command|exec|nice|stdbuf\s+\S+)\s+/, ""),
+    )
+    .some((seg) => TEST_RUN_RE.test(seg));
+}
 
 // Global options sit between `git` and its subcommand: `git -c k=v commit`,
 // `git -C dir push`, `git --git-dir=... merge`. Matching `git\s+commit`
@@ -312,9 +398,12 @@ function commandSkeleton(cmd: string): string {
     /<<-?\s*(['"]?)([A-Za-z_][A-Za-z0-9_]*)\1[\s\S]*?^\s*\2\s*$/gm,
     "<<HEREDOC",
   );
-  // An unterminated heredoc still hides everything after it.
+  // An unterminated heredoc still hides everything after it — but only
+  // when its delimiter ends the line. Without that anchor, a `<<` inside a
+  // quoted string ("a << b") erased the rest of the command, and every git
+  // gate downstream went quiet.
   out = out.replace(
-    /<<-?\s*(['"]?)[A-Za-z_][A-Za-z0-9_]*\1[\s\S]*$/,
+    /<<-?[ \t]*(['"]?)[A-Za-z_][A-Za-z0-9_]*\1[ \t]*$[\s\S]*$/m,
     "<<HEREDOC",
   );
   // A shell's -c payload is a command, not a literal: unwrap it so what
@@ -347,11 +436,73 @@ const GIT_STAGING_RE = new RegExp(
     GIT_OPTS +
     String.raw`(?:add|stage)\b|\bgit\s+` +
     GIT_OPTS +
-    String.raw`commit\b[^\n;&|]*\s-[a-zA-Z]*a`,
+    String.raw`commit\b[^\n;&|]*(?:\s-[a-zA-Z]*a[a-zA-Z]*\b|\s--(?:all|include|only)\b)`,
 );
 
 // Untracked files read per scan, so a large working tree cannot stall a
 // commit while the gate reads it.
+/**
+ * A path glob as a RegExp, built in one pass. A chain of .replace() calls
+ * lets a later pass rewrite regex syntax an earlier one emitted: the `?`
+ * rule corrupted the non-capturing group the double-star rule had just
+ * produced, so a declared pattern silently matched nothing.
+ *
+ * A single star stays inside one segment, a double star followed by a
+ * slash spans any number of directories, and a trailing double star takes
+ * the rest of the path.
+ */
+function globToRegExp(glob: string): RegExp {
+  let out = "";
+
+  for (let i = 0; i < glob.length; i++) {
+    const c = glob[i];
+
+    if (c === "*") {
+      if (glob[i + 1] === "*") {
+        i++;
+        if (glob[i + 1] === "/") {
+          i++;
+          out += "(?:.*/)?";
+        } else {
+          out += ".*";
+        }
+      } else {
+        out += "[^/]*";
+      }
+    } else if (c === "?") {
+      out += "[^/]";
+    } else if (".+^${}()|[]\\/".includes(c)) {
+      out += "\\" + c;
+    } else {
+      out += c;
+    }
+  }
+
+  return new RegExp("^" + out + "$", "i");
+}
+
+/**
+ * A tool.call result reports failure through `isError` and carries its
+ * output as text. It has no exitCode, stdout or stderr — those belong to
+ * `$.process.run`, which is a different shape. Reading them here recorded
+ * every failing test run as a pass (`exitCode ?? 0`), left the failure
+ * output empty, and made the `result.exitCode === 0` trackers unreachable,
+ * so a branch switch was never noticed and commits were never counted.
+ *
+ * A numeric exitCode is still honoured if a future build supplies one.
+ */
+function toolFailed(result: any): boolean {
+  if (typeof result?.exitCode === "number") return result.exitCode !== 0;
+  return result?.isError === true;
+}
+
+function toolOutput(result: any): string {
+  if (typeof result?.stdout === "string" || typeof result?.stderr === "string") {
+    return `${result.stdout ?? ""}${result.stderr ?? ""}`;
+  }
+  return String(result?.text ?? result?.result ?? "");
+}
+
 const MAX_UNTRACKED_SCAN = 50;
 
 const GIT_DESTRUCTIVE_RE = new RegExp(
@@ -365,16 +516,59 @@ const DESTRUCTIVE_BASH_RE =
   /(?:rm\s+(?:-[^\s]*r[^\s]*\s|--recursive\s)|chmod\s+(?:-R\s+)?777\s|curl\s[^|]*\|\s*(?:sudo\s+)?(?:bash|sh|zsh)|wget\s[^|]*\|\s*(?:sudo\s+)?(?:bash|sh|zsh)|dd\s+if=|mkfs\.|>\s*\/dev\/sd)/;
 
 // Secret/credential patterns — hard gate on git commit
+// Values that are obviously not a real credential, so an unquoted
+// assignment carrying one is not treated as a leak.
+const SECRET_PLACEHOLDER_RE =
+  /^(?:[*x.]{3,}|<[^>]*>|\$\{?[A-Za-z_]|\{\{|%[A-Za-z_]|your[-_]?|changeme|example|placeholder|redacted|dummy|sample|test|fake|none|null|true|false)/i;
+
+// A value that reads a secret rather than being one: `process.env.X`,
+// `os.environ["X"]`, `getenv(...)`, `config.token`. Any dotted identifier
+// or call is code, not a credential.
+const SECRET_REFERENCE_RE = /^[A-Za-z_$][\w$]*(?:\.[\w$]+|\[|\()/;
+
 const SECRET_PATTERNS: RegExp[] = [
-  /AKIA[0-9A-Z]{16}/,
-  /(?:^|[\s'"=:])sk-[a-zA-Z0-9]{20,}/m,
-  /ghp_[a-zA-Z0-9]{36}/,
-  /gho_[a-zA-Z0-9]{36}/,
+  // AWS long-lived, temporary (ASIA) and the other documented prefixes.
+  /(?:AKIA|ASIA|ABIA|ACCA)[0-9A-Z]{16}/,
+  // OpenAI legacy and project keys. `+` is in the lead-in class because
+  // this runs against diff output, where every added line starts with one.
+  /(?:^|[\s'"=:+])sk-[a-zA-Z0-9]{20,}/m,
+  /(?:^|[\s'"=:+])sk-proj-[a-zA-Z0-9_-]{20,}/m,
+  /gh[pousr]_[a-zA-Z0-9]{36}/,
+  /github_pat_[a-zA-Z0-9_]{22,}/,
   /glpat-[a-zA-Z0-9\-_]{20,}/,
-  /-----BEGIN\s+(?:RSA\s+|EC\s+|DSA\s+|OPENSSH\s+)?PRIVATE\s+KEY/,
+  /xox[abprs]-[a-zA-Z0-9-]{10,}/,
+  /-----BEGIN\s+(?:RSA\s+|EC\s+|DSA\s+|OPENSSH\s+|ENCRYPTED\s+|PGP\s+)?PRIVATE\s+KEY/,
+  // Quoted assignments.
   /(?:password|passwd|pwd)\s*[:=]\s*['"][^'"]{8,}['"]/i,
   /(?:api[_-]?key|apikey|secret[_-]?key|auth[_-]?token)\s*[:=]\s*['"][^'"]{12,}['"]/i,
 ];
+
+// Unquoted assignments — the shape a committed `.env` has, which the
+// quoted patterns above could never match. Checked separately so the
+// value can be tested against SECRET_PLACEHOLDER_RE first.
+const BARE_SECRET_ASSIGN_RE =
+  /(?:^|[\s+])(?:[A-Za-z_][A-Za-z0-9_]*_)?(?:password|passwd|pwd|secret|api[_-]?key|apikey|access[_-]?key|auth[_-]?token|token|credential)s?\s*[:=]\s*([^\s'"#]{8,})/gim;
+
+/**
+ * True when the added lines of a diff carry something credential-shaped.
+ * Kept as a function so the unquoted-assignment case can discount
+ * placeholders without that logic living inside a regex.
+ */
+function containsSecret(text: string): RegExp | null {
+  for (const pattern of SECRET_PATTERNS) {
+    if (pattern.test(text)) return pattern;
+  }
+
+  BARE_SECRET_ASSIGN_RE.lastIndex = 0;
+  for (const m of text.matchAll(BARE_SECRET_ASSIGN_RE)) {
+    const value = m[1];
+    if (SECRET_PLACEHOLDER_RE.test(value)) continue;
+    if (SECRET_REFERENCE_RE.test(value)) continue;
+    return BARE_SECRET_ASSIGN_RE;
+  }
+
+  return null;
+}
 
 // Skill → lifecycle phase mapping
 const SKILL_PHASE_MAP: Record<string, SessionState["currentPhase"]> = {
@@ -516,20 +710,7 @@ export const register: Register = (on, options) => {
   )
     .map((g) => String(g).trim())
     .filter(Boolean)
-    .map(
-      (g) =>
-        new RegExp(
-          "^" +
-            g
-              .replace(/[.+^${}()|[\]\\]/g, "\\$&")
-              .replace(/\*\*\//g, "\u0000")
-              .replace(/\*/g, "[^/]*")
-              .replace(/\u0000/g, "(?:.*/)?")
-              .replace(/\?/g, "[^/]") +
-            "$",
-          "i",
-        ),
-    );
+    .map(globToRegExp);
 
   const TEST_FRESHNESS_MS =
     ((options?.testFreshnessMinutes as number) ?? 5) * 60_000;
@@ -573,11 +754,7 @@ export const register: Register = (on, options) => {
 
     // Cross-session learning: use remembered test command if file
     // heuristics didn't find one
-    const history = await load<SessionHistory>(
-      $,
-      KEYS.history,
-      DEFAULT_HISTORY,
-    );
+    const history = await loadHistory($);
     try {
       const cwd = await $.session.cwd();
       if (!testCommand && history.lastTestCommand && history.projectPath === cwd) {
@@ -663,6 +840,11 @@ export const register: Register = (on, options) => {
 
     // Initialize trace log for this session
     await save($, KEYS.trace, []);
+
+    // Test evidence is session-scoped — the denial text says as much.
+    // It lived in a store that outlives the session, so a run from a
+    // previous session (or another project) kept satisfying the gate.
+    await save($, KEYS.test, null);
 
     // SDD session recovery — resume if active state survives restart
     const existingSDD = await load<SDDState | null>($, KEYS.sdd, null);
@@ -802,13 +984,34 @@ export const register: Register = (on, options) => {
         }
       }
 
-      const evidence = steppedAside
+      const storedEvidence = steppedAside
         ? null
         : await load<TestEvidence | null>($, KEYS.test, null);
 
+      // Evidence produced in another project proves nothing about this
+      // one. The store is global and the record used to carry no project,
+      // so a passing run in repo A unblocked a commit in repo B.
+      let evidence = storedEvidence;
+      if (storedEvidence) {
+        let here: string | null = null;
+        try {
+          here = await $.session.cwd();
+        } catch {
+          here = null;
+        }
+        if (storedEvidence.cwd && here && storedEvidence.cwd !== here) {
+          await trace(
+            $,
+            "evidence-foreign",
+            `from ${storedEvidence.cwd.substring(0, 60)}`,
+          );
+          evidence = null;
+        }
+      }
+
       if (!evidence && !steppedAside) {
         await trace($, "gate-deny", `git-no-evidence: ${cmd.substring(0, 80)}`);
-        const hist = await load<SessionHistory>($, KEYS.history, DEFAULT_HISTORY);
+        const hist = await loadHistory($);
         hist.qualityMetrics.gateDenials++;
         await save($, KEYS.history, hist);
         const testCmd = session?.testCommand ?? "the project's test suite";
@@ -828,7 +1031,7 @@ export const register: Register = (on, options) => {
       if (evidence && age > TEST_FRESHNESS_MS) {
         const mins = Math.round(age / 60_000);
         await trace($, "gate-deny", `git-stale-evidence: ${mins}m old`);
-        const hist = await load<SessionHistory>($, KEYS.history, DEFAULT_HISTORY);
+        const hist = await loadHistory($);
         hist.qualityMetrics.gateDenials++;
         await save($, KEYS.history, hist);
         return {
@@ -844,7 +1047,7 @@ export const register: Register = (on, options) => {
 
       if (evidence && evidence.exitCode !== 0) {
         await trace($, "gate-deny", `git-failing-tests: exit ${evidence.exitCode}`);
-        const hist = await load<SessionHistory>($, KEYS.history, DEFAULT_HISTORY);
+        const hist = await loadHistory($);
         hist.qualityMetrics.gateDenials++;
         await save($, KEYS.history, hist);
         return {
@@ -862,7 +1065,7 @@ export const register: Register = (on, options) => {
       // aside was not satisfied, so it is not counted as passed.
       if (evidence) {
         try {
-          const hist = await load<SessionHistory>($, KEYS.history, DEFAULT_HISTORY);
+          const hist = await loadHistory($);
           hist.qualityMetrics.gatesPassed++;
           await save($, KEYS.history, hist);
         } catch { /* non-critical */ }
@@ -876,7 +1079,7 @@ export const register: Register = (on, options) => {
         const hasConsent = session.branchConsents?.[session.branch];
         if (!hasConsent) {
           await trace($, "gate-deny", `branch-protection: ${session.branch}`);
-          const hist = await load<SessionHistory>($, KEYS.history, DEFAULT_HISTORY);
+          const hist = await loadHistory($);
           hist.qualityMetrics.gateDenials++;
           await save($, KEYS.history, hist);
           return {
@@ -904,7 +1107,13 @@ export const register: Register = (on, options) => {
         // `git add -A && git commit` is a single tool call: nothing is
         // staged yet when this runs, so the staged diff is empty and a
         // secret would sail through. Scan what is about to be staged too.
-        if (GIT_STAGING_RE.test(skel)) {
+        // An empty staged diff in front of a commit means the content is
+        // coming from somewhere else — `git commit <pathspec>`, or a stage
+        // step later in this same command line. Scan the working tree too
+        // rather than declaring the commit clean on an empty diff.
+        const nothingStaged = (cached.stdout ?? "").trim() === "";
+
+        if (GIT_STAGING_RE.test(skel) || nothingStaged) {
           const tracked = await $.process.run(["git", "diff", "HEAD", "-U0"]);
           chunks.push(tracked.stdout ?? "");
 
@@ -930,23 +1139,22 @@ export const register: Register = (on, options) => {
         }
 
         const diffText: string = chunks.join("\n");
-        for (const pattern of SECRET_PATTERNS) {
-          if (pattern.test(diffText)) {
-            await trace($, "gate-deny", `secret-detected: ${pattern.source.substring(0, 30)}`);
-            const hist = await load<SessionHistory>($, KEYS.history, DEFAULT_HISTORY);
-            hist.qualityMetrics.gateDenials++;
-            await save($, KEYS.history, hist);
-            return {
-              deny:
-                `Proctor gate: potential credential/secret detected in staged changes. ` +
-                `Pattern: ${pattern.source.substring(0, 40)}...\n` +
-                `Next steps:\n` +
-                `  1. Run \`git diff --cached\` to identify the secret\n` +
-                `  2. Remove or replace with an environment variable\n` +
-                `  3. Unstage the file: \`git reset HEAD <file>\`\n` +
-                `  4. Re-stage clean version and retry commit`,
-            };
-          }
+        const hit = containsSecret(diffText);
+        if (hit) {
+          await trace($, "gate-deny", `secret-detected: ${hit.source.substring(0, 30)}`);
+          const hist = await loadHistory($);
+          hist.qualityMetrics.gateDenials++;
+          await save($, KEYS.history, hist);
+          return {
+            deny:
+              `Proctor gate: potential credential/secret detected in staged changes. ` +
+              `Pattern: ${hit.source.substring(0, 40)}...\n` +
+              `Next steps:\n` +
+              `  1. Run \`git diff --cached\` to identify the secret\n` +
+              `  2. Remove or replace with an environment variable\n` +
+              `  3. Unstage the file: \`git reset HEAD <file>\`\n` +
+              `  4. Re-stage clean version and retry commit`,
+          };
         }
       } catch {
         // Diff unavailable — skip secret scan, other gates still apply
@@ -1003,16 +1211,24 @@ export const register: Register = (on, options) => {
     const result = await next(e);
 
     // ── POST: Track test runs ───────────────────────────────────────
-    if (TEST_RUN_RE.test(skel)) {
-      const stdout: string = result.stdout ?? "";
-      const stderr: string = result.stderr ?? "";
-      const output = stdout + stderr;
+    if (isTestRun(skel)) {
+      const output = toolOutput(result);
       const tail = output.substring(Math.max(0, output.length - 1200));
+      const testExit: number = toolFailed(result) ? 1 : 0;
+
+      let evidenceCwd: string | null = null;
+      try {
+        evidenceCwd = await $.session.cwd();
+      } catch {
+        // Unknown project — the gate treats that as unusable evidence.
+      }
+
       const evidence: TestEvidence = {
         command: cmd.substring(0, 200),
         timestamp: Date.now(),
-        exitCode: result.exitCode ?? 0,
+        exitCode: testExit,
         tailOutput: tail,
+        cwd: evidenceCwd,
       };
       await save($, KEYS.test, evidence);
       await trace(
@@ -1034,11 +1250,7 @@ export const register: Register = (on, options) => {
       // Cross-session learning: remember working test commands
       if (evidence.exitCode === 0) {
         try {
-          const hist = await load<SessionHistory>(
-            $,
-            KEYS.history,
-            DEFAULT_HISTORY,
-          );
+          const hist = await loadHistory($);
           hist.lastTestCommand = evidence.command;
           await save($, KEYS.history, hist);
         } catch {
@@ -1048,7 +1260,7 @@ export const register: Register = (on, options) => {
     }
 
     // ── POST: Track branch changes ──────────────────────────────────
-    if (GIT_BRANCH_SWITCH_RE.test(skel) && result.exitCode === 0) {
+    if (GIT_BRANCH_SWITCH_RE.test(skel) && !toolFailed(result)) {
       try {
         const branchResult = await $.process.run([
           "git",
@@ -1071,9 +1283,9 @@ export const register: Register = (on, options) => {
     }
 
     // ── POST: Quality metrics after successful commit ──────────────
-    if (GIT_COMMIT_RE.test(skel) && result.exitCode === 0) {
+    if (GIT_COMMIT_RE.test(skel) && !toolFailed(result)) {
       try {
-        const hist = await load<SessionHistory>($, KEYS.history, DEFAULT_HISTORY);
+        const hist = await loadHistory($);
         hist.qualityMetrics.totalCommits++;
         await save($, KEYS.history, hist);
       } catch {
@@ -1082,9 +1294,9 @@ export const register: Register = (on, options) => {
     }
 
     // ── POST: Track test run count for quality metrics ─────────────
-    if (TEST_RUN_RE.test(skel)) {
+    if (isTestRun(skel)) {
       try {
-        const hist = await load<SessionHistory>($, KEYS.history, DEFAULT_HISTORY);
+        const hist = await loadHistory($);
         hist.qualityMetrics.testsRun++;
         await save($, KEYS.history, hist);
       } catch {
@@ -1110,7 +1322,7 @@ export const register: Register = (on, options) => {
       // Allow writing design docs and plan files during planning
       if (!/\b(design|plan|spec|proposal|rfc)\b/i.test(path) && !/\.md$/.test(path)) {
         await trace($, "gate-deny", `planning-mode-write: ${path}`);
-        const hist = await load<SessionHistory>($, KEYS.history, DEFAULT_HISTORY);
+        const hist = await loadHistory($);
         hist.qualityMetrics.gateDenials++;
         await save($, KEYS.history, hist);
         return {
@@ -1140,7 +1352,7 @@ export const register: Register = (on, options) => {
       const path: string = e.file_path ?? "";
       if (!/\b(design|plan|spec|proposal|rfc)\b/i.test(path) && !/\.md$/.test(path)) {
         await trace($, "gate-deny", `planning-mode-edit: ${path}`);
-        const hist = await load<SessionHistory>($, KEYS.history, DEFAULT_HISTORY);
+        const hist = await loadHistory($);
         hist.qualityMetrics.gateDenials++;
         await save($, KEYS.history, hist);
         return {
@@ -1168,7 +1380,7 @@ export const register: Register = (on, options) => {
     const session = await load<SessionState | null>($, KEYS.session, null);
     if (session?.planningMode) {
       await trace($, "gate-deny", "planning-mode-notebook");
-      const hist = await load<SessionHistory>($, KEYS.history, DEFAULT_HISTORY);
+      const hist = await loadHistory($);
       hist.qualityMetrics.gateDenials++;
       await save($, KEYS.history, hist);
       return {
@@ -1225,11 +1437,7 @@ export const register: Register = (on, options) => {
 
     // Cross-session skill usage tracking
     try {
-      const hist = await load<SessionHistory>(
-        $,
-        KEYS.history,
-        DEFAULT_HISTORY,
-      );
+      const hist = await loadHistory($);
       const name = skillName || "unknown";
       hist.skillUsage[name] = (hist.skillUsage[name] ?? 0) + 1;
       await save($, KEYS.history, hist);
@@ -1453,7 +1661,7 @@ export const register: Register = (on, options) => {
           }
 
           try {
-            const hist = await load<SessionHistory>($, KEYS.history, DEFAULT_HISTORY);
+            const hist = await loadHistory($);
             hist.qualityMetrics.fixRounds++;
             await save($, KEYS.history, hist);
           } catch { /* non-critical */ }
@@ -1591,7 +1799,7 @@ export const register: Register = (on, options) => {
 
           // Persist ruling to cross-session history
           try {
-            const hist = await load<SessionHistory>($, KEYS.history, DEFAULT_HISTORY);
+            const hist = await loadHistory($);
             hist.recentRulings.push({
               text: rulingMatch[1]?.trim() ?? "",
               ts: Date.now(),
@@ -2036,13 +2244,7 @@ export const register: Register = (on, options) => {
         try {
           const diff = await $.process.run(["git", "diff", "--cached", "-U0"]);
           const diffText: string = diff.stdout ?? "";
-          let secretFound = false;
-          for (const pattern of SECRET_PATTERNS) {
-            if (pattern.test(diffText)) {
-              secretFound = true;
-              break;
-            }
-          }
+          const secretFound = containsSecret(diffText) !== null;
           if (diffText.length > 0) {
             parts.push(secretFound
               ? "✗ Staged diff: potential secret detected — commit will be blocked"
@@ -2094,7 +2296,7 @@ export const register: Register = (on, options) => {
     if (/\bproctor:\s*diagnose\b/i.test(text)) {
       try {
         const events = await load<TraceEvent[]>($, KEYS.trace, []);
-        const hist = await load<SessionHistory>($, KEYS.history, DEFAULT_HISTORY);
+        const hist = await loadHistory($);
         const session = await load<SessionState | null>($, KEYS.session, null);
         const sdd = await load<SDDState | null>($, KEYS.sdd, null);
 
@@ -2182,7 +2384,7 @@ export const register: Register = (on, options) => {
         const session = await load<SessionState | null>($, KEYS.session, null);
         const sdd = await load<SDDState | null>($, KEYS.sdd, null);
         const test = await load<TestEvidence | null>($, KEYS.test, null);
-        const hist = await load<SessionHistory>($, KEYS.history, DEFAULT_HISTORY);
+        const hist = await loadHistory($);
 
         const parts: string[] = ["─── Proctor Status ───"];
 
