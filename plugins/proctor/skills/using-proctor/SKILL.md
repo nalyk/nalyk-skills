@@ -37,7 +37,8 @@ reference them. What they enforce:
   Design docs (.md) are allowed. Exit with an implementation skill or
   "proctor: approve design".
 - **Step budget.** During SDD, each task has a configurable step budget
-  (tool call limit). The dashboard shows usage percentage. Warning at 80%,
+  (tool call limit). Bash, Write, Edit and NotebookEdit all spend from it
+  and all check it. The dashboard shows usage percentage. Warning at 80%,
   forced adjudication at 100%.
 - **Structured tracing.** All gate denials, skill invocations, SDD
   transitions, and agent spawns are logged to a ring buffer in $.store
@@ -87,7 +88,8 @@ reference them. What they enforce:
 - **SDD scope update.** Say `proctor: tasks N` to update the total task
   count when scope changes. Also auto-detects "Task N: added" patterns.
 - **Autonomy metrics.** Gate passes are tracked alongside denials.
-  `proctor: status` shows your autonomy rate (passes / total gate events).
+  `proctor: status` shows your autonomy rate (passes / total gate events),
+  or `n/a` before any gate has fired.
 - **Test failure context.** When tests are failing, the compaction block
   includes a summary of the failure output for faster diagnosis.
 - **Phase lifecycle tracking.** Your current development phase (idle →

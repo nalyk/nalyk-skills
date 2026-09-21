@@ -19,6 +19,13 @@ const pick = (re, what) => {
 };
 
 const fn = pick(/function commandSkeleton[\s\S]*?\n}\n/, "commandSkeleton");
+const unquotedFn = pick(/function unquotedSkeleton[\s\S]*?\n}\n/, "unquotedSkeleton");
+const spansFn = pick(/function quotedSpans[\s\S]*?\n}\n/, "quotedSpans");
+const writeTargetsFn = pick(/function shellWriteTargets[\s\S]*?\n}\n/, "shellWriteTargets");
+const addedFn = pick(/function addedLines[\s\S]*?\n}\n/, "addedLines");
+const writePath = pick(/const WRITE_PATH = (.*);/, "WRITE_PATH");
+const devSinkRe = pick(/const DEV_SINK_RE = (.*);/, "DEV_SINK_RE");
+const verbEnd = pick(/const GIT_VERB_END = (.*);/, "GIT_VERB_END");
 const testRe = pick(/const TEST_RUN_RE = new RegExp\(\n([\s\S]*?)\n\);/, "TEST_RUN_RE");
 const isTestRunFn = pick(/function isTestRun[\s\S]*?\n}\n/, "isTestRun");
 const testPatternsBlock = pick(/const TEST_PATTERNS[\s\S]*?\n\];/, "TEST_PATTERNS");
@@ -28,7 +35,7 @@ const taskRe = pick(/const TASK_COMPLETE_RE =\n([\s\S]*?);\n/, "TASK_COMPLETE_RE
 const rulingRe = pick(/const RULING_RE = (.*);/, "RULING_RE");
 const rulingSepRe = pick(/const RULING_SEPARATOR_RE = (.*);/, "RULING_SEPARATOR_RE");
 const rulingCostRe = pick(/const RULING_COST_RE = (.*);/, "RULING_COST_RE");
-const shellWriteRe = pick(/const SHELL_WRITE_RE =\n([\s\S]*?);\n/, "SHELL_WRITE_RE");
+const shellWriteRe = pick(/const SHELL_WRITE_RE = new RegExp\(\n([\s\S]*?)\n\);/, "SHELL_WRITE_RE");
 const toolFns = pick(/function toolFailed[\s\S]*?\nfunction toolOutput[\s\S]*?\n}\n/, "tool result helpers");
 const secretsBlock = pick(/const SECRET_PLACEHOLDER_RE =[\s\S]*?\nfunction containsSecret[\s\S]*?\n}\n/, "containsSecret");
 const gitOpts = pick(/const GIT_OPTS =\s([\s\S]*?);\n/, "GIT_OPTS");
@@ -49,6 +56,8 @@ const {
   toolOutput,
   isDesignDoc,
   allMatches,
+  shellWriteTargets,
+  addedLines,
   TASK_COMPLETE_RE,
   RULING_RE,
   RULING_SEPARATOR_RE,
@@ -67,6 +76,15 @@ const {
   "data:text/javascript," +
     encodeURIComponent(
       fn.replace(/:\s*string/g, "") +
+        `\n${unquotedFn.replace(/:\s*string/g, "")}` +
+        `\n${spansFn.replace(/:\s*string/g, "").replace(/:\s*Array<\[number, number\]>/g, "").replace(/const spans[^=]*=/, "const spans =")}` +
+        `\nconst WRITE_PATH = ${writePath};` +
+        `\nconst DEV_SINK_RE = ${devSinkRe};` +
+        `\nexport const SHELL_WRITE_RE = new RegExp(${shellWriteRe});` +
+        `\n${writeTargetsFn.replace(/:\s*string\[\]/g, "").replace(/:\s*string/g, "").replace(/const targets[^=]*=/, "const targets =").replace(/\(at: number\)/, "(at)")}` +
+        `\n${addedFn.replace(/:\s*string/g, "")}` +
+        `\nexport { shellWriteTargets, addedLines };` +
+        `\nconst GIT_VERB_END = ${verbEnd};` +
         `\nconst GIT_OPTS = ${gitOpts};` +
         `\nexport const TEST_RUN_RE = new RegExp(${testRe});` +
         `\n${isTestRunFn.replace(/:\s*string/g, "").replace(/:\s*boolean/g, "")}` +
@@ -78,7 +96,6 @@ const {
         `\nexport const RULING_RE = ${rulingRe};` +
         `\nexport const RULING_SEPARATOR_RE = ${rulingSepRe};` +
         `\nexport const RULING_COST_RE = ${rulingCostRe};` +
-        `\nexport const SHELL_WRITE_RE = ${shellWriteRe.trim()};` +
         `\nexport { isTestRun, containsSecret, toolFailed, toolOutput, isDesignDoc, allMatches };` +
         `\nexport const GIT_COMMIT_PUSH_RE = new RegExp(${gitRe});` +
         `\nexport const GIT_DESTRUCTIVE_RE = new RegExp(${destrRe});` +
@@ -450,12 +467,51 @@ for (const [c, target] of [
   ["echo x >> src/app.js", "src/app.js"],
   ["sed -i 's/a/b/' src/app.ts", "src/app.ts"],
   ["tee src/out.ts", "src/out.ts"],
-]) {
-  const m = commandSkeleton(c).match(SHELL_WRITE_RE);
-  const got = (m?.[1] ?? m?.[2] ?? m?.[3] ?? "").replace(/^['"]|['"]$/g, "");
-  check(`S9 shell write target: ${c}`, got, target);
+  // tee is the third capture group; the gate read only the first two.
+  ["echo x | tee -a src/out.ts", "src/out.ts"],
+  // A quoted path was blanked out of the skeleton before the match ran.
+  ["echo hi > 'src/impl.ts'", "src/impl.ts"],
+  ['cat foo > "src/impl.ts"', "src/impl.ts"],
+])
+  check(`S9 shell write target: ${c}`, shellWriteTargets(c)[0], target);
+
+check("S9 a read is not a write", shellWriteTargets("cat src/index.ts").length, 0);
+
+// Every write in the line, not just the first: judging the whole command
+// by `notes.md` let the .ts write through the planning gate.
+check(
+  "S9 both writes in a chain",
+  shellWriteTargets("echo a > notes.md && echo b > src/impl.ts").join(","),
+  "notes.md,src/impl.ts",
+);
+
+// Redirections that write nothing a planning gate cares about.
+for (const c of ["ls -la > /dev/null", "npm run build 2>&1", "cmd > /dev/stderr"])
+  check(`S9 not an implementation write: ${c}`, shellWriteTargets(c).length, 0);
+
+// A write named inside a string is still only a mention.
+for (const c of [`echo "redirect > out.ts"`, `git log --grep 'x > y.ts'`])
+  check(`S9 a mention is not a write: ${c}`, shellWriteTargets(c).length, 0);
+
+// S15: the secret scan reads what a change adds. Scanning the whole diff
+// blocked the commit that removes a leaked key.
+{
+  const key = "AWS_ACCESS_KEY_ID=" + "AKIA" + "IOSFODNN7EXAMPLE";
+  const diff = `--- a/.env\n+++ b/.env\n@@ -1 +1 @@\n-${key}\n+${key.split("=")[0]}=\${AWS_KEY}\n`;
+  check("S15 a removed secret is not an added one", containsSecret(addedLines(diff)) !== null, false);
+  check("S15 an added secret still is", containsSecret(addedLines(`+${key}`)) !== null, true);
 }
-check("S9 a read is not a write", SHELL_WRITE_RE.test(commandSkeleton("cat src/index.ts")), false);
+
+// S23: `\b` after the verb matched before a hyphen, so plumbing that
+// commits nothing tripped the commit gate and the secret scan.
+for (const c of ["git commit-tree $t -m x", "git checkout-index -a"])
+  check(`S23 plumbing is not the verb: ${c}`, GIT_COMMIT_PUSH_RE.test(commandSkeleton(c)), false);
+check("S23 the verb itself still matches", GIT_COMMIT_RE.test(commandSkeleton(`${GIT} -m x`)), true);
+check(
+  "S23 checkout-index does not read as a branch switch",
+  GIT_BRANCH_SWITCH_RE.test(commandSkeleton("git checkout-index -a")),
+  false,
+);
 
 // S22: classification gaps closed.
 for (const f of [

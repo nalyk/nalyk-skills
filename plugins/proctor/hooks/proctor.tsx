@@ -121,12 +121,17 @@ interface TraceEvent {
 //  Module-level variables are session-scoped.
 // ─────────────────────────────────────────────────────────────────────
 
+// The per-project keys carry a version suffix: their shape changed from a
+// bare record to a book keyed by project root, and a stale record read as
+// a book would be read as an empty one anyway. History stays unversioned —
+// `loadHistory` migrates it field by field, and its counters are the one
+// thing worth carrying forward.
 const KEYS = {
-  session: "proctor:session",
-  test: "proctor:test-evidence",
-  sdd: "proctor:sdd-state",
+  session: "proctor:session:v3",
+  test: "proctor:test-evidence:v3",
+  sdd: "proctor:sdd-state:v3",
   history: "proctor:history",
-  trace: "proctor:trace",
+  trace: "proctor:trace:v3",
 } as const;
 
 const DEFAULT_HISTORY: SessionHistory = {
@@ -160,6 +165,13 @@ async function load<T>(
   }
 }
 
+/** A stored counter that is usable as a number, whatever the store holds.
+ *  `undefined++` wrote NaN, which JSON stores as null, which the next
+ *  read had to cope with in turn. */
+function counter(value: unknown): number {
+  return typeof value === "number" && Number.isFinite(value) ? value : 0;
+}
+
 /**
  * SessionHistory with every field the current code expects, merged over
  * whatever the store holds. `load` returns a stored object verbatim, so a
@@ -167,6 +179,8 @@ async function load<T>(
  * `hist.qualityMetrics.x++` on it throws. A throwing hook is skipped
  * entirely, which silently disabled every gate it contained, because only
  * the DENIAL paths mutate those counters outside a try.
+ *
+ * Every write goes through `mutateHistory`, so this is the only door.
  */
 async function loadHistory($: any): Promise<SessionHistory> {
   const stored = await load<Partial<SessionHistory> | null>(
@@ -174,6 +188,9 @@ async function loadHistory($: any): Promise<SessionHistory> {
     KEYS.history,
     null,
   );
+  const metrics = (stored?.qualityMetrics ?? {}) as Partial<
+    SessionHistory["qualityMetrics"]
+  >;
 
   return {
     ...structuredClone(DEFAULT_HISTORY),
@@ -181,8 +198,11 @@ async function loadHistory($: any): Promise<SessionHistory> {
     skillUsage: { ...(stored?.skillUsage ?? {}) },
     recentRulings: [...(stored?.recentRulings ?? [])],
     qualityMetrics: {
-      ...DEFAULT_HISTORY.qualityMetrics,
-      ...(stored?.qualityMetrics ?? {}),
+      totalCommits: counter(metrics.totalCommits),
+      gateDenials: counter(metrics.gateDenials),
+      gatesPassed: counter(metrics.gatesPassed),
+      fixRounds: counter(metrics.fixRounds),
+      testsRun: counter(metrics.testsRun),
     },
   };
 }
@@ -192,11 +212,29 @@ async function loadHistory($: any): Promise<SessionHistory> {
 // assistant message (three parallel Edits, or a Bash and a Read) both read
 // the same snapshot and the second write erased the first. Lost that way:
 // step-budget increments, a branch change, and planningMode being set.
+//
+// A queue only helps if every writer uses it: `agent.spawn`, `skill.prompt`,
+// `turn.complete`, `trace` and the branch tracker each did their own raw
+// load+save straight past it, so the increments they raced with were lost
+// exactly as before. Nothing below calls `save` outside this chain.
 const writeQueues = new Map<string, Promise<unknown>>();
+
+/** Run `job` with no other write to `key` interleaved. */
+function enqueue<T>(key: string, job: () => Promise<T>): Promise<T> {
+  const queued = (writeQueues.get(key) ?? Promise.resolve()).then(job);
+  // Keep the chain alive even if one link rejects.
+  writeQueues.set(key, queued.catch(() => undefined));
+  return queued;
+}
 
 /**
  * Read, mutate and write a key with no other mutation interleaved.
  * `fn` may mutate its argument in place or return a replacement.
+ *
+ * The fallback is cloned before `fn` sees it: `load` returns the fallback
+ * itself when the key is empty, so a shared constant handed in here
+ * (DEFAULT_HISTORY was) gets mutated in place and every later reader
+ * inherits the mutation for the life of the module.
  */
 async function mutate<T>(
   $: any,
@@ -204,20 +242,121 @@ async function mutate<T>(
   fallback: T,
   fn: (value: T) => T | void,
 ): Promise<T> {
-  const queued = (writeQueues.get(key) ?? Promise.resolve()).then(async () => {
-    const current = await load<T>($, key, fallback);
+  return enqueue(key, async () => {
+    const current = await load<T>($, key, structuredClone(fallback));
     const updated = (fn(current) ?? current) as T;
     await save($, key, updated);
     return updated;
   });
+}
 
-  // Keep the chain alive even if one link rejects.
-  writeQueues.set(key, queued.catch(() => undefined));
-  return queued;
+/**
+ * Counters are telemetry. A gate must never fail to fire because a number
+ * could not be written, so this swallows its own errors and reads through
+ * `loadHistory` rather than `load` — the two halves of the bug that let a
+ * stale stored history throw inside a denial path and skip the denial.
+ */
+async function mutateHistory(
+  $: any,
+  fn: (history: SessionHistory) => void,
+): Promise<void> {
+  try {
+    await enqueue(KEYS.history, async () => {
+      const history = await loadHistory($);
+      fn(history);
+      await save($, KEYS.history, history);
+    });
+  } catch {
+    // Best-effort by design — see above.
+  }
 }
 
 async function save($: any, key: string, value: unknown): Promise<void> {
   await $.store.set(key, JSON.stringify(value));
+}
+
+// ─────────────────────────────────────────────────────────────────────
+//  Project scoping — $.store is one global namespace shared by every
+//  session on the machine. Session state, test evidence, the SDD run and
+//  the trace log all belong to ONE project and ONE session; keeping them
+//  under a bare key meant a second pane's session.start overwrote them,
+//  taking this session's branch consents, quiet mode and test evidence
+//  with it. Each is now a book keyed by project root.
+// ─────────────────────────────────────────────────────────────────────
+
+interface Shelf<T> {
+  at: number;
+  value: T;
+}
+type Book<T> = Record<string, Shelf<T>>;
+
+const BOOK_CAP = 12;
+
+// The repo root, not the cwd: a session that cds into a subdirectory is
+// still the same project, and evidence recorded before the cd must not
+// turn foreign. Re-read only when the cwd moves.
+let rootCache: { cwd: string | null; root: string } | null = null;
+
+async function projectRoot($: any): Promise<string> {
+  let cwd: string | null = null;
+  try {
+    cwd = (await $.session.cwd()) ?? null;
+  } catch {
+    cwd = null;
+  }
+
+  if (rootCache && rootCache.cwd === cwd) return rootCache.root;
+
+  let root: string | null = null;
+  try {
+    const res = await $.process.run(["git", "rev-parse", "--show-toplevel"]);
+    const top = (res.stdout ?? "").trim();
+    if (res.exitCode === 0 && top) root = top;
+  } catch {
+    // Not a repo, or git is unavailable — fall back to the cwd.
+  }
+
+  const resolved = root ?? cwd ?? "unknown";
+  rootCache = { cwd, root: resolved };
+  return resolved;
+}
+
+async function loadScoped<T>($: any, key: string, fallback: T): Promise<T> {
+  const book = await load<Book<T>>($, key, {});
+  const root = await projectRoot($);
+  const shelf = book?.[root];
+  return shelf && "value" in shelf ? shelf.value : fallback;
+}
+
+async function mutateScoped<T>(
+  $: any,
+  key: string,
+  fallback: T,
+  fn: (value: T) => T | void,
+): Promise<T> {
+  const root = await projectRoot($);
+  let result = fallback;
+
+  await mutate<Book<T>>($, key, {}, (book) => {
+    const shelf = book[root];
+    const current =
+      shelf && "value" in shelf ? shelf.value : structuredClone(fallback);
+    result = (fn(current) ?? current) as T;
+    book[root] = { at: Date.now(), value: result };
+
+    // Projects come and go; the book must not grow forever.
+    const roots = Object.keys(book);
+    if (roots.length > BOOK_CAP) {
+      roots
+        .sort((a, b) => (book[a]?.at ?? 0) - (book[b]?.at ?? 0))
+        .slice(0, roots.length - BOOK_CAP)
+        .forEach((stale) => {
+          delete book[stale];
+        });
+    }
+  });
+
+  return result;
 }
 
 async function trace(
@@ -226,14 +365,50 @@ async function trace(
   detail: string,
 ): Promise<void> {
   try {
-    const log = await load<TraceEvent[]>($, KEYS.trace, []);
-    log.push({ ts: Date.now(), kind, detail });
-    if (log.length > TRACE_CAP) log.splice(0, log.length - TRACE_CAP);
-    await save($, KEYS.trace, log);
+    await mutateScoped<TraceEvent[]>($, KEYS.trace, [], (log) => {
+      log.push({ ts: Date.now(), kind, detail });
+      if (log.length > TRACE_CAP) log.splice(0, log.length - TRACE_CAP);
+    });
   } catch {
     // Tracing is best-effort — never block the hook chain
   }
 }
+
+// The three per-project records, always read and written through the book.
+const loadSession = ($: any) =>
+  loadScoped<SessionState | null>($, KEYS.session, null);
+
+const mutateSession = ($: any, fn: (session: SessionState) => void) =>
+  mutateScoped<SessionState | null>($, KEYS.session, null, (session) => {
+    if (session) fn(session);
+  });
+
+const putSession = ($: any, session: SessionState | null) =>
+  mutateScoped<SessionState | null>($, KEYS.session, null, () => session);
+
+const loadSDD = ($: any) => loadScoped<SDDState | null>($, KEYS.sdd, null);
+
+const mutateSDD = ($: any, fn: (sdd: SDDState) => void) =>
+  mutateScoped<SDDState | null>($, KEYS.sdd, null, (sdd) => {
+    if (sdd) fn(sdd);
+  });
+
+const putSDD = ($: any, sdd: SDDState | null) =>
+  mutateScoped<SDDState | null>($, KEYS.sdd, null, () => sdd);
+
+/** One tool call against the current SDD task's step budget. */
+const countStep = ($: any) =>
+  mutateSDD($, (sdd) => {
+    if (!sdd.active) return;
+    sdd.toolCallsThisTask++;
+    sdd.totalToolCalls++;
+  });
+
+const loadEvidence = ($: any) =>
+  loadScoped<TestEvidence | null>($, KEYS.test, null);
+
+const putEvidence = ($: any, evidence: TestEvidence | null) =>
+  mutateScoped<TestEvidence | null>($, KEYS.test, null, () => evidence);
 
 // ─────────────────────────────────────────────────────────────────────
 //  Test command detection — language-agnostic file heuristics
@@ -338,8 +513,17 @@ const GIT_OPTS = String.raw`(?:` +
   ].join("|") +
   String.raw`)*`;
 
+// `\b` after the verb matches before a hyphen too, so `git commit-tree` and
+// `git checkout-index` — plumbing that commits nothing — tripped every gate
+// keyed off these. A verb is the verb only when nothing word-like follows.
+const GIT_VERB_END = String.raw`(?![\w-])`;
+
 const GIT_COMMIT_PUSH_RE = new RegExp(
-  String.raw`\bgit\s+` + GIT_OPTS + String.raw`(commit|push|merge)\b`,
+  String.raw`\bgit\s+` + GIT_OPTS + String.raw`(commit|push|merge)` + GIT_VERB_END,
+);
+
+const GIT_PUSH_RE = new RegExp(
+  String.raw`\bgit\s+` + GIT_OPTS + String.raw`push` + GIT_VERB_END,
 );
 
 // Files that normally carry no behaviour: prose, assets and licences.
@@ -418,6 +602,42 @@ async function changedPaths($: any): Promise<string[] | null> {
 }
 
 /**
+ * The paths a push would send: what HEAD has that its upstream does not.
+ * Returns null when there is no upstream to compare against, or git
+ * cannot be read — "could not tell", which the gate treats as "enforce".
+ */
+async function pushedPaths($: any): Promise<string[] | null> {
+  try {
+    const res = await $.process.run([
+      "git",
+      "diff",
+      "--name-only",
+      "@{u}..HEAD",
+    ]);
+    if (res.exitCode !== 0) return null;
+    return res.stdout
+      .split("\n")
+      .map((l: string) => l.trim())
+      .filter(Boolean);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * The added lines of a diff. `containsSecret` is documented as reading
+ * what a change ADDS, and was handed the whole diff — so the commit that
+ * removes a leaked key was the one that got blocked, with remediation
+ * text telling you to remove it.
+ */
+function addedLines(diff: string): string {
+  return diff
+    .split("\n")
+    .filter((l) => l.startsWith("+") && !l.startsWith("+++"))
+    .join("\n");
+}
+
+/**
  * A shell command with its heredoc bodies and quoted literals blanked out,
  * so the command regexes match commands actually being run rather than text
  * that merely mentions one. Without this, a commit whose message says
@@ -425,6 +645,22 @@ async function changedPaths($: any): Promise<string[] | null> {
  * that quotes a git subcommand is treated as running it.
  */
 function commandSkeleton(cmd: string): string {
+  let out = unquotedSkeleton(cmd);
+
+  // Quoted literals, escapes respected.
+  out = out.replace(/'(?:[^'\\]|\\.)*'/g, "''");
+  out = out.replace(/"(?:[^"\\]|\\.)*"/g, '""');
+
+  return out;
+}
+
+/**
+ * The same command with heredoc bodies removed and shell `-c` payloads
+ * unwrapped, but quoted literals left standing. Write-target detection
+ * needs this: blanking quotes first erased the path in `> 'src/x.ts'`
+ * along with the mention it was meant to erase.
+ */
+function unquotedSkeleton(cmd: string): string {
   let out = cmd;
 
   // Heredoc bodies: <<EOF / <<-'EOF' / <<"EOF" up to the terminator.
@@ -447,19 +683,25 @@ function commandSkeleton(cmd: string): string {
     (_m: string, q: string) => ` ${q.slice(1, -1)} `,
   );
 
-  // Quoted literals, escapes respected.
-  out = out.replace(/'(?:[^'\\]|\\.)*'/g, "''");
-  out = out.replace(/"(?:[^"\\]|\\.)*"/g, '""');
-
   return out;
 }
 
+/** The character spans covered by quoted literals. */
+function quotedSpans(text: string): Array<[number, number]> {
+  const spans: Array<[number, number]> = [];
+  for (const m of text.matchAll(/'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"/g)) {
+    if (m.index === undefined) continue;
+    spans.push([m.index, m.index + m[0].length]);
+  }
+  return spans;
+}
+
 const GIT_COMMIT_RE = new RegExp(
-  String.raw`\bgit\s+` + GIT_OPTS + String.raw`commit\b`,
+  String.raw`\bgit\s+` + GIT_OPTS + String.raw`commit` + GIT_VERB_END,
 );
 
 const GIT_BRANCH_SWITCH_RE = new RegExp(
-  String.raw`\bgit\s+` + GIT_OPTS + String.raw`(checkout|switch)\b`,
+  String.raw`\bgit\s+` + GIT_OPTS + String.raw`(checkout|switch)` + GIT_VERB_END,
 );
 
 // Commands that stage as they go: `git add -A && git commit`, or
@@ -574,9 +816,53 @@ function toolOutput(result: any): string {
   return String(result?.text ?? result?.result ?? "");
 }
 
-// Shell forms that write a file: a redirection, or an in-place edit.
-const SHELL_WRITE_RE =
-  /(?:>>?\s*(['"]?[\w./~@-]+['"]?)|\b(?:sed|perl|ruby)\s+(?:-\S+\s+)*-i\S*\s+(?:-\S+\s+)*(?:'[^']*'|"[^"]*"|\S+)\s+(['"]?[\w./~@-]+['"]?)|\btee\s+(?:-\S+\s+)*(['"]?[\w./~@-]+['"]?))/;
+// Shell forms that write a file: a redirection, an in-place edit, a tee.
+// A path may be quoted, so the alternatives accept a quoted literal —
+// `> 'src/x.ts'` is a write to src/x.ts, and matching against a skeleton
+// with the quotes blanked out saw no path at all.
+const WRITE_PATH = String.raw`'[^']+'|"[^"]+"|[\w./~@+=-]+`;
+
+const SHELL_WRITE_RE = new RegExp(
+  String.raw`>>?\s*(?!&)(` +
+    WRITE_PATH +
+    String.raw`)|\b(?:sed|perl|ruby)\s+(?:-\S+\s+)*-i\S*\s+(?:-\S+\s+)*(?:'[^']*'|"[^"]*"|\S+)\s+(` +
+    WRITE_PATH +
+    String.raw`)|\btee\s+(?:-\S+\s+)*(` +
+    WRITE_PATH +
+    String.raw`)`,
+  "g",
+);
+
+// A redirection to one of these writes nothing a planning gate cares
+// about; `ls > /dev/null` was being denied as an implementation write.
+const DEV_SINK_RE = /^\/dev\/(?:null|stdout|stderr|tty|fd\/\d+)$/;
+
+/**
+ * Every file the command writes.
+ *
+ * Three bugs lived in the single-match version this replaces: `tee` is the
+ * third capture group and only the first two were read; a quoted path was
+ * erased before the match; and `String.match` without /g returned one
+ * target, so `echo a > notes.md && echo b > src/x.ts` was judged entirely
+ * by notes.md. A write named inside a quoted string is still only a
+ * mention — the operator itself has to be outside the quotes.
+ */
+function shellWriteTargets(cmd: string): string[] {
+  const text = unquotedSkeleton(cmd);
+  const spans = quotedSpans(text);
+  const mention = (at: number) => spans.some(([a, b]) => at > a && at < b);
+
+  const targets: string[] = [];
+  for (const m of text.matchAll(SHELL_WRITE_RE)) {
+    if (m.index !== undefined && mention(m.index)) continue;
+    const path = (m[1] ?? m[2] ?? m[3] ?? "")
+      .replace(/^['"]|['"]$/g, "")
+      .trim();
+    if (!path || DEV_SINK_RE.test(path)) continue;
+    targets.push(path);
+  }
+  return targets;
+}
 
 const MAX_UNTRACKED_SCAN = 50;
 
@@ -780,6 +1066,111 @@ function buildSDDInjection(sdd: SDDState, stepBudget: number, timeBudgetMs: numb
     .join("\n");
 }
 
+/**
+ * Charge one tool call to the current SDD task, or deny when the task
+ * has already spent its budget.
+ *
+ * README has always documented "warn 80%, block 100%". Only the warning
+ * existed at first; then the ceiling was added to the Bash hook alone,
+ * so a task that worked through Write, Edit and subagents counted past
+ * 100% and was never once asked to adjudicate. Every tool that counts a
+ * step now checks the same ceiling.
+ */
+async function spendStep(
+  $: any,
+  stepBudget: number,
+  timeBudgetMs: number,
+): Promise<{ deny: string } | null> {
+  const sdd = await loadSDD($);
+  if (!sdd?.active) return null;
+
+  const overSteps =
+    stepBudget > 0 &&
+    sdd.toolCallsThisTask >= stepBudget;
+  const overTime =
+    timeBudgetMs > 0 &&
+    sdd.taskStartedAt > 0 &&
+    Date.now() - sdd.taskStartedAt >= timeBudgetMs;
+
+  if (!overSteps && !overTime) {
+    await countStep($);
+    return null;
+  }
+
+  const which = overSteps
+    ? `step budget (${sdd.toolCallsThisTask}/${stepBudget} tool calls)`
+    : `time budget (${formatElapsed(Date.now() - sdd.taskStartedAt)}/` +
+      `${formatElapsed(timeBudgetMs)})`;
+
+  await trace($, "gate-deny", `budget-exhausted: ${which}`);
+  await mutateHistory($, (h: SessionHistory) => {
+    h.qualityMetrics.gateDenials++;
+  });
+
+  return {
+    deny:
+      `Proctor gate: Task ${sdd.currentTask} has exhausted its ` +
+      `${which}.\n` +
+      `Adjudicate before spending more:\n` +
+      `  1. State what is done and what remains\n` +
+      `  2. Decide: finish, split the task, or stop\n` +
+      `  3. Then one of:\n` +
+      `     \`Task ${sdd.currentTask}: complete\` — resets the budget ` +
+      `and moves on\n` +
+      `     \`proctor: budget extend\` — one more full budget for ` +
+      `this task\n` +
+      `     \`proctor: sdd stop\` — leave SDD mode entirely`,
+  };
+}
+
+// A skill was invoked, however it reached us. Shared so that the Read
+// fallback below registers the same thing the event does: it used to set
+// two of the six fields, leaving the watchdog armed, the phase behind
+// and `lastSkillName` empty after a direct SKILL.md read.
+async function noteSkill($: any, skillName: string): Promise<void> {
+  const transitions: Array<[string, string]> = [];
+
+  await mutateSession($, (session) => {
+    session.skillInvoked = true;
+    session.turnsSinceSkill = 0;
+    session.watchdogNudgeSent = false;
+    session.lastSkillName = skillName;
+
+    // Planning mode transitions
+    if (PLANNING_SKILLS.has(skillName)) {
+      session.planningMode = true;
+      session.planningSkill = skillName;
+      transitions.push(["planning-mode-enter", `skill=${skillName}`]);
+    } else if (IMPLEMENTATION_SKILLS.has(skillName)) {
+      if (session.planningMode) {
+        transitions.push(["planning-mode-exit", `skill=${skillName}`]);
+      }
+      session.planningMode = false;
+      session.planningSkill = null;
+    }
+
+    // Phase lifecycle tracking
+    const phase = SKILL_PHASE_MAP[skillName];
+    if (phase && session.currentPhase !== phase) {
+      transitions.push([
+        "phase-transition",
+        `${session.currentPhase} → ${phase} (${skillName})`,
+      ]);
+      session.currentPhase = phase;
+    }
+  });
+
+  for (const [kind, detail] of transitions) await trace($, kind, detail);
+
+  // Cross-session skill usage tracking
+  await mutateHistory($, (hist) => {
+    const name = skillName || "unknown";
+    hist.skillUsage[name] = (hist.skillUsage[name] ?? 0) + 1;
+  });
+
+  await trace($, "skill-invoke", skillName);
+}
+
 // ─────────────────────────────────────────────────────────────────────
 //  REGISTRATION
 // ─────────────────────────────────────────────────────────────────────
@@ -853,17 +1244,14 @@ export const register: Register = (on, options) => {
     // Cross-session learning: use remembered test command if file
     // heuristics didn't find one
     const history = await loadHistory($);
-    try {
-      const cwd = await $.session.cwd();
-      if (!testCommand && history.lastTestCommand && history.projectPath === cwd) {
-        testCommand = history.lastTestCommand;
-      }
-      history.projectPath = cwd;
-      history.sessionsCount++;
-      await save($, KEYS.history, history);
-    } catch {
-      // Non-critical — cwd detection failed
+    const root = await projectRoot($);
+    if (!testCommand && history.lastTestCommand && history.projectPath === root) {
+      testCommand = history.lastTestCommand;
     }
+    await mutateHistory($, (hist) => {
+      hist.projectPath = root;
+      hist.sessionsCount++;
+    });
 
     // No marker file and nothing remembered means this project has no test
     // suite to run — a docs, notes or config repo. The commit gate steps
@@ -934,32 +1322,24 @@ export const register: Register = (on, options) => {
       quietMode: false,
     };
 
-    await save($, KEYS.session, session);
+    await putSession($, session);
 
-    // Initialize trace log for this session
-    await save($, KEYS.trace, []);
+    // Trace and evidence are this project's, and this session's. Both used
+    // to live under a bare key, so starting a session in one pane wiped
+    // the other pane's audit trail and its test evidence mid-run.
+    await mutateScoped<TraceEvent[]>($, KEYS.trace, [], () => []);
 
     // Test evidence is session-scoped — the denial text says as much.
     // It lived in a store that outlives the session, so a run from a
     // previous session (or another project) kept satisfying the gate.
-    await save($, KEYS.test, null);
+    await putEvidence($, null);
 
-    // SDD session recovery — resume if active state survives restart
-    const existingSDD = await load<SDDState | null>($, KEYS.sdd, null);
+    // SDD session recovery — resume if active state survives restart.
+    // The record is already scoped to this project, so a run started in
+    // another repo is never in hand here to begin with.
+    const existingSDD = await loadSDD($);
 
-    // A run belonging to another project is not this project's business.
-    let here: string | null = null;
-    try {
-      here = await $.session.cwd();
-    } catch {
-      here = null;
-    }
-
-    if (existingSDD?.active && existingSDD.cwd && here && existingSDD.cwd !== here) {
-      await trace($, "sdd-foreign", existingSDD.cwd.substring(0, 60));
-      existingSDD.active = false;
-      await save($, KEYS.sdd, existingSDD);
-    } else if (existingSDD?.active) {
+    if (existingSDD?.active) {
       $.ui.log(
         `Proctor: recovering SDD session — ` +
           `Task ${existingSDD.currentTask}/${existingSDD.totalTasks}, ` +
@@ -972,13 +1352,14 @@ export const register: Register = (on, options) => {
       // time budget before any work happened. Restart it, and clear the
       // one-shot warnings it already spent, so the resumed task gets a
       // budget rather than an instant verdict.
-      existingSDD.taskStartedAt = Date.now();
-      existingSDD.timeWarned80 = false;
-      existingSDD.timeWarned100 = false;
-      existingSDD.toolCallsThisTask = 0;
-      existingSDD.stepWarned80 = false;
-      existingSDD.stepWarned100 = false;
-      await save($, KEYS.sdd, existingSDD);
+      await mutateSDD($, (sdd) => {
+        sdd.taskStartedAt = Date.now();
+        sdd.timeWarned80 = false;
+        sdd.timeWarned100 = false;
+        sdd.toolCallsThisTask = 0;
+        sdd.stepWarned80 = false;
+        sdd.stepWarned100 = false;
+      });
       await trace($, "sdd-recovery", `task=${existingSDD.currentTask}/${existingSDD.totalTasks}`);
     }
 
@@ -1005,11 +1386,11 @@ export const register: Register = (on, options) => {
     async ($: any, e: any, next: any) => {
       const lines: string[] = [];
 
-      const sdd = await load<SDDState | null>($, KEYS.sdd, null);
+      const sdd = await loadSDD($);
       if (sdd?.active) lines.push(buildSDDInjection(sdd, STEP_BUDGET_PER_TASK, TIME_BUDGET_PER_TASK_MS));
 
-      const test = await load<TestEvidence | null>($, KEYS.test, null);
-      const session = await load<SessionState | null>($, KEYS.session, null);
+      const test = await loadEvidence($);
+      const session = await loadSession($);
 
       if (test) {
         const age = Date.now() - test.timestamp;
@@ -1049,7 +1430,7 @@ export const register: Register = (on, options) => {
       if (lines.length === 0) return next(e);
 
       const block = `[PROCTOR]\n${lines.join("\n")}`;
-      return next({ ...e, text: e.text + "\n\n" + block });
+      return next({ ...e, text: (e.text ?? "") + "\n\n" + block });
     },
   );
 
@@ -1071,7 +1452,7 @@ export const register: Register = (on, options) => {
 
     // ── GATE: Git commit/push requires fresh passing test evidence ──
     if (GIT_COMMIT_PUSH_RE.test(skel)) {
-      const session = await load<SessionState | null>($, KEYS.session, null);
+      const session = await loadSession($);
 
       // The gate exists to stop code shipping untested. Three cases are not
       // that, and enforcing against them only deadlocks the commit:
@@ -1095,7 +1476,17 @@ export const register: Register = (on, options) => {
           !(session?.executableDocs && EXECUTABLE_DOC_EXT_RE.test(f)) &&
           !EXECUTABLE_DOC_PATTERNS.some((re) => re.test(f));
 
-        const paths = await changedPaths($);
+        // What "the change" is depends on the operation. A commit sends
+        // the working tree; a push sends the commits the upstream lacks,
+        // which `git status` says nothing about — one uncommitted README
+        // edit used to make a push of untested code "prose-only". A merge
+        // is neither, so it is never excused on these grounds.
+        const paths = GIT_COMMIT_RE.test(skel)
+          ? await changedPaths($)
+          : GIT_PUSH_RE.test(skel)
+            ? await pushedPaths($)
+            : null;
+
         if (paths && paths.length > 0 && paths.every(isInertProse)) {
           steppedAside = `prose-only change (${paths.length} file${paths.length === 1 ? "" : "s"})`;
         }
@@ -1108,34 +1499,18 @@ export const register: Register = (on, options) => {
         }
       }
 
-      const storedEvidence = steppedAside
-        ? null
-        : await load<TestEvidence | null>($, KEYS.test, null);
-
       // Evidence produced in another project proves nothing about this
-      // one. The store is global and the record used to carry no project,
-      // so a passing run in repo A unblocked a commit in repo B.
-      let evidence = storedEvidence;
-      if (storedEvidence) {
-        let here: string | null = null;
-        try {
-          here = await $.session.cwd();
-        } catch {
-          here = null;
-        }
-        if (storedEvidence.cwd && here && storedEvidence.cwd !== here) {
-          await trace(
-            $,
-            "evidence-foreign",
-            `from ${storedEvidence.cwd.substring(0, 60)}`,
-          );
-          evidence = null;
-        }
-      }
+      // one. It used to be one global record with a cwd stamped on it,
+      // compared against the cwd of the moment — so a run in repo A
+      // unblocked a commit in repo B whenever either cwd was unknown, and
+      // a session that cd'd into a subdirectory disowned its own run. The
+      // record is now filed under the project root; another project's is
+      // simply not in hand.
+      const evidence = steppedAside ? null : await loadEvidence($);
 
       if (!evidence && !steppedAside) {
         await trace($, "gate-deny", `git-no-evidence: ${cmd.substring(0, 80)}`);
-        await mutate($, KEYS.history, DEFAULT_HISTORY, (h: SessionHistory) => {
+        await mutateHistory($, (h: SessionHistory) => {
           h.qualityMetrics.gateDenials++;
         });
         const testCmd = session?.testCommand ?? "the project's test suite";
@@ -1155,7 +1530,7 @@ export const register: Register = (on, options) => {
       if (evidence && age > TEST_FRESHNESS_MS) {
         const mins = Math.round(age / 60_000);
         await trace($, "gate-deny", `git-stale-evidence: ${mins}m old`);
-        await mutate($, KEYS.history, DEFAULT_HISTORY, (h: SessionHistory) => {
+        await mutateHistory($, (h: SessionHistory) => {
           h.qualityMetrics.gateDenials++;
         });
         return {
@@ -1171,7 +1546,7 @@ export const register: Register = (on, options) => {
 
       if (evidence && evidence.exitCode !== 0) {
         await trace($, "gate-deny", `git-failing-tests: exit ${evidence.exitCode}`);
-        await mutate($, KEYS.history, DEFAULT_HISTORY, (h: SessionHistory) => {
+        await mutateHistory($, (h: SessionHistory) => {
           h.qualityMetrics.gateDenials++;
         });
         return {
@@ -1189,7 +1564,7 @@ export const register: Register = (on, options) => {
       // aside was not satisfied, so it is not counted as passed.
       if (evidence) {
         try {
-          await mutate($, KEYS.history, DEFAULT_HISTORY, (h: SessionHistory) => {
+          await mutateHistory($, (h: SessionHistory) => {
             h.qualityMetrics.gatesPassed++;
           });
         } catch { /* non-critical */ }
@@ -1200,14 +1575,13 @@ export const register: Register = (on, options) => {
     // The gate was registered for Write/Edit/NotebookEdit only, so
     // `cat > src/x.ts <<EOF` and `sed -i` wrote implementation files
     // during a design phase while the identical Write call was blocked.
-    const shellWrite = skel.match(SHELL_WRITE_RE);
-    if (shellWrite) {
-      const target = (shellWrite[1] ?? shellWrite[2] ?? "").replace(/^['"]|['"]$/g, "");
-      if (target && !isDesignDoc(target)) {
-        const sess = await load<SessionState | null>($, KEYS.session, null);
+    {
+      const target = shellWriteTargets(cmd).find((path) => !isDesignDoc(path));
+      if (target) {
+        const sess = await loadSession($);
         if (sess?.planningMode) {
           await trace($, "gate-deny", `planning-mode-bash: ${target}`);
-          await mutate($, KEYS.history, DEFAULT_HISTORY, (h: SessionHistory) => {
+          await mutateHistory($, (h: SessionHistory) => {
             h.qualityMetrics.gateDenials++;
           });
           return {
@@ -1226,7 +1600,7 @@ export const register: Register = (on, options) => {
 
     // ── GATE: Protected branch enforcement ─────────────────────────
     if (GIT_DESTRUCTIVE_RE.test(skel)) {
-      const session = await load<SessionState | null>($, KEYS.session, null);
+      const session = await loadSession($);
 
       // Read the branch now rather than trusting the session's copy: the
       // same command line may have switched onto a protected branch a
@@ -1236,14 +1610,16 @@ export const register: Register = (on, options) => {
 
       if (session && branch && branch !== session.branch) {
         session.branch = branch;
-        await save($, KEYS.session, session);
+        await mutateSession($, (live) => {
+          live.branch = branch;
+        });
       }
 
       if (branch && PROTECTED_BRANCHES.includes(branch)) {
         const hasConsent = session?.branchConsents?.[branch];
         if (!hasConsent) {
           await trace($, "gate-deny", `branch-protection: ${branch}`);
-          await mutate($, KEYS.history, DEFAULT_HISTORY, (h: SessionHistory) => {
+          await mutateHistory($, (h: SessionHistory) => {
             h.qualityMetrics.gateDenials++;
           });
           return {
@@ -1262,11 +1638,20 @@ export const register: Register = (on, options) => {
 
     // ── GATE: Secret/credential detection before git commit ────────
     if (GIT_COMMIT_RE.test(skel)) {
-      try {
-        const chunks: string[] = [];
+      // Only the GATHERING is guarded. The decision used to sit inside
+      // this try as well, so anything that threw after the diff was read
+      // — a counter write, most of all — landed in a catch that means
+      // "skip the scan", and the credential shipped. A gate whose failure
+      // mode is "allow" must not be able to fail quietly.
+      const chunks: string[] = [];
+      let scanned = false;
 
+      try {
         const cached = await $.process.run(["git", "diff", "--cached", "-U0"]);
-        chunks.push(cached.stdout ?? "");
+        chunks.push(addedLines(cached.stdout ?? ""));
+        // Enough in hand to judge. What the widening scan below adds is a
+        // bonus; losing it must not turn the whole gate off.
+        scanned = true;
 
         // `git add -A && git commit` is a single tool call: nothing is
         // staged yet when this runs, so the staged diff is empty and a
@@ -1279,7 +1664,7 @@ export const register: Register = (on, options) => {
 
         if (GIT_STAGING_RE.test(skel) || nothingStaged) {
           const tracked = await $.process.run(["git", "diff", "HEAD", "-U0"]);
-          chunks.push(tracked.stdout ?? "");
+          chunks.push(addedLines(tracked.stdout ?? ""));
 
           const untracked = await $.process.run([
             "git",
@@ -1301,33 +1686,33 @@ export const register: Register = (on, options) => {
             }
           }
         }
-
-        const diffText: string = chunks.join("\n");
-        const hit = containsSecret(diffText);
-        if (hit) {
-          await trace($, "gate-deny", `secret-detected: ${hit.source.substring(0, 30)}`);
-          await mutate($, KEYS.history, DEFAULT_HISTORY, (h: SessionHistory) => {
-            h.qualityMetrics.gateDenials++;
-          });
-          return {
-            deny:
-              `Proctor gate: potential credential/secret detected in staged changes. ` +
-              `Pattern: ${hit.source.substring(0, 40)}...\n` +
-              `Next steps:\n` +
-              `  1. Run \`git diff --cached\` to identify the secret\n` +
-              `  2. Remove or replace with an environment variable\n` +
-              `  3. Unstage the file: \`git reset HEAD <file>\`\n` +
-              `  4. Re-stage clean version and retry commit`,
-          };
-        }
       } catch {
-        // Diff unavailable — skip secret scan, other gates still apply
+        // Diff unavailable — nothing to scan, other gates still apply.
+        await trace($, "secret-scan-unavailable", cmd.substring(0, 60));
+      }
+
+      const hit = scanned ? containsSecret(chunks.join("\n")) : null;
+      if (hit) {
+        await trace($, "gate-deny", `secret-detected: ${hit.source.substring(0, 30)}`);
+        await mutateHistory($, (h: SessionHistory) => {
+          h.qualityMetrics.gateDenials++;
+        });
+        return {
+          deny:
+            `Proctor gate: potential credential/secret detected in staged changes. ` +
+            `Pattern: ${hit.source.substring(0, 40)}...\n` +
+            `Next steps:\n` +
+            `  1. Run \`git diff --cached\` to identify the secret\n` +
+            `  2. Remove or replace with an environment variable\n` +
+            `  3. Unstage the file: \`git reset HEAD <file>\`\n` +
+            `  4. Re-stage clean version and retry commit`,
+        };
       }
     }
 
     // ── SOFT: Destructive bash command awareness ──────────────────
     if (DESTRUCTIVE_BASH_RE.test(skel)) {
-      const sess = await load<SessionState | null>($, KEYS.session, null);
+      const sess = await loadSession($);
       if (!sess?.quietMode) {
         const snippet = cmd.length > 80 ? cmd.substring(0, 77) + "..." : cmd;
         $.ui.log(
@@ -1349,7 +1734,7 @@ export const register: Register = (on, options) => {
           parseInt(insMatch?.[1] ?? "0", 10) +
           parseInt(delMatch?.[1] ?? "0", 10);
         if (total > 500) {
-          const sess = await load<SessionState | null>($, KEYS.session, null);
+          const sess = await loadSession($);
           if (!sess?.quietMode) {
             $.ui.log(
               `Proctor: ${total} lines staged — consider splitting into ` +
@@ -1364,51 +1749,8 @@ export const register: Register = (on, options) => {
     }
 
     // ── SDD budgets: warn on the way up, block at the ceiling ──────
-    // README has always documented "warn 80%, block 100%". Only the
-    // warning existed: at 100% the turn-complete handler appended a
-    // sentence to the next turn's context and nothing stopped.
-    const sdd = await load<SDDState | null>($, KEYS.sdd, null);
-    if (sdd?.active) {
-      const overSteps =
-        STEP_BUDGET_PER_TASK > 0 && sdd.toolCallsThisTask >= STEP_BUDGET_PER_TASK;
-      const overTime =
-        TIME_BUDGET_PER_TASK_MS > 0 &&
-        sdd.taskStartedAt > 0 &&
-        Date.now() - sdd.taskStartedAt >= TIME_BUDGET_PER_TASK_MS;
-
-      if (overSteps || overTime) {
-        const which = overSteps
-          ? `step budget (${sdd.toolCallsThisTask}/${STEP_BUDGET_PER_TASK} tool calls)`
-          : `time budget (${formatElapsed(Date.now() - sdd.taskStartedAt)}/` +
-            `${formatElapsed(TIME_BUDGET_PER_TASK_MS)})`;
-
-        await trace($, "gate-deny", `budget-exhausted: ${which}`);
-        await mutate($, KEYS.history, DEFAULT_HISTORY, (h: SessionHistory) => {
-          h.qualityMetrics.gateDenials++;
-        });
-
-        return {
-          deny:
-            `Proctor gate: Task ${sdd.currentTask} has exhausted its ` +
-            `${which}.\n` +
-            `Adjudicate before spending more:\n` +
-            `  1. State what is done and what remains\n` +
-            `  2. Decide: finish, split the task, or stop\n` +
-            `  3. Then one of:\n` +
-            `     \`Task ${sdd.currentTask}: complete\` — resets the budget ` +
-            `and moves on\n` +
-            `     \`proctor: budget extend\` — one more full budget for ` +
-            `this task\n` +
-            `     \`proctor: sdd stop\` — leave SDD mode entirely`,
-        };
-      }
-
-      await mutate<SDDState | null>($, KEYS.sdd, null, (live) => {
-        if (!live?.active) return;
-        live.toolCallsThisTask++;
-        live.totalToolCalls++;
-      });
-    }
+    const overBudget = await spendStep($, STEP_BUDGET_PER_TASK, TIME_BUDGET_PER_TASK_MS);
+    if (overBudget) return overBudget;
 
     // ── Execute the command ─────────────────────────────────────────
     const result = await next(e);
@@ -1419,12 +1761,7 @@ export const register: Register = (on, options) => {
       const tail = output.substring(Math.max(0, output.length - 1200));
       const testExit: number = toolFailed(result) ? 1 : 0;
 
-      let evidenceCwd: string | null = null;
-      try {
-        evidenceCwd = await $.session.cwd();
-      } catch {
-        // Unknown project — the gate treats that as unusable evidence.
-      }
+      const evidenceCwd = await projectRoot($);
 
       const evidence: TestEvidence = {
         command: cmd.substring(0, 200),
@@ -1433,7 +1770,7 @@ export const register: Register = (on, options) => {
         tailOutput: tail,
         cwd: evidenceCwd,
       };
-      await save($, KEYS.test, evidence);
+      await putEvidence($, evidence);
       await trace(
         $,
         "test-run",
@@ -1452,13 +1789,9 @@ export const register: Register = (on, options) => {
 
       // Cross-session learning: remember working test commands
       if (evidence.exitCode === 0) {
-        try {
-          const hist = await loadHistory($);
+        await mutateHistory($, (hist) => {
           hist.lastTestCommand = evidence.command;
-          await save($, KEYS.history, hist);
-        } catch {
-          // Non-critical
-        }
+        });
       }
     }
 
@@ -1470,16 +1803,11 @@ export const register: Register = (on, options) => {
           "branch",
           "--show-current",
         ]);
-        const session = await load<SessionState | null>(
-          $,
-          KEYS.session,
-          null,
-        );
-        if (session) {
-          session.branch = branchResult.stdout.trim() || null;
-          await save($, KEYS.session, session);
-          await trace($, "branch-change", `to=${session.branch}`);
-        }
+        const moved = branchResult.stdout.trim() || null;
+        await mutateSession($, (live) => {
+          live.branch = moved;
+        });
+        await trace($, "branch-change", `to=${moved}`);
       } catch {
         // Non-critical
       }
@@ -1488,7 +1816,7 @@ export const register: Register = (on, options) => {
     // ── POST: Quality metrics after successful commit ──────────────
     if (GIT_COMMIT_RE.test(skel) && !toolFailed(result)) {
       try {
-        await mutate($, KEYS.history, DEFAULT_HISTORY, (h: SessionHistory) => {
+        await mutateHistory($, (h: SessionHistory) => {
           h.qualityMetrics.totalCommits++;
         });
       } catch {
@@ -1499,7 +1827,7 @@ export const register: Register = (on, options) => {
     // ── POST: Track test run count for quality metrics ─────────────
     if (isTestRun(skel)) {
       try {
-        await mutate($, KEYS.history, DEFAULT_HISTORY, (h: SessionHistory) => {
+        await mutateHistory($, (h: SessionHistory) => {
           h.qualityMetrics.testsRun++;
         });
       } catch {
@@ -1519,13 +1847,13 @@ export const register: Register = (on, options) => {
   // ───────────────────────────────────────────────────────────────────
 
   on("tool.call", { tool: "Write" }, async ($: any, e: any, next: any) => {
-    const session = await load<SessionState | null>($, KEYS.session, null);
+    const session = await loadSession($);
     if (session?.planningMode) {
       const path: string = e.file_path ?? "";
       // Allow writing design docs and plan files during planning
       if (!isDesignDoc(path)) {
         await trace($, "gate-deny", `planning-mode-write: ${path}`);
-        await mutate($, KEYS.history, DEFAULT_HISTORY, (h: SessionHistory) => {
+        await mutateHistory($, (h: SessionHistory) => {
           h.qualityMetrics.gateDenials++;
         });
         return {
@@ -1539,25 +1867,20 @@ export const register: Register = (on, options) => {
         };
       }
     }
-    // SDD step budget
-    const sdd = await load<SDDState | null>($, KEYS.sdd, null);
-    if (sdd?.active) {
-      await mutate<SDDState | null>($, KEYS.sdd, null, (live) => {
-        if (!live?.active) return;
-        live.toolCallsThisTask++;
-        live.totalToolCalls++;
-      });
-    }
+    // SDD step budget — the same ceiling the Bash hook enforces.
+    const overBudget = await spendStep($, STEP_BUDGET_PER_TASK, TIME_BUDGET_PER_TASK_MS);
+    if (overBudget) return overBudget;
+
     return next(e);
   });
 
   on("tool.call", { tool: "Edit" }, async ($: any, e: any, next: any) => {
-    const session = await load<SessionState | null>($, KEYS.session, null);
+    const session = await loadSession($);
     if (session?.planningMode) {
       const path: string = e.file_path ?? "";
       if (!isDesignDoc(path)) {
         await trace($, "gate-deny", `planning-mode-edit: ${path}`);
-        await mutate($, KEYS.history, DEFAULT_HISTORY, (h: SessionHistory) => {
+        await mutateHistory($, (h: SessionHistory) => {
           h.qualityMetrics.gateDenials++;
         });
         return {
@@ -1571,23 +1894,18 @@ export const register: Register = (on, options) => {
         };
       }
     }
-    // SDD step budget
-    const sdd = await load<SDDState | null>($, KEYS.sdd, null);
-    if (sdd?.active) {
-      await mutate<SDDState | null>($, KEYS.sdd, null, (live) => {
-        if (!live?.active) return;
-        live.toolCallsThisTask++;
-        live.totalToolCalls++;
-      });
-    }
+    // SDD step budget — the same ceiling the Bash hook enforces.
+    const overBudget = await spendStep($, STEP_BUDGET_PER_TASK, TIME_BUDGET_PER_TASK_MS);
+    if (overBudget) return overBudget;
+
     return next(e);
   });
 
   on("tool.call", { tool: "NotebookEdit" }, async ($: any, e: any, next: any) => {
-    const session = await load<SessionState | null>($, KEYS.session, null);
+    const session = await loadSession($);
     if (session?.planningMode) {
       await trace($, "gate-deny", "planning-mode-notebook");
-      await mutate($, KEYS.history, DEFAULT_HISTORY, (h: SessionHistory) => {
+      await mutateHistory($, (h: SessionHistory) => {
         h.qualityMetrics.gateDenials++;
       });
       return {
@@ -1600,6 +1918,10 @@ export const register: Register = (on, options) => {
           `  3. OR invoke an implementation skill (TDD, SDD, etc.)`,
       };
     }
+
+    const overBudget = await spendStep($, STEP_BUDGET_PER_TASK, TIME_BUDGET_PER_TASK_MS);
+    if (overBudget) return overBudget;
+
     return next(e);
   });
 
@@ -1611,53 +1933,12 @@ export const register: Register = (on, options) => {
 
   on("skill.prompt", async ($: any, e: any, next: any) => {
     const skillName: string = e.skill ?? "";
-    const session = await load<SessionState | null>($, KEYS.session, null);
-
-    if (session) {
-      session.skillInvoked = true;
-      session.turnsSinceSkill = 0;
-      session.watchdogNudgeSent = false;
-      session.lastSkillName = skillName;
-
-      // Planning mode transitions
-      if (PLANNING_SKILLS.has(skillName)) {
-        session.planningMode = true;
-        session.planningSkill = skillName;
-        await trace($, "planning-mode-enter", `skill=${skillName}`);
-      } else if (IMPLEMENTATION_SKILLS.has(skillName)) {
-        if (session.planningMode) {
-          await trace($, "planning-mode-exit", `skill=${skillName}`);
-        }
-        session.planningMode = false;
-        session.planningSkill = null;
-      }
-
-      // Phase lifecycle tracking
-      const phase = SKILL_PHASE_MAP[skillName];
-      if (phase && session.currentPhase !== phase) {
-        const prev = session.currentPhase;
-        session.currentPhase = phase;
-        await trace($, "phase-transition", `${prev} → ${phase} (${skillName})`);
-      }
-
-      await save($, KEYS.session, session);
-    }
-
-    // Cross-session skill usage tracking
-    try {
-      const hist = await loadHistory($);
-      const name = skillName || "unknown";
-      hist.skillUsage[name] = (hist.skillUsage[name] ?? 0) + 1;
-      await save($, KEYS.history, hist);
-    } catch {
-      // Non-critical
-    }
-
-    await trace($, "skill-invoke", skillName);
+    await noteSkill($, skillName);
+    const session = await loadSession($);
 
     // ── REWRITE: inject live discipline state into every skill ──
-    const sdd = await load<SDDState | null>($, KEYS.sdd, null);
-    const test = await load<TestEvidence | null>($, KEYS.test, null);
+    const sdd = await loadSDD($);
+    const test = await loadEvidence($);
 
     const lines: string[] = [];
 
@@ -1722,14 +2003,8 @@ export const register: Register = (on, options) => {
   on("tool.call", { tool: "Read" }, async ($: any, e: any, next: any) => {
     const result = await next(e);
     const path: string = e.file_path ?? "";
-    if (/\/skills\/[^/]+\/SKILL\.md$/.test(path)) {
-      const session = await load<SessionState | null>($, KEYS.session, null);
-      if (session) {
-        session.skillInvoked = true;
-        session.turnsSinceSkill = 0;
-        await save($, KEYS.session, session);
-      }
-    }
+    const direct = path.match(/\/skills\/([^/]+)\/SKILL\.md$/);
+    if (direct) await noteSkill($, direct[1]);
     return result;
   });
 
@@ -1745,8 +2020,8 @@ export const register: Register = (on, options) => {
     const answer: string = e.answer ?? "";
 
     // Load state once
-    const session = await load<SessionState | null>($, KEYS.session, null);
-    let sdd = await load<SDDState | null>($, KEYS.sdd, null);
+    const session = await loadSession($);
+    let sdd = await loadSDD($);
 
     const contextAdditions: string[] = [];
     let sessionChanged = false;
@@ -1784,12 +2059,7 @@ export const register: Register = (on, options) => {
           /(\d+)\s*(?:tasks?|todos?)/i,
         );
 
-        let sddCwd: string | null = null;
-        try {
-          sddCwd = await $.session.cwd();
-        } catch {
-          sddCwd = null;
-        }
+        const sddCwd = await projectRoot($);
 
         sdd = {
           active: true,
@@ -1861,7 +2131,11 @@ export const register: Register = (on, options) => {
             sddChanged = true;
             await trace($, "sdd-task-complete", `task=${taskNum}`);
 
-            const evidenceMatch = answer.match(/(?:evidence|result|outcome|completed):\s*(.{10,150})/i);
+            // From where this completion was announced, not the first
+            // match in the turn: three tasks finished in one message all
+            // used to be filed with task one's evidence.
+            const after = answer.slice(completeMatch.index ?? 0);
+            const evidenceMatch = after.match(/(?:evidence|result|outcome|completed):\s*(.{10,150})/i);
             sdd.completedEvidence[taskNum] = evidenceMatch?.[1]?.trim() ?? "marked complete";
 
             if (taskNum < sdd.totalTasks) {
@@ -1882,30 +2156,40 @@ export const register: Register = (on, options) => {
         }
 
         // Detect fix rounds — capture failed approach for compaction resilience
+        const seenRounds = new Set<string>();
         for (const fixMatch of allMatches(FIX_ROUND_RE, answer)) {
           const round = parseInt(fixMatch[2], 10);
           // The task the agent named, not whatever currentTask happens to
           // be: a failed approach filed under the wrong task is injected
           // as "DO NOT REDO" against work that never tried it.
           const fixTask = parseInt(fixMatch[1], 10) || sdd.currentTask;
-          if (round === sdd.currentFixRound && fixTask === sdd.currentTask) continue;
-          sdd.currentFixRound = round;
+          if (seenRounds.has(`${fixTask}:${round}`)) continue;
+          seenRounds.add(`${fixTask}:${round}`);
+          if (fixTask === sdd.currentTask && round === sdd.currentFixRound) continue;
+
+          // Another task's round is still a round, and still worth
+          // remembering — but it is not this task's counter. Writing it
+          // there put Task 4's third attempt on Task 2's budget, and the
+          // escalation and cap then fired against the wrong work.
+          if (fixTask === sdd.currentTask) sdd.currentFixRound = round;
           sdd.totalFixRounds++;
           sddChanged = true;
           await trace($, "sdd-fix-round", `task=${fixTask} round=${round}`);
 
-          const approachMatch = answer.match(/(?:approach|tried|attempted|fix):\s*(.{10,120})/i);
+          // Read the approach from where THIS round was announced. A
+          // single non-global match over the whole turn gave every round
+          // in it the first one's text.
+          const after = answer.slice(fixMatch.index ?? 0);
+          const approachMatch = after.match(/(?:approach|tried|attempted|fix):\s*(.{10,120})/i);
           if (approachMatch) {
             sdd.failedApproaches.push(`Task ${fixTask} R${round}: ${approachMatch[1].trim()}`);
           } else {
             sdd.failedApproaches.push(`Task ${fixTask} R${round}: fix attempt failed`);
           }
 
-          try {
-            await mutate($, KEYS.history, DEFAULT_HISTORY, (h: SessionHistory) => {
-              h.qualityMetrics.fixRounds++;
-            });
-          } catch { /* non-critical */ }
+          await mutateHistory($, (h: SessionHistory) => {
+            h.qualityMetrics.fixRounds++;
+          });
 
           if (round >= FIX_ROUND_CAP) {
             contextAdditions.push(
@@ -2042,10 +2326,14 @@ export const register: Register = (on, options) => {
             task: sdd.currentTask,
             text: segments[0] ?? "",
             costIfWrong: costText,
+            // With no task count parsed from the start message — the
+            // common case — `0 === 0` filed every ruling of the run as
+            // "final", including the first one before any work.
             phase:
               sdd.currentFixRound > 0
                 ? "fix-loop"
-                : sdd.completedTasks.length === sdd.totalTasks
+                : sdd.totalTasks > 0 &&
+                    sdd.completedTasks.length >= sdd.totalTasks
                   ? "final"
                   : "preflight",
           });
@@ -2053,8 +2341,7 @@ export const register: Register = (on, options) => {
           await trace($, "ruling", rulingMatch[1]?.trim() ?? "");
 
           // Persist ruling to cross-session history
-          try {
-            const hist = await loadHistory($);
+          await mutateHistory($, (hist) => {
             hist.recentRulings.push({
               text: rulingMatch[1]?.trim() ?? "",
               ts: Date.now(),
@@ -2062,8 +2349,7 @@ export const register: Register = (on, options) => {
             if (hist.recentRulings.length > 20) {
               hist.recentRulings = hist.recentRulings.slice(-20);
             }
-            await save($, KEYS.history, hist);
-          } catch {}
+          });
         }
 
         // Detect deferred minors — every one in the turn, not the first.
@@ -2090,7 +2376,7 @@ export const register: Register = (on, options) => {
     }
 
     // ── SDD done-condition validation ───────────────────────────────
-    if (sdd?.active && sdd.rulings.length >= 0) {
+    if (sdd?.active) {
       const isFinishing =
         /\b(finishing-a-development-branch|all\s+tasks?\s+complete|sdd\s+done|sdd\s+finished)\b/i.test(
           answer,
@@ -2117,7 +2403,7 @@ export const register: Register = (on, options) => {
         }
 
         // Validate test evidence
-        const evidence = await load<TestEvidence | null>($, KEYS.test, null);
+        const evidence = await loadEvidence($);
         if (!evidence) {
           issues.push("no test evidence — run the test suite");
         } else if (evidence.exitCode !== 0) {
@@ -2172,8 +2458,8 @@ export const register: Register = (on, options) => {
     }
 
     // Save state once
-    if (sessionChanged) await save($, KEYS.session, session);
-    if (sddChanged) await save($, KEYS.sdd, sdd);
+    if (sessionChanged) await putSession($, session);
+    if (sddChanged) await putSDD($, sdd);
 
     if (contextAdditions.length > 0) {
       return {
@@ -2190,22 +2476,23 @@ export const register: Register = (on, options) => {
   // ───────────────────────────────────────────────────────────────────
 
   on("agent.spawn", async ($: any, e: any, next: any) => {
-    const sdd = await load<SDDState | null>($, KEYS.sdd, null);
-    const session = await load<SessionState | null>($, KEYS.session, null);
+    const sdd = await loadSDD($);
+    const session = await loadSession($);
 
-    if (session) {
-      session.agentsSpawned++;
-      await save($, KEYS.session, session);
-    }
+    await mutateSession($, (live) => {
+      live.agentsSpawned++;
+    });
+
     if (sdd?.active) {
-      sdd.totalAgents++;
-      sdd.toolCallsThisTask++;
-      sdd.totalToolCalls++;
-
-      if (e.model) {
-        sdd.lastImplementerModel = e.model;
-      }
-      await save($, KEYS.sdd, sdd);
+      // Through the queue, like every other writer: a raw save here raced
+      // the Bash hook's step-budget increment and one of the two was lost.
+      await mutateSDD($, (live) => {
+        if (!live.active) return;
+        live.totalAgents++;
+        live.toolCallsThisTask++;
+        live.totalToolCalls++;
+        if (e.model) live.lastImplementerModel = e.model;
+      });
     }
 
     await trace($, "agent-spawn", `model=${e.model ?? "inherited"}`);
@@ -2256,7 +2543,7 @@ export const register: Register = (on, options) => {
     "ui.render",
     { component: "AbovePrompt" },
     async ($: any, e: any, next: any) => {
-      const sdd = await load<SDDState | null>($, KEYS.sdd, null);
+      const sdd = await loadSDD($);
       if (!sdd?.active) return next(e);
 
       const { Box, Text } = await $.ui.resolve(e);
@@ -2293,6 +2580,19 @@ export const register: Register = (on, options) => {
 
       parts.push(elapsed);
 
+      // An AbovePrompt tree sizes itself to the box it draws into, which
+      // is narrower than the viewport while a pane is docked. Nothing read
+      // it, so on a narrow terminal the dashboard wrapped into the prompt.
+      // Segments are in priority order: drop from the end until it fits.
+      const width = Number(e.props?.bodyColumns);
+      if (Number.isFinite(width) && width > 0) {
+        const SEP = " │ ";
+        while (parts.length > 1 && parts.join(SEP).length > width) parts.pop();
+        if (parts.join(SEP).length > width) {
+          parts.splice(0, parts.length, parts[0].slice(0, width));
+        }
+      }
+
       return (
         <Box>
           <Text>{parts.join(" │ ")}</Text>
@@ -2307,11 +2607,11 @@ export const register: Register = (on, options) => {
 
   on("attribution.text", async ($: any, e: any, next: any) => {
     const result = await next(e);
-    const sdd = await load<SDDState | null>($, KEYS.sdd, null);
+    const sdd = await loadSDD($);
 
     if (!sdd?.active) return result;
 
-    const evidence = await load<TestEvidence | null>($, KEYS.test, null);
+    const evidence = await loadEvidence($);
     const additions: string[] = [];
 
     if (sdd.currentTask > 0) {
@@ -2356,23 +2656,35 @@ export const register: Register = (on, options) => {
       /\bproctor:\s*allow\s+(\S+)\b/i,
     );
     if (consentMatch) {
-      const branch = consentMatch[1];
-      const session = await load<SessionState | null>($, KEYS.session, null);
-      if (session && session.protectedBranches.includes(branch)) {
-        session.branchConsents[branch] = true;
-        await save($, KEYS.session, session);
+      // `\S+` takes the sentence's punctuation with it, so "proctor: allow
+      // master." asked for a branch named "master." and matched nothing.
+      const branch = consentMatch[1].replace(/[.,;:!?)\]}'"]+$/, "");
+      const guarded = PROTECTED_BRANCHES.includes(branch);
+
+      if (guarded) {
+        await mutateSession($, (session) => {
+          session.branchConsents[branch] = true;
+        });
         $.ui.log(`Proctor: consent recorded for branch '${branch}'`);
         await trace($, "branch-consent", branch);
+      } else {
+        // Silence here read as consent granted: the next destructive
+        // command was blocked anyway, with no hint why.
+        $.ui.log(
+          `Proctor: '${branch}' is not a protected branch — nothing to ` +
+            `consent to. Protected: ${PROTECTED_BRANCHES.join(", ")}.`,
+        );
+        await trace($, "branch-consent-noop", branch);
       }
     }
 
     // Design approval: exit planning mode
     if (/\bproctor:\s*approve\s+design\b/i.test(text)) {
-      const session = await load<SessionState | null>($, KEYS.session, null);
+      const session = await loadSession($);
       if (session?.planningMode) {
         session.planningMode = false;
         session.planningSkill = null;
-        await save($, KEYS.session, session);
+        await putSession($, session);
         $.ui.log("Proctor: design approved — planning mode deactivated");
         await trace($, "planning-mode-exit", "design-approved");
       }
@@ -2384,10 +2696,10 @@ export const register: Register = (on, options) => {
         text,
       )
     ) {
-      const sdd = await load<SDDState | null>($, KEYS.sdd, null);
+      const sdd = await loadSDD($);
       if (sdd?.active) {
         sdd.active = false;
-        await save($, KEYS.sdd, sdd);
+        await putSDD($, sdd);
         const elapsed = formatElapsed(Date.now() - sdd.startedAt);
         $.ui.log(
           `Proctor: SDD session complete.\n` +
@@ -2406,7 +2718,7 @@ export const register: Register = (on, options) => {
     // The budget gate blocks at 100%; without an escape the only ways out
     // were completing the task or leaving SDD entirely.
     if (/\bproctor:\s*budget\s+extend\b/i.test(text)) {
-      const sdd = await load<SDDState | null>($, KEYS.sdd, null);
+      const sdd = await loadSDD($);
       if (sdd?.active) {
         sdd.toolCallsThisTask = 0;
         sdd.taskStartedAt = Date.now();
@@ -2414,7 +2726,7 @@ export const register: Register = (on, options) => {
         sdd.stepWarned100 = false;
         sdd.timeWarned80 = false;
         sdd.timeWarned100 = false;
-        await save($, KEYS.sdd, sdd);
+        await putSDD($, sdd);
         $.ui.log(
           `Proctor: budget extended for Task ${sdd.currentTask} — ` +
             `steps and clock reset.`,
@@ -2427,10 +2739,10 @@ export const register: Register = (on, options) => {
 
     // Declare the project test-free: "proctor: no tests"
     if (/\bproctor:\s*no\s+tests\b/i.test(text)) {
-      const session = await load<SessionState | null>($, KEYS.session, null);
+      const session = await loadSession($);
       if (session) {
         session.testsAcknowledgedAbsent = true;
-        await save($, KEYS.session, session);
+        await putSession($, session);
         $.ui.log(
           "Proctor: test gate stood down for this session — " +
             "no test suite in this project. Other gates still enforce.",
@@ -2442,11 +2754,11 @@ export const register: Register = (on, options) => {
     // Quiet mode toggle: "proctor: quiet on/off"
     const quietMatch = text.match(/\bproctor:\s*quiet\s+(on|off)\b/i);
     if (quietMatch) {
-      const session = await load<SessionState | null>($, KEYS.session, null);
+      const session = await loadSession($);
       if (session) {
         const quietOn = quietMatch[1].toLowerCase() === "on";
         session.quietMode = quietOn;
-        await save($, KEYS.session, session);
+        await putSession($, session);
         $.ui.log(
           quietOn
             ? "Proctor: quiet mode ON — soft warnings suppressed, hard gates still enforce."
@@ -2459,7 +2771,7 @@ export const register: Register = (on, options) => {
     // Trace visibility: "proctor: show trace"
     if (/\bproctor:\s*show\s+trace\b/i.test(text)) {
       try {
-        const events = await load<TraceEvent[]>($, KEYS.trace, []);
+        const events = await loadScoped<TraceEvent[]>($, KEYS.trace, []);
         const recent = events.slice(-25);
         if (recent.length === 0) {
           $.ui.log("Proctor trace: no events recorded yet.");
@@ -2478,8 +2790,8 @@ export const register: Register = (on, options) => {
     // Pre-flight gate check: "proctor: check"
     if (/\bproctor:\s*check\b/i.test(text)) {
       try {
-        const session = await load<SessionState | null>($, KEYS.session, null);
-        const test = await load<TestEvidence | null>($, KEYS.test, null);
+        const session = await loadSession($);
+        const test = await loadEvidence($);
         const parts: string[] = ["─── Proctor Pre-flight Check ───"];
 
         // Test evidence gate
@@ -2552,11 +2864,11 @@ export const register: Register = (on, options) => {
     const tasksMatch = text.match(/\bproctor:\s*tasks\s+(\d+)\b/i);
     if (tasksMatch) {
       const newTotal = parseInt(tasksMatch[1], 10);
-      const sdd = await load<SDDState | null>($, KEYS.sdd, null);
+      const sdd = await loadSDD($);
       if (sdd?.active) {
         const oldTotal = sdd.totalTasks;
         sdd.totalTasks = newTotal;
-        await save($, KEYS.sdd, sdd);
+        await putSDD($, sdd);
         $.ui.log(`Proctor: SDD task count updated ${oldTotal} → ${newTotal}`);
         await trace($, "sdd-scope-update", `${oldTotal} → ${newTotal}`);
       } else {
@@ -2568,10 +2880,10 @@ export const register: Register = (on, options) => {
     const taskAddedMatch = text.match(/Task\s+(\d+)\s*:\s*added\b/i);
     if (taskAddedMatch) {
       const addedTask = parseInt(taskAddedMatch[1], 10);
-      const sdd = await load<SDDState | null>($, KEYS.sdd, null);
+      const sdd = await loadSDD($);
       if (sdd?.active && addedTask > sdd.totalTasks) {
         sdd.totalTasks = addedTask;
-        await save($, KEYS.sdd, sdd);
+        await putSDD($, sdd);
         $.ui.log(`Proctor: SDD scope expanded to ${addedTask} tasks`);
         await trace($, "sdd-scope-expand", `new total=${addedTask}`);
       }
@@ -2580,10 +2892,10 @@ export const register: Register = (on, options) => {
     // Self-diagnosis: "proctor: diagnose"
     if (/\bproctor:\s*diagnose\b/i.test(text)) {
       try {
-        const events = await load<TraceEvent[]>($, KEYS.trace, []);
+        const events = await loadScoped<TraceEvent[]>($, KEYS.trace, []);
         const hist = await loadHistory($);
-        const session = await load<SessionState | null>($, KEYS.session, null);
-        const sdd = await load<SDDState | null>($, KEYS.sdd, null);
+        const session = await loadSession($);
+        const sdd = await loadSDD($);
 
         const parts: string[] = ["─── Proctor Diagnosis ───"];
 
@@ -2599,7 +2911,7 @@ export const register: Register = (on, options) => {
           const autonomyRate = Math.round((passes / totalGateEvents) * 100);
           parts.push(
             `Gate autonomy: ${autonomyRate}% ` +
-              `(${passes} passed / ${denials.length} denied)`,
+              `(${passes} passed / ${denials} denied)`,
           );
           if (autonomyRate < 70) {
             parts.push("  → Low autonomy — run tests more frequently before commit attempts");
@@ -2645,7 +2957,7 @@ export const register: Register = (on, options) => {
 
         // Recommendations
         const recommendations: string[] = [];
-        if (denials.length > 3) {
+        if (denials > 3) {
           recommendations.push("Run tests before every commit attempt");
         }
         if (!session?.skillInvoked) {
@@ -2670,9 +2982,9 @@ export const register: Register = (on, options) => {
     // Status dashboard: "proctor: status"
     if (/\bproctor:\s*status\b/i.test(text)) {
       try {
-        const session = await load<SessionState | null>($, KEYS.session, null);
-        const sdd = await load<SDDState | null>($, KEYS.sdd, null);
-        const test = await load<TestEvidence | null>($, KEYS.test, null);
+        const session = await loadSession($);
+        const sdd = await loadSDD($);
+        const test = await loadEvidence($);
         const hist = await loadHistory($);
 
         const parts: string[] = ["─── Proctor Status ───"];
@@ -2715,9 +3027,10 @@ export const register: Register = (on, options) => {
 
         const qm = hist.qualityMetrics;
         const totalGateEvents = (qm.gatesPassed ?? 0) + qm.gateDenials;
-        const autonomyRate = totalGateEvents > 0
-          ? Math.round(((qm.gatesPassed ?? 0) / totalGateEvents) * 100)
-          : 100;
+        const autonomyRate =
+          totalGateEvents > 0
+            ? `${Math.round(((qm.gatesPassed ?? 0) / totalGateEvents) * 100)}%`
+            : "n/a (no gate events yet)";
         parts.push(
           `Quality: ${qm.totalCommits} commits · ` +
             `${qm.gateDenials} denials · ` +
@@ -2725,7 +3038,7 @@ export const register: Register = (on, options) => {
             `${qm.fixRounds} fix rounds · ` +
             `${qm.testsRun} test runs`,
         );
-        parts.push(`Autonomy rate: ${autonomyRate}%`);
+        parts.push(`Autonomy rate: ${autonomyRate}`);
 
         parts.push(`Sessions: ${hist.sessionsCount}`);
 

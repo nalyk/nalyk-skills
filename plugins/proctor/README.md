@@ -101,10 +101,10 @@ protection, SDD dashboard, state persistence — do not fire.
 | **Test freshness** | `git commit`, `git push` | Test run within 5 minutes (configurable) |
 | **Test passing** | `git commit`, `git push` | Last test run exit code 0 |
 | **Branch protection** | `git commit/push/merge/rebase/reset` on main/master | Feature branch or explicit human consent |
-| **Step budget** | Any tool call once an SDD task hits 100% of its step budget | Complete the task, `proctor: budget extend`, or `proctor: sdd stop` |
-| **Time budget** | Any tool call once an SDD task hits 100% of its time budget | Same three exits |
+| **Step budget** | Bash, Write, Edit or NotebookEdit once an SDD task hits 100% of its step budget | Complete the task, `proctor: budget extend`, or `proctor: sdd stop` |
+| **Time budget** | The same four tools once an SDD task hits 100% of its time budget | Same three exits |
 | **Planning mode (Bash)** | Shell writes to implementation files during a design phase | A design doc, or exit planning mode |
-| **Secret detection** | `git commit` with staged credentials | No AWS/OpenAI/GitHub/GitLab/Slack tokens, private keys, or password-shaped assignments (quoted or not) in the diff |
+| **Secret detection** | `git commit` with staged credentials | No AWS/OpenAI/GitHub/GitLab/Slack tokens, private keys, or password-shaped assignments (quoted or not) among the **added** lines — the commit that removes a leaked key is not the one to block |
 
 ### Soft Enforcers (context injection — the agent is reminded)
 
@@ -208,6 +208,12 @@ steps aside — visibly, with a line in the transcript — when:
 - **the change is inert prose only**, or
 - you said **`proctor: no tests`** this session.
 
+"The change" is whatever the operation actually sends: for a commit, the
+working tree; for a push, the commits the upstream does not have. A push
+is never excused by an unrelated edit sitting in the working tree, and
+when there is no upstream to compare against the gate enforces rather
+than guesses. A merge is never excused on prose grounds at all.
+
 Every other gate keeps enforcing regardless: branch protection, secret
 detection and planning mode are untouched by this.
 
@@ -269,6 +275,21 @@ function hooks can do.
 compaction. Task progress, test evidence, rulings, fix-round counts.
 Injected into context automatically so the agent never forgets where it
 is.
+
+`$.store` is one namespace shared by every session on the machine, so
+session state, test evidence, the SDD run and the trace log are each
+filed under the **project root** — the repo `git rev-parse
+--show-toplevel` reports, not the cwd of the moment. A second session in
+another repo no longer overwrites the first one's branch consents, quiet
+mode or evidence, and `cd`-ing into a subdirectory does not make a
+session's own test run look foreign. Two sessions in the *same* repo
+still share one record: they share the branch and the consents that go
+with it, so the sharing is the accurate reading.
+
+Every write goes through a single per-key queue. Counters are the one
+exception to "state is load-bearing": they are telemetry, they are
+written best-effort, and a counter that cannot be written can never stop
+a gate from firing.
 
 ### Why Each Layer Exists
 

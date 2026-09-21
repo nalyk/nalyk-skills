@@ -107,13 +107,32 @@ check(`TEST_RUN_RE runners >= 29 (have ${runners})`, runners >= 29);
 // Each of these fixes a silent bug; losing one brings the bug back.
 for (const [name, why] of [
   ["commandSkeleton", "text that mentions a command is not that command"],
+  ["unquotedSkeleton", "a quoted path is still a path"],
+  ["quotedSpans", "a write named inside a string is only a mention"],
+  ["shellWriteTargets", "every write in the line, tee included"],
   ["isTestRun", "naming a test tool is not running one"],
   ["containsSecret", "unquoted .env secrets are still secrets"],
+  ["addedLines", "removing a secret is not committing one"],
   ["loadHistory", "a stale stored history must not throw in a gate"],
+  ["mutateHistory", "a counter write must never take a gate down with it"],
   ["globToRegExp", "executableDocPatterns must actually match"],
   ["changedPaths", "the prose skip needs to know what changed"],
+  ["pushedPaths", "a push sends commits, not the working tree"],
+  ["projectRoot", "one store, many projects and many sessions"],
+  ["spendStep", "every tool that counts a step checks the same ceiling"],
 ])
   has(`helper: ${name} (${why})`, new RegExp(String.raw`function ${name}\b`));
+
+// Scoping and serialisation: the two invariants the store layer rests on.
+// Losing either brings back a whole class of silent cross-talk.
+has(
+  "every per-project record goes through the scoped book",
+  /function (loadScoped|mutateScoped)\b/,
+);
+check(
+  "no hook writes the store outside the write queue",
+  (src.match(/await save\(\$/g) || []).length <= 2,
+);
 
 // ── Observability and state ────────────────────────────────────────────
 for (const key of [
