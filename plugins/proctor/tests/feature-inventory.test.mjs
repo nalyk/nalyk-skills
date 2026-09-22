@@ -32,7 +32,7 @@ console.log("feature-inventory:");
 // Every event the module answers. Losing one silently disables a feature.
 for (const ev of [
   "session.start",
-  "prompt.section",
+  "prompt.context",
   "prompt.submit",
   "tool.call",
   "tool.describe",
@@ -121,6 +121,11 @@ for (const [name, why] of [
   ["pushedPaths", "a push sends commits, not the working tree"],
   ["projectRoot", "one store, many projects and many sessions"],
   ["spendStep", "every tool that counts a step checks the same ceiling"],
+  ["testStatusMasked", "a pipe or `;` after the tests hides their status"],
+  ["unprovenBy", "a backgrounded, timed-out or interrupted run proves nothing"],
+  ["lineSwitchTarget", "a same-line switch onto a protected branch is judged there"],
+  ["statusBlock", "the live state rides on each prompt's context"],
+  ["drainNotes", "turn-end notes reach the model on the next prompt"],
 ])
   has(`helper: ${name} (${why})`, new RegExp(String.raw`function ${name}\b`));
 

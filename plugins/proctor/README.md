@@ -100,14 +100,20 @@ protection, SDD dashboard, state persistence — do not fire.
 | **Test evidence** | `git commit`, `git push` | Fresh passing test run in this session — unless the project has no test suite, the change is prose-only, or you said `proctor: no tests` |
 | **Test freshness** | `git commit`, `git push` | Test run within 5 minutes (configurable) |
 | **Test passing** | `git commit`, `git push` | Last test run exit code 0 |
-| **Visible test status** | `git commit`, `git push` | The last test run's own exit status reached the result — not hidden by a following `\|`, `;`, `\|\|` or `&` (`set -o pipefail` / `set -e` count) |
-| **Branch protection** | `git commit/push/merge/rebase/reset` on main/master | Feature branch or explicit human consent |
+| **Proven test status** | `git commit`, `git push` | The last test run finished in the foreground and its own exit status reached the result — not hidden by a following `\|`, `;`, `\|\|` or `&` (`set -o pipefail` / `set -e` count), not sent to the background, not moved there by the Bash timeout, not interrupted |
+| **Branch protection** | `git commit/push/merge/rebase/reset` on main/master — including a line that switches onto one first (`git checkout main && git merge feat`) | Feature branch or explicit human consent |
 | **Step budget** | Bash, Write, Edit or NotebookEdit once an SDD task hits 100% of its step budget | Complete the task, `proctor: budget extend`, or `proctor: sdd stop` |
 | **Time budget** | The same four tools once an SDD task hits 100% of its time budget | Same three exits |
 | **Planning mode (Bash)** | Shell writes to implementation files during a design phase | A design doc, or exit planning mode |
 | **Secret detection** | `git commit` with staged credentials | No AWS/OpenAI/GitHub/GitLab/Slack tokens, private keys, or password-shaped assignments (quoted or not) among the **added** lines — the commit that removes a leaked key is not the one to block |
 
 ### Soft Enforcers (context injection — the agent is reminded)
+
+A reminder produced when a turn ends (the watchdog, task progress,
+budget warnings, the SDD done-check) cannot reach the model then — a
+turn's result carries nothing the model reads — so it waits and arrives
+with the next prompt. Advice about a subagent dispatch arrives on the
+Agent tool's result.
 
 All soft enforcers are suppressed in quiet mode (`proctor: quiet on`).
 Hard gates always enforce regardless of quiet mode.
@@ -132,7 +138,8 @@ Hard gates always enforce regardless of quiet mode.
 | Feature | What it does |
 |---------|-------------|
 | **SDD state persistence** | Task completion, fix rounds, rulings, failed approaches tracked in `$.store` |
-| **Compaction recovery** | `[PROCTOR — SDD STATE]` block injected into context post-compaction with "DO NOT REDO" section |
+| **Live status** | A `[PROCTOR]` block rides on every prompt as context the model reads: test verdict and age, planning mode, phase, SDD progress |
+| **Compaction recovery** | `[PROCTOR — SDD STATE]` is one of the conversation's context blocks, which the engine re-reads at compaction — with its "DO NOT REDO" section |
 | **SDD session recovery** | Active SDD state detected and resumed on session restart |
 | **Failed approach tracking** | Fix round descriptions captured and injected post-compaction to prevent retries |
 | **Task completion evidence** | Completion evidence recorded per task for audit trail |
@@ -332,6 +339,30 @@ The differences:
 Superpowers is the right choice for Codex, Cursor, Gemini CLI, and other
 harnesses where function hooks are not available. Proctor is for Claude
 Code CLI sessions where mechanical enforcement matters.
+
+## Testing
+
+`make test` at the repo root runs three layers:
+
+- `claude plugin validate` — the manifest and hooks module as the
+  engine's loader reads them
+- `tests/*.test.mjs` — the pure helpers, a feature ratchet, and the
+  hooks against a small fake engine
+- `tests/engine/*.test.ts` — `claude plugin test`: every feature driven
+  through **the real engine**, with the host (git, files, store, the
+  tools' own results) answered beneath the plugin by `tests/engine/world.ts`.
+  The fake engine could only ever agree with Proctor's own reading of
+  the API; this layer is where five delivery channels that never
+  reached the model were found.
+
+An end-to-end check against a live model loads the working tree in
+place of the installed copy:
+
+```bash
+claude -p --plugin-dir plugins/proctor \
+  --settings '{"enabledPlugins":{"proctor@nalyk-skills":false}}' \
+  --output-format stream-json --verbose "..."
+```
 
 ## Status
 

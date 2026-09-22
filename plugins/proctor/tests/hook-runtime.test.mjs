@@ -524,17 +524,15 @@ const planning = async (h) => {
   has("S5 the denial recommendation fires", out, "Run tests before every commit");
 }
 
-// S19 prompt.section concatenated e.text without a guard.
+// S19 The status block concatenated fields without a guard. It rides on
+// the prompt's context now (see tests/engine for why).
 {
   const h = await harness();
   await h.start();
   await h.bash(NPMTEST);
-  const out = await h.fire(
-    "prompt.section",
-    { section: "context" },
-    { match: { section: "context" }, next: async (ev) => ev },
-  );
-  check("S19 no literal undefined in the injected section", !String(out?.text ?? "").includes("undefined"), out?.text);
+  const out = await h.submit("go");
+  const ctx = (out?.context ?? []).join("\n");
+  check("S19 no literal undefined in the injected status", ctx.includes("[PROCTOR]") && !ctx.includes("undefined"), ctx);
 }
 
 // S20 Consent for a branch that is not protected was recorded nowhere and
@@ -642,12 +640,8 @@ const planning = async (h) => {
   const h = await harness();
   await h.start();
   await h.bash(`${NPMTEST} | tail -20`);
-  const out = await h.fire(
-    "prompt.section",
-    { section: "context" },
-    { match: { section: "context" }, next: async (ev) => ev },
-  );
-  has("S27b the status line says unproven", out?.text, "UNPROVEN");
+  const out = await h.submit("go");
+  has("S27b the status line says unproven", (out?.context ?? []).join("\n"), "UNPROVEN");
 }
 
 try {

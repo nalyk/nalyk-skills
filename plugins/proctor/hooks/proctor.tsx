@@ -22,10 +22,13 @@ interface TestEvidence {
   timestamp: number;
   exitCode: number;
   tailOutput: string;
-  /** The run's own exit status was hidden by what followed it on the
-   *  command line (`| tail`, `; echo`, `|| true`, `&`), so a pass is
-   *  unproven. Recorded with exitCode -1. */
+  /** The run reported success without proving the suite passed: its
+   *  exit status was hidden by what followed it on the command line
+   *  (`| tail`, `; echo`, `|| true`, `&`), or it had not finished — sent
+   *  to the background, timed out into it, or interrupted. Recorded with
+   *  exitCode -1, and `unproven` says which. */
   masked?: boolean;
+  unproven?: string;
   /** Project the run happened in. Evidence from another project must not
    *  unblock this one's commit gate. */
   cwd: string | null;
@@ -96,6 +99,10 @@ interface SessionState {
     | "reviewing"
     | "finishing";
   quietMode: boolean;
+  /** Notes for the model produced after its turn ended — the watchdog,
+   *  task progress, budget warnings, the done-check. `turn.complete`
+   *  cannot reach the model, so they wait here for the next prompt. */
+  pendingNotes?: string[];
 }
 
 interface SessionHistory {
@@ -233,7 +240,10 @@ function enqueue<T>(key: string, job: () => Promise<T>): Promise<T> {
 
 /**
  * Read, mutate and write a key with no other mutation interleaved.
- * `fn` may mutate its argument in place or return a replacement.
+ * `fn` may mutate its argument in place (return nothing) or return a
+ * replacement — `null` included. `fn(x) ?? x` read a returned null as
+ * "mutated in place", so every `put…(null)` was a no-op: session.start's
+ * reset of the test evidence kept the last session's run standing.
  *
  * The fallback is cloned before `fn` sees it: `load` returns the fallback
  * itself when the key is empty, so a shared constant handed in here
@@ -248,7 +258,8 @@ async function mutate<T>(
 ): Promise<T> {
   return enqueue(key, async () => {
     const current = await load<T>($, key, structuredClone(fallback));
-    const updated = (fn(current) ?? current) as T;
+    const out = fn(current);
+    const updated = (out === undefined ? current : out) as T;
     await save($, key, updated);
     return updated;
   });
@@ -345,7 +356,8 @@ async function mutateScoped<T>(
     const shelf = book[root];
     const current =
       shelf && "value" in shelf ? shelf.value : structuredClone(fallback);
-    result = (fn(current) ?? current) as T;
+    const out = fn(current);
+    result = (out === undefined ? current : out) as T;
     book[root] = { at: Date.now(), value: result };
 
     // Projects come and go; the book must not grow forever.
@@ -389,6 +401,22 @@ const mutateSession = ($: any, fn: (session: SessionState) => void) =>
 
 const putSession = ($: any, session: SessionState | null) =>
   mutateScoped<SessionState | null>($, KEYS.session, null, () => session);
+
+/** Hold notes for the model until the next prompt carries them. */
+const queueNotes = ($: any, notes: string[]) =>
+  mutateSession($, (session) => {
+    session.pendingNotes = [...(session.pendingNotes ?? []), ...notes];
+  });
+
+/** Take the held notes, leaving none behind. */
+async function drainNotes($: any): Promise<string[]> {
+  let notes: string[] = [];
+  await mutateSession($, (session) => {
+    notes = session.pendingNotes ?? [];
+    session.pendingNotes = [];
+  });
+  return notes;
+}
 
 const loadSDD = ($: any) => loadScoped<SDDState | null>($, KEYS.sdd, null);
 
@@ -543,6 +571,27 @@ function testStatusMasked(skel: string): boolean {
     if ((sep === ";" || sep === "\n") && rest && !errexit) return true;
   }
   return false;
+}
+
+/**
+ * Why a Bash result that reads as success proves nothing about the suite,
+ * or null when it does prove it. The status is one for the whole line, and
+ * a command that has not finished reports none of its own: Bash answers at
+ * once for `run_in_background`, and moves a command that hits its timeout
+ * to the background and answers then — on a slow machine, the usual fate
+ * of a full suite.
+ */
+function unprovenBy(e: any, record: any, skel: string): string | null {
+  if (e?.run_in_background === true || record?.backgroundTaskId) {
+    return record?.timedOutAfterMs
+      ? "it hit the Bash timeout and was moved to the background, so it had not finished"
+      : "it was sent to the background, so it had not finished";
+  }
+  if (record?.interrupted === true) return "it was interrupted before it finished";
+  if (testStatusMasked(skel)) {
+    return "it was followed by a pipe, `;`, `||` or `&`, so the result reported that command's status, not the tests'";
+  }
+  return null;
 }
 
 /** How a status line names a test run: a hidden status is not a failure. */
@@ -922,6 +971,32 @@ const GIT_DESTRUCTIVE_RE = new RegExp(
     String.raw`(?:(commit|push|merge|rebase|force-push)\b|reset\s+--hard\b|(?:checkout|restore)\s+(?:--\s+)?[.*]|checkout\s+--\s)`,
 );
 
+/**
+ * The branch a destructive git command in this line will run on, when the
+ * line switches branch first: `git checkout main && git merge feat`. The
+ * gate runs before the line does, when git still reports the branch it
+ * started on — so without this, one line walked onto a protected branch
+ * and merged there unchecked. The last switch before the destructive
+ * command wins; a path checkout (`checkout main -- file`) is not a switch.
+ */
+function lineSwitchTarget(skel: string): string | null {
+  const at = skel.search(GIT_DESTRUCTIVE_RE);
+  if (at <= 0) return null;
+  const switchRe = new RegExp(
+    String.raw`\bgit\s+` + GIT_OPTS + String.raw`(?:checkout|switch)` + GIT_VERB_END + String.raw`([^;&|\n]*)`,
+    "g",
+  );
+  let target: string | null = null;
+  for (const m of skel.slice(0, at).matchAll(switchRe)) {
+    const args = (m[1] ?? "").trim().split(/\s+/).filter(Boolean);
+    if (args.includes("--")) continue;
+    const named = args.findIndex((a) => /^-[bBcC]$/.test(a) || a === "--orphan");
+    const name = named >= 0 ? args[named + 1] : args.find((a) => !a.startsWith("-"));
+    if (name) target = name;
+  }
+  return target;
+}
+
 // Destructive non-git bash commands — soft warning
 const DESTRUCTIVE_BASH_RE =
   /(?:rm\s+(?:-[^\s]*r[^\s]*\s|--recursive\s)|chmod\s+(?:-R\s+)?777\s|curl\s[^|]*\|\s*(?:sudo\s+)?(?:bash|sh|zsh)|wget\s[^|]*\|\s*(?:sudo\s+)?(?:bash|sh|zsh)|dd\s+if=|mkfs\.|>\s*\/dev\/sd)/;
@@ -1221,6 +1296,68 @@ async function noteSkill($: any, skillName: string): Promise<void> {
   await trace($, "skill-invoke", skillName);
 }
 
+/** The live state the model needs on every prompt, or null if none. */
+async function statusBlock(
+  $: any,
+  cfg: { stepBudget: number; fixRoundCap: number; freshnessMs: number },
+): Promise<string | null> {
+  const lines: string[] = [];
+
+  const sdd = await loadSDD($);
+  if (sdd?.active) {
+    const budgetPct =
+      cfg.stepBudget > 0
+        ? Math.round((sdd.toolCallsThisTask / cfg.stepBudget) * 100)
+        : 0;
+    lines.push(
+      `SDD: Task ${sdd.currentTask}/${sdd.totalTasks} · ` +
+        `${sdd.completedTasks.length} complete · ` +
+        `fix round ${sdd.currentFixRound}/${cfg.fixRoundCap} · ` +
+        `steps ${budgetPct}%`,
+    );
+  }
+
+  const test = await loadEvidence($);
+  const session = await loadSession($);
+
+  if (test) {
+    const age = Date.now() - test.timestamp;
+    const fresh = age < cfg.freshnessMs;
+    lines.push(
+      `Tests: ${fresh ? "✓ fresh" : "✗ STALE"} · ` +
+        `${testVerdict(test)} · ` +
+        `${Math.round(age / 60_000)}m ago · ` +
+        `cmd: ${test.command}`,
+    );
+    if (test.exitCode !== 0 && !test.masked && test.tailOutput) {
+      const summary = test.tailOutput.substring(0, 300).trim();
+      lines.push(`Failure: ${summary}`);
+    }
+  }
+
+  if (session?.planningMode) {
+    lines.push(
+      `Planning: ON (${session.planningSkill ?? "unknown"}) — ` +
+        `Write/Edit/NotebookEdit BLOCKED until design approved`,
+    );
+  }
+
+  if (session && session.currentPhase !== "idle") {
+    lines.push(
+      `Phase: ${session.currentPhase}` +
+        (session.lastSkillName ? ` (${session.lastSkillName})` : ""),
+    );
+  }
+
+  if (session?.testCommand && !test && session.hasTestInfrastructure && !session.testsAcknowledgedAbsent) {
+    lines.push(
+      `No tests run — \`${session.testCommand}\` required before commit`,
+    );
+  }
+
+  return lines.length > 0 ? `[PROCTOR]\n${lines.join("\n")}` : null;
+}
+
 // ─────────────────────────────────────────────────────────────────────
 //  REGISTRATION
 // ─────────────────────────────────────────────────────────────────────
@@ -1370,6 +1507,7 @@ export const register: Register = (on, options) => {
       executableDocs,
       currentPhase: "idle",
       quietMode: false,
+      pendingNotes: [],
     };
 
     await putSession($, session);
@@ -1426,63 +1564,36 @@ export const register: Register = (on, options) => {
   });
 
   // ───────────────────────────────────────────────────────────────────
-  //  2. COMPACTION-PROOF STATE — inject SDD state into context
-  //     Uses prompt.section to survive compaction automatically.
+  //  2. WHAT THE MODEL KNOWS — live state, delivered where it is read
+  //
+  //     This used to be a `prompt.section` hook matched on a section
+  //     named "context" by a key named `section`. The engine names
+  //     sections by `name`, has none called "context", and caches every
+  //     section for the whole session — so the block never reached the
+  //     model, and could not have stayed current if it had. Now:
+  //       · the status rides on each prompt, as its context
+  //       · notes a turn produced wait for the next prompt, the one
+  //         channel that reaches the model after a turn has ended
+  //       · the SDD state is a context block of the conversation, which
+  //         the engine re-reads at compaction — the part that must
+  //         survive it
   // ───────────────────────────────────────────────────────────────────
 
-  on(
-    "prompt.section",
-    { section: "context" },
-    async ($: any, e: any, next: any) => {
-      const lines: string[] = [];
-
-      const sdd = await loadSDD($);
-      if (sdd?.active) lines.push(buildSDDInjection(sdd, STEP_BUDGET_PER_TASK, TIME_BUDGET_PER_TASK_MS));
-
-      const test = await loadEvidence($);
-      const session = await loadSession($);
-
-      if (test) {
-        const age = Date.now() - test.timestamp;
-        const fresh = age < TEST_FRESHNESS_MS;
-        lines.push(
-          `Tests: ${fresh ? "✓ fresh" : "✗ STALE"} · ` +
-            `${testVerdict(test)} · ` +
-            `${Math.round(age / 60_000)}m ago · ` +
-            `cmd: ${test.command}`,
-        );
-        if (test.exitCode !== 0 && !test.masked && test.tailOutput) {
-          const summary = test.tailOutput.substring(0, 300).trim();
-          lines.push(`Failure: ${summary}`);
-        }
-      }
-
-      if (session?.planningMode) {
-        lines.push(
-          `Planning: ON (${session.planningSkill ?? "unknown"}) — ` +
-            `Write/Edit/NotebookEdit BLOCKED until design approved`,
-        );
-      }
-
-      if (session && session.currentPhase !== "idle") {
-        lines.push(
-          `Phase: ${session.currentPhase}` +
-            (session.lastSkillName ? ` (${session.lastSkillName})` : ""),
-        );
-      }
-
-      if (session?.testCommand && !test) {
-        lines.push(
-          `No tests run — \`${session.testCommand}\` required before commit`,
-        );
-      }
-
-      if (lines.length === 0) return next(e);
-
-      const block = `[PROCTOR]\n${lines.join("\n")}`;
-      return next({ ...e, text: (e.text ?? "") + "\n\n" + block });
-    },
-  );
+  on("prompt.context", async ($: any, e: any, next: any) => {
+    const result = await next(e);
+    const sdd = await loadSDD($);
+    if (!sdd?.active) return result;
+    return {
+      ...result,
+      blocks: [
+        ...(result.blocks ?? []).filter((b: any) => b.name !== "proctor"),
+        {
+          name: "proctor",
+          text: buildSDDInjection(sdd, STEP_BUDGET_PER_TASK, TIME_BUDGET_PER_TASK_MS),
+        },
+      ],
+    };
+  });
 
   // ───────────────────────────────────────────────────────────────────
   //  3. GIT GATES — hard enforcement on Bash tool calls
@@ -1602,11 +1713,11 @@ export const register: Register = (on, options) => {
         return {
           deny:
             `Proctor gate: the last test run hid its exit status.\n` +
-            `\`${evidence.command}\` was followed by a pipe, \`;\`, \`||\` ` +
-            `or \`&\`, so the result reported that command's status, not ` +
-            `the tests'.\n` +
+            `\`${evidence.command}\`: ` +
+            `${evidence.unproven ?? "it was followed by a pipe, `;`, `||` or `&`"}.\n` +
             `Next steps:\n` +
-            `  1. Re-run the tests alone, or redirect: \`cmd > log 2>&1\`\n` +
+            `  1. Re-run the tests in the foreground, alone or redirected: ` +
+            `\`cmd > log 2>&1\` (raise the Bash timeout for a slow suite)\n` +
             `  2. To keep a pipe, prefix \`set -o pipefail;\`\n` +
             `  3. Retry this command`,
         };
@@ -1674,14 +1785,16 @@ export const register: Register = (on, options) => {
       // same command line may have switched onto a protected branch a
       // moment ago, and the tracker that refreshed the cache was itself
       // unreachable until S25 was fixed.
-      const branch = await currentBranch($, session?.branch ?? null);
+      const live = await currentBranch($, session?.branch ?? null);
 
-      if (session && branch && branch !== session.branch) {
-        session.branch = branch;
-        await mutateSession($, (live) => {
-          live.branch = branch;
+      if (session && live && live !== session.branch) {
+        session.branch = live;
+        await mutateSession($, (state) => {
+          state.branch = live;
         });
       }
+
+      const branch = lineSwitchTarget(skel) ?? live;
 
       if (branch && PROTECTED_BRANCHES.includes(branch)) {
         const hasConsent = session?.branchConsents?.[branch];
@@ -1828,7 +1941,8 @@ export const register: Register = (on, options) => {
       const output = toolOutput(result);
       const tail = output.substring(Math.max(0, output.length - 1200));
       const failed = toolFailed(result);
-      const masked = !failed && testStatusMasked(skel);
+      const unproven = failed ? null : unprovenBy(e, result?.result, skel);
+      const masked = unproven !== null;
       const testExit: number = failed ? 1 : masked ? -1 : 0;
 
       const evidenceCwd = await projectRoot($);
@@ -1839,7 +1953,7 @@ export const register: Register = (on, options) => {
         exitCode: testExit,
         tailOutput: tail,
         cwd: evidenceCwd,
-        ...(masked ? { masked: true } : {}),
+        ...(masked ? { masked: true, unproven: unproven ?? undefined } : {}),
       };
       await putEvidence($, evidence);
       await trace(
@@ -1853,8 +1967,7 @@ export const register: Register = (on, options) => {
         $.ui.log("Proctor: ✓ tests passing — git commit is unblocked.");
       } else if (masked) {
         $.ui.log(
-          `Proctor: test exit status hidden by what follows it — not ` +
-            `counted as a pass. Use \`set -o pipefail\` or redirect to a file.`,
+          `Proctor: test run not counted as a pass — ${unproven}.`,
         );
       } else {
         $.ui.log(
@@ -2067,9 +2180,11 @@ export const register: Register = (on, options) => {
       );
     }
 
+    // The skill's prompt is `text`. Writing a `prompt` field added a key
+    // the event does not have, and the skill loaded without the state.
     if (lines.length > 0) {
-      const prompt: string = e.prompt ?? "";
-      return next({ ...e, prompt: prompt + "\n\n" + lines.join("\n") });
+      const text: string = e.text ?? "";
+      return next({ ...e, text: text + "\n\n" + lines.join("\n") });
     }
 
     return next(e);
@@ -2093,6 +2208,12 @@ export const register: Register = (on, options) => {
 
   on("turn.complete", async ($: any, e: any, next: any) => {
     const result = await next(e);
+
+    // A subagent's turn is not the session's: every run of its loop is a
+    // turn, so an implementer counted toward the watchdog, and its report
+    // ("Task 3: complete", before any review) moved the controller's run.
+    if (e.agentId) return result;
+
     const answer: string = e.answer ?? "";
 
     // Load state once
@@ -2356,7 +2477,7 @@ export const register: Register = (on, options) => {
           answer.length > 100
         ) {
           try {
-            const raw = await $.model.fork({
+            const fork = await $.model.fork({
               prompt:
                 "You are Proctor, a discipline enforcement system. " +
                 "Based on the conversation, is the agent in a " +
@@ -2364,9 +2485,12 @@ export const register: Register = (on, options) => {
                 "root-cause investigation? Answer ONLY with JSON: " +
                 '{"looping":true,"signal":"one sentence"} or ' +
                 '{"looping":false}',
-              maxTokens: 80,
             });
-            const parsed = JSON.parse(raw);
+            // The fork answers { text, usage }, or null on an API error.
+            // Parsing the object itself threw every time, into the catch
+            // below, so the detector never once reported.
+            const reply = String(fork?.text ?? "");
+            const parsed = JSON.parse(reply.slice(reply.indexOf("{"), reply.lastIndexOf("}") + 1));
             if (parsed.looping) {
               contextAdditions.push(
                 `Proctor: repeated fix pattern detected — ` +
@@ -2537,12 +2661,9 @@ export const register: Register = (on, options) => {
     if (sessionChanged) await putSession($, session);
     if (sddChanged) await putSDD($, sdd);
 
-    if (contextAdditions.length > 0) {
-      return {
-        ...result,
-        context: [...(result.context ?? []), ...contextAdditions],
-      };
-    }
+    // A turn's result has no field the model reads — a different `text`
+    // is shown to the person under the answer — so these used to vanish.
+    if (contextAdditions.length > 0) await queueNotes($, contextAdditions);
 
     return result;
   });
@@ -2553,7 +2674,6 @@ export const register: Register = (on, options) => {
 
   on("agent.spawn", async ($: any, e: any, next: any) => {
     const sdd = await loadSDD($);
-    const session = await loadSession($);
 
     await mutateSession($, (live) => {
       live.agentsSpawned++;
@@ -2573,42 +2693,47 @@ export const register: Register = (on, options) => {
 
     await trace($, "agent-spawn", `model=${e.model ?? "inherited"}`);
 
-    const contextAdditions: string[] = [];
+    return next(e);
+  });
 
-    // Model selection nudge during SDD
-    if (!e.model && sdd?.active && !session?.quietMode) {
-      try {
-        const sessionModel = await $.session.model();
-        contextAdditions.push(
+  // The advice about a dispatch goes back on the Agent tool's result,
+  // which carries `context` to the model. It was written onto the
+  // spawn's input, which has no such field, and never arrived. Judged
+  // on the state before the spawn: agent.spawn, inside this call,
+  // records the model this dispatch uses as the last one.
+  on("tool.call", { tool: "Agent" }, async ($: any, e: any, next: any) => {
+    const sdd = await loadSDD($);
+    const session = await loadSession($);
+    const model: string | undefined = e.model || undefined;
+    const notes: string[] = [];
+
+    if (sdd?.active && !session?.quietMode) {
+      if (!model) {
+        let sessionModel = "the session's";
+        try {
+          sessionModel = await $.session.model();
+        } catch {
+          // Name it generically.
+        }
+        notes.push(
           `Proctor: subagent inheriting session model (${sessionModel}). ` +
             `Consider a cheaper model for mechanical tasks.`,
         );
-      } catch {
-        contextAdditions.push(
-          `Proctor: no model specified for subagent — specify explicitly.`,
-        );
-      }
-    }
-
-    // Fix-loop escalation enforcement
-    if (sdd?.active && sdd.currentFixRound >= 4 && e.model && !session?.quietMode) {
-      const lastModel = sdd.lastImplementerModel;
-      if (lastModel && e.model === lastModel) {
-        contextAdditions.push(
+      } else if (
+        sdd.currentFixRound >= 4 &&
+        sdd.lastImplementerModel &&
+        model === sdd.lastImplementerModel
+      ) {
+        notes.push(
           `Proctor: fix round ${sdd.currentFixRound}/${FIX_ROUND_CAP} ` +
-            `with same model (${lastModel}). Try a more capable model.`,
+            `with same model (${model}). Try a more capable model.`,
         );
       }
     }
 
-    if (contextAdditions.length > 0) {
-      return next({
-        ...e,
-        context: [...(e.context ?? []), ...contextAdditions],
-      });
-    }
-
-    return next(e);
+    const result = await next(e);
+    if (notes.length === 0 || result?.deny) return result;
+    return { ...result, context: [...(result.context ?? []), ...notes] };
   });
 
   // ───────────────────────────────────────────────────────────────────
@@ -2882,7 +3007,7 @@ export const register: Register = (on, options) => {
           if (test.exitCode !== 0) {
             parts.push(`✗ Tests: ${testVerdict(test)} — commit will be blocked`);
             parts.push(test.masked
-              ? "  → Re-run tests without a pipe, `;`, `||` or `&` after them"
+              ? `  → Not proven: ${test.unproven ?? "exit status hidden"}. Re-run in the foreground`
               : "  → Fix failures and re-run tests");
           } else if (!fresh) {
             parts.push(`✗ Tests: STALE (${Math.round(age / 60_000)}m ago) — commit will be blocked`);
@@ -3154,7 +3279,17 @@ export const register: Register = (on, options) => {
       }
     }
 
-    return next(e);
+    // What the model reads beside this prompt: the notes the last turn
+    // left, then the live state. Another plugin's context stays first.
+    const notes = await drainNotes($);
+    const status = await statusBlock($, {
+      stepBudget: STEP_BUDGET_PER_TASK,
+      fixRoundCap: FIX_ROUND_CAP,
+      freshnessMs: TEST_FRESHNESS_MS,
+    });
+    const mine = [...notes, ...(status ? [status] : [])];
+    if (mine.length === 0) return next(e);
+    return next({ ...e, context: [...(e.context ?? []), ...mine] });
   });
 
   // ───────────────────────────────────────────────────────────────────
