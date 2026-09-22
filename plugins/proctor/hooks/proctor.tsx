@@ -22,6 +22,10 @@ interface TestEvidence {
   timestamp: number;
   exitCode: number;
   tailOutput: string;
+  /** The run's own exit status was hidden by what followed it on the
+   *  command line (`| tail`, `; echo`, `|| true`, `&`), so a pass is
+   *  unproven. Recorded with exitCode -1. */
+  masked?: boolean;
   /** Project the run happened in. Evidence from another project must not
    *  unblock this one's commit gate. */
   cwd: string | null;
@@ -499,6 +503,52 @@ function isTestRun(skel: string): boolean {
         .replace(/^(?:time|command|exec|nice|stdbuf\s+\S+)\s+/, ""),
     )
     .some((seg) => TEST_RUN_RE.test(seg));
+}
+
+/**
+ * True when the test run's own exit status cannot reach the tool result.
+ * The result carries one status for the whole line, so in `npm test |
+ * tail`, `npm test; echo done`, `npm test || true` or `npm test &` it is
+ * the last command's, and a failing suite reads as a pass. `&&` after the
+ * test is fine: a failure stops the chain and the line fails with it.
+ */
+function testStatusMasked(skel: string): boolean {
+  // Redirections carry an `&` that is not a separator: 2>&1, &>, >&2, |&.
+  const s = skel.replace(/\d*>&\d*|&>>?|<&\d*/g, " ").trim();
+  const parts = s.split(/(&&|\|\||\|&?|[;&\n])/);
+
+  let test = -1;
+  for (let i = 0; i < parts.length; i += 2) {
+    if (isTestRun(parts[i])) test = i;
+  }
+  if (test < 0) return false;
+
+  const before = parts.slice(0, test).join("");
+  const pipefail = /\bset\s+-[A-Za-z]*o\s+pipefail\b/.test(before);
+  const errexit =
+    /\bset\s+-[A-Za-z]*e[A-Za-z]*\b/.test(before) ||
+    /\bset\s+-o\s+errexit\b/.test(before);
+
+  let piped = true; // still inside the test's own pipeline
+  for (let j = test + 1; j < parts.length; j += 2) {
+    const sep = parts[j];
+    const rest = parts.slice(j + 1).join("").trim();
+    if (sep === "&") return true;
+    if (sep === "||") return true;
+    if (sep === "|" || sep === "|&") {
+      if (piped && !pipefail) return true;
+      continue;
+    }
+    piped = false;
+    if ((sep === ";" || sep === "\n") && rest && !errexit) return true;
+  }
+  return false;
+}
+
+/** How a status line names a test run: a hidden status is not a failure. */
+function testVerdict(t: TestEvidence): string {
+  if (t.masked) return "UNPROVEN (exit status hidden)";
+  return t.exitCode === 0 ? "passing" : `FAILING (exit ${t.exitCode})`;
 }
 
 // Global options sit between `git` and its subcommand: `git -c k=v commit`,
@@ -1397,11 +1447,11 @@ export const register: Register = (on, options) => {
         const fresh = age < TEST_FRESHNESS_MS;
         lines.push(
           `Tests: ${fresh ? "✓ fresh" : "✗ STALE"} · ` +
-            `exit ${test.exitCode} · ` +
+            `${testVerdict(test)} · ` +
             `${Math.round(age / 60_000)}m ago · ` +
             `cmd: ${test.command}`,
         );
-        if (test.exitCode !== 0 && test.tailOutput) {
+        if (test.exitCode !== 0 && !test.masked && test.tailOutput) {
           const summary = test.tailOutput.substring(0, 300).trim();
           lines.push(`Failure: ${summary}`);
         }
@@ -1541,6 +1591,24 @@ export const register: Register = (on, options) => {
             `  1. Re-run \`${evidence.command}\`\n` +
             `  2. Verify tests pass\n` +
             `  3. Retry this command immediately (within ${TEST_FRESHNESS_MS / 60_000}m)`,
+        };
+      }
+
+      if (evidence?.masked) {
+        await trace($, "gate-deny", "git-masked-test-status");
+        await mutateHistory($, (h: SessionHistory) => {
+          h.qualityMetrics.gateDenials++;
+        });
+        return {
+          deny:
+            `Proctor gate: the last test run hid its exit status.\n` +
+            `\`${evidence.command}\` was followed by a pipe, \`;\`, \`||\` ` +
+            `or \`&\`, so the result reported that command's status, not ` +
+            `the tests'.\n` +
+            `Next steps:\n` +
+            `  1. Re-run the tests alone, or redirect: \`cmd > log 2>&1\`\n` +
+            `  2. To keep a pipe, prefix \`set -o pipefail;\`\n` +
+            `  3. Retry this command`,
         };
       }
 
@@ -1759,7 +1827,9 @@ export const register: Register = (on, options) => {
     if (isTestRun(skel)) {
       const output = toolOutput(result);
       const tail = output.substring(Math.max(0, output.length - 1200));
-      const testExit: number = toolFailed(result) ? 1 : 0;
+      const failed = toolFailed(result);
+      const masked = !failed && testStatusMasked(skel);
+      const testExit: number = failed ? 1 : masked ? -1 : 0;
 
       const evidenceCwd = await projectRoot($);
 
@@ -1769,6 +1839,7 @@ export const register: Register = (on, options) => {
         exitCode: testExit,
         tailOutput: tail,
         cwd: evidenceCwd,
+        ...(masked ? { masked: true } : {}),
       };
       await putEvidence($, evidence);
       await trace(
@@ -1780,6 +1851,11 @@ export const register: Register = (on, options) => {
       // Success signal — proactive readiness notification
       if (evidence.exitCode === 0) {
         $.ui.log("Proctor: ✓ tests passing — git commit is unblocked.");
+      } else if (masked) {
+        $.ui.log(
+          `Proctor: test exit status hidden by what follows it — not ` +
+            `counted as a pass. Use \`set -o pipefail\` or redirect to a file.`,
+        );
       } else {
         $.ui.log(
           `Proctor: ✗ tests failing (exit ${evidence.exitCode}) — ` +
@@ -1966,7 +2042,7 @@ export const register: Register = (on, options) => {
     if (test) {
       const age = Date.now() - test.timestamp;
       const fresh = age < TEST_FRESHNESS_MS;
-      const status = test.exitCode === 0 ? "passing" : "FAILING";
+      const status = testVerdict(test);
       lines.push(
         `Test evidence: ${fresh ? "✓ fresh" : "✗ STALE"} · ` +
           `${status} · ${Math.round(age / 60_000)}m ago`,
@@ -2407,7 +2483,7 @@ export const register: Register = (on, options) => {
         if (!evidence) {
           issues.push("no test evidence — run the test suite");
         } else if (evidence.exitCode !== 0) {
-          issues.push(`tests failing (exit ${evidence.exitCode})`);
+          issues.push(`tests ${testVerdict(evidence).toLowerCase()}`);
         } else {
           const age = Date.now() - evidence.timestamp;
           if (age > TEST_FRESHNESS_MS) {
@@ -2804,8 +2880,10 @@ export const register: Register = (on, options) => {
           const age = Date.now() - test.timestamp;
           const fresh = age < TEST_FRESHNESS_MS;
           if (test.exitCode !== 0) {
-            parts.push(`✗ Tests: FAILING (exit ${test.exitCode}) — commit will be blocked`);
-            parts.push("  → Fix failures and re-run tests");
+            parts.push(`✗ Tests: ${testVerdict(test)} — commit will be blocked`);
+            parts.push(test.masked
+              ? "  → Re-run tests without a pipe, `;`, `||` or `&` after them"
+              : "  → Fix failures and re-run tests");
           } else if (!fresh) {
             parts.push(`✗ Tests: STALE (${Math.round(age / 60_000)}m ago) — commit will be blocked`);
             parts.push(`  → Re-run \`${test.command}\``);
@@ -3018,7 +3096,7 @@ export const register: Register = (on, options) => {
           const age = Math.round((Date.now() - test.timestamp) / 60_000);
           const fresh = (Date.now() - test.timestamp) < TEST_FRESHNESS_MS;
           parts.push(
-            `Tests: ${test.exitCode === 0 ? "passing" : "FAILING"} · ` +
+            `Tests: ${testVerdict(test)} · ` +
               `${fresh ? "fresh" : "STALE"} · ${age}m ago`,
           );
         } else {

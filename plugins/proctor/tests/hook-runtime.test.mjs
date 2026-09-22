@@ -595,6 +595,61 @@ const planning = async (h) => {
   check("S26 the dashboard fits its box", (tree?.text ?? "").length <= 40, tree?.text);
 }
 
+// S27 The tool result carries one status for the whole command line, so
+// `npm test | tail` reported tail's exit and a failing suite unblocked
+// the commit gate. A run whose own status cannot reach the result is not
+// evidence of a pass.
+{
+  const commitAfter = async (cmd, isError = false) => {
+    const h = await harness();
+    await h.start();
+    await h.bash(cmd, async () => ({ isError, text: "" }));
+    return h.bash(`${GIT} -m x`);
+  };
+  for (const cmd of [
+    `${NPMTEST} | tail -20`,
+    `${NPMTEST} 2>&1 | tee test.log`,
+    `${NPMTEST}; echo done`,
+    `${NPMTEST} || true`,
+    `${NPMTEST} &`,
+    `cd /repo && time ${NPMTEST} > t.log 2>&1; echo exit=$?; tail t.log`,
+  ]) {
+    const r = await commitAfter(cmd);
+    has(`S27 masked status is not a pass: ${cmd}`, r?.deny, "exit status");
+  }
+  for (const cmd of [
+    NPMTEST,
+    `${NPMTEST} > t.log 2>&1`,
+    `${NPMTEST} 2>&1`,
+    `cd /repo && ${NPMTEST}`,
+    `time ${NPMTEST}`,
+    `${NPMTEST} && echo ok`,
+    `set -o pipefail; ${NPMTEST} | tail -20`,
+    `set -euo pipefail\n${NPMTEST} | tail -20`,
+    `set -e; ${NPMTEST}; echo done`,
+    `${NPMTEST};`,
+    `${NPMTEST} && git diff | wc -l`,
+  ]) {
+    const r = await commitAfter(cmd);
+    eq(`S27 visible status still counts: ${JSON.stringify(cmd)}`, r?.deny, undefined);
+  }
+  const r = await commitAfter(`${NPMTEST} | tail -20`, true);
+  has("S27 a masked run that failed still blocks", r?.deny, "failing");
+}
+
+// S27b …and the status line calls a hidden status unproven, not failing.
+{
+  const h = await harness();
+  await h.start();
+  await h.bash(`${NPMTEST} | tail -20`);
+  const out = await h.fire(
+    "prompt.section",
+    { section: "context" },
+    { match: { section: "context" }, next: async (ev) => ev },
+  );
+  has("S27b the status line says unproven", out?.text, "UNPROVEN");
+}
+
 try {
   rmSync(tmpFile);
 } catch {

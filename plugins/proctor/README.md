@@ -100,6 +100,7 @@ protection, SDD dashboard, state persistence — do not fire.
 | **Test evidence** | `git commit`, `git push` | Fresh passing test run in this session — unless the project has no test suite, the change is prose-only, or you said `proctor: no tests` |
 | **Test freshness** | `git commit`, `git push` | Test run within 5 minutes (configurable) |
 | **Test passing** | `git commit`, `git push` | Last test run exit code 0 |
+| **Visible test status** | `git commit`, `git push` | The last test run's own exit status reached the result — not hidden by a following `\|`, `;`, `\|\|` or `&` (`set -o pipefail` / `set -e` count) |
 | **Branch protection** | `git commit/push/merge/rebase/reset` on main/master | Feature branch or explicit human consent |
 | **Step budget** | Bash, Write, Edit or NotebookEdit once an SDD task hits 100% of its step budget | Complete the task, `proctor: budget extend`, or `proctor: sdd stop` |
 | **Time budget** | The same four tools once an SDD task hits 100% of its time budget | Same three exits |

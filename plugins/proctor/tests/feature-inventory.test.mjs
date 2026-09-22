@@ -53,6 +53,7 @@ for (const gate of [
   "Proctor gate: no test evidence this session",
   "Proctor gate: test evidence is stale",
   "Proctor gate: tests are failing",
+  "Proctor gate: the last test run hid its exit status",
   "Proctor gate: destructive git operation blocked on",
   "Proctor gate: potential credential/secret detected in staged changes",
   "Proctor gate: Write blocked — planning mode active",
