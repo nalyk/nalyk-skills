@@ -143,7 +143,7 @@
       "name": "proctor",
       "source": "./plugins/proctor",
       "description": "Hook-enforced development discipline for Claude Code. Skills teach methodology (TDD, debugging, verification, SDD); hooks enforce compliance (git gates, branch protection, test evidence); store survives compaction.",
-      "version": "1.0.0",
+      "version": "2.9.0",
       "keywords": [
         "hooks",
         "function-hooks",
