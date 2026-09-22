@@ -88,8 +88,8 @@ Complete each phase before proceeding to the next.
 Proctor's hooks reinforce this discipline mechanically:
 
 - **Fix-round cap:** The hook tracks how many fix attempts you've made
-  in an SDD cycle. At the configured cap (default 5), it blocks further
-  dispatch and forces adjudication. This prevents infinite guess-and-check
+  in an SDD cycle. Past the configured cap (default 5), it refuses
+  further dispatch and forces adjudication. This prevents infinite guess-and-check
   loops.
 - **Test gate:** The git gate blocks commits without fresh, passing test
   evidence. You cannot skip Phase 4's "create failing test case" step —

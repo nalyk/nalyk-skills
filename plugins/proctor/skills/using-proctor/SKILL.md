@@ -24,14 +24,18 @@ reference them. What they enforce:
   blocked until your human partner grants explicit consent.
 - **Skill watchdog.** If you work for several turns without invoking a
   skill, a reminder fires. It fires once.
-- **SDD state persistence.** When running subagent-driven development or
-  executing-plans, task state is persisted in the store and injected into
-  your context after compaction. Look for the `[PROCTOR — SDD STATE]`
+- **SDD state persistence.** When subagent-driven-development or
+  executing-plans loads, a run starts; the plan's `### Task N` headings
+  size it and the ledger's lines (`Task N: complete`, `Task N: fix round
+  M — approach: …`, `Ruling: …`, `minor (deferred): …`) drive it. State
+  is persisted in the store and injected into your context after
+  compaction. Look for the `[PROCTOR — SDD STATE]`
   block.
 - **Progress dashboard.** During SDD, a status bar appears above the
   prompt showing completion percentage, task count, agent count, fix
   rounds, and elapsed time.
-- **Fix-round cap.** The hooks track fix rounds and warn at the cap.
+- **Fix-round cap.** The hooks track fix rounds, warn at the cap and
+  deny any dispatch past it.
 - **Planning mode gate.** When brainstorming or writing-plans is active,
   Write/Edit tool calls for implementation files are mechanically blocked.
   Design docs (.md) are allowed. Exit with an implementation skill or
@@ -46,8 +50,9 @@ reference them. What they enforce:
 - **Model selection nudge.** When spawning subagents without specifying a
   model, you are reminded that the session model may be unnecessarily
   expensive.
-- **Ruling aggregation.** At session end, all rulings and deferred minors
-  are surfaced for inclusion in your final message.
+- **Ruling aggregation.** When the last task is marked complete, and in
+  the finishing skill's prompt, all rulings and deferred minors are
+  surfaced for inclusion in your final message.
 - **Context pressure warning.** At high turn counts, you are reminded that
   SDD state survives compaction and the ledger should be current.
 - **Secret detection gate.** `git commit` is hard-denied if the staged
@@ -147,6 +152,14 @@ Proctor's enforcement thresholds are configurable via plugin settings:
   (default: 5)
 - **Step budget per task** — tool call limit per SDD task before forced
   adjudication (default: 100)
+- **Time budget per task** — wall-clock minutes per SDD task before
+  forced adjudication (default: 30)
+- **Executable doc patterns** — globs for prose-shaped files that are
+  really behaviour; a glob without `/` matches at any depth (default:
+  none)
+
+The remote's default branch (`origin/HEAD`) is protected alongside the
+configured list.
 
 These are set per-user via the plugin configuration UI. You do not need
 to manage them — the hooks read them automatically.

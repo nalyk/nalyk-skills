@@ -63,6 +63,9 @@ which files already exist and which are new.
 
 ### 4. Design tasks
 
+Head each task `### Task <N>: <name>`, numbered from 1 — Proctor
+counts these headings to size the run's dashboard and done-check.
+
 Each task:
 - Can be implemented and tested independently
 - Has clear inputs and outputs

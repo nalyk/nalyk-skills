@@ -1,0 +1,4 @@
+# Refreshed from plugins/proctor by `make test` before each run.
+hooks/proctor.tsx
+engine/world.ts
+engine/.last-run.log

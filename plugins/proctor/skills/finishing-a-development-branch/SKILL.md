@@ -17,10 +17,10 @@ detected, and the human partner chooses the integration strategy.
 **Hook enforcement:** Proctor's git gate blocks merge commits without
 fresh passing test evidence. The gate runs at commit time — you cannot
 bypass it by claiming tests passed earlier. During SDD, Proctor also
-performs done-condition validation before finishing: all tasks must be
-marked complete in the ledger, no fix rounds may be open, and test
-evidence must be fresh and passing. If any condition fails, the hook
-blocks the finish and reports what's missing.
+performs done-condition validation: this skill's prompt carries the
+result — every task marked complete in the ledger, no fix round open,
+test evidence fresh and passing — with every ruling of the run. While a
+task is unmarked or a fix round is open, `git merge` is denied.
 
 ## When to Use
 
@@ -142,15 +142,16 @@ git merge --ff-only <branch-name>
 Proctor's git gate validates test evidence at the commit/merge point.
 If evidence is stale or missing, the gate blocks the operation.
 
-**SDD done-condition validation:** During SDD, Proctor checks before
-allowing the merge:
+**SDD done-condition validation:** During SDD, Proctor checks:
 - All tasks in the ledger are marked complete
 - No fix rounds are open (all resolved or adjudicated at cap)
 - Test evidence is fresh (within the configured staleness window)
 - All tests pass
 
-If any condition fails, the hook blocks and reports exactly which
-condition is unmet. Address the condition — do not bypass the hook.
+The result is in this skill's prompt, naming each unmet condition. The
+merge gate denies a merge while tasks or fix rounds are open, and the
+test gate while evidence is stale or failing. Address the condition —
+do not bypass the hook.
 
 ## Step 5: Clean Up
 

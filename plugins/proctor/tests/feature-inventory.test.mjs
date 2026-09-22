@@ -61,6 +61,8 @@ for (const gate of [
   "Proctor gate: NotebookEdit blocked — planning mode active",
   "Proctor gate: Bash write to",
   "has exhausted its",
+  "Proctor gate: the SDD run is not done — merge blocked",
+  "is past its fix-round cap",
 ])
   has(`gate: ${gate.replace("Proctor gate: ", "")}`, gate);
 
@@ -126,6 +128,17 @@ for (const [name, why] of [
   ["lineSwitchTarget", "a same-line switch onto a protected branch is judged there"],
   ["statusBlock", "the live state rides on each prompt's context"],
   ["drainNotes", "turn-end notes reach the model on the next prompt"],
+  ["absorbSignals", "the ledger, rewritten or repeated, counts each signal once, in order"],
+  ["ingestSignals", "a run reports itself mid-turn, in the ledger"],
+  ["startSDD", "invoking the SDD skill is the run starting"],
+  ["doneCheckIssues", "the finish conditions, shared by the skill, the answer and the merge"],
+  ["rulingAggregation", "the rulings reach the final message on the happy path"],
+  ["runDoneCheck", "a passing done-check settles a run that ended itself"],
+  ["pushTargets", "a push writes the branches its refspecs name, not only HEAD's"],
+  ["cellWidth", "the dashboard fits its box in cells, not UTF-16 units"],
+  ["withNotes", "mid-turn notes ride on the tool result"],
+  ["stripHeredocs", "a heredoc hides its body, not the commands after it"],
+  ["stagedPathspecs", "the secret scan reads what the line stages, not every stray file"],
 ])
   has(`helper: ${name} (${why})`, new RegExp(String.raw`function ${name}\b`));
 

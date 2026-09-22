@@ -13,8 +13,8 @@ Dispatch a code reviewer subagent to catch issues before they cascade.
 request is a review that found nothing — or a defect that shipped.
 
 **Hook enforcement:** Proctor's SDD hooks track review dispatch and
-fix-round counts. The fix-round cap (default 5) blocks further dispatch
-and forces adjudication. The git gate blocks commits without fresh,
+fix-round counts. Past the fix-round cap (default 5) any further
+dispatch is denied, forcing adjudication. The git gate blocks commits without fresh,
 passing test evidence, so the reviewer always sees tested code.
 
 ## When to Use

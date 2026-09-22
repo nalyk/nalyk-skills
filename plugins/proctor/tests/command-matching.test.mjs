@@ -20,6 +20,7 @@ const pick = (re, what) => {
 
 const fn = pick(/function commandSkeleton[\s\S]*?\n}\n/, "commandSkeleton");
 const unquotedFn = pick(/function unquotedSkeleton[\s\S]*?\n}\n/, "unquotedSkeleton");
+const heredocFn = pick(/function stripHeredocs[\s\S]*?\n}\n/, "stripHeredocs");
 const spansFn = pick(/function quotedSpans[\s\S]*?\n}\n/, "quotedSpans");
 const writeTargetsFn = pick(/function shellWriteTargets[\s\S]*?\n}\n/, "shellWriteTargets");
 const addedFn = pick(/function addedLines[\s\S]*?\n}\n/, "addedLines");
@@ -77,6 +78,7 @@ const {
     encodeURIComponent(
       fn.replace(/:\s*string/g, "") +
         `\n${unquotedFn.replace(/:\s*string/g, "")}` +
+        `\n${heredocFn.replace(/:\s*string/g, "")}` +
         `\n${spansFn.replace(/:\s*string/g, "").replace(/:\s*Array<\[number, number\]>/g, "").replace(/const spans[^=]*=/, "const spans =")}` +
         `\nconst WRITE_PATH = ${writePath};` +
         `\nconst DEV_SINK_RE = ${devSinkRe};` +

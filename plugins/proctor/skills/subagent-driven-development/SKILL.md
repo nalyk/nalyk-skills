@@ -15,14 +15,17 @@ for coordination.
 **Core principle:** Fresh subagent per task + task review (spec + quality)
 + broad final review = high quality, fast iteration.
 
-**Hook enforcement:** Proctor tracks your SDD state automatically. The
-progress dashboard above the prompt shows completion percentage, task
+**Hook enforcement:** Proctor starts tracking the run when this skill
+loads, sizes it from the plan's `### Task N` headings when you read the
+plan, and follows the ledger as you write it — the lines below are what
+it reads, so write them exactly. The progress dashboard above the prompt shows completion percentage, task
 count, agent count, fix rounds, step budget usage, and elapsed time.
 After compaction, the `[PROCTOR — SDD STATE]` block in your context
 shows the recovery point — which tasks are complete, which is current,
-and what rulings you made. The hooks enforce the fix-round cap, step
-budget (warning at 80%, forced adjudication at 100%), and nudge model
-selection. All transitions are traced to $.store for observability.
+and what rulings you made. The hooks refuse any dispatch past the
+fix-round cap, enforce the step and time budgets (a note on the tool
+result at 80%, a denial at 100%), block `git merge` while the run is
+unfinished, and nudge model selection. All transitions are traced to $.store for observability.
 
 **Narration:** between tool calls, narrate at most one short line.
 
@@ -43,7 +46,8 @@ Ensure work happens in an isolated workspace: use
 proctor:using-git-worktrees.
 
 Track progress in a ledger file (`progress.md` in the plan's workspace).
-The ledger is your recovery map. After compaction, trust the ledger and
+Its first line is `Plan: <plan path> — <N> tasks`. The ledger is your
+recovery map. After compaction, trust the ledger and
 `git log` over your own recollection. Proctor's store also tracks state,
 but the file ledger is the human-readable record.
 
@@ -97,19 +101,25 @@ package path, and the global constraints.
 
 Triggers when review reports spec failure, Critical or Important findings.
 
-- **Minor findings:** Record in ledger as deferred. Never enter the loop.
+- **Minor findings:** Record in ledger as `minor (deferred): <finding>`.
+  Never enter the loop.
 - **Plan-mandated conflicts:** Rule against the spec, ledger the ruling.
+
+Record each round in the ledger before dispatching it:
+`Task <N>: fix round <M> — approach: <what this round tries>`. Proctor
+keeps the approach as "DO NOT REDO" across compaction.
 
 Five rounds maximum:
 
 - **Rounds 1-3:** Resume the original implementer with open findings.
-- **Rounds 4-5:** Fresh implementer on a more capable model. Proctor's
-  hooks enforce this escalation.
+- **Rounds 4-5:** Fresh implementer on a more capable model. Proctor
+  flags a round 4-5 dispatch on the stuck implementer's model.
 
 Every round: implementer fixes → re-runs covering tests → scoped
 re-review.
 
-**The breaker (Proctor enforces the cap):** When round 5's re-review
+**The breaker (Proctor enforces the cap — a dispatch for round 6 is
+denied):** When round 5's re-review
 still has open findings, adjudicate each:
 - Contestable → park with ruling
 - Real but not load-bearing → park with ruling
@@ -120,7 +130,8 @@ still has open findings, adjudicate each:
 Append to ledger:
 `Task <N>: complete (commits <base7>..<head7>, review clean)`
 
-Mark todo complete. Move on.
+Mark todo complete. Move on. A task found mid-run gets its own line,
+`Task <N>: added`, and grows the run.
 
 ## Final Review
 
@@ -131,9 +142,9 @@ residuals. There is no second fix wave.
 ## Finish
 
 Collect every `Ruling:` line into your final message under "Rulings I
-made." Collect every deferred minor. Proctor's hooks aggregate these
-automatically — the `context` injection at session end lists them all.
-Verify the list is exhaustive.
+made." Collect every deferred minor. Proctor aggregates them the moment
+the last task is marked complete, and again in the finishing skill's
+prompt together with its done-check. Verify the list is exhaustive.
 
 Delete the plan's workspace. Use proctor:finishing-a-development-branch.
 

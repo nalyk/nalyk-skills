@@ -18,10 +18,10 @@ not independent — run them sequentially.
 **Hook enforcement:** Proctor tracks agent spawns via the `agent.spawn`
 hook. Each dispatch increments the agent counter visible in the SDD
 dashboard. The hook records the model each agent uses — spawning without
-an explicit model triggers a soft reminder about cost. During SDD, the
-dashboard's agent count and the fix-round cap interact: agents spawned
-for fix rounds count toward the cap, so a parallel burst of fix agents
-can exhaust rounds faster than expected.
+an explicit model triggers a soft reminder about cost. During SDD every
+spawn also spends one step of the current task's budget, and a dispatch
+past the fix-round cap (counted from the ledger's
+`Task N: fix round M` lines) is denied.
 
 ## When to Use
 

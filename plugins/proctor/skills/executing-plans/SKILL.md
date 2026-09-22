@@ -13,7 +13,8 @@ Gives up fresh context per task and per-task review. This skill
 compensates: the brief is the spec, the ledger is your memory, TDD is
 the per-task gate, the final reviewer is the second pair of eyes.
 
-**Hook enforcement:** Same as SDD — Proctor tracks task state, shows the
+**Hook enforcement:** Same as SDD — Proctor starts tracking when this
+skill loads, reads the ledger lines below as you write them, shows the
 progress dashboard (including step budget usage), enforces the git gate
 and step budget (warning at 80%, forced adjudication at 100%), and
 persists recovery state. The `[PROCTOR — SDD STATE]` block appears
@@ -30,7 +31,8 @@ prove each step with a test you watched fail and then pass, leave a record.
 ## Setup
 
 Use proctor:using-git-worktrees for isolation. Track progress in a
-ledger file. After compaction, trust the ledger and `git log` over your
+ledger file, `progress.md`, whose first line is
+`Plan: <plan path> — <N> tasks`. After compaction, trust the ledger and `git log` over your
 recollection.
 
 Load proctor:test-driven-development before Task 1 — it governs every
@@ -64,13 +66,14 @@ proctor:verification-before-completion governs the claim.
 
 ### 4. Complete the task
 
-Append to ledger, mark todo complete, take the next task.
+Append `Task <N>: complete (<evidence>)` to the ledger, mark the todo
+complete, take the next task.
 
 ## Final Review
 
 Dispatch on the most capable model using
 proctor:requesting-code-review. Sort findings: Critical/Important enter
-the fix pass. Minor goes to the ledger as deferred.
+the fix pass. Minor goes to the ledger as `minor (deferred): <finding>`.
 
 Fix Critical/Important yourself in ONE pass. Each fix verified by TDD.
 No second fix wave.

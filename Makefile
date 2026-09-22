@@ -3,6 +3,11 @@
 # caught here rather than in a session, then run the unit tests plugins
 # ship alongside their hooks, and the engine tests (`*.test.ts`, run by
 # `claude plugin test` against the real engine rather than a fake).
+#
+# tests/proctor-configured is Proctor loaded with every userConfig option
+# set away from its default. The engine refuses a hooks module or test
+# import from outside a plugin's folder, symlinks included, so the module
+# and the test world are copied in fresh and compared byte for byte.
 
 PLUGINS := $(sort $(patsubst %/.claude-plugin/plugin.json,%,$(wildcard plugins/*/.claude-plugin/plugin.json)))
 UNIT_TESTS := $(sort $(wildcard plugins/*/tests/*.test.mjs))
@@ -37,4 +42,16 @@ test:
 			fail=1; \
 		fi; \
 	done; \
+	cfg=tests/proctor-configured; \
+	cp plugins/proctor/hooks/proctor.tsx $$cfg/hooks/proctor.tsx; \
+	cp plugins/proctor/tests/engine/world.ts $$cfg/engine/world.ts; \
+	if ! cmp -s plugins/proctor/hooks/proctor.tsx $$cfg/hooks/proctor.tsx; then \
+		echo "FAIL  $$cfg (stale copy of proctor.tsx)"; fail=1; \
+	elif claude plugin test $$cfg > $$cfg/engine/.last-run.log 2>&1; then \
+		echo "ok    $$cfg (engine: $$(grep -oE '^ *[0-9]+ pass' $$cfg/engine/.last-run.log | tr -s ' ' | sed 's/^ //'))"; \
+	else \
+		echo "FAIL  $$cfg (engine)"; \
+		grep -E '^\(fail\)|Error|Expected|Received' $$cfg/engine/.last-run.log | sed 's/^/        /'; \
+		fail=1; \
+	fi; \
 	exit $$fail

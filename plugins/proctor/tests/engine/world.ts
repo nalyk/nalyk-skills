@@ -27,8 +27,10 @@ export type World = {
   logText: () => string;
   /** The plugin's store, as the engine keeps it: key to stored value. */
   store: Map<string, unknown>;
-  /** This project's record under a per-project key. */
-  shelf: (key: string) => any;
+  /** The session's cwd, as `$.session.cwd()` answers it; tests move it. */
+  cwd: string;
+  /** This project's record under a per-project key (another's by root). */
+  shelf: (key: string, root?: string) => any;
   /** Rewrite this project's record under a per-project key. */
   reshelve: (key: string, fn: (value: any) => any) => void;
   /** What `$.model.fork` answers; null (an API error) when unset. */
@@ -45,10 +47,11 @@ export function world($: any, on: any, opts: {
 } = {}): World {
   const w: World = {
     store: new Map(Object.entries(opts.store ?? {})),
-    shelf: (key) => {
+    cwd: ROOT,
+    shelf: (key, root = ROOT) => {
       const raw = w.store.get(key);
       if (typeof raw !== "string") return null;
-      return JSON.parse(raw)?.[ROOT]?.value ?? null;
+      return JSON.parse(raw)?.[root]?.value ?? null;
     },
     reshelve: (key, fn) => {
       const raw = w.store.get(key);
@@ -78,7 +81,7 @@ export function world($: any, on: any, opts: {
     },
     bash: () => ({ ok: "" }),
     start: async () => {
-      await $.session.start({ cwd: ROOT, surface: null, isInteractive: false });
+      await $.session.start({ cwd: w.cwd, surface: null, isInteractive: false });
     },
     sh: (command, extra = {}) => $.tool.call({ tool: "Bash", command, ...extra }),
     write: (tool, path) =>
@@ -133,7 +136,7 @@ export function world($: any, on: any, opts: {
     if (k === undefined) throw new Error(`ENOENT ${e.path}`);
     return { value: w.files[k] };
   });
-  on("session.cwd", async () => ({ value: ROOT }));
+  on("session.cwd", async () => ({ value: w.cwd }));
   on("session.model", async () => ({ value: "claude-opus-5" }));
   on("ui.log", async (_$: any, e: any) => {
     w.logs.push(String(e.text ?? e.message ?? JSON.stringify(e)));

@@ -1,8 +1,8 @@
 {
   "name": "proctor",
   "displayName": "Proctor",
-  "description": "Hook-enforced development discipline for Claude Code. Skills teach methodology; hooks enforce compliance mechanically (git gates, planning mode, step budgets, quiet mode, pre-flight checks, self-diagnosis, autonomy metrics); store + tracing survive compaction.",
-  "version": "3.0.0",
+  "description": "Test fixture: Proctor loaded with every userConfig option set away from its default.",
+  "version": "2.9.0",
   "author": {
     "name": "nalyk"
   },
@@ -45,10 +45,8 @@
       "title": "Protected branches",
       "description": "Branch names protected from destructive git operations (commit, push, merge, rebase, reset)",
       "default": [
-        "main",
-        "master",
-        "production",
-        "release"
+        "trunk",
+        "prod"
       ],
       "multiple": true
     },
@@ -56,14 +54,17 @@
       "type": "string",
       "title": "Executable doc patterns",
       "description": "Globs for prose-shaped files that are really behaviour (runbooks a tool runs, agent instructions, fixtures). The commit gate keeps enforcing on these instead of treating them as inert prose.",
-      "default": [],
+      "default": [
+        "handbook/**",
+        "*.run.md"
+      ],
       "multiple": true
     },
     "testFreshnessMinutes": {
       "type": "number",
       "title": "Test freshness (minutes)",
       "description": "How many minutes before test evidence expires and the git gate blocks commits",
-      "default": 5,
+      "default": 2,
       "min": 1,
       "max": 60
     },
@@ -71,7 +72,7 @@
       "type": "number",
       "title": "Skill watchdog threshold",
       "description": "Number of consecutive turns without a skill invocation before the watchdog fires a reminder",
-      "default": 4,
+      "default": 2,
       "min": 2,
       "max": 20
     },
@@ -79,7 +80,7 @@
       "type": "number",
       "title": "Fix-round cap",
       "description": "Maximum fix-loop rounds in SDD before the hook forces adjudication instead of another dispatch",
-      "default": 5,
+      "default": 3,
       "min": 2,
       "max": 15
     },
@@ -87,7 +88,7 @@
       "type": "number",
       "title": "Step budget per task",
       "description": "Maximum tool calls allowed per SDD task before forcing adjudication. Warns at 80%, blocks at 100%.",
-      "default": 100,
+      "default": 20,
       "min": 20,
       "max": 500
     },
@@ -95,7 +96,7 @@
       "type": "number",
       "title": "Time budget per task (minutes)",
       "description": "Wall-clock time limit per SDD task before forcing adjudication. Warns at 80%, blocks at 100%.",
-      "default": 30,
+      "default": 5,
       "min": 5,
       "max": 120
     }
