@@ -1,6 +1,6 @@
 # nalyk-skills
 
-Personal Claude Code plugin marketplace. 9 plugins covering automation, orchestration, code review, debugging, multi-model debate, SEO analysis, philosophical reasoning, and hook-enforced development discipline.
+Personal Claude Code plugin marketplace. 10 plugins covering automation, orchestration, code review, debugging, multi-model debate, SEO analysis, philosophical reasoning, hook-enforced development discipline, and a live tracker for obra/superpowers.
 
 ## Installation
 
@@ -252,6 +252,36 @@ Hook-enforced development discipline for Claude Code. Skills teach methodology; 
 **Configuration (6 options):** Protected branches, test freshness window, skill watchdog threshold, fix-round cap, step budget per task, time budget per task — all configurable via the plugin settings UI.
 
 Without `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1`, the skills still work as prose guidance but hooks do not fire.
+
+---
+
+### superpowers-tracker (v0.1.0)
+
+A live tracker for [obra/superpowers](https://github.com/obra/superpowers) inside Claude Code: a stage rail in the band above the prompt (brainstorm → spec → plan → execute → review → finish), a seven-tab dashboard pane, toasts when work lands, and resume detection for unfinished plans. An observer first: by default it never blocks, rewrites or delays anything, and never writes inside superpowers' own folders.
+
+```bash
+/plugin install superpowers-tracker@nalyk-skills --scope user
+```
+
+Install it at user scope: it stays dormant in projects that don't use superpowers and fires on its own where they do.
+
+**Requirements:** Claude Code with mods (function hooks), built and tested on 2.1.289. Built against superpowers 6.4.2; every superpowers format it reads lives in `hooks/patterns.ts`.
+
+**What it shows:**
+
+| Surface | Content |
+|---------|---------|
+| Band | Brand capsule, path tag (`ARCH`/`BOUNDED`/`SPIKE`), the arc rail with a sub-cell progress bar, ⚖ rulings / ⌁ agents / ⚠ warnings pills; a second row with the running subagent, fix-round pips, elapsed time, the TDD trail and a context sparkline |
+| Pane (`/sp`) | Flow (subway map), Plan (tasks + Gantt strip), Agents (swimlanes), Ledger (rulings, parked findings, deferred minors), Tests (RED→GREEN), Workspace, Warnings |
+| Resume | On every start it scans this checkout and all git worktrees for plans in progress, plans not executed, specs without a plan, a running visual companion, and ledgers still moving in another session; offers the resume text as ghost text and fills it on `r` (never submits) |
+
+**Modes:** `observe` (default, records only), `assist` (adds a ≤ 3-line ledger note after compaction or a re-dispatch), `strict` (also denies re-dispatching a completed task, parallel implementers, SDD subagents with no model, and source writes before brainstorming approval).
+
+**Commands:** `/sp [1-7]`, `/sp status`, `/sp ledger`, `/sp export`, `/sp ack`, `/sp mode`, `/sp band`, `/sp config`, `/sp reset`, `/sp resume [n]`, `/sp dismiss [n] [--forget]`, `/sp scan`, `/sp demo`, `/sp theme`, `/sp diagnose`.
+
+**Design:** one hue per stage, blended in OKLCH; every text token at ≥ 4.5:1 in dark, light and daltonized themes; single-width glyphs only; motion only while work runs, none when idle or under `NO_COLOR`. Desktop gets an interactive SVG rail; VS Code and mobile a Box/Text version.
+
+61 engine tests (`claude plugin test`), run by `make test`.
 
 ---
 

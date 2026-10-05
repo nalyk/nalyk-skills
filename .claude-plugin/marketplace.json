@@ -157,6 +157,24 @@
         "branch-protection"
       ],
       "category": "productivity"
+    },
+    {
+      "name": "superpowers-tracker",
+      "source": "./plugins/superpowers-tracker",
+      "description": "Live tracker for obra/superpowers: a stage rail above the prompt, a seven-tab dashboard pane, resume detection for unfinished plans across worktrees, toasts, and opt-in assist/strict guards. Observer by default.",
+      "version": "0.1.0",
+      "keywords": [
+        "superpowers",
+        "mod",
+        "function-hooks",
+        "tracker",
+        "dashboard",
+        "sdd",
+        "tdd",
+        "resume",
+        "ui"
+      ],
+      "category": "ui"
     }
   ]
 }

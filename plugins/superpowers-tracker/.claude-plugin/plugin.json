@@ -1,0 +1,20 @@
+{
+  "name": "superpowers-tracker",
+  "version": "0.1.0",
+  "description": "Live tracker for obra/superpowers: a stage rail above the prompt, a dashboard pane, resume detection, toasts and optional guards.",
+  "author": {
+    "name": "nalyk"
+  },
+  "homepage": "https://github.com/nalyk/nalyk-skills",
+  "repository": "https://github.com/nalyk/nalyk-skills",
+  "license": "MIT",
+  "types": "./types/index.d.ts",
+  "keywords": [
+    "superpowers",
+    "mod",
+    "tracker",
+    "sdd",
+    "tdd",
+    "workflow"
+  ]
+}
