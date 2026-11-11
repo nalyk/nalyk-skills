@@ -210,7 +210,7 @@ Auto-configures via `SessionStart` hook only when no statusLine is set; never ov
 
 ---
 
-### proctor (v2.7.0)
+### proctor (v3.0.0)
 
 Hook-enforced development discipline for Claude Code. Skills teach methodology; hooks enforce compliance mechanically (git gates, planning mode, step/time budgets, quiet mode, pre-flight checks, self-diagnosis, autonomy metrics); store + tracing survive compaction.
 
@@ -249,7 +249,7 @@ Hook-enforced development discipline for Claude Code. Skills teach methodology; 
 
 **Observability:** Structured event tracing, cross-session quality metrics, phase lifecycle tracking, real-time SDD progress dashboard.
 
-**Configuration (6 options):** Protected branches, test freshness window, skill watchdog threshold, fix-round cap, step budget per task, time budget per task — all configurable via the plugin settings UI.
+**Configuration (7 options):** Protected branches, executable doc patterns, test freshness window, skill watchdog threshold, fix-round cap, step budget per task, time budget per task — all configurable via the plugin settings UI.
 
 Without `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1`, the skills still work as prose guidance but hooks do not fire.
 
