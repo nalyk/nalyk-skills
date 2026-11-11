@@ -7,6 +7,9 @@ import type { MockClock } from 'claude-code/testing'
 import type { On, RenderElement } from 'claude-code'
 import { ROOT } from './fixtures/superpowers'
 
+/** Tests that drive a whole session: the default 5 s is short on a busy machine. */
+export const SLOW = { timeoutMs: 30_000 } as const
+
 export type Files = Record<string, string>
 
 export type WorldOptions = {
@@ -25,6 +28,11 @@ export type WorldOptions = {
   listDelayMs?: number
   unplacedReason?: string
   onRead?: (path: string) => void
+  /** Holds $.store and $.state in the world itself, so a test can read the
+   *  store and end the process (`restart`) the way a crash does. */
+  durable?: boolean
+  sessionId?: string
+  cwd?: string
 }
 
 export type Recorder = {
@@ -39,6 +47,12 @@ export type Recorder = {
   status: (string | undefined)[]
   opened: string[]
   messages: unknown[]
+  /** The plugin's $.store, when the world is durable. */
+  store: Record<string, unknown>
+  /** The id `$.session.id()` answers; a test changes it to switch sessions. */
+  sessionId: string
+  /** A process restart: every $.state value is gone, the store stays. */
+  restart: () => void
   settle: (rounds?: number) => Promise<void>
 }
 
@@ -47,7 +61,26 @@ const ENGINE_TREE: RenderElement = { type: 'Text', children: ['ENGINE'] }
 export const world = (on: On, o: WorldOptions = {}): Recorder => {
   const now = o.now ?? 1_760_000_000_000
   const clock = mock.clock(on, { now })
-  mock.store(on, o.store ?? {})
+  const store: Record<string, unknown> = { ...(o.store ?? {}) }
+  const state = new Map<string, { value: unknown; version: number }>()
+  if (o.durable) {
+    const clone = <T>(v: T): T => (v === undefined ? v : (JSON.parse(JSON.stringify(v)) as T))
+    on('store.get', (_$, e) => ({ value: clone(store[e.key]) }))
+    on('store.set', (_$, e) => ((store[e.key] = clone(e.value)), { value: undefined }))
+    on('store.delete', (_$, e) => (delete store[e.key], { value: undefined }))
+    on('store.keys', () => ({ value: Object.keys(store) }))
+    const at = (e: { plugin: string; key: string; id?: string }) => `${e.plugin}/${e.key}/${e.id ?? ''}`
+    on('state.get', (_$, e) => ({ value: (state.get(at(e as never)) ?? { value: undefined, version: 0 }) as never }))
+    on('state.set', (_$, e) => {
+      const w = e as unknown as { plugin: string; key: string; id?: string; value: unknown; ifVersion?: number }
+      const cur = state.get(at(w)) ?? { value: undefined, version: 0 }
+      if (w.ifVersion !== undefined && w.ifVersion !== cur.version) return { value: { isSet: false as const, version: cur.version } }
+      state.set(at(w), { value: w.value, version: cur.version + 1 })
+      return { value: { isSet: true as const, version: cur.version + 1 } }
+    })
+  } else {
+    mock.store(on, store)
+  }
   mock.env(on, { HOME: '/home/t' })
   const files: Files = { ...(o.files ?? {}) }
   const mtimes: Record<string, number> = { ...(o.mtimes ?? {}) }
@@ -63,6 +96,9 @@ export const world = (on: On, o: WorldOptions = {}): Recorder => {
     status: [],
     opened: [],
     messages: o.messages ?? [],
+    store,
+    sessionId: o.sessionId ?? 'sess-1',
+    restart: () => state.clear(),
     settle: async (rounds = 12) => {
       for (let i = 0; i < rounds; i += 1) await clock.settle()
     },
@@ -116,9 +152,9 @@ export const world = (on: On, o: WorldOptions = {}): Recorder => {
   // The session.
   on('settings.read', () => ({ value: o.installed ? { enabledPlugins: { 'superpowers@superpowers-marketplace': true } } : {} }))
   on('session.messages', () => ({ value: r.messages as never }))
-  on('session.cwd', () => ({ value: ROOT }))
+  on('session.cwd', () => ({ value: o.cwd ?? ROOT }))
   on('session.root', () => ({ value: ROOT }))
-  on('session.id', () => ({ value: 'sess-1' }))
+  on('session.id', () => ({ value: r.sessionId }))
   on('session.surfaces', () => ({ value: ['terminal' as const] }))
   on('session.usage', () => ({ value: { startedAt: now, context: { window: 200_000, tokens: 40_000, percent: 20 }, rateLimits: [], cost: { usd: 0.5 } } }))
   on('config.list', () => ({ value: [] }))
@@ -158,8 +194,9 @@ export const world = (on: On, o: WorldOptions = {}): Recorder => {
 }
 
 /** The AbovePrompt props a terminal band gets at a width. */
-export const bandProps = (bodyColumns: number, extra: { isWorking?: boolean; hasSurvey?: boolean } = {}) => ({
+export const bandProps = (bodyColumns: number, extra: { isWorking?: boolean; hasSurvey?: boolean; isCollapsed?: boolean } = {}) => ({
   hasSurvey: extra.hasSurvey ?? false,
+  isCollapsed: extra.isCollapsed ?? false,
   isWorking: extra.isWorking ?? false,
   maxRows: 12,
   bodyColumns,

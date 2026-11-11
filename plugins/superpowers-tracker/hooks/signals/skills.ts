@@ -7,6 +7,7 @@ import type { SkillName } from '../patterns'
 import { CAP, capTail } from '../state'
 import { stageForSkill, goLive, advance } from '../stages'
 import { note } from '../core'
+import { archiveAndRestart } from './plan'
 
 export type SkillContext = { agentId?: string; args?: string; via: SkillHit['via'] }
 
@@ -36,6 +37,14 @@ export const onSkill = async (io: Io, skill: SkillName, ctx: SkillContext): Prom
   if (!isNew) return false
 
   const isMain = ctx.agentId === undefined
+  // Brainstorming again once a plan is through (every task done, or past
+  // review) is new work: the finished plan is filed and the rail starts over.
+  if (isMain && skill === 'brainstorming' && !run.spectator) {
+    const through = run.tasks.length > 0 && run.tasks.every(t => t.status === 'done' || t.status === 'parked')
+    if (run.lifecycle === 'shipped' || (run.planPath && (through || run.stage === 'review' || run.stage === 'finish'))) {
+      await archiveAndRestart(io, 'brainstorm', ctx.via === 'replay')
+    }
+  }
   await io.state.run.set(r => {
     let next = goLive(r, now)
     if (!isMain) return next
@@ -43,7 +52,12 @@ export const onSkill = async (io: Io, skill: SkillName, ctx: SkillContext): Prom
     if (stage) next = advance(next, stage, now)
     switch (skill) {
       case 'brainstorming':
-        next = { ...next, brainstormActive: true, approvalSeen: false, pathInferred: true, boundedDesignShown: false }
+        // A brainstorm starts with no size, no design shown and no design doc
+        // of its own: the last one's must not count as this one's approval.
+        {
+          const { path: _p, specPath: _s, ...rest } = next
+          next = { ...rest, brainstormActive: true, approvalSeen: false, pathInferred: true, boundedDesignShown: false, specCommitted: false }
+        }
         break
       case 'writing-plans':
         // Architectural approval: the written spec was approved and writing-plans invoked.

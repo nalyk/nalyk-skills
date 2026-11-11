@@ -2,7 +2,7 @@
 
 import type { Agent, Role } from '../../types'
 import type { Io } from '../io'
-import { tierOf } from '../patterns'
+import { BUILDER_CLEAN, IMPLEMENT_TASK, tierOf } from '../patterns'
 import {
   classifyRole,
   fixRoundOf,
@@ -16,6 +16,7 @@ import { CAP, capTail } from '../state'
 import { advance, goLive } from '../stages'
 import { fmtDuration, note, patchTask, warn, type Toaster } from '../core'
 import { guardSpawn, isSddRole, ledgerDone } from '../modes'
+import { ledgerFor } from './plan'
 
 export type SpawnInput = {
   tool_use_id: string
@@ -43,7 +44,12 @@ export const roleLabel = (r: Role): string => ROLE_LABEL[r]
 
 /** Before the spawn runs: role, warnings, and a strict-mode denial. */
 export const assessSpawn = async (io: Io, toast: Toaster, e: SpawnInput, replay = false): Promise<SpawnAssessment> => {
-  const role = classifyRole(e.description, e.prompt)
+  const run0 = await io.state.run.get()
+  // "Fix …" / "Address …" names SDD's fix subagent only while a plan is
+  // being executed or reviewed; anywhere else it is anyone's subagent.
+  const executing = run0.lifecycle === 'live' && run0.planPath !== undefined && (run0.stage === 'execute' || run0.stage === 'review')
+  const named = classifyRole(e.description, e.prompt)
+  const role: Role = named === 'implementer' && !executing && !IMPLEMENT_TASK.test(e.description) && !IMPLEMENT_TASK.test(e.prompt.slice(0, 4000)) ? 'other' : named
   const task = taskOf(e.description, role === 'other' ? '' : e.prompt)
   const shaped = role !== 'other'
   if (!shaped) return { role, ...(task !== undefined ? { task } : {}), shaped }
@@ -55,7 +61,7 @@ export const assessSpawn = async (io: Io, toast: Toaster, e: SpawnInput, replay 
     io.state.settings.get(),
     io.state.env.get(),
   ])
-  const done = ledgerDone(ledger)
+  const done = ledgerDone(ledgerFor(run, ledger))
   const running = agents.filter(a => a.role === 'implementer' && a.status === 'running')
   const parent = e.parentAgentId ? agents.find(a => a.agentId === e.parentAgentId) : undefined
   const modelOmitted = e.model === undefined || e.model === ''
@@ -128,6 +134,7 @@ export const recordSpawn = async (
     let next = goLive(r, now)
     if (a.role === 'implementer' || a.role === 'task-reviewer' || a.role === 're-reviewer') next = advance(next, 'execute', now)
     if (a.role === 'final-reviewer') next = advance(next, 'review', now)
+    if (a.role === 'spec-reviewer' && next.brainstormActive) next = advance(next, 'spec', now, next.specPath === undefined)
     if (a.role === 'implementer' && a.task !== undefined) next = { ...next, currentTask: a.task }
     return next
   })
@@ -204,6 +211,9 @@ export const onAgentDone = async (io: Io, toast: Toaster, agentId: string, answe
       if (!replay) toast(r.ready === 'Yes' ? '●' : '◐', 'Final review', `${verdict} · ${summary}`)
       break
     }
+    case 'spec-reviewer':
+      verdict = BUILDER_CLEAN.test(answer) ? 'nothing important left' : 'questions for the design'
+      break
     default:
       break
   }

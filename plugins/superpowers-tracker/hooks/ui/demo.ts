@@ -162,7 +162,7 @@ export const demoWorld = (elapsed: number, start: number, mode: World['settings'
     ledger: { path: `${run.workspace}/progress.md`, mtime: now, size: 1, entries, unknown: [], readAt: now },
     tests: tasks.flatMap(x => x.tdd.map(d => ({ at: d.at, command: `npm test -- task${x.n}`, ok: d.ok, ref: `demo-${x.n}-${d.at}`, task: x.n }))),
     warnings,
-    env: { ...FRESH_ENV, pluginVersion: '6.4.2', installed: true, branch: 'feature/retry-policy', isLinkedWorktree: true, repoRoot: '/repo', context: [12, 18, 24, 31, 38, 44, 52, 58].slice(0, 1 + Math.floor(t / 7500)), bootstrap: [{ at: start, ok: true, why: 'startup' }], costUsd: t / 20_000 },
+    env: { ...FRESH_ENV, pluginVersion: '7.0.2', installed: true, branch: 'feature/retry-policy', isLinkedWorktree: true, repoRoot: '/repo', context: [12, 18, 24, 31, 38, 44, 52, 58].slice(0, 1 + Math.floor(t / 7500)), bootstrap: [{ at: start, ok: true, why: 'startup' }], costUsd: t / 20_000 },
     ui: FRESH_UI,
     resume: FRESH_RESUME,
     settings: { ...DEFAULT_SETTINGS, mode },

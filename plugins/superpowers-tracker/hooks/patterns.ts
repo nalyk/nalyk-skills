@@ -1,8 +1,9 @@
 // Every pattern the tracker depends on in obra/superpowers, in one place.
-// Built against superpowers 6.4.2 (commit 8ca22db). A new superpowers
+// Built against superpowers 7.0.2, and still reading what 6.4 wrote: a
+// pattern that changed between them accepts both forms. A new superpowers
 // release that changes a format means editing this file alone.
 
-export const BUILT_AGAINST = '6.4.2'
+export const BUILT_AGAINST = '7.0.2'
 
 export const SKILLS = [
   'using-superpowers',
@@ -25,11 +26,15 @@ export type SkillName = (typeof SKILLS)[number]
 
 const SKILL_SET: ReadonlySet<string> = new Set(SKILLS)
 
-/** `superpowers:brainstorming` → `brainstorming`; undefined for a skill not ours. */
+/** `superpowers:brainstorming` → `brainstorming`; undefined for a skill not
+ *  ours. Another plugin's skill of the same name (`proctor:brainstorming`)
+ *  is not superpowers; a bare name is taken as ours. */
 export const normalizeSkill = (raw: string | undefined): SkillName | undefined => {
   if (!raw) return undefined
   const bare = raw.trim().replace(/^\//, '').split(/\s+/)[0] ?? ''
-  const name = bare.includes(':') ? bare.slice(bare.lastIndexOf(':') + 1) : bare
+  const cut = bare.lastIndexOf(':')
+  if (cut >= 0 && !/^superpowers(?:[-@][^:]*)?$/.test(bare.slice(0, cut))) return undefined
+  const name = cut >= 0 ? bare.slice(cut + 1) : bare
   return SKILL_SET.has(name) ? (name as SkillName) : undefined
 }
 
@@ -39,17 +44,35 @@ export const SKILL_FILE = /superpowers[^\s]*\/skills\/([a-z-]+)\/SKILL\.md$/
 // Bootstrap: hooks/session-start wraps using-superpowers in this block.
 export const BOOTSTRAP = /<EXTREMELY_IMPORTANT>\s*You have superpowers\./
 
-// Brainstorming path announcement ("this looks bounded, so I'll ...").
+// The size brainstorming announces. 6.x said "this looks bounded /
+// architectural / a spike"; 7.x says it in plain words: "a quick, clear
+// task", "a small change", "a project" (with a written design). The three
+// path names stay: spike = quick task, bounded = small change,
+// architectural = project.
+// "a project" needs its article and nothing between ("a TypeScript
+// project", "the project root" say nothing of size).
+const SAYS = String.raw`\b(?:this|it|that)(?:'s|\s+(?:looks|is|seems|reads|feels))\s+(?:to be\s+|like\s+)?(?:really\s+|just\s+)?`
 export const PATH_ANNOUNCE: readonly [RegExp, 'spike' | 'bounded' | 'architectural'][] = [
-  [/\b(?:this|it)\s+(?:looks|is|seems|reads)\s+(?:like\s+)?(?:an?\s+)?architectural\b/i, 'architectural'],
-  [/\b(?:this|it)\s+(?:looks|is|seems|reads)\s+(?:like\s+)?(?:a\s+)?bounded\b/i, 'bounded'],
-  [/\b(?:this|it)\s+(?:looks|is|seems|reads)\s+(?:like\s+)?(?:a\s+)?spike\b/i, 'spike'],
+  [new RegExp(`${SAYS}(?:(?:an?\\s+)?architectural\\b|a\\s+(?:(?:real|full|proper|big(?:ger)?|larger?|whole)\\s+)?project\\b)`, 'i'), 'architectural'],
+  [/\b(?:full|whole)\s+written design\b|\bI(?:'ll| will)\s+write\s+(?:it|this|that)\s+up\s+as\s+a\s+(?:full\s+)?design\b/i, 'architectural'],
+  [new RegExp(`${SAYS}(?:(?:a\\s+)?bounded\\b|a\\s+small(?:ish)?\\s+change\\b)`, 'i'), 'bounded'],
+  [/\ba\s+short\s+design\s+doc(?:ument)?\b/i, 'bounded'],
+  [new RegExp(`${SAYS}(?:(?:a\\s+)?spike\\b|a\\s+quick,?\\s+(?:and\\s+)?clear\\s+task\\b)`, 'i'), 'spike'],
   [/\b(?:classif(?:y|ied|ying)\s+(?:this|it)\s+as|taking the)\s+(architectural|bounded|spike)\b/i, 'architectural'],
 ]
 
+// The design put in front of the person (6.x: in chat; 7.x: played back, ending "what's wrong or missing").
+export const DESIGN_SHOWN = /design|approach|files? touched|I'?d change|what(?:'s| is) (?:wrong|missing)|anything (?:wrong|missing)/i
+// The person opting out of the questions: the skill is done and its gate goes with it.
+// Only words that name the questions, or a bare "just build it" that ends
+// the sentence: "just make sure…" and "no questions on that, but…" are answers.
+export const OPT_OUT = /\bskip (?:the |all (?:the )?|your )?questions\b|\bno more questions\b|\bdon'?t ask (?:me )?(?:any(?: more)?|more) questions\b|\bjust (?:(?:build|do|ship|make|implement|write) it|start(?: (?:building|coding|implementing))?|go ahead)\s*(?:[.!]|$)/i
+
 // Artifacts.
+// A design doc: any Markdown file in the spec folder. The dated
+// `-design.md` name is the default, and the person's own naming overrides it.
 export const specFile = (specDir: string): RegExp =>
-  new RegExp(`(^|/)${escape(specDir)}/(\\d{4}-\\d{2}-\\d{2}-[^/]+-design\\.md)$`)
+  new RegExp(`(^|/)${escape(specDir)}/([^/]+\\.md)$`)
 export const planFile = (planDir: string): RegExp =>
   new RegExp(`(^|/)${escape(planDir)}/([^/]+\\.md)$`)
 export const SUPERPOWERS_DOCS = /(^|\/)docs\/superpowers\//
@@ -60,7 +83,12 @@ export const SP_PRIVATE = /(^|\/)\.superpowers\//
 export const WORKSPACE_DIR = /(\/[^\s'"]*\/\.superpowers\/sdd\/[^/\s'"]+)/
 export const LEDGER_NAME = 'progress.md'
 export const SCRIPT = /\b(sdd-workspace|task-brief|review-package|task-start|task-done)\b/
-export const SCRIPT_ARGS = /\b(sdd-workspace|task-brief|review-package|task-start|task-done)\s+("[^"]+"|'[^']+'|\S+)(?:\s+(\d+))?(?:\s+([0-9a-f]{7,40}))?/
+// A script actually run: its name ends a path through a `scripts/` folder
+// (`scripts/task-brief`, `"$SP/skills/…/scripts/task-done"`) or a folder
+// held in a variable (`S=…/scripts && bash $S/review-package`), never a
+// bare word in a grep or an echo, nor the tail of a URL. The second group
+// is the rest of that one command, up to `;`, `&`, `|`, `)`.
+export const SCRIPT_CALL = /(?:^|[\s;&|(`"'=])(?![^\s;&|()`'"=]*:\/\/)[^\s;&|()`'"=]*(?:\bscripts|\$\{?[A-Za-z_][A-Za-z0-9_]*\}?)\/(sdd-workspace|task-brief|review-package|task-start|task-done)["']?(?=\s|$|[;&|)])([^\n;&|)]*)/
 export const OUT_TASK_BRIEF = /^wrote (.+\/task-(\d+)-brief\.md): \d+ lines$/m
 export const OUT_REVIEW_PKG = /^wrote (.+\/review-([0-9a-f]+)\.\.([0-9a-f]+)\.diff): (\d+) commit\(s\)/m
 export const OUT_TASK_START_BRIEF = /^brief: (.+)$/m
@@ -71,10 +99,13 @@ export const TASK_REPORT = /\/task-(\d+)-report\.md/
 
 // Plan structure. task-brief accepts any heading depth: /^#+[ \t]+Task[ \t]+N/.
 export const FENCE = /^(```|~~~)/
-export const TASK_HEADING = /^#+[ \t]+Task[ \t]+(\d+)\s*[:.\-–—]?\s*(.*)$/
+// 7.0.2's task-brief also takes IDs like 6b or 2.1; the tracker counts
+// whole-number tasks, and leaves such a heading alone rather than read
+// "Task 6b" as Task 6.
+export const TASK_HEADING = /^#+[ \t]+Task[ \t]+(\d+)(?![\w.]*[A-Za-z0-9])\s*[:.\-–—]?\s*(.*)$/
 export const PLAN_TITLE = /^#\s+(.+?)\s*$/
 export const PLAN_GOAL = /^\*\*Goal:\*\*\s*(.+)$/
-export const PLAN_SPEC = /^\*\*Spec:\*\*\s*`?([^`]+?)`?\s*$/
+export const PLAN_SPEC = /^\*\*Spec:\*\*.*?([\w@~./-]+\.md)\b/
 export const REVIEW_FOCUS = /^##\s+Review Focus\b/
 export const STEP_OPEN = /^\s*[-*]\s+\[ \]/
 export const STEP_DONE = /^\s*[-*]\s+\[[xX]\]/
@@ -84,13 +115,17 @@ export const L = {
   title: /^#\s*SDD ledger\s*[—–-]\s*plan:\s*(.+)$/,
   preflight: /^Pre-flight:\s*(.+)$/,
   table: /^\|.*\|\s*$/,
-  complete: /^Task\s+(\d+):\s*complete\s*\((?:commits\s+)?([0-9a-f]{4,40}\.\.[0-9a-f]{4,40})?,?\s*(.*)\)\s*$/,
+  // The scripts write `(commits a..b, review clean)`; a controller writing
+  // the line by hand lists hashes, or leaves the parentheses out.
+  complete: /^Task\s+(\d+):\s*complete\b\s*(?:\((?:commits\s+)?([0-9a-f]{4,40}\.\.[0-9a-f]{4,40})?,?\s*(.*)\))?\s*$/,
   fixRound: /^Task\s+(\d+):\s*fix round\s+(\d+)\s*\/\s*5\s*\((\d+)\s+addressed,\s*(\d+)\s+open(.*)\)\s*$/,
-  minor: /^Task\s+(\d+):\s*minor \(deferred\):\s*(.+)$/,
+  minor: /^Task\s+(\d+):\s*minor \(deferred\):\s*(.+)$/i,
+  // Written under its task with no `Task N:` of its own.
+  bareMinor: /^minor \(deferred\):\s*(.+)$/i,
   parked: /^Task\s+(\d+):\s*parked\s*[—–-]\s*(.+)$/,
   taskRuling: /^Task\s+(\d+):\s*Ruling:\s*(.+)$/,
   ruling: /^Ruling:\s*(.+)$/,
-  finalMinor: /^Final:\s*minor \(deferred\):\s*(.+)$/,
+  finalMinor: /^Final:\s*minor \(deferred\):\s*(.+)$/i,
   finalFixed: /^Final:\s*fixed\s+(.+)$/,
   finalRuling: /^Final:\s*Ruling:\s*(.+)$/,
   finalReview: /^Final review:\s*(.+)$/,
@@ -101,12 +136,17 @@ export const ROLE: readonly [RegExp, 'implementer' | 'task-reviewer' | 're-revie
   [/^Re-review\b|scoped re-review|re-reviewing one task's fix round/i, 're-reviewer'],
   [/^Review Task\s+\d+|reviewing one task's implementation/i, 'task-reviewer'],
   [/^Implement Task\s+\d+|You are implementing Task\s+\d+/i, 'implementer'],
-  [/whole[- ]branch|final (?:code )?review|Senior Code Reviewer|^Review code changes/i, 'final-reviewer'],
-  [/analyst-common|skill-timeline|plan-adherence|repeated-work|quality-evidence|cost-and-time|request-conflicts|diagnosing-superpowers/i, 'analyst'],
-  [/spec[- ]document[- ]reviewer|review (?:the|this) spec/i, 'spec-reviewer'],
+  // The one fix subagent after the final review names the review; it is no reviewer.
+  [/^Fix\b|^Address\b|fix (?:wave|pass|subagent)\b/i, 'implementer'],
+  [/^(?:Final|Whole[- ]branch)\b.*\breview|whole[- ]branch review|final (?:code )?review of|Senior Code Reviewer|^Review code changes/i, 'final-reviewer'],
+  [/analyst-common|skill-timeline|plan-adherence|repeated-work|quality-evidence|cost-and-time|request-conflicts|stumbles|similar-session|scrub(?:-audit)?\b|You are an analyst subagent|diagnosing-superpowers/i, 'analyst'],
+  // 6.x: the spec document reviewer. 7.x: the builder check on the design doc.
+  [/spec[- ]document[- ]reviewer|review (?:the|this) spec|builder[- ]check|You(?:'ve| have) been handed a design document/i, 'spec-reviewer'],
   [/\binvestigat|independent (?:problem )?domain|in parallel\b/i, 'investigator'],
 ]
-export const TASK_N = /\bTask\s+(\d+)\b/
+// "Task 6b" and "Task 2.1" are other tasks than 6 and 2.
+export const IMPLEMENT_TASK = /^Implement Task\s+\d+|You are implementing Task\s+\d+/i
+export const TASK_N = /\bTask\s+(\d+)(?![\w.]*[A-Za-z0-9])/
 export const FIX_ROUND_N = /fix round\s+(\d+)/i
 
 // Subagent answers.
@@ -128,7 +168,10 @@ export const A = {
 
 // Main-loop answers.
 export const SUCCESS_CLAIM = /\b(all (?:the )?tests? (?:are )?pass(?:ing|es)?|tests? (?:now )?pass|(?:is|are|now) fixed|it'?s fixed|fixed it|(?:is |are |everything is )?(?:done|complete)\b|ready to merge|works now)\b/i
-export const PERFORMATIVE = /^\s*(?:You'?re absolutely right|Absolutely right|Great point|Excellent (?:feedback|point|catch)|Good catch|Thanks for catching)\b/i
+// receiving-code-review forbids these; "Good catch - <issue>. Fixed in <place>." is its own good example.
+export const PERFORMATIVE = /^\s*(?:You'?re absolutely right|Absolutely right|Great point|Excellent (?:feedback|point|catch)|Thanks for (?:catching|the|pointing))\b/i
+export const KEEP_BRANCH = /\bKeeping branch\b|\bKeep(?:ing)? (?:the )?branch as-is\b/i
+export const BUILDER_CLEAN = /nothing important left/i
 export const RULINGS_LIST = /Rulings I made/i
 export const MINORS_LIST = /Deferred minors/i
 export const DIAGNOSE_PHRASE = 'figure out what went wrong with superpowers in this session'
@@ -138,8 +181,9 @@ export const G = {
   worktreeAdd: /\bgit\s+worktree\s+add\b/,
   worktreeRemove: /\bgit\s+worktree\s+remove\b/,
   commit: /\bgit\s+commit\b/,
-  merge: /\bgit\s+merge\b/,
+  merge: /\bgit\s+merge(?![-\w])/,
   push: /\bgit\s+push\b[^\n]*\s-u\b|\bgit\s+push\s+-u\b|\bgit\s+push\b/,
+  pushForPr: /\bgit\s+push\s+(?:-u|--set-upstream)\b|\bgit\s+push\s+\S+\s+HEAD:refs\/heads\//,
   prCreate: /\bgh\s+pr\s+create\b|\bglab\s+mr\s+create\b/,
   branchDelete: /\bgit\s+branch\s+-[dD]\b/,
   workspaceDelete: /\brm\s+-r?f?r?\s+[^\n]*\.superpowers\/sdd\//,

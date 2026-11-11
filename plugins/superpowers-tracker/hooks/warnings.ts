@@ -19,6 +19,7 @@ export type WarningCode =
   | 'rulings-lost'
   | 'impl-before-test'
   | 'strict-deny'
+  | 'version-drift'
 
 export const SEVERITY: Record<WarningCode, Severity> = {
   'code-before-approval': 'warn',
@@ -37,6 +38,7 @@ export const SEVERITY: Record<WarningCode, Severity> = {
   'rulings-lost': 'warn',
   'impl-before-test': 'info',
   'strict-deny': 'warn',
+  'version-drift': 'info',
 }
 
 export const SEV_RANK: Record<Severity, number> = { info: 0, warn: 1, critical: 2 }

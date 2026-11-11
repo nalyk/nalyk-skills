@@ -3,15 +3,21 @@
 // Subagent turns never reach here.
 
 import type { Io, Message } from '../io'
-import { BOOTSTRAP, MINORS_LIST, PERFORMATIVE, RULINGS_LIST, SUCCESS_CLAIM } from '../patterns'
+import { BOOTSTRAP, DESIGN_SHOWN, KEEP_BRANCH, MINORS_LIST, OPT_OUT, PERFORMATIVE, RULINGS_LIST, SUCCESS_CLAIM } from '../patterns'
 import { detectPath, rulingCount } from '../parsers'
 import { fmtDuration, note, warn, type Toaster } from '../core'
+import { ledgerFor } from './plan'
 
-export const onPromptSubmitted = async (io: Io, fromPerson: boolean): Promise<void> => {
+export const onPromptSubmitted = async (io: Io, fromPerson: boolean, text = ''): Promise<void> => {
   await io.state.run.set(r => {
     let next = { ...r, turn: r.turn + 1, turnHadVerification: false }
-    // Bounded approval: the person replied after the in-chat design was shown.
-    if (fromPerson && r.brainstormActive && r.path === 'bounded' && r.boundedDesignShown && !r.approvalSeen) {
+    if (!fromPerson || !r.brainstormActive || r.approvalSeen) return next
+    // Opting out of the questions ends brainstorming, and its gate with it.
+    if (OPT_OUT.test(text)) return { ...next, brainstormActive: false, approvalSeen: true }
+    // Approval: the person replied after the design was put in front of
+    // them: shown in chat (6.x bounded), or written as a design doc (7.x,
+    // short for a small change, full for a project).
+    if ((r.path === 'bounded' && r.boundedDesignShown) || (r.specPath !== undefined && (r.path === 'bounded' || r.path === 'architectural'))) {
       next = { ...next, approvalSeen: true }
     }
     return next
@@ -26,7 +32,7 @@ export const onMainAnswer = async (io: Io, toast: Toaster, answer: string, turnI
     await io.state.run.set(r => ({ ...r, path, pathInferred: true }))
     await note(io, { kind: 'note', label: `path: ${path}?`, detail: 'announced; inferred until an artifact confirms it' })
   }
-  if (run.brainstormActive && (path ?? run.path) === 'bounded' && /design|approach|files? touched|I'?d change/i.test(answer)) {
+  if (run.brainstormActive && (path ?? run.path) === 'bounded' && DESIGN_SHOWN.test(answer)) {
     await io.state.run.set(r => ({ ...r, boundedDesignShown: true }))
   }
   if (!replay && SUCCESS_CLAIM.test(answer) && !run.turnHadVerification) {
@@ -36,7 +42,7 @@ export const onMainAnswer = async (io: Io, toast: Toaster, answer: string, turnI
   if (!replay && PERFORMATIVE.test(answer)) {
     await warn(io, toast, 'performative-agreement', 'Review feedback answered with performative agreement', `turn ${turnId}`)
   }
-  const ledger = await io.state.ledger.get()
+  const ledger = ledgerFor(run, await io.state.ledger.get())
   const rulings = rulingCount(ledger.entries)
   if (RULINGS_LIST.test(answer) || MINORS_LIST.test(answer)) {
     await io.state.run.set(r =>
@@ -52,6 +58,9 @@ export const onMainAnswer = async (io: Io, toast: Toaster, answer: string, turnI
         : r,
     )
   }
+  if (KEEP_BRANCH.test(answer)) {
+    await io.state.run.set(r => (r.finishing && !r.finishing.option ? { ...r, finishing: { ...r.finishing, option: 'keep' as const } } : r))
+  }
   const after = await io.state.run.get()
   if (!replay && rulings > 0 && after.finishing?.workspaceDeleted && !after.finishing.rulingsListed) {
     await warn(io, toast, 'rulings-lost', `Workspace deleted; ${rulings} ledger ruling(s) never reached "Rulings I made"`, ledger.path ?? 'progress.md')
@@ -66,7 +75,8 @@ export const maybeShip = async (io: Io, toast: Toaster, replay = false): Promise
   if (run.lifecycle === 'shipped' || run.shippedAt !== undefined) return
   const fr = run.finalReview
   const allDone = run.tasks.length > 0 && run.tasks.every(t => t.status === 'done' || t.status === 'parked')
-  const clean = fr && (fr.verdict === 'Yes' || fr.critical + fr.important === 0)
+  // A review whose verdict was never read is no clean review.
+  const clean = fr && (fr.verdict === 'Yes' || (fr.verdict !== '?' && fr.verdict !== 'No' && fr.critical + fr.important === 0))
   const deletedAfterReview = fr && run.finishing?.workspaceDeleted
   if (!((allDone && clean) || deletedAfterReview)) return
   const now = await io.now()

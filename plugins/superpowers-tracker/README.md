@@ -4,7 +4,7 @@ A live tracker for [obra/superpowers](https://github.com/obra/superpowers) insid
 
 It is an observer first. In the default mode it never blocks, rewrites or delays anything. It never writes inside superpowers' own folders (`.superpowers/sdd/`, `.superpowers/brainstorm/`, `docs/superpowers/`, the plugin install). It makes no network calls and sends no telemetry.
 
-Built against **superpowers 6.4.2** (commit `8ca22db`). Every superpowers format the tracker depends on lives in `hooks/patterns.ts`, so a new superpowers release means editing that one file.
+Built against **superpowers 7.0.2**, and it still reads what 6.4 wrote: where the two differ (the rebuilt brainstorming's sizes, the builder check, the scripts' `-C DIR`), both forms are accepted. Every superpowers format the tracker depends on lives in `hooks/patterns.ts`, so a new superpowers release means editing that one file. A superpowers of another major version than the tracker was built against is noted in the Warnings tab.
 
 ## Install
 
@@ -15,7 +15,7 @@ From the [nalyk-skills](https://github.com/nalyk/nalyk-skills) marketplace, at u
 /plugin install superpowers-tracker@nalyk-skills --scope user
 ```
 
-**Requirements:** Claude Code with mods (function hooks), built and tested on 2.1.289. superpowers itself is optional: without it the tracker loads quietly and shows nothing.
+**Requirements:** Claude Code with mods (function hooks), built on 2.1.289 and tested on 2.1.322. superpowers itself is optional: without it the tracker loads quietly and shows nothing.
 
 To try a working copy without installing, load the folder for one session:
 
@@ -30,7 +30,7 @@ You never need to type `/sp` for it to come alive.
 | State | When | What you see |
 |---|---|---|
 | dormant | No superpowers anywhere | Nothing. No timers, no scan beyond one stat. |
-| armed | superpowers is installed, or its bootstrap is in context | `▐ϟ superpowers▌ 6.4.2 · ready`, muted, no motion (hidden under `band compact`) |
+| armed | superpowers is installed, or its bootstrap is in context | `▐ϟ superpowers▌ 7.0.2 · ready`, muted, no motion (hidden under `band compact`) |
 | resumable | The startup scan found earlier or still-running work | The resume capsule, a toast, and a ghost-text prompt suggestion |
 | live | The first superpowers signal: a skill, an SDD script, a write to `docs/superpowers/`, a superpowers-shaped subagent | The full rail, with a pulse |
 | shipped | Every task is done and the final review is clean | A spark, then a gold `✓ shipped` capsule for 30 s |
@@ -47,17 +47,27 @@ Results are cached in the plugin store, keyed by repo root and file mtimes.
 ## The band
 
 ```
-▐ϟ superpowers▌  ARCH  ● Brainstorm ━━━ ● Spec ━━━ ● Plan ━━━ ◆  Execute  ▕█████▋   ▏ 5/9  ○ Review ╌╌╌ ○ Finish ╌╌╌   ⚖ 2   ⌁ 1   ⚠ 1
+▐ϟ superpowers▌  ARCH  ● Brainstorm ━━━ ● Spec ━━━ ● Plan ━━━ ◆  Execute  ▕█████▋   ▏ 5/9  ○ Review ╌╌╌ ○ Finish ╌╌╌    ⚖ 2 ⌁ 1 ⚠ 1 /sp
 ⠹ implementer ◈ sonnet · Task 6 · Idempotency keys  ●●○○○  1m12s  ✗ ● RED→GREEN ✓                                         ▂▂▃▃▄▅
 ```
 
 Resumable:
 
 ```
-▐ϟ resumable▌ Retry Policy · ▕███▍      ▏ 1/3 · Task 2 at fix 2/5 · 3h ago  ⚖ 1                      r: resume  o: open  x: dismiss
+▐ϟ resumable▌ Retry Policy · ▕███▍      ▏ 1/3 · Task 2 at fix 2/5 · 3h ago  ⚖ 1                   1: resume 2: open 3: dismiss
 ```
 
-A critical warning replaces row 2 with a red, round-bordered strip, `[a] ack  [o] open`. It stays until it is acknowledged.
+A critical warning replaces row 2 with a red, round-bordered strip, and the row's buttons become `1: ack 2: details`. It stays until it is acknowledged.
+
+### Keys and clicks
+
+| Where | Keys | Click |
+|---|---|---|
+| Resume strip, critical strip | `1` `2` `3` straight from an **empty prompt**, no focus needed (the way a survey's digits answer) | yes |
+| Live band: `⚖ n` (Ledger), `⌁ n` (Agents), `⚠ n` (Warnings), `/sp` (the pane) | `ctrl+x tab` focuses the band, then Tab and Enter; or type `/sp`, `/sp 4`, … | yes |
+| Pane | once it has the keyboard (`● keys` in its header): `1`–`7` tabs, `j`/`k` move, `v` expand, `n`/`p` next/previous tab, `e` export, `q` close. `/sp` opens it focused; `ctrl+x tab` gives the keys back after you typed in the prompt. | yes |
+
+Clicks reach a plugin only in the **fullscreen** terminal (`/tui fullscreen`); on the classic main screen the terminal reports no mouse, so there the keys are the way. A letter key never works from the prompt (it is typed into it), which is why the pane shows its key hints only while it holds the keyboard, and `○ ctrl+x tab for keys` when it does not.
 
 Width tiers:
 
@@ -78,11 +88,11 @@ Motion is purposeful only:
 
 ## The pane (`/sp`)
 
-Seven tabs, switched with `1`–`7`, or `n` and `p`:
+Seven tabs, switched with `1`–`7`, or `n` and `p`, while the pane holds the keyboard (`● keys`); `/sp 4` opens a tab from the prompt. The frame is the engine's own:
 
 ```
 ╭─────────────────────────────────────────────────────────────────────╮
-│  ϟ superpowers  execute › 2026-10-05-retry-policy …  OBSERVE   6.4.2 │
+│  ϟ superpowers  execute › 2026-10-05-retry-policy  OBSERVE 7.0.2 ● keys │
 │  1: Flow   2 Plan   3: Agents  4: Ledger  5: Tests  6: Workspace  7  │
 │  T A S K S                                            Retry Policy  │
 │  ●  #1 Backoff calculator       ████████████                        │
@@ -126,7 +136,7 @@ On the desktop app, the rail and the Flow map draw as interactive SVG, with grad
   - the bootstrap missing after a compaction;
   - 3+ failed fixes while debugging;
   - rulings lost when the workspace was deleted.
-- **Info**: a success claim with no verification in the same turn; performative agreement; production code before a test.
+- **Info**: a success claim with no verification in the same turn; performative agreement; production code before a test; a superpowers of another major version than the tracker was built against.
 
 ## Commands
 
@@ -165,6 +175,22 @@ On the desktop app, the rail and the Flow map draw as interactive SVG, with grad
 
 Settings persist in the plugin store. Session data lives in `$.state` and survives hot reloads.
 
+## What survives a crash or a restart
+
+A closed terminal, a killed process or a crash fires no `session.end`, so the tracker does not wait for the exit to save. While a session works it writes a **checkpoint** of everything it tracks (the run, tasks, agents, tests, warnings, timeline, ledger read, acks and dismissals) to the plugin store: within 4 s of anything it records, and at the end of every turn.
+
+| What happened | What the next start does |
+|---|---|
+| Terminal closed, crash, `kill`, then `claude --resume` / `--continue` | Restores the session's checkpoint, replays the transcript after the checkpoint's last tool call, then re-reads the plan and ledger from disk. A subagent that was running is marked interrupted. |
+| A resume that was given a new session id | Finds the checkpoint whose last tool call is in the resumed transcript. |
+| A resumed session from before checkpoints existed | Rebuilds from the transcript, then fills in what a compaction dropped from the plan's snapshot. |
+| Hot reload, hooks worker respawn | `$.state` still holds the session: nothing is restored or replayed twice. |
+| `/clear` | Starts clean. The cleared session keeps its checkpoint for a later `--resume`. |
+| `/resume` into another session, same process | Drops the old session's state and restores the other session's checkpoint. |
+| A brand-new session after a crash | The scan offers the unfinished plan; its snapshot brings the earlier story into the pane. |
+
+A second plan in the same session, or brainstorming again once a plan is through, starts a new run: the first plan's story is filed under its own snapshot and none of its tasks carries over. The store keeps the 8 most recent checkpoints and 10 plan snapshots per repository; scan caches unused for a month, snapshots older than 90 days and checkpoints older than 30 days are swept at start.
+
 ## Design: "Arc"
 
 Each stage owns a hue, from ideas (violet) to shipped (gold): brainstorm `#B48CFF`, spec `#7AA2FF`, plan `#5CC8FF`, execute `#3DDBB5`, review `#A3E635`, finish `#FFC857`.
@@ -185,6 +211,14 @@ claude --plugin-dir plugins/superpowers-tracker
 
 Record with your tool of choice, for example `vhs`, `asciinema` plus `agg`, or a screen recorder. `/sp theme` switches palettes between takes.
 
+## Limits
+
+- **Task IDs.** superpowers 7.0.2 lets a plan name tasks `6b` or `2.1`. The tracker counts whole-number tasks; such a heading is left alone, not read as Task 6 or Task 2, so those tasks are not tracked.
+- **Clicks** need the fullscreen terminal (`/tui fullscreen`). The classic main screen reports no mouse to any plugin.
+- **Digits.** While the resume strip or a critical warning is up, a digit typed first into an empty prompt presses its button. Resume only fills the prompt box, and a dismissed plan returns with `/sp scan`.
+- **The brainstorming size** (`SPIKE` / `BOUNDED` / `ARCH`: 7.x's quick task, small change, project) is read from what the agent says, and 7.x says it in plain words, so it stays marked `?` until a design doc confirms it.
+- **A new session after a crash** is offered the plan to resume; the whole run comes back only with `claude --resume` or `--continue`.
+
 ## Tests
 
 ```sh
@@ -194,7 +228,7 @@ claude plugin test plugins/superpowers-tracker
 
 From the repository root, `make test` runs both, with every other plugin's checks. The tests live in `tests/engine/`.
 
-The 61 tests cover:
+The 96 tests cover:
 - the parsers (fenced Task headings, every ledger line form, roles and verdicts);
 - the full happy path, from brainstorming to finishing, with the band asserted at each step;
 - the fix loop to the breaker;
@@ -203,11 +237,15 @@ The 61 tests cover:
 - every startup-scan fixture: checkout, `.worktrees/`, orphan, unexecuted plan, spec without a plan, live and dead companion, live elsewhere, `--resume` replay;
 - ranking, the `+N` pill, suggestions, `/sp resume` (fills, never submits), dismiss and forget across a restart, the scan cache;
 - width tiers 48–160, themes, motion, every surface, every pane tab, hotkeys, the not-placed fallback;
-- contrast, OKLCH, glyph widths, Raster code points, render time, an idle band holding still, the demo.
+- the band's Buttons (digits, each acting, none inside the Client, the row never wider than it is given) and the pane with and without the keyboard;
+- contrast, OKLCH, glyph widths, Raster code points, render time, an idle band holding still, the demo;
+- persistence (`persist.test.ts`): a crash with no `session.end` mid-task and mid-brainstorm, an interrupted subagent, ledger progress made while away, a reload that replays nothing twice, `/clear`, `/resume` to another session and back, a second plan starting clean, strict mode not judging a new plan by the old ledger, the plan a script names (shell variables, `-C`, a wandering cwd, look-alikes), the store sweep;
+- superpowers 7.x beside 6.x (`drift.test.ts`): the plain-word sizes, the builder check, the final-review fix subagent, the design-doc gate and the opt-out, hand-written ledger lines.
 
 ## Troubleshooting
 
 - **The band is empty.** Run `claude --debug`. Look for `ui.render (AbovePrompt): a hook returned a tree that does not validate`, and for `superpowers-tracker:` lines.
 - **Nothing happens in a project that uses superpowers.** Run `/sp scan`. If superpowers isn't installed or enabled and no bootstrap is in context, the tracker stays dormant until the first skill fires.
 - **`claude plugin test` says hooks modules are turned off.** Start `claude` once with network access, then run it again.
+- **The run is gone after a restart.** Start with `claude --resume` (or `--continue`): a new session only offers the plan for resuming. `claude --debug` logs `restored the checkpoint of …` or `rehydrated N tool uses …` at start.
 - **Too many resume candidates.** Use `/sp dismiss n --forget`, or narrow `windowDays`.

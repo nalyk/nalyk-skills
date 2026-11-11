@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'claude-code/testing'
-import { world } from './world'
+import { world, SLOW } from './world'
 import { drive } from './drive'
 import {
   FINAL_REVIEW,
@@ -21,7 +21,7 @@ const sddOut = (tool: string, input: Record<string, unknown>) =>
   tool === 'Bash' && String(input.command).includes('sdd-workspace') ? { text: `${WS}\n` } : { text: '' }
 
 describe('the happy path', () => {
-  test('brainstorming → spec → writing-plans → SDD → 3 tasks → final review → finishing', async ($, on) => {
+  test('brainstorming → spec → writing-plans → SDD → 3 tasks → final review → finishing', SLOW, async ($, on) => {
     const w = world(on, { installed: true, toolText: sddOut })
     const d = drive($, w)
     await d.start()
@@ -89,7 +89,7 @@ describe('the happy path', () => {
 })
 
 describe('fix loop and breaker', () => {
-  test('round 5 with findings open trips the breaker and shows it', async ($, on) => {
+  test('round 5 with findings open trips the breaker and shows it', SLOW, async ($, on) => {
     const w = world(on, { installed: true, files: { [PLAN]: PLAN_3_TASKS }, toolText: sddOut })
     const d = drive($, w)
     await d.start()
@@ -103,7 +103,7 @@ describe('fix loop and breaker', () => {
     const status = await d.sp('status')
     expect(status).toContain('fix 5/5')
   })
-  test('a blocked implementer toasts and marks the task', async ($, on) => {
+  test('a blocked implementer toasts and marks the task', SLOW, async ($, on) => {
     const w = world(on, { installed: true, toolText: sddOut })
     const d = drive($, w)
     await d.start()
@@ -132,28 +132,28 @@ const reDispatch = async (mode: 'observe' | 'assist' | 'strict', $: Parameters<t
 }
 
 describe('re-dispatch of a completed task after compaction', () => {
-  test('observe records a critical warning and lets it run', async ($, on) => {
+  test('observe records a critical warning and lets it run', SLOW, async ($, on) => {
     const { d, sub, spawn } = await reDispatch('observe', $, on)
     expect(spawn.deny).toBeUndefined()
     expect(sub.context ?? []).toEqual([])
     const vm = await d.band()
     expect(vm?.critical?.text).toBe('Task 1 re-dispatched after it completed')
   })
-  test('assist injects the ledger note before the next turn', async ($, on) => {
+  test('assist injects the ledger note before the next turn', SLOW, async ($, on) => {
     const { sub, spawn } = await reDispatch('assist', $, on)
     expect(spawn.deny).toBeUndefined()
     const note = (sub.context ?? []).join('\n')
     expect(note).toContain(`ledger ${LEDGER} shows Task 1 complete`)
     expect(note.split('\n').length).toBeLessThanOrEqual(3)
   })
-  test('strict denies the spawn, naming the evidence', async ($, on) => {
+  test('strict denies the spawn, naming the evidence', SLOW, async ($, on) => {
     const { spawn } = await reDispatch('strict', $, on)
     expect(spawn.deny).toContain('Task 1 is already complete in the ledger')
   })
 })
 
 describe('missing model and parallel implementers', () => {
-  test('observe warns on both', async ($, on) => {
+  test('observe warns on both', SLOW, async ($, on) => {
     const w = world(on, { installed: true })
     const d = drive($, w)
     await d.start()
@@ -164,7 +164,7 @@ describe('missing model and parallel implementers', () => {
     expect(status).toContain('implementer dispatched with no explicit model')
     expect(status).toContain('Two implementers running at once')
   })
-  test('strict denies both', async ($, on) => {
+  test('strict denies both', SLOW, async ($, on) => {
     const w = world(on, { installed: true })
     const d = drive($, w)
     await d.start()
@@ -179,7 +179,7 @@ describe('missing model and parallel implementers', () => {
 })
 
 describe('other warnings', () => {
-  test('a success claim with no verification in the turn', async ($, on) => {
+  test('a success claim with no verification in the turn', SLOW, async ($, on) => {
     const w = world(on, { installed: true })
     const d = drive($, w)
     await d.start()
@@ -187,7 +187,7 @@ describe('other warnings', () => {
     await d.turn('All tests pass and it is ready to merge.')
     expect(await d.sp('status')).toContain('claimed with no verification run this turn')
   })
-  test('the same claim after a test run in the turn is fine', async ($, on) => {
+  test('the same claim after a test run in the turn is fine', SLOW, async ($, on) => {
     const w = world(on, { installed: true, toolText: (t, i) => (t === 'Bash' && String(i.command).startsWith('npm test') ? { text: '9 passed' } : { text: '' }) })
     const d = drive($, w)
     await d.start()
@@ -198,7 +198,7 @@ describe('other warnings', () => {
     await w.settle()
     expect(await d.sp('status')).not.toContain('claimed with no verification')
   })
-  test('strict denies source writes before bounded approval, never docs', async ($, on) => {
+  test('strict denies source writes before bounded approval, never docs', SLOW, async ($, on) => {
     const w = world(on, { installed: true })
     const d = drive($, w)
     await d.start()
@@ -212,7 +212,7 @@ describe('other warnings', () => {
     const sub = await d.bash('npm test')
     expect(sub.deny).toBeUndefined()
   })
-  test('subagent turns never count as main-loop claims', async ($, on) => {
+  test('subagent turns never count as main-loop claims', SLOW, async ($, on) => {
     const w = world(on, { installed: true })
     const d = drive($, w)
     await d.start()

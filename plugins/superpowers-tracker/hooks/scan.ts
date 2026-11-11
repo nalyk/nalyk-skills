@@ -95,6 +95,9 @@ export const scan = async (io: Io, root: string, settings: Settings, opts: { for
         return { ...c, mtime: st.mtimeMs, kind } as Candidate
       }),
     )
+    // Keep the cache's own date moving, a day at a time, so the sweep knows the folder is in use.
+    const stamped = cached as { at?: number }
+    if (candidates.length && (typeof stamped.at !== 'number' || now - stamped.at > 24 * 3_600_000)) await safe(io.store.set(cacheKey, { ...cached, at: now }), undefined)
     return { candidates: rankCandidates(candidates), fromCache: true, roots, ms: (await io.now()) - t0 }
   }
 
@@ -182,13 +185,13 @@ export const scan = async (io: Io, root: string, settings: Settings, opts: { for
     // 4. Specs with no plan naming them.
     const specDir = joinPath(tree, settings.specDir)
     for (const ent of await safe(io.fs.list(specDir), [])) {
-      if (ent.kind !== 'file' || !/-design\.md$/.test(ent.name)) continue
+      if (ent.kind !== 'file' || !/\.md$/.test(ent.name)) continue
       const specWritten = dateFromName(ent.name) ?? (await commitTime(io, tree, joinPath(specDir, ent.name))) ?? ent.mtimeMs
       if (plannedSpecs.has(ent.name) || now - specWritten > windowMs) continue
       const base = {
         id: `spec:${joinPath(specDir, ent.name)}`,
         kind: 'spec' as const,
-        title: ent.name.replace(/^\d{4}-\d{2}-\d{2}-/, '').replace(/-design\.md$/, ''),
+        title: ent.name.replace(/^\d{4}-\d{2}-\d{2}-/, '').replace(/(?:-design)?\.md$/, ''),
         stage: 'spec' as const,
         specPath: relTo(tree, joinPath(specDir, ent.name)),
         done: 0,
@@ -207,7 +210,9 @@ export const scan = async (io: Io, root: string, settings: Settings, opts: { for
       const state = joinPath(bdir, ent.name, 'state')
       const info = await safe(io.fs.read(joinPath(state, 'server-info')), '')
       if (!info || (await safe(io.fs.exists(joinPath(state, 'server-stopped')), true))) continue
-      const pid = /^(\d+)-/.exec(ent.name)?.[1]
+      // The folder's number is the launcher's pid, gone once it backgrounds
+      // the server; the server's own is in state/server.pid.
+      const pid = /^\s*(\d+)\s*$/.exec(await safe(io.fs.read(joinPath(state, 'server.pid')), ''))?.[1] ?? /^(\d+)-/.exec(ent.name)?.[1]
       const alive = pid ? (await safe(io.run(['kill', '-0', pid]), { code: 1, out: '', err: '' })).code === 0 : false
       const url = /"url"\s*:\s*"([^"]+)"/.exec(info)?.[1]
       const st = await safe(io.fs.stat(joinPath(state, 'server-info')), undefined)
@@ -228,7 +233,8 @@ export const scan = async (io: Io, root: string, settings: Settings, opts: { for
   }
 
   const candidates = rankCandidates(found)
-  await safe(io.store.set(cacheKey, { sig, candidates }), undefined)
+  if (candidates.length || sig.length) await safe(io.store.set(cacheKey, { sig, candidates, at: now }), undefined)
+  else if (cached) await safe(io.store.del(cacheKey), undefined)
   return { candidates, fromCache: false, roots, ms: (await io.now()) - t0 }
 }
 

@@ -1,10 +1,10 @@
 import { test, expect } from 'claude-code/testing'
-import { world, bandProps, textOf } from './world'
+import { world, bandProps, textOf, SLOW } from './world'
 import { BOOTSTRAP_TEXT, ROOT } from './fixtures/superpowers'
 
 const BAND = { plugin: 'superpowers-tracker', component: 'AbovePrompt' as const }
 
-test('dormant: no superpowers anywhere draws nothing and starts no poll', async ($, on) => {
+test('dormant: no superpowers anywhere draws nothing and starts no poll', SLOW, async ($, on) => {
   const w = world(on)
   await $.session.start({ cwd: ROOT, surface: 'terminal', isInteractive: true })
   await w.settle()
@@ -13,7 +13,7 @@ test('dormant: no superpowers anywhere draws nothing and starts no poll', async 
   expect(w.toasts).toHaveLength(0)
 })
 
-test('armed: the bootstrap at start shows the quiet brand capsule', async ($, on) => {
+test('armed: the bootstrap at start shows the quiet brand capsule', SLOW, async ($, on) => {
   const w = world(on, { messages: [{ role: 'user', text: BOOTSTRAP_TEXT, toolUses: [] }] })
   await $.session.start({ cwd: ROOT, surface: 'terminal', isInteractive: true })
   await w.settle()
@@ -23,7 +23,7 @@ test('armed: the bootstrap at start shows the quiet brand capsule', async ($, on
   expect(JSON.stringify(client?.props)).toContain('"kind":"armed"')
 })
 
-test('live: the first skill.prompt turns the tracker on with a pulse, no command', async ($, on) => {
+test('live: the first skill.prompt turns the tracker on with a pulse, no command', SLOW, async ($, on) => {
   const w = world(on, { installed: true })
   await $.session.start({ cwd: ROOT, surface: 'terminal', isInteractive: true })
   await w.settle()

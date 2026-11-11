@@ -8,14 +8,86 @@ import { LEDGER_NAME } from '../patterns'
 import { parseLedger, parsePlan, progressOf } from '../parsers'
 import { basename, blankTask, dirname, fmtDuration, joinPath, note, type Toaster } from '../core'
 import { advance } from '../stages'
+import { FRESH_LEDGER, freshRun } from '../state'
+import { saveSnapshot } from '../archive'
+import type { Ledger } from '../../types'
+
+/** The ledger as far as it is this run's: one read for another workspace
+ *  (a plan since shipped or replaced) says nothing about the tasks here. */
+export const ledgerFor = (run: Pick<Run, 'workspace'>, ledger: Ledger): Ledger =>
+  run.workspace && ledger.path === joinPath(run.workspace, LEDGER_NAME) ? ledger : FRESH_LEDGER
+
+/** Two spellings of one plan: the same file, or the same dated name in another checkout or worktree. */
+export const samePlan = (a: string, b: string): boolean => a === b || basename(a) === basename(b)
+
+/** Files the old run's story under its plan, then starts the run over:
+ *  its tests, finished agents and timeline go with it, so nothing of the
+ *  old plan's Task N shows under the new plan's Task N. A replay files
+ *  nothing: what it rebuilds is thinner than what the live session stored. */
+export const archiveAndRestart = async (io: Io, stage: 'brainstorm' | 'plan', replay = false): Promise<void> => {
+  const env = await io.state.env.get()
+  const root = env.repoRoot ?? (await safe(io.session.cwd(), ''))
+  if (root && !replay) await safe(saveSnapshot(io, root), false)
+  const now = await io.now()
+  await io.state.tests.set(() => [])
+  await io.state.agents.set(list => list.filter(a => a.status === 'running'))
+  await io.state.timeline.set(() => [])
+  await io.state.run.set(r => ({
+    ...freshRun(now),
+    lifecycle: 'live',
+    stage,
+    stageInferred: false,
+    pulseAt: now,
+    turn: r.turn,
+    turnHadVerification: r.turnHadVerification,
+    debuggingActive: r.debuggingActive,
+  }))
+  await io.state.ledger.set(() => FRESH_LEDGER)
+}
+
+/** Takes a plan file as the run's plan. Answers false, changing nothing,
+ *  when the file cannot be read. A different plan than the one the run
+ *  holds starts a new run: no task row, workspace or review carries over. */
+export const adoptPlan = async (io: Io, planPath: string, replay = false): Promise<boolean> => {
+  const text = await safe(io.fs.read(planPath), undefined as string | undefined)
+  if (text === undefined) return false
+  const run = await io.state.run.get()
+  const hasTasks = parsePlan(text).tasks.length > 0
+  const another = !!run.planPath && !samePlan(run.planPath, planPath)
+  // Another plan, or any plan at all once the run shipped with none of its own.
+  if (hasTasks && !run.spectator && (another || (run.lifecycle === 'shipped' && !run.planPath))) {
+    await archiveAndRestart(io, 'plan', replay)
+  }
+  await refreshPlan(io, planPath, text)
+  return true
+}
+
+/** The first of the candidate folders under which a relative path exists. */
+export const resolveExisting = async (io: Io, path: string, bases: readonly (string | undefined)[]): Promise<string | undefined> => {
+  const tries = path.startsWith('/') ? [path] : [...new Set(bases.filter((b): b is string => !!b).map(b => joinPath(b, path)))]
+  for (const p of tries) if (await safe(io.fs.exists(p), false)) return p
+  return undefined
+}
+
+/** The plan a workspace was made for, from its plan-path marker. */
+export const planOfWorkspace = async (io: Io, workspace: string): Promise<string | undefined> => {
+  const marker = (await safe(io.fs.read(joinPath(workspace, 'plan-path')), '')).trim()
+  if (!marker) return undefined
+  const root = workspace.replace(/\/\.superpowers\/.*$/, '')
+  return resolveExisting(io, marker, [root])
+}
 
 /** Reads the plan, keeping every task's live status; a parse failure keeps the last good read. */
-export const refreshPlan = async (io: Io, planPath: string): Promise<void> => {
-  const text = await safe(io.fs.read(planPath), undefined as string | undefined)
+export const refreshPlan = async (io: Io, planPath: string, known?: string): Promise<void> => {
+  const text = known ?? (await safe(io.fs.read(planPath), undefined as string | undefined))
   if (text === undefined) return
   const parsed = parsePlan(text)
   await io.state.run.set(run => {
-    if (parsed.tasks.length === 0) return { ...run, planPath, planParseError: parsed.error ?? 'no tasks' }
+    if (parsed.tasks.length === 0) {
+      // A file with no task is not taken in place of a plan that has them.
+      if (run.planPath && !samePlan(run.planPath, planPath)) return run
+      return { ...run, planPath, planParseError: parsed.error ?? 'no tasks' }
+    }
     const tasks: TaskRow[] = parsed.tasks.map(pt => {
       const had = run.tasks.find(t => t.n === pt.n) ?? blankTask(pt.n, pt.name)
       return { ...had, name: pt.name, steps: pt.steps, stepsDone: pt.stepsDone }

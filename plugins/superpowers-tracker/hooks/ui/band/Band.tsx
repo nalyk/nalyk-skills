@@ -1,6 +1,10 @@
 // The band above the prompt: a Client surface module with its own frame
 // clock. It draws the BandVM it is handed (plain data); motion lives here,
 // so no $.state write happens per frame. Self-contained: types only.
+//
+// It draws and moves, and holds no control: every Button is in the hook's
+// own tree beside it (ui/band/actions.ts), where a hotkey is armed and a
+// press reaches the plugin. `vm.columns` is the exact width it was given.
 
 import type { ClientModule, ClientSurface, JsonValue, RenderChildren } from 'claude-code'
 
@@ -70,12 +74,12 @@ const easeOut = (x: number): number => 1 - (1 - x) ** 3
 
 const Band: ClientModule<JsonValue, Local> = (props, surface) => {
   const vm = props as unknown as VM
-  const { Box, Text, Button } = surface.elements
+  const { Box, Text } = surface.elements
   const anchor = anchors.get(surface)
   if (!anchor || anchor.vmNow !== vm.now) anchors.set(surface, { vmNow: vm.now, realAt: Date.now() })
   const a0 = anchors.get(surface)!
   const now = vm.now + Math.max(0, Date.now() - a0.realAt)
-  const width = Math.max(20, surface.columns || vm.columns)
+  const width = Math.max(10, vm.columns)
   const tick = surface.state?.tick ?? 0
 
   // Progress ease-out toward the new fraction.
@@ -132,14 +136,6 @@ const Band: ClientModule<JsonValue, Local> = (props, surface) => {
         ? span(' ASSIST ', { color: vm.rail[2]?.hue ?? c.text, inverse: true })
         : null
 
-  const pills = () => {
-    const out: RenderChildren[] = []
-    if (vm.pills.rulings) out.push(span(` ⚖ ${vm.pills.rulings} `, { color: c.warn, backgroundColor: c.tint }), span(' '))
-    if (vm.pills.agents) out.push(span(` ⌁ ${vm.pills.agents} `, { color: c.hue, backgroundColor: c.tint }), span(' '))
-    if (vm.pills.warnings) out.push(span(` ⚠ ${vm.pills.warnings} `, { color: vm.pills.warnColor, backgroundColor: c.tint, bold: true }))
-    return out
-  }
-
   const progressBar = (w: number) => {
     if (!vm.progress) return []
     const [full, part, empty] = bar(shown, w)
@@ -183,11 +179,6 @@ const Band: ClientModule<JsonValue, Local> = (props, surface) => {
             {r.more > 0 ? span(` +${r.more} `, { color: c.muted, backgroundColor: c.tint }) : null}
           </Text>
           </Box>
-          <Box flexDirection="row" gap={1} flexShrink={0} marginLeft={1}>
-            <Button key="resume" label="resume" hotkey="r" plain onPress={() => surface.post({ action: 'resume' })} />
-            <Button key="open" label="open" hotkey="o" plain dimColor onPress={() => surface.post({ action: 'open' })} />
-            <Button key="dismiss" label="dismiss" hotkey="x" plain dimColor onPress={() => surface.post({ action: 'dismiss' })} />
-          </Box>
         </Box>
       )
     }
@@ -205,7 +196,7 @@ const Band: ClientModule<JsonValue, Local> = (props, surface) => {
         </Text>
       )
     }
-    const pillCells = (vm.pills.rulings ? 6 : 0) + (vm.pills.agents ? 6 : 0) + (vm.pills.warnings ? 6 : 0) + (vm.mode !== 'observe' ? 9 : 0)
+    const pillCells = vm.mode !== 'observe' ? 9 : 0
     const head = 15 + (vm.path ? vm.path.length + 3 : 0)
     const progCells = vm.progress ? 18 : 0
     const titleCells = vm.tier === 'lg' && vm.title ? Math.min(32, Math.floor(width / 6)) : 0
@@ -227,7 +218,9 @@ const Band: ClientModule<JsonValue, Local> = (props, surface) => {
       )
       rail.push(span(' '))
       if (isCurrent && s.id === 'execute' && vm.progress) {
-        rail.push(...progressBar(Math.max(6, seg + 6)), span(' '))
+        // The bar gives way before a stage is pushed off the row.
+        const spare = railRoom - labels - seg * (vm.rail.length - 1) - 8
+        rail.push(...progressBar(Math.max(4, Math.min(seg + 6, spare))), span(' '))
       } else if (isCurrent && shimmering) {
         const cellsOf = [...'━'.repeat(seg)]
         rail.push(...cellsOf.map((ch, k) => span(ch, { color: k === shimmerAt || k === shimmerAt - 1 ? c.text : s.hue, bold: k === shimmerAt })))
@@ -245,11 +238,7 @@ const Band: ClientModule<JsonValue, Local> = (props, surface) => {
           {rail}
           {titleCells ? span(` ${clip(vm.title ?? '', titleCells)}`, { color: c.muted, italic: true }) : null}
         </Text>
-        <Text>
-          {pills()}
-          {modeBadge() ? span(' ') : null}
-          {modeBadge()}
-        </Text>
+        <Text>{modeBadge()}</Text>
       </Box>
     )
   }
@@ -265,10 +254,6 @@ const Band: ClientModule<JsonValue, Local> = (props, surface) => {
             {span(vm.critical.text, { bold: true })}
             {span(` · ${clip(vm.critical.evidence, Math.max(10, width - vm.critical.text.length - 30))}`, { color: c.muted })}
           </Text>
-          <Box flexDirection="row" gap={1} flexShrink={0} marginLeft={1}>
-            <Button key="ack" label="ack" hotkey="a" plain onPress={() => surface.post({ action: 'ack', id: vm.critical?.id ?? '' })} />
-            <Button key="open-warn" label="open" hotkey="o" plain dimColor onPress={() => surface.post({ action: 'open', tab: 7 })} />
-          </Box>
         </Box>
       )
     }
@@ -311,7 +296,7 @@ const Band: ClientModule<JsonValue, Local> = (props, surface) => {
 
   void tick
   return (
-    <Box flexDirection="column">
+    <Box flexDirection="column" width={width} overflow="hidden">
       {row1()}
       {row2()}
     </Box>

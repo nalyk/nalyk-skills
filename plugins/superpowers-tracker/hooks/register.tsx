@@ -22,10 +22,10 @@ import { onSkill } from './signals/skills'
 import { onToolResult, refreshGit } from './signals/tools'
 import { assessSpawn, onAgentDone, recordSpawn } from './signals/agents'
 import { checkBootstrap, maybeShip, onMainAnswer, onPromptSubmitted } from './signals/answers'
-import { refreshLedger, refreshPlan } from './signals/plan'
+import { ledgerFor, refreshLedger, refreshPlan } from './signals/plan'
 import { guardWrite, ledgerNote, ledgerDone } from './modes'
 import { LIVE_WINDOW_MS, projectDirName, scan } from './scan'
-import { dismissKey, leftOffKey, loadSnapshot, mergeSnapshot, rehydrate, saveLeftOff, saveSnapshot, type LeftOff } from './persist'
+import { dismissKey, findCheckpoint, leftOffKey, loadSnapshot, mergeSnapshot, pruneStore, rehydrate, restoreCheckpoint, saveCheckpoint, saveLeftOff, saveSnapshot, tailAfter, type LeftOff } from './persist'
 import { parseLedger, progressOf } from './parsers'
 import { applyConfig, configText, diagnoseText, exportMarkdown, ledgerText, parseSp } from './commands'
 import { buildBand, statusText, visibleCandidates, SHIP_SPARK_MS, SHIP_HOLD_MS, type World } from './ui/viewModel'
@@ -33,6 +33,7 @@ import { pickTheme, arcRamp, type Tokens } from './ui/theme'
 import { PaneView } from './ui/pane/Pane'
 import type { PaneActions, PaneCtx } from './ui/pane/kit'
 import { BandText } from './ui/band/BandText'
+import { actionsWidth, bandActions, type BandAction } from './ui/band/actions'
 import { ThemePreview } from './ui/themePreview'
 import { railSvg, flowSvg } from './ui/desktop/svg'
 import { encodeCells, sparkFrame } from './ui/raster'
@@ -134,7 +135,7 @@ async function readWorld($: EngineInterface): Promise<World> {
     read($, settingsA),
     read($, demoA),
   ])
-  return { run, timeline, skills, agents, ledger, tests, warnings, env, ui, resume, settings, demo }
+  return { run, timeline, skills, agents, ledger: ledgerFor(run, ledger), tests, warnings, env, ui, resume, settings, demo }
 }
 
 
@@ -154,6 +155,19 @@ type Mem = {
   pendingAssist: boolean
   spectating: { id: string; workspace: string; lastMtime: number; quietSince: number } | undefined
   redispatched: Set<string>
+  /** The session the tracked state belongs to; empty until startup has put it in place. */
+  sessionId: string
+  /** The restore in flight: hooks that record wait for it, so nothing lands under it. */
+  starting: Promise<void> | undefined
+  /** The last tool call recorded: where a restore picks the transcript up again. */
+  lastRef: string | undefined
+  ckTimer: { cancel: () => void } | undefined
+  /** What the left-off record was last written from: rewritten only when it moves. */
+  leftSig: string
+  /** Counts startups: one that a later one overtook changes nothing more. */
+  gen: number
+  /** A session this process just left, and when: its id is not taken for the next one's. */
+  left: { id: string; at: number } | undefined
 }
 
 const newMem = (): Mem => ({
@@ -170,7 +184,58 @@ const newMem = (): Mem => ({
   pendingAssist: false,
   spectating: undefined,
   redispatched: new Set(),
+  sessionId: '',
+  starting: undefined,
+  lastRef: undefined,
+  ckTimer: undefined,
+  leftSig: '',
+  gen: 0,
+  left: undefined,
 })
+
+const stopTimers = (m: Mem) => {
+  for (const t of [m.poll, m.snapTimer, m.toastTimer, m.sparkTimer, m.demoTimer, m.ckTimer]) t?.cancel()
+  m.poll = m.snapTimer = m.toastTimer = m.sparkTimer = m.demoTimer = m.ckTimer = undefined
+}
+
+const CHECKPOINT_MS = 4000
+
+/** Writes the session's checkpoint and its left-off record now. */
+const checkpointNow = async ($: EngineInterface, m: Mem) => {
+  if (!m.sessionId) return
+  const io = makeIo($)
+  await safe(saveCheckpoint(io, { sessionId: m.sessionId, root: m.root, pendingAssist: m.pendingAssist, ...(m.lastRef ? { lastRef: m.lastRef } : {}) }), false)
+  if (!m.root) return
+  const run = await read($, runA)
+  const sig = `${m.sessionId}|${run.planPath ?? ''}|${run.stage}|${run.lifecycle}|${run.currentTask ?? ''}|${run.tasks.find(t => t.status === 'fixing')?.fixRound ?? ''}`
+  if (sig === m.leftSig) return
+  m.leftSig = sig
+  await safe(saveLeftOff(io, m.root, m.sessionId), undefined)
+}
+
+/** Something was recorded: a checkpoint follows within 4 s. A crash fires no
+ *  session.end, so this, not the exit, is what keeps the run. */
+const touch = ($: EngineInterface, m: Mem) => {
+  if (m.ckTimer || !m.sessionId) return
+  m.ckTimer = $.clock.after(CHECKPOINT_MS, () => {
+    m.ckTimer = undefined
+    void checkpointNow($, m)
+  })
+}
+
+/** Every tracked value back to its start: the state of a session that is over. */
+const resetTracked = async ($: EngineInterface) => {
+  const now = await safe($.clock.now(), 0)
+  await update($, runA, () => freshRun(now))
+  await update($, timelineA, () => [])
+  await update($, skillsA, () => [])
+  await update($, agentsA, () => [])
+  await update($, ledgerA, () => FRESH_LEDGER)
+  await update($, testsA, () => [])
+  await update($, warningsA, () => [])
+  await update($, resumeA, () => FRESH_RESUME)
+  await update($, envA, () => FRESH_ENV)
+}
 
 /** One-line toasts; several within 1 s fold into one summary. */
 const makeToaster = ($: EngineInterface, m: Mem): Toaster => (glyph, subject, detail, sev) => {
@@ -241,6 +306,7 @@ const tickPoll = async ($: EngineInterface, m: Mem, io: Io) => {
   const toast = makeToaster($, m)
   const change = await safe(refreshLedger(io, toast), undefined)
   if (change && (change.completed.length || change.finalReview)) scheduleSnapshot($, m)
+  if (change) touch($, m)
   await safe(maybeShip(io, toast), undefined)
   if (m.spectating) await followElsewhere($, m, io)
   await ensurePoll($, m)
@@ -330,12 +396,11 @@ const runScan = async ($: EngineInterface, m: Mem, force = false) => {
       await safe(refreshLedger(io, toast, { quiet: true }), undefined)
     }
     if (top.planPath) {
-      const snap = await safe(loadSnapshot(io, m.root, joinPath(m.root, top.planPath)), undefined)
+      const snap = (await safe(loadSnapshot(io, m.root, joinPath(top.worktree ?? m.root, top.planPath)), undefined)) ?? (await safe(loadSnapshot(io, m.root, joinPath(m.root, top.planPath)), undefined))
       if (snap) await safe(mergeSnapshot(io, snap), undefined)
     }
   }
   await lastSuperpowersSession($, m, io)
-  void note
 }
 
 
@@ -454,38 +519,149 @@ const paneActions = ($: EngineInterface, m: Mem): PaneActions => ({
 })
 
 
-/** Session start (and after /clear): detect, rehydrate, scan. Runs in the background. */
+/** Session start, and the start of whatever session this process moves to
+ *  (/clear, /resume): put the tracked state in place, then scan.
+ *
+ *  The state comes from, in order: what $.state still holds for this session
+ *  (a reload: nothing is replayed), this session's checkpoint plus the
+ *  transcript after it (a crash, a restart, a resume), the transcript alone
+ *  (a session from before checkpoints), or nothing (a new session). */
 const startup = async ($: EngineInterface, m: Mem) => {
   const io = makeIo($)
   const toast = makeToaster($, m)
-  await loadSettings($, m)
-  await refreshTheme($, m)
-  const cwd = await safe(io.session.cwd(), '')
-  const sessionId = await safe(io.session.id(), '')
-  const install = await detectInstall($, m, io)
-  m.version = install.version ?? BUILT_AGAINST
-  const messages = await safe(io.session.messages(), [] as Message[])
-  const surfaces = await safe($.session.surfaces(), [])
-  await update($, envA, env => ({
-    ...env,
-    installed: install.installed,
-    ...(install.version ? { pluginVersion: install.version } : {}),
-    ...(sessionId ? { sessionId } : {}),
-    ...(surfaces[0] ? { surface: surfaces[0] } : {}),
-  }))
-  const bootstrapped = await checkBootstrap(io, toast, 'startup', false)
-  // Dormant fast path: nothing of superpowers here, one stat and done.
-  const traces = (await safe(io.fs.exists(joinPath(cwd, '.superpowers')), false)) || (await safe(io.fs.exists(joinPath(cwd, 'docs/superpowers')), false))
-  if (!install.installed && !bootstrapped && !traces) return
-  if (install.installed || bootstrapped) await update($, runA, r => (r.lifecycle === 'dormant' ? { ...r, lifecycle: 'armed' as const } : r))
-  await refreshGit(io)
-  m.root = (await read($, envA)).repoRoot ?? cwd
-  if (messages.some(m => m.role === 'assistant' && m.toolUses.length > 0)) {
-    const n = await safe(rehydrate(io, messages), 0)
-    if (n > 0) io.ui.log(`rehydrated ${n} tool uses from the resumed transcript`)
+  const quiet: Toaster = () => undefined
+  m.sessionId = ''
+  const gen = (m.gen += 1)
+  let sid = ''
+  let resolveStarting: () => void = () => undefined
+  const mine = new Promise<void>(res => (resolveStarting = res))
+  m.starting = mine
+  try {
+    await loadSettings($, m)
+    await refreshTheme($, m)
+    const cwd = await safe(io.session.cwd(), '')
+    const sessionId = await safe(io.session.id(), '')
+    sid = sessionId
+    const install = await detectInstall($, m, io)
+    m.version = install.version ?? BUILT_AGAINST
+    const messages = await safe(io.session.messages(), [] as Message[])
+    const surfaces = await safe($.session.surfaces(), [])
+    const now = await io.now()
+
+    const held = await read($, envA)
+    const heldRun = await read($, runA)
+    if (held.sessionId && sessionId && held.sessionId !== sessionId) await resetTracked($)
+    const isHeld = !!sessionId && held.sessionId === sessionId && heldRun.lifecycle !== 'dormant'
+    // Right after a /clear the engine may still answer the id it is leaving:
+    // an empty transcript under that id is the cleared session, not a resume.
+    const cleared = !!m.left && m.left.id === sessionId && messages.length === 0
+    const ck = cleared ? undefined : await safe(findCheckpoint(io, sessionId, messages), undefined)
+    // A later startup (a /clear or /resume while this one read) owns the state now.
+    if (gen !== m.gen) return
+    if (ck && !isHeld) await safe(restoreCheckpoint(io, ck, now), undefined)
+
+    await update($, envA, env => ({
+      ...env,
+      installed: install.installed,
+      ...(install.version ? { pluginVersion: install.version } : {}),
+      ...(sessionId ? { sessionId } : {}),
+      ...(surfaces[0] ? { surface: surfaces[0] } : {}),
+    }))
+    const bootstrapped = await checkBootstrap(io, toast, 'startup', false)
+    // Dormant fast path: nothing of superpowers here, one stat and done.
+    const traces = (await safe(io.fs.exists(joinPath(cwd, '.superpowers')), false)) || (await safe(io.fs.exists(joinPath(cwd, 'docs/superpowers')), false))
+    if (!install.installed && !bootstrapped && !traces && !ck && !isHeld) {
+      m.sessionId = sessionId
+      return
+    }
+    if (install.installed || bootstrapped) await update($, runA, r => (r.lifecycle === 'dormant' ? { ...r, lifecycle: 'armed' as const } : r))
+    // A superpowers of another major version may write what this build cannot read.
+    const major = (v: string) => v.split('.')[0]
+    if (install.version && major(install.version) !== major(BUILT_AGAINST)) {
+      await warn(io, quiet, 'version-drift', `superpowers ${install.version} is installed; this tracker reads ${BUILT_AGAINST}'s formats`, `installed ${install.version}, built against ${BUILT_AGAINST}`)
+    }
+    await refreshGit(io)
+    m.root = (await read($, envA)).repoRoot ?? cwd
+
+    if (ck) {
+      m.lastRef = ck.lastRef
+      m.pendingAssist = ck.pendingAssist === true
+    }
+    if (isHeld) {
+      io.ui.log('state held for this session: nothing replayed')
+    } else if (ck) {
+      const tail = tailAfter(messages, ck.lastRef)
+      const n = tail.length ? await safe(rehydrate(io, tail), 0) : 0
+      io.ui.log(`restored the checkpoint of ${new Date(ck.savedAt).toISOString()}${n ? `, then replayed ${n} tool uses after it` : ''}`)
+    } else if (messages.some(x => x.role === 'assistant' && x.toolUses.length > 0)) {
+      const n = await safe(rehydrate(io, messages), 0)
+      if (n > 0) io.ui.log(`rehydrated ${n} tool uses from the resumed transcript`)
+      // A transcript that was compacted has lost its beginning: the plan's snapshot has it.
+      const run = await read($, runA)
+      const snap = run.planPath ? await safe(loadSnapshot(io, m.root, run.planPath), undefined) : undefined
+      if (snap) await safe(mergeSnapshot(io, snap), undefined)
+    }
+    // Everything in the transcript is in the state now, held or restored.
+    const last = messages.flatMap(x => x.toolUses ?? []).at(-1)?.tool_use_id
+    if (last) m.lastRef = last
+    if (!isHeld) {
+      // The disk is the truth for what happened while the tracker was away.
+      const run = await read($, runA)
+      if (run.planPath) await safe(refreshPlan(io, run.planPath), undefined)
+      await safe(refreshLedger(io, quiet, { force: true, quiet: true }), undefined)
+      await safe(maybeShip(io, quiet, true), undefined)
+    }
+    m.sessionId = sessionId
+  } finally {
+    if (gen === m.gen) {
+      // Whatever failed, this session counts as started: no start loop.
+      if (!m.sessionId) m.sessionId = sid
+      if (m.starting === mine) m.starting = undefined
+    }
+    resolveStarting()
   }
+  if (gen !== m.gen) return
   await runScan($, m)
   await ensurePoll($, m)
+  touch($, m)
+  void safe(pruneStore(io, await io.now()), 0)
+}
+
+
+/** The process moved to another session with no session.start (/clear,
+ *  /resume): what was tracked belonged to the one it left. */
+const switchSession = async ($: EngineInterface, m: Mem) => {
+  stopTimers(m)
+  m.spectating = undefined
+  m.pendingAssist = false
+  m.lastRef = undefined
+  m.redispatched.clear()
+  m.toastBuf = []
+  m.sessionId = ''
+  // Held from before the first await, so a second caller waits instead of switching again.
+  let release: () => void = () => undefined
+  const guard = new Promise<void>(res => (release = res))
+  m.starting = guard
+  try {
+    await resetTracked($)
+    await startup($, m)
+  } finally {
+    if (m.starting === guard) m.starting = undefined
+    release()
+  }
+}
+
+/** Called where a session begins to act (a prompt, a skill): if the id the
+ *  engine answers is not the one tracked, the tracker moves with it. */
+const ensureSession = async ($: EngineInterface, m: Mem) => {
+  if (m.starting) {
+    await m.starting
+    return
+  }
+  const id = await safe($.session.id(), '')
+  if (!id || id === m.sessionId) return
+  if (m.left && id === m.left.id && (await safe($.clock.now(), 0)) - m.left.at < 3000) return
+  await switchSession($, m)
 }
 
 
@@ -507,6 +683,7 @@ const handleSkill = async ($: EngineInterface, m: Mem, skill: NonNullable<Return
   }
   await ensurePoll($, m)
   scheduleSnapshot($, m)
+  touch($, m)
 }
 
 
@@ -533,14 +710,22 @@ export const register: Register = on => {
       }),
       { command: 'sp' },
     )
-    void startup($, m)
+    // A fresh load of the module (the process started, a reload, a worker
+    // respawn): timers of the copy before are the engine's to drop, and this
+    // copy's working memory starts over. What $.state holds decides the rest.
+    stopTimers(m)
+    Object.assign(m, newMem())
+    void safe(startup($, m), undefined)
     return r
   })
 
   on('skill.prompt', async ($, e, next) => {
     const r = await next(e)
     const skill = normalizeSkill(e.skill)
-    if (skill) await safe(handleSkill($, m, skill, 'prompt'), undefined)
+    if (skill) {
+      await safe(ensureSession($, m), undefined)
+      await safe(handleSkill($, m, skill, 'prompt'), undefined)
+    }
     return r
   })
 
@@ -561,6 +746,7 @@ export const register: Register = on => {
       }
     }
     const r = await next(e)
+    if (m.starting) await m.starting
     const run = await read($, runA)
     const relevant = run.lifecycle !== 'dormant' || tool === 'Skill' || tool === 'Read' || tool === 'Write' || tool === 'Edit' || tool === 'Bash'
     if (relevant) {
@@ -577,16 +763,22 @@ export const register: Register = on => {
         undefined,
       )
       if (tool === 'Bash' || tool === 'Write' || tool === 'Edit') await ensurePoll($, m)
+      if ((await read($, runA)).lifecycle !== 'dormant') {
+        // Only the main thread's calls are in the transcript a restore reads.
+        if (isMain) m.lastRef = e.tool_use_id
+        touch($, m)
+      }
     }
     if (tool === 'Agent' && m.redispatched.has(e.tool_use_id) && r.deny === undefined) {
       m.redispatched.delete(e.tool_use_id)
-      const note = ledgerNote(await read($, ledgerA), run)
+      const note = ledgerNote(ledgerFor(run, await read($, ledgerA)), run)
       if (note) return { ...r, context: [...(r.context ?? []), note] }
     }
     return r
   })
 
   on('agent.spawn', async ($, e, next) => {
+    if (m.starting) await m.starting
     const io = makeIo($)
     const toast = makeToaster($, m)
     const spawn = {
@@ -602,25 +794,29 @@ export const register: Register = on => {
     if (a?.deny) return { deny: a.deny }
     if (a && a.role === 'implementer' && a.task !== undefined) {
       const s = await read($, settingsA)
-      if (s.mode !== 'observe' && ledgerDone(await read($, ledgerA)).includes(a.task)) m.redispatched.add(e.tool_use_id)
+      if (s.mode !== 'observe' && ledgerDone(ledgerFor(await read($, runA), await read($, ledgerA))).includes(a.task)) m.redispatched.add(e.tool_use_id)
     }
     const r = await next(e)
     if (a && r.deny === undefined) {
       const label = await safe(recordSpawn(io, spawn, a, { ...(r.agentId ? { agentId: r.agentId } : {}), ...(r.model ? { model: r.model } : {}) }), undefined)
       if (label) io.ui.notice(e.tool_use_id, label)
       await ensurePoll($, m)
+      if (!e.parentAgentId) m.lastRef = e.tool_use_id
+      touch($, m)
     }
     return r
   })
 
   on('turn.complete', async ($, e, next) => {
     const r = await next(e)
+    if (m.starting) await m.starting
     const run = await read($, runA)
     if (run.lifecycle === 'dormant') return r
     const io = makeIo($)
     const toast = makeToaster($, m)
     if (e.agentId) {
       await safe(onAgentDone(io, toast, e.agentId, e.answer, e.reason === 'error' || e.isAborted), undefined)
+      touch($, m)
       return r
     }
     await safe(onMainAnswer(io, toast, e.answer, e.turnId), undefined)
@@ -640,17 +836,23 @@ export const register: Register = on => {
     }
     await ensurePoll($, m)
     scheduleSnapshot($, m)
+    // The turn is over: the quiet moment a checkpoint is cheapest and most whole.
+    m.ckTimer?.cancel()
+    m.ckTimer = undefined
+    void checkpointNow($, m)
     return r
   })
 
   on('prompt.submit', async ($, e, next) => {
+    await safe(ensureSession($, m), undefined)
     const run = await read($, runA)
     if (run.lifecycle === 'dormant') return next(e)
-    await safe(onPromptSubmitted(makeIo($), e.origin.kind === 'composer'), undefined)
+    await safe(onPromptSubmitted(makeIo($), e.origin.kind === 'composer', e.text), undefined)
+    touch($, m)
     const s = await read($, settingsA)
     if (s.mode !== 'observe' && m.pendingAssist) {
       m.pendingAssist = false
-      const note = ledgerNote(await read($, ledgerA), run)
+      const note = ledgerNote(ledgerFor(run, await read($, ledgerA)), run)
       if (note) return next({ ...e, context: [...(e.context ?? []), note] })
     }
     return next(e)
@@ -666,6 +868,7 @@ export const register: Register = on => {
     await update($, envA, env => ({ ...env, compactions: [...env.compactions, now].slice(-50) }))
     await note(io, { kind: 'compact', label: 'compacted', detail: 'checking bootstrap' })
     if (run.planPath) m.pendingAssist = true
+    touch($, m)
     const hadBootstrap = (await read($, envA)).bootstrap.some(b => b.ok)
     $.clock.after(2500, () => void safe(checkBootstrap(io, makeToaster($, m), 'compaction', hadBootstrap), false))
     return r
@@ -684,26 +887,30 @@ export const register: Register = on => {
   })
 
   on('session.end', async ($, e, next) => {
-    const io = makeIo($)
-    if (m.root) {
-      await safe(saveSnapshot(io, m.root), false)
-      await safe(saveLeftOff(io, m.root, e.sessionId), undefined)
+    // One short bound covers every plugin's end hook: the small records
+    // first, the plan's snapshot last. A crash never gets here at all, which
+    // is why the checkpoint is also written while the session runs.
+    if (m.sessionId) {
+      m.ckTimer?.cancel()
+      m.ckTimer = undefined
+      await checkpointNow($, m)
+      if (m.root) await safe(saveSnapshot(makeIo($), m.root), false)
     }
     const r = await next(e)
-    if (e.reason === 'clear') {
-      m.poll?.cancel()
-      m.poll = undefined
+    if (e.reason === 'clear' || e.reason === 'resume') {
+      // The process goes on under another session and no session.start
+      // fires: what was tracked is the old session's, kept in its checkpoint.
+      stopTimers(m)
       m.spectating = undefined
-      const now = await safe($.clock.now(), 0)
-      await update($, runA, () => freshRun(now))
-      await update($, timelineA, () => [])
-      await update($, skillsA, () => [])
-      await update($, agentsA, () => [])
-      await update($, ledgerA, () => FRESH_LEDGER)
-      await update($, testsA, () => [])
-      await update($, warningsA, () => [])
-      await update($, resumeA, () => FRESH_RESUME)
-      void startup($, m)
+      m.pendingAssist = false
+      m.lastRef = undefined
+      m.redispatched.clear()
+      m.sessionId = ''
+      m.left = { id: e.sessionId, at: await safe($.clock.now(), 0) }
+      await resetTracked($)
+      if (e.reason === 'clear') void safe(startup($, m), undefined)
+      // A resumed session's id and transcript are in place a moment later.
+      else $.clock.after(400, () => void safe(ensureSession($, m), undefined))
     }
     return r
   })
@@ -728,14 +935,39 @@ export const register: Register = on => {
       ack: (id: string) => void ack($, m, id),
     }
     if (e.surface === 'terminal') {
-      const { Box, Client, Raster } = $.ui.resolve(e)
+      const { Box, Client, Raster, Button } = $.ui.resolve(e)
       const cols = Math.max(10, e.props.bodyColumns)
-      const sparkOn = vm.kind === 'shipped' && vm.motion && w.run.shippedAt !== undefined && now - w.run.shippedAt < SHIP_SPARK_MS
+      // The controls are Buttons of this tree; the Client beside them draws
+      // and animates in exactly the columns that are left.
+      const acts = bandActions(vm, cols)
+      const actsW = actionsWidth(acts)
+      const bandW = Math.max(10, cols - actsW)
+      // Laid out in the columns it has; the tier (how much it says) stays the row's.
+      const drawn = { ...(buildBand(w, m.theme, { columns: bandW, now, working: e.props.isWorking, version: m.version }) ?? vm), tier: vm.tier, columns: bandW }
+      const press = (a: BandAction) => {
+        if (a.do === 'resume') actions.resume()
+        else if (a.do === 'dismiss') actions.dismiss()
+        else if (a.do === 'ack') actions.ack(a.id ?? '')
+        else actions.open(a.tab)
+      }
+      // A collapsed band has nothing on screen: no frame is blitted into it.
+      const sparkOn = !e.props.isCollapsed && vm.kind === 'shipped' && vm.motion && w.run.shippedAt !== undefined && now - w.run.shippedAt < SHIP_SPARK_MS
       if (sparkOn) playSpark($, m, cols)
       return (
-        <Box flexDirection="column">
+        <Box flexDirection="column" width={cols}>
           {sparkOn ? <Raster key="spark" columns={cols} rows={2} cells={encodeCells(sparkFrame(cols, 2, 0, 18, arcRamp(m.theme, 24)), cols, 2)} /> : null}
-          <Client key="band" module="./ui/band/Band.tsx" props={vm} />
+          <Box flexDirection="row" width={cols}>
+            <Box width={bandW} flexShrink={0} overflow="hidden">
+              <Client key="band" module="./ui/band/Band.tsx" props={drawn} width={bandW} />
+            </Box>
+            {acts.length ? (
+              <Box flexDirection="row" columnGap={1} marginLeft={1} flexShrink={0}>
+                {acts.map(a => (
+                  <Button key={a.key} label={a.label} plain {...(a.hotkey ? { hotkey: a.hotkey } : {})} {...(a.color ? { color: a.color } : {})} {...(a.dim ? { dimColor: true } : {})} onPress={() => press(a)} />
+                ))}
+              </Box>
+            ) : null}
+          </Box>
         </Box>
       )
     }
@@ -760,7 +992,8 @@ export const register: Register = on => {
       t: m.theme,
       w,
       now,
-      cols: Math.max(30, e.props.bodyColumns - 6),
+      cols: Math.max(30, e.props.bodyColumns - 2),
+      fullscreen: e.viewport?.isFullscreen === true,
       surface: e.surface,
       focused: e.props.isFocused,
       loading: w.resume.scanning && w.run.lifecycle !== 'live' && w.timeline.length === 0,
@@ -821,6 +1054,7 @@ export const register: Register = on => {
         return { text: `Wrote ${await exportRun($, m)}` }
       case 'ack': {
         const n = await ack($, m, intent.target)
+        touch($, m)
         return { text: n ? `Acknowledged ${n} warning${n === 1 ? '' : 's'}.` : 'No open warning matched.' }
       }
       case 'mode': {
@@ -867,12 +1101,17 @@ export const register: Register = on => {
         await update($, warningsA, () => [])
         await update($, uiA, () => FRESH_UI)
         await update($, demoA, () => FRESH_DEMO)
+        m.lastRef = undefined
+        touch($, m)
         return { text: 'Tracker state cleared for this session. Settings kept.' }
       }
       case 'resume':
         return { text: await doResume($, m, intent.n) }
-      case 'dismiss':
-        return { text: await doDismiss($, m, intent.n, intent.forget) }
+      case 'dismiss': {
+        const text = await doDismiss($, m, intent.n, intent.forget)
+        touch($, m)
+        return { text }
+      }
       case 'scan': {
         if (!m.root) {
           await refreshGit(io)

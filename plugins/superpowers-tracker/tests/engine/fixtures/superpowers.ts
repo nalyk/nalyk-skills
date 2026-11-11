@@ -1,4 +1,6 @@
-// Fixtures in superpowers 6.4.2's real formats. Tests have no file system,
+// Fixtures in superpowers' real formats: 6.4.2's, which 7.0.2 still writes
+// for plans, ledgers, scripts and subagent reports. What 7.x changed (the
+// brainstorming sizes, the builder check) is covered in drift.test.ts. Tests have no file system,
 // so each fixture is a module exporting the file's text.
 
 export const ROOT = '/repo'

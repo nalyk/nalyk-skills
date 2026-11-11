@@ -255,7 +255,7 @@ Without `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1`, the skills still work as prose gu
 
 ---
 
-### superpowers-tracker (v0.1.0)
+### superpowers-tracker (v0.2.0)
 
 A live tracker for [obra/superpowers](https://github.com/obra/superpowers) inside Claude Code: a stage rail in the band above the prompt (brainstorm → spec → plan → execute → review → finish), a seven-tab dashboard pane, toasts when work lands, and resume detection for unfinished plans. An observer first: by default it never blocks, rewrites or delays anything, and never writes inside superpowers' own folders.
 
@@ -265,15 +265,15 @@ A live tracker for [obra/superpowers](https://github.com/obra/superpowers) insid
 
 Install it at user scope: it stays dormant in projects that don't use superpowers and fires on its own where they do.
 
-**Requirements:** Claude Code with mods (function hooks), built and tested on 2.1.289. Built against superpowers 6.4.2; every superpowers format it reads lives in `hooks/patterns.ts`.
+**Requirements:** Claude Code with mods (function hooks), built on 2.1.289 and tested on 2.1.322. Built against superpowers 7.0.2 and still reading 6.4's formats; every superpowers format it reads lives in `hooks/patterns.ts`.
 
 **What it shows:**
 
 | Surface | Content |
 |---------|---------|
-| Band | Brand capsule, path tag (`ARCH`/`BOUNDED`/`SPIKE`), the arc rail with a sub-cell progress bar, ⚖ rulings / ⌁ agents / ⚠ warnings pills; a second row with the running subagent, fix-round pips, elapsed time, the TDD trail and a context sparkline |
+| Band | Brand capsule, path tag (`ARCH`/`BOUNDED`/`SPIKE`), the arc rail with a sub-cell progress bar, ⚖ rulings / ⌁ agents / ⚠ warnings buttons that open their tab; a second row with the running subagent, fix-round pips, elapsed time, the TDD trail and a context sparkline |
 | Pane (`/sp`) | Flow (subway map), Plan (tasks + Gantt strip), Agents (swimlanes), Ledger (rulings, parked findings, deferred minors), Tests (RED→GREEN), Workspace, Warnings |
-| Resume | On every start it scans this checkout and all git worktrees for plans in progress, plans not executed, specs without a plan, a running visual companion, and ledgers still moving in another session; offers the resume text as ghost text and fills it on `r` (never submits) |
+| Resume | On every start it scans this checkout and all git worktrees for plans in progress, plans not executed, specs without a plan, a running visual companion, and ledgers still moving in another session; offers the resume text as ghost text and fills it on `1` (never submits) |
 
 **Modes:** `observe` (default, records only), `assist` (adds a ≤ 3-line ledger note after compaction or a re-dispatch), `strict` (also denies re-dispatching a completed task, parallel implementers, SDD subagents with no model, and source writes before brainstorming approval).
 
@@ -281,7 +281,11 @@ Install it at user scope: it stays dormant in projects that don't use superpower
 
 **Design:** one hue per stage, blended in OKLCH; every text token at ≥ 4.5:1 in dark, light and daltonized themes; single-width glyphs only; motion only while work runs, none when idle or under `NO_COLOR`. Desktop gets an interactive SVG rail; VS Code and mobile a Box/Text version.
 
-61 engine tests (`claude plugin test`), run by `make test`.
+**Keys and clicks:** the resume and critical strips answer `1` `2` `3` straight from an empty prompt; the pane's keys (`1`–`7`, `j`/`k`, `v`, `n`/`p`, `e`, `q`) work while it holds the keyboard (`/sp` opens it focused, `ctrl+x tab` gives it back). Clicks need the fullscreen terminal (`/tui fullscreen`).
+
+**Crash and restart:** the session's tracked state is checkpointed to the plugin store within 4 s of anything recorded and at every turn's end, so a closed terminal, a crash or a kill loses nothing: `claude --resume` restores the checkpoint, replays the transcript after it and re-reads the plan and ledger from disk.
+
+96 engine tests (`claude plugin test`), run by `make test`.
 
 ---
 

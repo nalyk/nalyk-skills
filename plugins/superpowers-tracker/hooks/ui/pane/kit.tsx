@@ -28,6 +28,8 @@ export type PaneCtx = {
   cols: number
   surface: RenderSurface
   focused: boolean
+  /** The fullscreen terminal reports clicks; the main screen does not. */
+  fullscreen: boolean
   loading: boolean
   act: PaneActions
 }

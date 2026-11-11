@@ -13,6 +13,7 @@ import {
   PLAN_TITLE,
   REVIEW_FOCUS,
   ROLE,
+  SCRIPT_CALL,
   STEP_DONE,
   STEP_OPEN,
   TASK_HEADING,
@@ -80,10 +81,13 @@ export const parseLedger = (text: string): ParsedLedger => {
   const out: ParsedLedger = { entries: [], unknown: [] }
   try {
     const lines = text.split(/\r?\n/)
+    let lastTask: number | undefined
     lines.forEach((raw, i) => {
       const line = raw.trim().replace(/^[-*]\s+/, '')
       if (line === '') return
       const at = i + 1
+      const seen = /^Task\s+(\d+):/.exec(line)
+      if (seen) lastTask = Number(seen[1])
       let m: RegExpExecArray | null
       if ((m = L.title.exec(line))) {
         out.planRef = (m[1] ?? '').trim()
@@ -112,12 +116,13 @@ export const parseLedger = (text: string): ParsedLedger => {
           task: Number(m[1]),
           text: rest,
           line: at,
-          clean: /review clean/.test(rest),
+          clean: /review (?:clean|pass(?:ed)?|approved)\b/i.test(rest),
           ...(m[2] ? { commits: m[2] } : {}),
           ...(parked ? { parked: Number(parked[1]) } : {}),
           ...(tests ? { tests } : {}),
         })
       } else if ((m = L.minor.exec(line))) out.entries.push({ kind: 'minor', task: Number(m[1]), text: m[2] ?? '', line: at })
+      else if ((m = L.bareMinor.exec(line))) out.entries.push({ kind: 'minor', text: m[1] ?? '', line: at, ...(lastTask !== undefined ? { task: lastTask } : {}) })
       else if ((m = L.parked.exec(line))) out.entries.push({ kind: 'parked', task: Number(m[1]), text: m[2] ?? '', line: at })
       else if ((m = L.taskRuling.exec(line))) out.entries.push({ kind: 'task-ruling', task: Number(m[1]), text: m[2] ?? '', line: at })
       else if ((m = L.finalMinor.exec(line))) out.entries.push({ kind: 'final-minor', text: m[1] ?? '', line: at })
@@ -136,7 +141,7 @@ export const parseLedger = (text: string): ParsedLedger => {
 
 /** How many ledger lines carry a ruling (every `Ruling:` the final message must list). */
 export const rulingCount = (entries: readonly LedgerEntry[]): number =>
-  entries.filter(e => e.kind === 'ruling' || e.kind === 'task-ruling' || e.kind === 'final-ruling' || e.kind === 'parked').length
+  entries.filter(e => e.kind === 'ruling' || e.kind === 'task-ruling' || e.kind === 'final-ruling' || e.kind === 'parked' || (e.kind === 'table' && /Ruling:/.test(e.text))).length
 
 /** The ledger split as ruling cards: what, why, cost if wrong. */
 export const splitRuling = (text: string): { what: string; why?: string; cost?: string } => {
@@ -282,4 +287,47 @@ export const listedRulings = (answer: string): number => {
     else if (/^\s*#|^\s*[A-Z][^:]{0,40}:\s*$/.test(line) && n > 0) break
   }
   return n
+}
+
+
+export type ScriptCall = { name: string; plan?: string; n?: number; base?: string; dir?: string }
+
+/** The SDD script a Bash command runs and its arguments. The plan is the
+ *  first argument that names a Markdown file once shell variables assigned
+ *  in the same command are filled in; `$P` with no assignment is no plan. */
+export const scriptCall = (command: string): ScriptCall | undefined => {
+  const m = SCRIPT_CALL.exec(command)
+  if (!m) return undefined
+  const vars = new Map<string, string>()
+  for (const a of command.matchAll(/(?:^|[\s;&|(])([A-Za-z_][A-Za-z0-9_]*)=("[^"]*"|'[^']*'|[^\s;&|)]*)/g)) {
+    vars.set(a[1]!, (a[2] ?? '').replace(/^["']|["']$/g, ''))
+  }
+  const fill = (t: string): string | undefined => {
+    let missing = false
+    const out = t.replace(/\$\{?([A-Za-z_][A-Za-z0-9_]*)\}?/g, (_all, name: string) => {
+      const v = vars.get(name)
+      if (v === undefined || /\$/.test(v)) missing = true
+      return v ?? ''
+    })
+    return missing || /[$`]/.test(out) ? undefined : out
+  }
+  const tokens = [...(m[2] ?? '').matchAll(/"([^"]*)"|'([^']*)'|(\S+)/g)].map(t => t[1] ?? t[2] ?? t[3] ?? '')
+  const out: ScriptCall = { name: m[1]! }
+  for (let i = 0; i < tokens.length; i += 1) {
+    const raw = tokens[i]!
+    // 7.0.2: `-C DIR` runs the script as if started in DIR.
+    if (raw === '-C') {
+      const dir = fill(tokens[i + 1] ?? '')
+      if (dir) out.dir = dir
+      i += 1
+      continue
+    }
+    if (raw === '--' || (out.name === 'task-done' && out.base !== undefined)) break
+    const t = fill(raw)
+    if (t === undefined || t.startsWith('-')) continue
+    if (out.plan === undefined && /\.md$/i.test(t)) out.plan = t
+    else if (out.n === undefined && /^\d{1,4}$/.test(t)) out.n = Number(t)
+    else if (out.base === undefined && /^[0-9a-f]{7,40}$/.test(t)) out.base = t
+  }
+  return out
 }

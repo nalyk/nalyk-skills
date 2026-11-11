@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'claude-code/testing'
-import { world, bandProps, paneProps, textOf } from './world'
+import { world, bandProps, paneProps, textOf, SLOW } from './world'
 import { drive } from './drive'
 import { wideChars } from '../../hooks/ui/cells'
 import { buildBand, bandTier } from '../../hooks/ui/viewModel'
@@ -28,7 +28,7 @@ const midPlan = async ($: Parameters<typeof drive>[0], on: Parameters<typeof wor
 }
 
 describe('the band', () => {
-  test('width tiers at 48, 50, 80, 120, 140 and 160 columns, never a wide glyph', async ($, on) => {
+  test('width tiers at 48, 50, 80, 120, 140 and 160 columns, never a wide glyph', SLOW, async ($, on) => {
     const { d } = await midPlan($, on)
     for (const [cols, tier] of [[48, 'xs'], [50, 'sm'], [80, 'sm'], [120, 'md'], [140, 'lg'], [160, 'lg']] as const) {
       const ui = await $.ui.mount({ ...BAND, surface: 'terminal', props: bandProps(cols, { isWorking: true }), viewport: { columns: cols + 5, rows: 40 } })
@@ -45,13 +45,13 @@ describe('the band', () => {
     void d
   })
 
-  test('yields to a survey', async ($, on) => {
+  test('yields to a survey', SLOW, async ($, on) => {
     await midPlan($, on)
     const ui = await $.ui.mount({ ...BAND, surface: 'terminal', props: bandProps(120, { hasSurvey: true }) })
     expect(textOf(await ui.drawn())).toBe('ENGINE')
   })
 
-  test('dark, light and ANSI themes; motion off; every surface draws', async ($, on) => {
+  test('dark, light and ANSI themes; motion off; every surface draws', SLOW, async ($, on) => {
     const { d } = await midPlan($, on)
     for (const theme of ['dark', 'light', 'ansi'] as const) {
       await d.sp(`config theme ${theme}`)
@@ -73,7 +73,7 @@ describe('the band', () => {
     }
   })
 
-  test('a critical warning slides in a red strip with ack', async ($, on) => {
+  test('a critical warning slides in a red strip with ack', SLOW, async ($, on) => {
     const { w, d } = await midPlan($, on)
     w.files[`${WS}/progress.md`] = `${LEDGER_FIX2}Task 2: complete (commits a..b, review clean)\n`
     w.mtimes[`${WS}/progress.md`] = w.clock.now() + 5
@@ -94,7 +94,7 @@ describe('the band', () => {
     expect((performance.now() - t0) / 200).toBeLessThan(2)
   })
 
-  test('no frame faster than 12 fps, and an idle band holds still', async ($, on) => {
+  test('no frame faster than 12 fps, and an idle band holds still', SLOW, async ($, on) => {
     const w = world(on, { installed: true })
     const d = drive($, w)
     await d.start()
@@ -107,7 +107,7 @@ describe('the band', () => {
 })
 
 describe('the pane', () => {
-  test('every tab draws on every surface, with designed empty states', async ($, on) => {
+  test('every tab draws on every surface, with designed empty states', SLOW, async ($, on) => {
     const w = world(on, { installed: true })
     const d = drive($, w)
     await d.start()
@@ -125,7 +125,7 @@ describe('the pane', () => {
     }
   })
 
-  test('number hotkeys switch tabs; mid-plan tabs show their data', async ($, on) => {
+  test('number hotkeys switch tabs; mid-plan tabs show their data', SLOW, async ($, on) => {
     await midPlan($, on)
     const ui = await $.ui.mount({ ...PANE, surface: 'terminal', props: paneProps(140) })
     await ui.press({ key: 'tab2' })
@@ -140,12 +140,27 @@ describe('the pane', () => {
     await ui.press({ key: 'tab4' })
     expect(textOf(await ui.drawn())).toContain('P R E - F L I G H T')
     await ui.press({ key: 'tab6' })
-    expect(textOf(await ui.drawn())).toContain('built against 6.4.2')
+    expect(textOf(await ui.drawn())).toContain('built against 7.0.2')
     await ui.press({ key: 'tabnext' })
     expect(textOf(await ui.drawn())).toContain('No process warnings.')
   })
 
-  test('when the pane cannot be placed, /sp says why', async ($, on) => {
+  test('without the keyboard the pane shows no dead hotkey, and says how to get the keys', SLOW, async ($, on) => {
+    await midPlan($, on)
+    const off = await $.ui.mount({ ...PANE, surface: 'terminal', props: { ...paneProps(140), isFocused: false } })
+    const tree = JSON.stringify(await off.drawn())
+    expect(tree).not.toContain('"hotkey"')
+    expect(textOf(await off.drawn())).toContain('ctrl+x tab')
+    // The tabs are still there to click.
+    await off.press({ key: 'tab2' })
+    expect(textOf(await off.drawn())).toContain('T A S K S')
+    await off.unmount()
+    const on2 = await $.ui.mount({ ...PANE, surface: 'terminal', props: paneProps(140) })
+    expect(JSON.stringify(await on2.drawn())).toContain('"hotkey":"3"')
+    expect(textOf(await on2.drawn())).toContain('● keys')
+  })
+
+  test('when the pane cannot be placed, /sp says why', SLOW, async ($, on) => {
     const w = world(on, { installed: true, unplacedReason: 'below 110 columns (now 90)' })
     const d = drive($, w)
     await d.start()
@@ -154,14 +169,14 @@ describe('the pane', () => {
 })
 
 describe('commands', () => {
-  test('/sp export writes a Markdown report with a self-ignoring folder', async ($, on) => {
+  test('/sp export writes a Markdown report with a self-ignoring folder', SLOW, async ($, on) => {
     const { w, d } = await midPlan($, on)
     const out = await d.sp('export')
     expect(out).toContain('/repo/.superpowers/tracker/sess-1.md')
     expect(w.files['/repo/.superpowers/tracker/.gitignore']).toBe('*\n')
     expect(w.files['/repo/.superpowers/tracker/sess-1.md']).toContain('| 1 | Backoff calculator | done |')
   })
-  test('/sp ledger, /sp config and /sp band', async ($, on) => {
+  test('/sp ledger, /sp config and /sp band', SLOW, async ($, on) => {
     const { d } = await midPlan($, on)
     expect(await d.sp('ledger')).toContain('Deferred minors:')
     expect(await d.sp('config pollMs 100')).toBe('pollMs takes a number ≥ 500')
@@ -173,7 +188,7 @@ describe('commands', () => {
 })
 
 describe('the demo', () => {
-  test('plays every state over 60 s and never touches real state', async ($, on) => {
+  test('plays every state over 60 s and never touches real state', SLOW, async ($, on) => {
     const w = world(on, { installed: true })
     const d = drive($, w)
     await d.start()

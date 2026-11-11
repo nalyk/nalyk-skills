@@ -55,13 +55,6 @@ export const advance = (run: Run, to: StageId, now: number, inferred = false): R
   return { ...run, stage: to, stageInferred: inferred, pulseAt: now }
 }
 
-/** A new piece of work after a ship starts the rail over. */
-export const restartIfShipped = (run: Run, now: number): Run => {
-  if (run.lifecycle !== 'shipped' && run.shippedAt === undefined) return run
-  const { shippedAt: _s, finalReview: _f, finishing: _g, shipSummary: _m, ...rest } = run
-  return { ...rest, lifecycle: 'live', stage: 'brainstorm', stageInferred: true, tasks: [], startedAt: now, pulseAt: now }
-}
-
 /** Fraction of the execute segment filled: done tasks, plus a share for the one running. */
 export const executeProgress = (run: Run): { done: number; total: number; fraction: number } => {
   const total = run.tasks.length
@@ -72,6 +65,9 @@ export const executeProgress = (run: Run): { done: number; total: number; fracti
   return { done, total, fraction: Math.min(1, (done + partial * 0.999) / total) }
 }
 
-/** Lifecycle moves: dormant → armed → resumable/live → shipped → armed. */
+/** Lifecycle moves: dormant → armed → resumable/live → shipped. A shipped
+ *  run stays shipped through its own tail (the finishing skill, a last
+ *  review-package, cleanup): only evidence of new work (brainstorming, a new
+ *  spec or plan) starts another run, and the signals that see it do that. */
 export const goLive = (run: Run, now: number): Run =>
-  run.lifecycle === 'live' ? run : { ...restartIfShipped(run, now), lifecycle: 'live', pulseAt: now }
+  run.lifecycle === 'live' || run.lifecycle === 'shipped' ? run : { ...run, lifecycle: 'live', pulseAt: now }

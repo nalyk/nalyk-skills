@@ -12,7 +12,6 @@ import {
   OUT_TASK_DONE_LEDGER,
   OUT_TASK_START_BASE,
   OUT_TASK_START_BRIEF,
-  SCRIPT_ARGS,
   SKILL_FILE,
   SP_PRIVATE,
   VERIFY_HINT,
@@ -21,7 +20,7 @@ import {
   planFile,
   specFile,
 } from '../patterns'
-import { parseTestOutput } from '../parsers'
+import { parseTestOutput, scriptCall } from '../parsers'
 import { CAP, capTail } from '../state'
 import { advance, goLive } from '../stages'
 import {
@@ -36,7 +35,7 @@ import {
   type Toaster,
 } from '../core'
 import { onSkill } from './skills'
-import { refreshLedger, refreshPlan, resolveWorkspace } from './plan'
+import { adoptPlan, archiveAndRestart, planOfWorkspace, refreshLedger, resolveExisting, resolveWorkspace, samePlan } from './plan'
 
 export type ToolEvent = {
   tool: string
@@ -118,16 +117,19 @@ const onWrite = async (io: Io, toast: Toaster, ev: ToolEvent): Promise<void> => 
   const now = await io.now()
 
   if (specFile(settings.specDir).test(rel)) {
+    // A new design doc after a ship is new work: the shipped run is filed.
+    const held = await io.state.run.get()
+    if (held.lifecycle === 'shipped' && held.specPath !== rel) await archiveAndRestart(io, 'brainstorm', ev.replay === true)
     await io.state.run.set(r => advance(goLive({ ...r, specPath: rel }, now), 'spec', now))
     await note(io, { kind: 'artifact', label: `spec ${rel.split('/').at(-1)}`, ok: true })
     return
   }
   if (planFile(settings.planDir).test(rel)) {
     const before = await io.state.run.get()
+    if (!(await adoptPlan(io, path, ev.replay === true))) return
     await io.state.run.set(r => advance(goLive(r, now), 'plan', now))
-    await refreshPlan(io, path)
     const after = await io.state.run.get()
-    if (before.planPath !== after.planPath && !ev.replay) {
+    if (!(before.planPath && samePlan(before.planPath, path)) && !ev.replay) {
       toast('◆', 'Plan written', `${after.tasks.length} tasks · ${after.planTitle ?? rel}`)
     }
     if (env.repoRoot && !after.workspace) {
@@ -179,23 +181,33 @@ const onBash = async (io: Io, toast: Toaster, ev: ToolEvent): Promise<void> => {
   let touchedLedger = false
 
   // SDD and executing-plans scripts.
-  const script = SCRIPT_ARGS.exec(command)
+  // What the command's output says, and the plan it names: the argument
+  // when it is a file that exists (from the script's -C folder, a `cd` in
+  // the command, the shell's folder or the repo root), else the one the
+  // workspace's own marker names. Never a word that is no file.
+  const called = scriptCall(command)
+  const brief = called ? OUT_TASK_BRIEF.exec(out) : null
+  const startBrief = called ? OUT_TASK_START_BRIEF.exec(out) : null
+  const workspace = !called ? undefined : brief?.[1] ? dirname(brief[1]) : startBrief?.[1] ? dirname(startBrief[1].trim()) : WORKSPACE_DIR.exec(out)?.[1]
+  let plan: string | undefined
+  if (called) {
+    const env = await io.state.env.get()
+    const cdTo = /(?:^|[\s;&|(])cd\s+("[^"]+"|'[^']+'|[^\s;&|)]+)/.exec(command)?.[1]?.replace(/^["']|["']$/g, '')
+    const bases = [called.dir?.startsWith('/') ? called.dir : undefined, cdTo?.startsWith('/') ? cdTo : undefined, cwd, env.repoRoot]
+    plan = (called.plan ? await resolveExisting(io, called.plan, bases) : undefined) ?? (workspace ? await planOfWorkspace(io, workspace) : undefined)
+  }
+  // A command that only looks like one of the scripts names no plan that
+  // exists and prints nothing a script prints: it is not evidence.
+  const script = called && (plan || workspace || OUT_TASK_DONE_LEDGER.test(out) || OUT_TASK_DONE_FAIL.test(out)) ? called : undefined
   if (script) {
-    const [, name, planArg, nArg, baseArg] = script
-    const plan = planArg ? absolute(cwd, planArg.replace(/^["']|["']$/g, '')) : undefined
-    const n = nArg ? Number(nArg) : undefined
+    const { name, n, base: baseArg } = script
     await io.state.run.set(r => goLive(r, now))
-    const wsLine = WORKSPACE_DIR.exec(out)
-    const brief = OUT_TASK_BRIEF.exec(out)
-    const startBrief = OUT_TASK_START_BRIEF.exec(out)
-    const workspace = brief?.[1] ? dirname(brief[1]) : startBrief?.[1] ? dirname(startBrief[1].trim()) : wsLine?.[1]
+    if (plan) await adoptPlan(io, plan, ev.replay === true)
     await io.state.run.set(r => ({
       ...r,
       ...(workspace ? { workspace } : {}),
-      ...(plan ? { planPath: plan } : {}),
       ...(name === 'task-start' || name === 'task-done' ? (r.executor ? {} : { executor: 'inline' as const }) : {}),
     }))
-    if (plan) await refreshPlan(io, plan)
     if (n !== undefined && (name === 'task-brief' || name === 'task-start')) {
       const base = OUT_TASK_START_BASE.exec(out)?.[1] ?? baseArg
       await io.state.run.set(r => advance({ ...r, currentTask: n, ...(base ? { base } : {}) }, 'execute', now))
@@ -237,7 +249,7 @@ const onBash = async (io: Io, toast: Toaster, ev: ToolEvent): Promise<void> => {
       if (/\s-D\b/.test(command)) f.option = 'discard'
     }
     if (G.merge.test(command) && !f.option) f.option = 'merge'
-    if (G.prCreate.test(command) || /\bgit\s+push\s+(?:-u|--set-upstream)\b/.test(command)) f.option = 'pr'
+    if (G.prCreate.test(command) || G.pushForPr.test(command)) f.option = 'pr'
     if (G.workspaceDelete.test(command) && !ev.isError) f.workspaceDeleted = true
     return { ...r, finishing: f }
   })

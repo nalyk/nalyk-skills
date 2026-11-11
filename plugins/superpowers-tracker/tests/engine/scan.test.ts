@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'claude-code/testing'
-import { world } from './world'
+import { world, bandProps, SLOW } from './world'
 import { drive } from './drive'
 import {
   IMPLEMENTER_DONE,
@@ -27,7 +27,7 @@ const midExec = (base = ROOT, ledgerAge = 3 * H) => ({
 })
 
 describe('startup scan', () => {
-  test('a mid-execution ledger in the checkout: resume capsule, toast, suggestion', async ($, on) => {
+  test('a mid-execution ledger in the checkout: resume capsule, toast, suggestion', SLOW, async ($, on) => {
     const w = world(on, { installed: true, now: NOW, ...midExec() })
     const d = drive($, w)
     await d.start()
@@ -39,7 +39,7 @@ describe('startup scan', () => {
     expect(w.suggested[0]).toBe(`Continue executing ${PLAN_REL} with superpowers:subagent-driven-development. The ledger shows Task 1 complete and Task 2 at fix round 2/5.`)
   })
 
-  test('a mid-execution ledger inside a .worktrees/ worktree is found from the main checkout', async ($, on) => {
+  test('a mid-execution ledger inside a .worktrees/ worktree is found from the main checkout', SLOW, async ($, on) => {
     const tree = `${ROOT}/.worktrees/feature-x`
     const w = world(on, { installed: true, now: NOW, worktrees: [tree], ...midExec(tree) })
     const d = drive($, w)
@@ -49,7 +49,7 @@ describe('startup scan', () => {
     expect(scan).toContain(`in ${tree}`)
   })
 
-  test('an orphaned workspace is shown dimmed', async ($, on) => {
+  test('an orphaned workspace is shown dimmed', SLOW, async ($, on) => {
     const w = world(on, {
       installed: true,
       now: NOW,
@@ -61,7 +61,7 @@ describe('startup scan', () => {
     expect(await d.sp('scan')).toContain('orphan · gone')
   })
 
-  test('a plan written but never executed, and a spec with no plan', async ($, on) => {
+  test('a plan written but never executed, and a spec with no plan', SLOW, async ($, on) => {
     const w = world(on, {
       installed: true,
       now: NOW,
@@ -78,10 +78,12 @@ describe('startup scan', () => {
     expect(vm?.resume?.more).toBe(1)
   })
 
-  test('a live companion shows its URL; a dead one is stale', async ($, on) => {
-    const live = `${ROOT}/.superpowers/brainstorm/4242-1706000000/state`
+  test('a live companion shows its URL; a dead one is stale', SLOW, async ($, on) => {
+    // The folder is named for the launcher's pid, which exits once the
+    // server is in the background: the server's own pid is in state/server.pid.
+    const live = `${ROOT}/.superpowers/brainstorm/7777-1706000000/state`
     const dead = `${ROOT}/.superpowers/brainstorm/9999-1706000000/state`
-    const w = world(on, { installed: true, now: NOW, files: { [`${live}/server-info`]: SERVER_INFO, [`${dead}/server-info`]: SERVER_INFO } })
+    const w = world(on, { installed: true, now: NOW, files: { [`${live}/server-info`]: SERVER_INFO, [`${live}/server.pid`]: '4242\n', [`${dead}/server-info`]: SERVER_INFO, [`${dead}/server.pid`]: '5555\n' } })
     const d = drive($, w)
     await d.start()
     const scan = await d.sp('scan')
@@ -90,7 +92,7 @@ describe('startup scan', () => {
     expect(scan).toContain('http://localhost:52341/?key=ab12')
   })
 
-  test('a ledger that keeps moving is followed read-only, and strict never denies because of it', async ($, on) => {
+  test('a ledger that keeps moving is followed read-only, and strict never denies because of it', SLOW, async ($, on) => {
     const w = world(on, { installed: true, now: NOW, ...midExec(ROOT, 30_000) })
     const d = drive($, w)
     await d.start()
@@ -104,7 +106,7 @@ describe('startup scan', () => {
     expect(spawn.deny).toBeUndefined()
   })
 
-  test('the scan never delays session.start, and a second start reads no file again', async ($, on) => {
+  test('the scan never delays session.start, and a second start reads no file again', SLOW, async ($, on) => {
     let lists = 0
     const w = world(on, { installed: true, now: NOW, ...midExec(), listDelayMs: 5_000, onRead: path => void (path.startsWith(ROOT) && (lists += 1)) })
     const d = drive($, w)
@@ -126,7 +128,52 @@ describe('startup scan', () => {
 })
 
 describe('resume actions', () => {
-  test('/sp resume fills the prompt (replace), never submits', async ($, on) => {
+  test('the resume strip: digit Buttons in the hook\'s own tree, each one acting', SLOW, async ($, on) => {
+    const w = world(on, { installed: true, now: NOW, ...midExec() })
+    const d = drive($, w)
+    await d.start()
+    const ui = await $.ui.mount({ plugin: 'superpowers-tracker', surface: 'terminal', component: 'AbovePrompt', props: bandProps(120) })
+    const tree = JSON.stringify(await ui.drawn())
+    // A digit answers from an empty prompt, as a survey's does; a letter would
+    // need the band focused first. And no Button sits inside the Client.
+    for (const [key, digit] of [['resume', '1'], ['open', '2'], ['dismiss', '3']] as const) {
+      expect(tree).toMatch(new RegExp(`"type":"Button","props":\\{[^}]*"key":"${key}"[^}]*"hotkey":"${digit}"`))
+    }
+    expect(JSON.stringify(await ui.drawn({ in: 'band' }))).not.toContain('"type":"Button"')
+    await ui.press({ key: 'open' })
+    expect(w.opened).toContain('superpowers-tracker')
+    await ui.press({ key: 'resume' })
+    expect(w.filled.at(-1)).toContain('replace:Continue executing')
+    await ui.press({ key: 'dismiss' })
+    await ui.unmount()
+    expect((await d.band())?.kind).toBe('armed')
+  })
+
+  test('the band and its Buttons take exactly the row they are given, at every width', SLOW, async ($, on) => {
+    const w = world(on, { installed: true, now: NOW, ...midExec() })
+    const d = drive($, w)
+    await d.start()
+    for (const cols of [48, 60, 72, 100, 140, 200]) {
+      const ui = await $.ui.mount({ plugin: 'superpowers-tracker', surface: 'terminal', component: 'AbovePrompt', props: bandProps(cols) })
+      const found: { label: string; hot: boolean }[] = []
+      let bandW = NaN
+      const walk = (n: unknown): void => {
+        if (Array.isArray(n)) return n.forEach(walk)
+        if (!n || typeof n !== 'object') return
+        const o = n as { type?: string; props?: Record<string, unknown>; children?: unknown }
+        if (o.type === 'Button') found.push({ label: String(o.props?.label ?? ''), hot: typeof o.props?.hotkey === 'string' })
+        if (o.type === 'Client') bandW = Number(o.props?.width)
+        walk(o.children)
+      }
+      walk(await ui.drawn())
+      // Each plain Button is `1: label` or the label, one cell apart, one cell from the band.
+      const buttons = found.reduce((n, b) => n + [...b.label].length + (b.hot ? 3 : 0), 0) + found.length
+      expect(bandW + buttons).toBe(cols)
+      await ui.unmount()
+    }
+  })
+
+  test('/sp resume fills the prompt (replace), never submits', SLOW, async ($, on) => {
     const w = world(on, { installed: true, now: NOW, ...midExec() })
     const d = drive($, w)
     await d.start()
@@ -136,7 +183,7 @@ describe('resume actions', () => {
     expect(w.submitted).toEqual([])
   })
 
-  test('dismiss --forget survives a restart until the ledger changes', async ($, on) => {
+  test('dismiss --forget survives a restart until the ledger changes', SLOW, async ($, on) => {
     const w = world(on, { installed: true, now: NOW, ...midExec() })
     const d = drive($, w)
     await d.start()
@@ -151,7 +198,7 @@ describe('resume actions', () => {
     expect((await d.band())?.kind).toBe('resume')
   })
 
-  test('a --resume transcript is replayed into the state a live session would have', async ($, on) => {
+  test('a --resume transcript is replayed into the state a live session would have', SLOW, async ($, on) => {
     const messages = [
       { role: 'user', text: 'execute the plan', toolUses: [] },
       {
@@ -176,7 +223,7 @@ describe('resume actions', () => {
     expect(status).toContain('executor subagent-driven-development')
   })
 
-  test('state survives the module loading again (session.start re-fires)', async ($, on) => {
+  test('state survives the module loading again (session.start re-fires)', SLOW, async ($, on) => {
     const w = world(on, { installed: true, now: NOW })
     const d = drive($, w)
     await d.start()

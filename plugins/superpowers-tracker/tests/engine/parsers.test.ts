@@ -35,7 +35,9 @@ describe('skill names', () => {
     expect(normalizeSkill('superpowers:subagent-driven-development')).toBe('subagent-driven-development')
     expect(normalizeSkill('subagent-driven-development')).toBe('subagent-driven-development')
     expect(normalizeSkill('/superpowers:writing-plans')).toBe('writing-plans')
-    expect(normalizeSkill('other:brainstorming')).toBe('brainstorming')
+    // Another plugin's skill of the same name is not superpowers.
+    expect(normalizeSkill('other:brainstorming')).toBeUndefined()
+    expect(normalizeSkill('proctor:subagent-driven-development')).toBeUndefined()
     expect(normalizeSkill('frontend-design')).toBeUndefined()
     expect(normalizeSkill(undefined)).toBeUndefined()
   })
