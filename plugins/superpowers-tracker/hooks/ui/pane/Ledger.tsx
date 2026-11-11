@@ -1,6 +1,7 @@
 // Tab 4, Ledger: rulings as cards (what in bold, why, cost if wrong in muted
 // italic), parked findings and deferred minors as lists, the pre-flight table.
 
+import { taskLabel } from '../../taskid'
 import type { RenderElement, RenderNode } from 'claude-code'
 import { Empty, ParseError, Section, type PaneCtx } from './kit'
 import { splitRuling } from '../../parsers'
@@ -30,7 +31,7 @@ export const Ledger = (c: PaneCtx): RenderElement => {
           <Box flexDirection="row" marginBottom={1}>
             <Text color={c.t.warn}>{'▎'}</Text>
             <Box flexDirection="column" paddingLeft={1}>
-              <Text bold wrap="wrap">{`${e.task !== undefined ? `Task ${e.task} · ` : e.kind === 'final-ruling' ? 'Final · ' : ''}${r.what}`}</Text>
+              <Text bold wrap="wrap">{`${e.task !== undefined ? `Task ${taskLabel(e.task)} · ` : e.kind === 'final-ruling' ? 'Final · ' : ''}${r.what}`}</Text>
               {r.why ? <Text wrap="wrap">{r.why}</Text> : null}
               {r.cost ? <Text color={c.t.muted} italic wrap="wrap">{`cost if wrong: ${r.cost}`}</Text> : null}
             </Box>
@@ -39,12 +40,12 @@ export const Ledger = (c: PaneCtx): RenderElement => {
       })}
       {parked.length ? Section(c, 'Parked', `${parked.length}`) : null}
       {parked.map(e => (
-        <Text wrap="truncate-end"><Text color={c.t.warn}>{'⚠ '}</Text>{`Task ${e.task} · ${e.text}`}</Text>
+        <Text wrap="truncate-end"><Text color={c.t.warn}>{'⚠ '}</Text>{`Task ${taskLabel(e.task ?? 0)} · ${e.text}`}</Text>
       ))}
       {Section(c, 'Deferred minors', `${minors.length}`)}
       {minors.length === 0 ? <Text color={c.t.muted}>None deferred.</Text> : null}
       {minors.map(e => (
-        <Text wrap="truncate-end" color={c.t.muted}>{`· ${e.task !== undefined ? `Task ${e.task}` : 'Final'}: ${e.text}`}</Text>
+        <Text wrap="truncate-end" color={c.t.muted}>{`· ${e.task !== undefined ? `Task ${taskLabel(e.task)}` : 'Final'}: ${e.text}`}</Text>
       ))}
       {fixed.length ? Section(c, 'Final fixes', `${fixed.length}`) : null}
       {fixed.map(e => (

@@ -1,6 +1,7 @@
 // Shared moves on the tracker's state: timeline rows, warnings, the pulse,
 // the lifecycle and task rows. Every function takes the Io, never `$`.
 
+import { taskLabel } from './taskid'
 import type { Run, Severity, StageId, TaskRow, TimelineRow } from '../types'
 import type { Io } from './io'
 import { CAP, capTail } from './state'
@@ -57,7 +58,7 @@ export const patchTask = async (io: Io, n: number, fn: (t: TaskRow) => TaskRow):
   })
 }
 
-export const blankTask = (n: number, name = `Task ${n}`): TaskRow => ({
+export const blankTask = (n: number, name = `Task ${taskLabel(n)}`): TaskRow => ({
   n,
   name,
   steps: 0,

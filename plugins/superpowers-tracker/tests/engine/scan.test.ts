@@ -34,7 +34,7 @@ describe('startup scan', () => {
     await d.flush()
     const vm = await d.band()
     expect(vm?.kind).toBe('resume')
-    expect(vm?.resume).toMatchObject({ title: 'Retry Policy', kind: 'mid-exec', done: 1, total: 3, current: 2, fixRound: 2, ago: '3h ago' })
+    expect(vm?.resume).toMatchObject({ title: 'Retry Policy', kind: 'mid-exec', done: 1, total: 3, current: '2', fixRound: 2, ago: '3h ago' })
     expect(w.toasts).toContain('● Found unfinished plan · Retry Policy · 1 of 3 tasks done')
     expect(w.suggested[0]).toBe(`Continue executing ${PLAN_REL} with superpowers:subagent-driven-development. The ledger shows Task 1 complete and Task 2 at fix round 2/5.`)
   })
@@ -171,6 +171,29 @@ describe('resume actions', () => {
       expect(bandW + buttons).toBe(cols)
       await ui.unmount()
     }
+  })
+
+  test('brainstorming in a session that was only offered a plan starts at Brainstorm, not at that plan\'s stage', SLOW, async ($, on) => {
+    const w = world(on, { installed: true, now: NOW, ...midExec() })
+    const d = drive($, w)
+    await d.start()
+    expect((await d.band())?.kind).toBe('resume')
+    await d.skill('superpowers:brainstorming')
+    const vm = await d.band()
+    expect(vm?.kind).toBe('live')
+    expect(vm?.rail.find(x => x.state === 'current')?.id).toBe('brainstorm')
+    expect(vm?.progress).toBeNull()
+    // Picking the plan up instead continues it where the ledger left it.
+  })
+
+  test('executing the offered plan continues it where the ledger left it', SLOW, async ($, on) => {
+    const w = world(on, { installed: true, now: NOW, ...midExec() })
+    const d = drive($, w)
+    await d.start()
+    await d.skill('superpowers:subagent-driven-development')
+    const vm = await d.band()
+    expect(vm?.rail.find(x => x.state === 'current')?.id).toBe('execute')
+    expect(vm?.progress).toMatchObject({ done: 1, total: 3 })
   })
 
   test('/sp resume fills the prompt (replace), never submits', SLOW, async ($, on) => {

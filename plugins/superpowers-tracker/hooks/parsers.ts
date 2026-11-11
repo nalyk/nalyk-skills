@@ -19,6 +19,7 @@ import {
   TASK_HEADING,
   TASK_N,
 } from './patterns'
+import { TASK_ID, taskKey } from './taskid'
 
 export type PlanTask = { n: number; name: string; steps: number; stepsDone: number }
 export type ParsedPlan = {
@@ -45,7 +46,7 @@ export const parsePlan = (text: string): ParsedPlan => {
       if (inFence) continue
       const heading = TASK_HEADING.exec(line)
       if (heading) {
-        current = { n: Number(heading[1]), name: (heading[2] ?? '').trim() || `Task ${heading[1]}`, steps: 0, stepsDone: 0 }
+        current = { n: taskKey(heading[1] ?? ''), name: (heading[2] ?? '').trim() || `Task ${heading[1]}`, steps: 0, stepsDone: 0 }
         if (!out.tasks.some(t => t.n === current!.n)) out.tasks.push(current)
         continue
       }
@@ -86,8 +87,8 @@ export const parseLedger = (text: string): ParsedLedger => {
       const line = raw.trim().replace(/^[-*]\s+/, '')
       if (line === '') return
       const at = i + 1
-      const seen = /^Task\s+(\d+):/.exec(line)
-      if (seen) lastTask = Number(seen[1])
+      const seen = L.anyTask.exec(line)
+      if (seen) lastTask = taskKey(seen[1] ?? '')
       let m: RegExpExecArray | null
       if ((m = L.title.exec(line))) {
         out.planRef = (m[1] ?? '').trim()
@@ -99,7 +100,7 @@ export const parseLedger = (text: string): ParsedLedger => {
         const commits = /commits\s+([0-9a-f]+\.\.[0-9a-f]+)/.exec(tail)?.[1]
         out.entries.push({
           kind: 'fix-round',
-          task: Number(m[1]),
+          task: taskKey(m[1] ?? ''),
           round: Number(m[2]),
           addressed: Number(m[3]),
           open: Number(m[4]),
@@ -113,7 +114,7 @@ export const parseLedger = (text: string): ParsedLedger => {
         const tests = /^tests:\s*(.+)$/.exec(rest)?.[1]
         out.entries.push({
           kind: 'complete',
-          task: Number(m[1]),
+          task: taskKey(m[1] ?? ''),
           text: rest,
           line: at,
           clean: /review (?:clean|pass(?:ed)?|approved)\b/i.test(rest),
@@ -121,10 +122,10 @@ export const parseLedger = (text: string): ParsedLedger => {
           ...(parked ? { parked: Number(parked[1]) } : {}),
           ...(tests ? { tests } : {}),
         })
-      } else if ((m = L.minor.exec(line))) out.entries.push({ kind: 'minor', task: Number(m[1]), text: m[2] ?? '', line: at })
+      } else if ((m = L.minor.exec(line))) out.entries.push({ kind: 'minor', task: taskKey(m[1] ?? ''), text: m[2] ?? '', line: at })
       else if ((m = L.bareMinor.exec(line))) out.entries.push({ kind: 'minor', text: m[1] ?? '', line: at, ...(lastTask !== undefined ? { task: lastTask } : {}) })
-      else if ((m = L.parked.exec(line))) out.entries.push({ kind: 'parked', task: Number(m[1]), text: m[2] ?? '', line: at })
-      else if ((m = L.taskRuling.exec(line))) out.entries.push({ kind: 'task-ruling', task: Number(m[1]), text: m[2] ?? '', line: at })
+      else if ((m = L.parked.exec(line))) out.entries.push({ kind: 'parked', task: taskKey(m[1] ?? ''), text: m[2] ?? '', line: at })
+      else if ((m = L.taskRuling.exec(line))) out.entries.push({ kind: 'task-ruling', task: taskKey(m[1] ?? ''), text: m[2] ?? '', line: at })
       else if ((m = L.finalMinor.exec(line))) out.entries.push({ kind: 'final-minor', text: m[1] ?? '', line: at })
       else if ((m = L.finalRuling.exec(line))) out.entries.push({ kind: 'final-ruling', text: m[1] ?? '', line: at })
       else if ((m = L.finalFixed.exec(line))) out.entries.push({ kind: 'final-fixed', text: m[1] ?? '', line: at })
@@ -186,7 +187,7 @@ export const classifyRole = (description: string, prompt: string): Role => {
 
 export const taskOf = (description: string, prompt = ''): number | undefined => {
   const m = TASK_N.exec(description) ?? TASK_N.exec(prompt.slice(0, 2000))
-  return m ? Number(m[1]) : undefined
+  return m ? taskKey(m[1] ?? '') : undefined
 }
 
 export const fixRoundOf = (description: string): number | undefined => {
@@ -290,6 +291,8 @@ export const listedRulings = (answer: string): number => {
 }
 
 
+const ID_ONLY = new RegExp(`^${TASK_ID}$`)
+
 export type ScriptCall = { name: string; plan?: string; n?: number; base?: string; dir?: string }
 
 /** The SDD script a Bash command runs and its arguments. The plan is the
@@ -326,7 +329,7 @@ export const scriptCall = (command: string): ScriptCall | undefined => {
     const t = fill(raw)
     if (t === undefined || t.startsWith('-')) continue
     if (out.plan === undefined && /\.md$/i.test(t)) out.plan = t
-    else if (out.n === undefined && /^\d{1,4}$/.test(t)) out.n = Number(t)
+    else if (out.n === undefined && t.length <= 8 && ID_ONLY.test(t) && !/^[0-9a-f]{7,8}$/.test(t)) out.n = taskKey(t)
     else if (out.base === undefined && /^[0-9a-f]{7,40}$/.test(t)) out.base = t
   }
   return out

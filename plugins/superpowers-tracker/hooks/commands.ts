@@ -1,6 +1,7 @@
 // /sp and its subcommands: parsed into intents (pure), plus the texts the
 // plain-text commands print. register.tsx carries the intents out.
 
+import { taskLabel } from './taskid'
 import type { AutoOpen, BandMode, Mode, Settings, ThemeChoice } from '../types'
 import type { World } from './ui/viewModel'
 import { statusText } from './ui/viewModel'
@@ -166,11 +167,11 @@ export const ledgerText = (w: World): string => {
   if (!rulings.length && !parked.length) out.push('- none')
   for (const r of [...rulings, ...parked]) {
     const s = splitRuling(r.text)
-    out.push(`- ${r.task !== undefined ? `Task ${r.task}: ` : ''}${r.kind === 'parked' ? 'parked — ' : ''}${s.what}${s.why ? ` — ${s.why}` : ''}${s.cost ? ` — cost if wrong: ${s.cost}` : ''}`)
+    out.push(`- ${r.task !== undefined ? `Task ${taskLabel(r.task)}: ` : ''}${r.kind === 'parked' ? 'parked — ' : ''}${s.what}${s.why ? ` — ${s.why}` : ''}${s.cost ? ` — cost if wrong: ${s.cost}` : ''}`)
   }
   out.push('', 'Deferred minors:')
   if (!minors.length) out.push('- none')
-  for (const m of minors) out.push(`- ${m.task !== undefined ? `Task ${m.task}` : 'Final'}: ${m.text}`)
+  for (const m of minors) out.push(`- ${m.task !== undefined ? `Task ${taskLabel(m.task)}` : 'Final'}: ${m.text}`)
   return out.join('\n')
 }
 
@@ -197,7 +198,7 @@ export const exportMarkdown = (w: World, now: number, sessionId: string): string
     '',
     '| # | Task | Status | Fix rounds | Commits | Duration | Subagents |',
     '|---|------|--------|------------|---------|----------|-----------|',
-    ...run.tasks.map(t => `| ${t.n} | ${t.name.replace(/\|/g, '\\|')} | ${t.status} | ${t.fixRound} | ${t.commits ?? ''} | ${t.startedAt ? fmtDuration((t.doneAt ?? now) - t.startedAt) : ''} | ${t.agents} |`),
+    ...run.tasks.map(t => `| ${taskLabel(t.n)} | ${t.name.replace(/\|/g, '\\|')} | ${t.status} | ${t.fixRound} | ${t.commits ?? ''} | ${t.startedAt ? fmtDuration((t.doneAt ?? now) - t.startedAt) : ''} | ${t.agents} |`),
     '',
     '## Subagents',
     '',
@@ -211,7 +212,7 @@ export const exportMarkdown = (w: World, now: number, sessionId: string): string
     '',
     '## Tests',
     '',
-    ...w.tests.map(t => `- ${t.ok ? 'pass' : 'FAIL'} \`${t.command}\`${t.task !== undefined ? ` (Task ${t.task})` : ''}${t.passed !== undefined ? ` · ${t.passed} passed` : ''}${t.failed ? ` · ${t.failed} failed` : ''}`),
+    ...w.tests.map(t => `- ${t.ok ? 'pass' : 'FAIL'} \`${t.command}\`${t.task !== undefined ? ` (Task ${taskLabel(t.task)})` : ''}${t.passed !== undefined ? ` · ${t.passed} passed` : ''}${t.failed ? ` · ${t.failed} failed` : ''}`),
     '',
     '## Warnings',
     '',

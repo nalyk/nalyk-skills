@@ -87,6 +87,26 @@ describe('the band', () => {
     expect((await d.band())?.critical).toBeNull()
   })
 
+  test('motion that marks an event: lit cell by cell in truecolor, inverse video under ANSI, still when off', SLOW, async ($, on) => {
+    const { d } = await midPlan($, on)
+    const connectors = async () => {
+      const ui = await $.ui.mount({ ...BAND, surface: 'terminal', props: bandProps(140) })
+      const tree = JSON.stringify(await ui.drawn({ in: 'band' }))
+      await ui.unmount()
+      // One Text per cell: a connector cell is a lone ━, a filled bar cell a lone █.
+      return (tree.match(/"children":\["━"\]/g) ?? []).length + (tree.match(/"children":\["█"\]/g) ?? []).length
+    }
+    // Truecolor: each finished connector cell and each filled bar cell is its
+    // own span (a gradient, a comet, a sheen). ANSI and motion-off draw runs.
+    const rich = await connectors()
+    expect(rich).toBeGreaterThan(6)
+    await d.sp('config theme ansi')
+    expect(await connectors()).toBeLessThan(rich / 2)
+    await d.sp('config theme dark')
+    await d.sp('config motion off')
+    expect(await connectors()).toBeLessThan(rich / 2)
+  })
+
   test('renders well under 2 ms', () => {
     const w = demoWorld(30_000, 1_000)
     const t0 = performance.now()

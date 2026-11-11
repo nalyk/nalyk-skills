@@ -1,6 +1,7 @@
 // observe records; assist adds a ledger note to context; strict also denies.
 // Every decision here is pure: the hooks gather the facts and act on the answer.
 
+import { taskLabel } from './taskid'
 import type { Ledger, Mode, Role, Run } from '../types'
 import { progressOf } from './parsers'
 
@@ -21,7 +22,7 @@ export type SpawnFacts = {
 export const guardSpawn = (f: SpawnFacts): string | undefined => {
   if (f.mode !== 'strict') return undefined
   if (f.role === 'implementer' && f.task !== undefined && f.ledgerDone.includes(f.task) && f.fixRound === undefined) {
-    return `superpowers-tracker (strict): Task ${f.task} is already complete in the ledger (\`Task ${f.task}: complete\`). Do not re-dispatch it; resume at the first task without a complete line.`
+    return `superpowers-tracker (strict): Task ${taskLabel(f.task)} is already complete in the ledger (\`Task ${taskLabel(f.task)}: complete\`). Do not re-dispatch it; resume at the first task without a complete line.`
   }
   if (f.role === 'implementer' && f.runningImplementers > 0) {
     return 'superpowers-tracker (strict): an implementer subagent is still running. subagent-driven-development forbids parallel implementers; wait for its report.'
@@ -55,7 +56,7 @@ export const ranges = (ns: readonly number[]): string => {
   while (i < sorted.length) {
     let j = i
     while (j + 1 < sorted.length && sorted[j + 1] === (sorted[j] ?? 0) + 1) j += 1
-    parts.push(i === j ? String(sorted[i]) : `${sorted[i]}–${sorted[j]}`)
+    parts.push(i === j ? taskLabel(sorted[i] ?? 0) : `${taskLabel(sorted[i] ?? 0)}–${taskLabel(sorted[j] ?? 0)}`)
     i = j + 1
   }
   return parts.join(', ')
@@ -66,9 +67,9 @@ export const ledgerNote = (ledger: Ledger, run: Pick<Run, 'tasks'>): string | un
   if (!ledger.path || ledger.entries.length === 0) return undefined
   const p = progressOf(ledger.entries)
   const doneText = p.done.length ? `Task${p.done.length > 1 ? 's' : ''} ${ranges(p.done)} complete` : 'no task complete yet'
-  const fixing = [...p.fixing.entries()].map(([n, r]) => `Task ${n} mid fix round ${r}/5`)
+  const fixing = [...p.fixing.entries()].map(([n, r]) => `Task ${taskLabel(n)} mid fix round ${r}/5`)
   const next = run.tasks.find(t => !p.done.includes(t.n) && !p.fixing.has(t.n))?.n
-  const resume = fixing.length ? fixing.join(', ') : next !== undefined ? `next is Task ${next}` : 'all listed tasks complete'
+  const resume = fixing.length ? fixing.join(', ') : next !== undefined ? `next is Task ${taskLabel(next)}` : 'all listed tasks complete'
   const lines = [
     `superpowers-tracker: ledger ${ledger.path} shows ${doneText}; ${resume}.`,
     `Trust the ledger and git log over memory: do not re-dispatch a task with a complete line.`,

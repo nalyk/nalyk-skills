@@ -9,7 +9,7 @@
 import type { ClientModule, ClientSurface, JsonValue, RenderChildren } from 'claude-code'
 
 type Stop = { id: string; label: string; initial: string; hue: string; state: 'done' | 'current' | 'future'; inferred: boolean }
-type Chip = { role: string; glyph: string; model: string; task?: number; title: string; startedAt: number }
+type Chip = { role: string; glyph: string; model: string; task?: string; title: string; startedAt: number }
 type VM = {
   kind: 'armed' | 'resume' | 'live' | 'shipped'
   tier: 'xs' | 'sm' | 'md' | 'lg'
@@ -28,12 +28,13 @@ type VM = {
   title: string | null
   pills: { rulings: number; agents: number; warnings: number; warnColor: string }
   agents: Chip[]
-  fix: { round: number; breaker: boolean; task: number } | null
+  fix: { round: number; breaker: boolean; task: string } | null
   tdd: { dots: boolean[]; green: boolean } | null
   spark: string
   idle: string
-  critical: { id: string; text: string; evidence: string } | null
-  resume: { title: string; kind: string; label: string; done: number; total: number; current: number | null; fixRound: number | null; ago: string; rulings: number; more: number; hue: string } | null
+  critical: { id: string; text: string; evidence: string; at: number } | null
+  shownAt: number
+  resume: { title: string; kind: string; label: string; done: number; total: number; current: string | null; fixRound: number | null; ago: string; rulings: number; more: number; hue: string } | null
   shipped: string | null
 }
 type Local = { tick: number }
@@ -43,6 +44,29 @@ const FRAME_MS = 83 // ≤ 12 fps
 const SHIMMER_MS = 1600
 const PULSE_MS = 2 * FRAME_MS
 const EASE_MS = 400
+// Motion that says something happened, each for a moment and then still:
+const COMET_MS = 720 // a stage landed: light runs down the connector into its node
+const BREATH_MS = 2400 // a plan to resume appeared: the capsule breathes three times
+const ALERT_MS = 1800 // a critical warning appeared: its frame flashes three times
+const SWEEP_MS = 1500 // shipped: a highlight crosses the line once
+const HEART_MS = 2000 // a turn is running: the brand glyph breathes
+
+// Colour maths for truecolor themes only (`c.ansi` themes use named colours
+// and get the inverse-video forms instead). sRGB lerp: the spans are a few
+// cells of one hue family, where it reads the same as a perceptual blend.
+const rgb = (hex: string): [number, number, number] | undefined => {
+  const m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex)
+  return m ? [parseInt(m[1]!, 16), parseInt(m[2]!, 16), parseInt(m[3]!, 16)] : undefined
+}
+const mix = (a: string, b: string, t: number): string => {
+  const x = rgb(a)
+  const y = rgb(b)
+  if (!x || !y) return t < 0.5 ? a : b
+  const k = Math.min(1, Math.max(0, t))
+  return '#' + x.map((v, i) => Math.round(v + (y[i]! - v) * k).toString(16).padStart(2, '0')).join('')
+}
+/** 0→1→0 over one period. */
+const wave = (ms: number, period: number): number => (1 - Math.cos((2 * Math.PI * (ms % period)) / period)) / 2
 const SPINNER = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
 const EIGHTHS = ['', '▏', '▎', '▍', '▌', '▋', '▊', '▉']
 
@@ -99,9 +123,16 @@ const Band: ClientModule<JsonValue, Local> = (props, surface) => {
   const pulsing = vm.motion && now - vm.pulseAt < PULSE_MS
   const shimmering = vm.motion && vm.working && vm.kind === 'live'
   const spinning = vm.motion && vm.agents.length > 0
+  const rich = vm.motion && !vm.c.ansi
+  const since = now - vm.pulseAt
+  const landing = rich && vm.kind === 'live' && since >= 0 && since < COMET_MS
+  const breathing = rich && vm.kind === 'resume' && now - vm.shownAt < BREATH_MS
+  const alerting = vm.motion && vm.kind === 'live' && vm.critical !== null && now - vm.critical.at < ALERT_MS
+  const sweeping = rich && vm.kind === 'shipped' && now - vm.shownAt < SWEEP_MS
+  const heart = rich && vm.working && vm.kind === 'live'
 
   // The clock runs only while something moves; idle, it stops completely.
-  const need = shimmering || spinning || pulsing || easing ? FRAME_MS : 0
+  const need = shimmering || spinning || pulsing || easing || landing || breathing || alerting || sweeping ? FRAME_MS : 0
   const held = timers.get(surface)
   if ((held?.ms ?? 0) !== need) {
     held?.stop()
@@ -123,9 +154,14 @@ const Band: ClientModule<JsonValue, Local> = (props, surface) => {
   // The brand capsule: ▐ϟ superpowers▌, gradient letters on a tint, half-block caps.
   const capsule = (word = ' superpowers') => {
     const letters = [...`ϟ${word}`]
+    const beat = heart ? wave(now, HEART_MS) : 0
+    const tone = (i: number): string => {
+      const base = c.brand[Math.min(c.brand.length - 1, Math.round((i / Math.max(1, letters.length - 1)) * (c.brand.length - 1)))] ?? c.text
+      return i === 0 && heart ? mix(base, c.text, beat * 0.7) : base
+    }
     return [
       span('▐', { color: c.tint ?? c.muted }),
-      ...letters.map((ch, i) => span(ch, { color: c.brand[Math.min(c.brand.length - 1, Math.round((i / Math.max(1, letters.length - 1)) * (c.brand.length - 1)))] ?? c.text, backgroundColor: c.tint, bold: true })),
+      ...letters.map((ch, i) => span(ch, { color: tone(i), backgroundColor: c.tint, bold: true })),
       span('▌ ', { color: c.tint ?? c.muted }),
     ]
   }
@@ -139,12 +175,21 @@ const Band: ClientModule<JsonValue, Local> = (props, surface) => {
   const progressBar = (w: number) => {
     if (!vm.progress) return []
     const [full, part, empty] = bar(shown, w)
+    const from = vm.rail[3]?.hue ?? c.hue
+    const to = vm.rail[4]?.hue ?? from
+    const cells = [...(full + part)]
+    // Filled cells run from the execute hue toward the review hue as the plan
+    // nears its end; while a turn works, one lit cell crosses them.
+    const sheen = rich && shimmering && cells.length > 1 ? Math.floor(((now % SHIMMER_MS) / SHIMMER_MS) * (cells.length + 3)) : -1
+    const fill = rich
+      ? cells.map((ch, i) => span(ch, { color: i === sheen ? mix(from, c.text, 0.75) : i === sheen - 1 ? mix(from, c.text, 0.35) : mix(from, to, (i / Math.max(1, w - 1)) * 0.6) }, `f${i}`))
+      : [span(full + part, { color: from })]
     return [
       span('▕', { color: c.muted }),
-      span(full + part, { color: vm.rail[3]?.hue ?? c.hue }),
+      ...fill,
       span(empty, { color: c.muted }),
       span('▏ ', { color: c.muted }),
-      span(`${vm.progress.done}/${vm.progress.total}`, { bold: true }),
+      span(`${vm.progress.done}/${vm.progress.total}`, { bold: true, ...(easing ? { color: rich ? mix(from, c.text, 0.6) : from, inverse: !rich } : {}) }),
     ]
   }
 
@@ -154,11 +199,20 @@ const Band: ClientModule<JsonValue, Local> = (props, surface) => {
       return <Text>{capsule()}{span(`${vm.version} · ready`, { color: c.muted })}</Text>
     }
     if (vm.kind === 'shipped') {
-      return <Text>{span(' ✓ shipped ', { color: vm.rail[5]?.hue ?? c.ok, inverse: true, bold: true })}{span(` · ${vm.shipped ?? ''}`, { color: vm.rail[5]?.hue ?? c.ok })}</Text>
+      const hueF = vm.rail[5]?.hue ?? c.ok
+      const tail = [...` · ${vm.shipped ?? ''}`]
+      const at = sweeping ? Math.floor(((now - vm.shownAt) / SWEEP_MS) * (tail.length + 4)) : -9
+      return (
+        <Text wrap="truncate-end">
+          {span(' ✓ shipped ', { color: hueF, inverse: true, bold: true })}
+          {sweeping ? tail.map((ch, i) => span(ch, { color: Math.abs(i - at) <= 1 ? mix(hueF, c.text, i === at ? 0.85 : 0.45) : hueF, bold: i === at }, `s${i}`)) : span(tail.join(''), { color: hueF })}
+        </Text>
+      )
     }
     if (vm.kind === 'resume' && vm.resume) {
       const r = vm.resume
       const pulse = pulsing
+      const lit = breathing ? mix(r.hue, c.text, wave(now - vm.shownAt, BREATH_MS / 3) * 0.65) : r.hue
       const tail = [
         r.current !== null ? `Task ${r.current}${r.fixRound ? ` at fix ${r.fixRound}/5` : ''}` : null,
         r.ago,
@@ -169,7 +223,7 @@ const Band: ClientModule<JsonValue, Local> = (props, surface) => {
           <Box flexGrow={1} flexShrink={1} overflow="hidden">
           <Text wrap="truncate-end">
             {span('▐', { color: c.tint ?? c.muted })}
-            {span(`ϟ ${r.label}`, { color: r.hue, backgroundColor: c.tint, bold: true, inverse: pulse })}
+            {span(`ϟ ${r.label}`, { color: lit, backgroundColor: c.tint, bold: true, inverse: pulse })}
             {span('▌ ', { color: c.tint ?? c.muted })}
             {span(clip(r.title, Math.max(8, Math.floor(room / 3))), { bold: true })}
             {r.total ? span(' · ', { color: c.muted }) : null}
@@ -209,7 +263,8 @@ const Band: ClientModule<JsonValue, Local> = (props, surface) => {
     vm.rail.forEach((s, i) => {
       const node = s.state === 'done' ? '●' : s.state === 'current' ? '◆' : '○'
       const isCurrent = s.state === 'current'
-      rail.push(span(node, { color: s.state === 'future' ? c.muted : s.hue, bold: isCurrent, inverse: isCurrent && pulsing }, `n${i}`))
+      const arrived = isCurrent && landing && since > COMET_MS * 0.6
+      rail.push(span(node, { color: s.state === 'future' ? c.muted : arrived ? mix(s.hue, c.text, 0.7) : s.hue, bold: isCurrent, inverse: isCurrent && pulsing }, `n${i}`))
       rail.push(span(' '))
       rail.push(
         isCurrent
@@ -224,6 +279,17 @@ const Band: ClientModule<JsonValue, Local> = (props, surface) => {
       } else if (isCurrent && shimmering) {
         const cellsOf = [...'━'.repeat(seg)]
         rail.push(...cellsOf.map((ch, k) => span(ch, { color: k === shimmerAt || k === shimmerAt - 1 ? c.text : s.hue, bold: k === shimmerAt })))
+      } else if (rich && s.state === 'done') {
+        // A finished stage's connector runs from its hue into the next one's;
+        // when the next stage has just landed, a head of light runs down it.
+        const next = vm.rail[i + 1]
+        const into = next?.hue ?? s.hue
+        const head = landing && next?.state === 'current' ? Math.floor((since / COMET_MS) * (seg + 3)) : -9
+        for (let k = 0; k < seg; k += 1) {
+          const base = mix(s.hue, into, seg > 1 ? k / (seg - 1) : 1)
+          const d = head - k
+          rail.push(span('━', { color: d === 0 ? mix(base, c.text, 0.9) : d === 1 ? mix(base, c.text, 0.55) : d === 2 ? mix(base, c.text, 0.25) : base, bold: d === 0 }, `c${i}-${k}`))
+        }
       } else {
         rail.push(span((s.state === 'future' ? '╌' : '━').repeat(seg), { color: s.state === 'future' ? c.muted : s.hue, dimColor: s.state === 'future', bold: isCurrent }))
       }
@@ -248,7 +314,7 @@ const Band: ClientModule<JsonValue, Local> = (props, surface) => {
     if (vm.kind !== 'live' || vm.tier === 'xs') return null
     if (vm.critical) {
       return (
-        <Box borderStyle="round" borderColor={c.critical} paddingX={1} flexDirection="row" justifyContent="space-between">
+        <Box borderStyle="round" borderColor={alerting && Math.floor((now - vm.critical.at) / 300) % 2 === 0 ? c.text : c.critical} paddingX={1} flexDirection="row" justifyContent="space-between">
           <Text wrap="truncate-end">
             {span('✗ ', { color: c.critical, bold: true })}
             {span(vm.critical.text, { bold: true })}

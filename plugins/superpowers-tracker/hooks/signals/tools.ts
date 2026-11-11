@@ -1,6 +1,7 @@
 // Tool calls as evidence: Write/Edit to superpowers paths, Bash (SDD
 // scripts, tests, git, the companion), Read of a SKILL.md, the worktree tools.
 
+import { taskLabel } from '../taskid'
 import type { Companion, TestRun } from '../../types'
 import type { Io } from '../io'
 import { safe } from '../io'
@@ -157,7 +158,7 @@ const onWrite = async (io: Io, toast: Toaster, ev: ToolEvent): Promise<void> => 
     const sawRed = task?.tdd.some(d => !d.ok) ?? false
     if (task && !task.sawTestEdit && !sawRed && !task.implFirst) {
       await patchTask(io, taskN, t => ({ ...t, implFirst: true }))
-      if (!ev.replay) await warn(io, toast, 'impl-before-test', `Task ${taskN}: production code changed before a test or a failing run`, `${rel} (${ev.id})`)
+      if (!ev.replay) await warn(io, toast, 'impl-before-test', `Task ${taskLabel(taskN)}: production code changed before a test or a failing run`, `${rel} (${ev.id})`)
     }
   }
   if (ev.agentId) return
@@ -220,7 +221,7 @@ const onBash = async (io: Io, toast: Toaster, ev: ToolEvent): Promise<void> => {
     }
     if (name === 'task-done' && n !== undefined) {
       const ok = OUT_TASK_DONE_LEDGER.test(out) && !OUT_TASK_DONE_FAIL.test(out + ev.text)
-      await recordTest(io, toast, ev, `task-done ${n}`, ok, n)
+      await recordTest(io, toast, ev, `task-done ${taskLabel(n)}`, ok, n)
     }
     touchedLedger = true
   }

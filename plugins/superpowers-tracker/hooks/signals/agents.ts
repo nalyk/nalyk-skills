@@ -1,5 +1,6 @@
 // Subagents: classified at spawn, verdicts parsed from their final answers.
 
+import { taskLabel } from '../taskid'
 import type { Agent, Role } from '../../types'
 import type { Io } from '../io'
 import { BUILDER_CLEAN, IMPLEMENT_TASK, tierOf } from '../patterns'
@@ -70,7 +71,7 @@ export const assessSpawn = async (io: Io, toast: Toaster, e: SpawnInput, replay 
 
   if (!replay) {
     if (role === 'implementer' && task !== undefined && done.includes(task) && round === undefined) {
-      await warn(io, toast, 'redispatch-complete', `Task ${task} re-dispatched after it completed`, `ledger: Task ${task}: complete · ${ev}`)
+      await warn(io, toast, 'redispatch-complete', `Task ${taskLabel(task)} re-dispatched after it completed`, `ledger: Task ${taskLabel(task)}: complete · ${ev}`)
     }
     if (role === 'implementer' && running.length > 0) {
       await warn(io, toast, 'parallel-implementers', 'Two implementers running at once', ev)
@@ -85,7 +86,7 @@ export const assessSpawn = async (io: Io, toast: Toaster, e: SpawnInput, replay 
       await warn(io, toast, 'impl-on-main', `Implementation dispatched on ${env.branch} with no worktree`, ev)
     }
     if (role === 'implementer' && task !== undefined && round !== undefined && round > 5) {
-      await warn(io, toast, 'fix-loop-overrun', `Task ${task} fix loop past round 5`, ev)
+      await warn(io, toast, 'fix-loop-overrun', `Task ${taskLabel(task)} fix loop past round 5`, ev)
     }
   }
 
@@ -148,12 +149,12 @@ export const recordSpawn = async (
   }
   await note(io, {
     kind: 'agent-start',
-    label: `${roleLabel(a.role)}${a.task !== undefined ? ` · Task ${a.task}` : ''}`,
+    label: `${roleLabel(a.role)}${a.task !== undefined ? ` · Task ${taskLabel(a.task)}` : ''}`,
     ...(started.agentId ? { agentId: started.agentId } : {}),
     detail: model ?? 'model inherited',
   })
   const tier = model ? model.replace(/^claude-/, '').split('-')[0] : 'inherits'
-  return [roleLabel(a.role), a.task !== undefined ? `Task ${a.task}` : undefined, tier].filter(Boolean).join(' · ')
+  return [roleLabel(a.role), a.task !== undefined ? `Task ${taskLabel(a.task)}` : undefined, tier].filter(Boolean).join(' · ')
 }
 
 /** A subagent's turn.complete: duration and the verdict its answer carries. */
@@ -178,7 +179,7 @@ export const onAgentDone = async (io: Io, toast: Toaster, agentId: string, answe
         }))
         if (!replay && (r.status === 'BLOCKED' || r.status === 'NEEDS_CONTEXT')) {
           const why = r.status === 'BLOCKED' ? 'blocked' : 'needs context'
-          toast('✗', `Implementer ${why}`, `Task ${n} · the controller will re-dispatch`, 'warn')
+          toast('✗', `Implementer ${why}`, `Task ${taskLabel(n)} · the controller will re-dispatch`, 'warn')
         }
       }
       break
@@ -190,7 +191,7 @@ export const onAgentDone = async (io: Io, toast: Toaster, agentId: string, answe
       if (n !== undefined) await patchTask(io, n, t => ({ ...t, verdict }))
       if (!replay && n !== undefined) {
         const clean = r.spec !== 'bad' && /approved/i.test(r.quality ?? '') && r.critical + r.important === 0
-        toast(clean ? '●' : '◐', `Task ${n} review`, clean ? 'clean' : summary)
+        toast(clean ? '●' : '◐', `Task ${taskLabel(n)} review`, clean ? 'clean' : summary)
       }
       break
     }
@@ -226,7 +227,7 @@ export const onAgentDone = async (io: Io, toast: Toaster, agentId: string, answe
   )
   await note(io, {
     kind: 'agent-end',
-    label: `${roleLabel(agent.role)}${n !== undefined ? ` · Task ${n}` : ''} ${failed ? '✗' : '✓'}`,
+    label: `${roleLabel(agent.role)}${n !== undefined ? ` · Task ${taskLabel(n)}` : ''} ${failed ? '✗' : '✓'}`,
     agentId,
     ok: !failed,
     detail: [verdict, fmtDuration(now - agent.startedAt)].filter(Boolean).join(' · '),

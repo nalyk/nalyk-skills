@@ -1,5 +1,6 @@
 // State to plain view data, shared by every surface; renderers only draw.
 
+import { taskLabel } from '../taskid'
 import type {
   Agent,
   DemoState,
@@ -45,7 +46,7 @@ export const SHIP_HOLD_MS = 30_000
 export const SHIP_SPARK_MS = 1_500
 
 export type RailStop = { id: StageId; label: string; initial: string; hue: string; state: 'done' | 'current' | 'future'; inferred: boolean }
-export type AgentChip = { role: string; glyph: string; model: string; task?: number; title: string; startedAt: number }
+export type AgentChip = { role: string; glyph: string; model: string; task?: string; title: string; startedAt: number }
 
 export type BandVM = {
   kind: 'armed' | 'resume' | 'live' | 'shipped'
@@ -65,12 +66,14 @@ export type BandVM = {
   title: string | null
   pills: { rulings: number; agents: number; warnings: number; warnColor: string }
   agents: AgentChip[]
-  fix: { round: number; breaker: boolean; task: number } | null
+  fix: { round: number; breaker: boolean; task: string } | null
   tdd: { dots: boolean[]; green: boolean } | null
   spark: string
   idle: string
-  critical: { id: string; text: string; evidence: string } | null
-  resume: { title: string; kind: string; label: string; done: number; total: number; current: number | null; fixRound: number | null; ago: string; rulings: number; more: number; hue: string } | null
+  /** When what the band shows now appeared: the scan for a resume strip, the ship for a shipped one. */
+  shownAt: number
+  critical: { id: string; text: string; evidence: string; at: number } | null
+  resume: { title: string; kind: string; label: string; done: number; total: number; current: string | null; fixRound: number | null; ago: string; rulings: number; more: number; hue: string } | null
   shipped: string | null
 }
 
@@ -117,7 +120,7 @@ export const buildBand = (
   const current = run.tasks.find(x => x.n === run.currentTask)
   const rulings = kind === 'resume' && top ? top.rulings : rulingCount(w.ledger.entries)
   const lastDone = run.lastDone
-  const idle = lastDone ? `last: Task ${lastDone.n} ${GLYPH.check} ${fmtAgo(o.now - lastDone.at)}` : run.planTitle ? `plan: ${run.planTitle}` : 'ready'
+  const idle = lastDone ? `last: Task ${taskLabel(lastDone.n)} ${GLYPH.check} ${fmtAgo(o.now - lastDone.at)}` : run.planTitle ? `plan: ${run.planTitle}` : 'ready'
   const label =
     top?.kind === 'live-elsewhere'
       ? '◐ live in another session (likely)'
@@ -169,13 +172,14 @@ export const buildBand = (
       model: a.model ? a.model.replace(/^claude-/, '').split('-')[0] ?? a.model : 'inherits',
       title: run.tasks.find(x => x.n === a.task)?.name ?? a.description,
       startedAt: a.startedAt,
-      ...(a.task !== undefined ? { task: a.task } : {}),
+      ...(a.task !== undefined ? { task: taskLabel(a.task) } : {}),
     })),
-    fix: current && current.fixRound > 0 ? { round: current.fixRound, breaker: current.breaker, task: current.n } : null,
+    fix: current && current.fixRound > 0 ? { round: current.fixRound, breaker: current.breaker, task: taskLabel(current.n) } : null,
     tdd: current && current.tdd.length ? { dots: current.tdd.slice(-6).map(d => d.ok), green: current.tdd.some(d => !d.ok) && current.tdd.at(-1)?.ok === true } : null,
     spark: sparkline(w.env.context, 8),
     idle,
-    critical: crit ? { id: crit.id, text: crit.text, evidence: crit.evidence } : null,
+    shownAt: kind === 'shipped' ? run.shippedAt ?? 0 : kind === 'resume' ? w.resume.scannedAt : run.pulseAt,
+    critical: crit ? { id: crit.id, text: crit.text, evidence: crit.evidence, at: crit.at } : null,
     resume:
       kind === 'resume' && top
         ? {
@@ -184,7 +188,7 @@ export const buildBand = (
             label,
             done: top.done,
             total: top.total,
-            current: top.current ?? null,
+            current: top.current !== undefined ? taskLabel(top.current) : null,
             fixRound: top.fixRound ?? null,
             ago: fmtAgo(o.now - top.mtime),
             rulings: top.rulings,
@@ -200,7 +204,7 @@ export const buildBand = (
 export const breadcrumb = (run: Run): string[] => {
   const parts: string[] = [STAGE_LABEL[run.stage].toLowerCase()]
   if (run.planPath) parts.push((run.planPath.split('/').at(-1) ?? '').replace(/\.md$/, ''))
-  if (run.currentTask !== undefined) parts.push(`Task ${run.currentTask}`)
+  if (run.currentTask !== undefined) parts.push(`Task ${taskLabel(run.currentTask)}`)
   return parts
 }
 
@@ -213,15 +217,15 @@ export const statusText = (w: World, now: number): string => {
     `ϟ superpowers-tracker · ${run.lifecycle} · stage ${STAGE_LABEL[run.stage]}${run.stageInferred ? '?' : ''}${run.path ? ` · path ${run.path}${run.pathInferred ? '?' : ''}` : ''}`,
   ]
   if (run.planPath) lines.push(`plan: ${run.planTitle ?? run.planPath} (${run.planPath})`)
-  if (p.total) lines.push(`tasks: ${p.done}/${p.total} done${run.currentTask !== undefined ? ` · current Task ${run.currentTask}` : ''}${run.executor ? ` · executor ${run.executor === 'sdd' ? 'subagent-driven-development' : 'executing-plans'}` : ''}`)
+  if (p.total) lines.push(`tasks: ${p.done}/${p.total} done${run.currentTask !== undefined ? ` · current Task ${taskLabel(run.currentTask)}` : ''}${run.executor ? ` · executor ${run.executor === 'sdd' ? 'subagent-driven-development' : 'executing-plans'}` : ''}`)
   for (const t of run.tasks) {
     const g = t.status === 'done' ? '●' : t.status === 'parked' ? '⚠' : t.status === 'blocked' ? '✗' : t.status === 'pending' ? '○' : '◐'
-    lines.push(`  ${g} ${String(t.n).padStart(2)} ${t.name}${t.fixRound ? ` · fix ${t.fixRound}/5` : ''}${t.commits ? ` · ${t.commits}` : ''}`)
+    lines.push(`  ${g} ${taskLabel(t.n).padStart(2)} ${t.name}${t.fixRound ? ` · fix ${t.fixRound}/5` : ''}${t.commits ? ` · ${t.commits}` : ''}`)
   }
   const minors = w.ledger.entries.filter(e => e.kind === 'minor' || e.kind === 'final-minor').length
   lines.push(`rulings: ${rulingCount(w.ledger.entries)} · deferred minors: ${minors}`)
   lines.push(open.length ? `open warnings (${open.length}):` : 'open warnings: none')
   for (const x of open.slice(0, 8)) lines.push(`  ${x.sev === 'critical' ? '✗' : x.sev === 'warn' ? '⚠' : '·'} ${x.text} — ${x.evidence}`)
-  if (run.lastDone) lines.push(`last completion: Task ${run.lastDone.n}, ${fmtAgo(now - run.lastDone.at)}`)
+  if (run.lastDone) lines.push(`last completion: Task ${taskLabel(run.lastDone.n)}, ${fmtAgo(now - run.lastDone.at)}`)
   return lines.join('\n')
 }

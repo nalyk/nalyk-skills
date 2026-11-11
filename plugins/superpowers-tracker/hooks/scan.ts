@@ -1,6 +1,7 @@
 // The startup scan: unfinished superpowers work in this project and every
 // worktree of it. Cached in $.store by repo root and directory mtimes.
 
+import { taskLabel } from './taskid'
 import type { Candidate, Executor, Settings } from '../types'
 import type { Io } from './io'
 import { safe } from './io'
@@ -33,7 +34,7 @@ export const suggestionFor = (c: Omit<Candidate, 'suggest'>, doneList: number[] 
     case 'mid-exec': {
       const skill = c.executor === 'inline' ? 'superpowers:executing-plans' : 'superpowers:subagent-driven-development'
       const done = doneList.length ? `Task${doneList.length > 1 ? 's' : ''} ${ranges(doneList)} complete` : 'no task complete yet'
-      const at = c.current !== undefined ? ` and Task ${c.current}${c.fixRound ? ` at fix round ${c.fixRound}/5` : ' next'}` : ''
+      const at = c.current !== undefined ? ` and Task ${taskLabel(c.current)}${c.fixRound ? ` at fix round ${c.fixRound}/5` : ' next'}` : ''
       return `Continue executing ${c.planPath ?? c.title} with ${skill}. The ledger shows ${done}${at}.`
     }
     case 'planned':

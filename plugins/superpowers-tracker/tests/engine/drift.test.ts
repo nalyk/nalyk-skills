@@ -5,6 +5,7 @@ import { describe, test, expect } from 'claude-code/testing'
 import { world, SLOW } from './world'
 import { drive } from './drive'
 import { G, OPT_OUT, PERFORMATIVE, normalizeSkill } from '../../hooks/patterns'
+import { taskKey, taskLabel } from '../../hooks/taskid'
 import { classifyRole, detectPath, parseLedger, parsePlan, rulingCount, scriptCall, taskOf } from '../../hooks/parsers'
 import { FINAL_REVIEW, IMPLEMENTER_DONE, LEDGER_HEAD, PLAN_3_TASKS, PLAN_REL, ROOT, WS } from './fixtures/superpowers'
 
@@ -42,13 +43,23 @@ describe('roles', () => {
     expect(classifyRole('Final whole-branch review', '')).toBe('final-reviewer')
     expect(classifyRole('Stumbles analyst', 'You are an analyst subagent')).toBe('analyst')
   })
-  test('Task 6b and Task 2.1 are not Task 6 and Task 2', () => {
-    expect(taskOf('Implement Task 6b: retry')).toBeUndefined()
-    expect(taskOf('Implement Task 2.1: retry')).toBeUndefined()
+  test('Task 6b, 2.1 and A1 are tasks of their own, in the order a plan reads', () => {
+    for (const id of ['3', '6b', '2.1', 'A1', '12', '2.10', '6B', '3.2.1']) expect(taskLabel(taskKey(id))).toBe(id)
+    expect(taskKey('6')).toBeLessThan(taskKey('6b'))
+    expect(taskKey('6b')).toBeLessThan(taskKey('7'))
+    expect(taskKey('2')).toBeLessThan(taskKey('2.1'))
+    expect(taskKey('2.1')).toBeLessThan(taskKey('2.2'))
+    expect(taskOf('Implement Task 6b: retry')).toBe(taskKey('6b'))
+    expect(taskOf('Implement Task 2.1: retry')).toBe(taskKey('2.1'))
     expect(taskOf('Implement Task 6: retry.')).toBe(6)
-    const plan = parsePlan('# P\n\n### Task 1: a\n\n### Task 1b: side\n\n### Task 2.1: sub\n\n### Task 2: b\n')
-    expect(plan.tasks.map(t => t.n)).toEqual([1, 2])
-    expect(plan.tasks[0]?.name).toBe('a')
+    expect(taskOf('Review the Task Overview section')).toBeUndefined()
+    const plan = parsePlan('# P\n\n## Task Overview\n\n### Task 1: a\n\n### Task 1b: side\n\n### Task 2: b\n\n### Task 2.1: sub\n')
+    expect(plan.tasks.map(t => taskLabel(t.n))).toEqual(['1', '1b', '2', '2.1'])
+    expect(plan.tasks.map(t => t.name)).toEqual(['a', 'side', 'b', 'sub'])
+    const led = parseLedger(`${LEDGER_HEAD}Task 1b: complete (commits a..b, review clean)\nTask 2.1: fix round 2/5 (1 addressed, 1 open — bound; commits a..b)\n`)
+    expect(led.entries.filter(e => e.task !== undefined).map(e => `${e.kind}:${taskLabel(e.task!)}`)).toEqual(['complete:1b', 'fix-round:2.1'])
+    expect(classifyRole('Implement Task A1: bucket', '')).toBe('implementer')
+    expect(scriptCall('bash /x/scripts/task-brief docs/p.md 6b')?.n).toBe(taskKey('6b'))
   })
   test("a same-named skill of another plugin is not superpowers'", () => {
     expect(normalizeSkill('proctor:brainstorming')).toBeUndefined()
@@ -147,5 +158,30 @@ describe('7.x brainstorming, end to end', () => {
     const fix = await d.spawn('Fix final review findings', { model: 'sonnet' })
     await d.agentDone(fix.agentId!, IMPLEMENTER_DONE)
     expect((await d.band())?.kind).not.toBe('shipped')
+  })
+})
+
+describe('a plan with lettered and dotted tasks, end to end', () => {
+  const PLAN_IDS = '# Mixed Implementation Plan\n\n**Goal:** ids.\n\n### Task 1: one\n\n- [ ] **Step 1: t**\n\n### Task 1b: one-b\n\n- [ ] **Step 1: t**\n\n### Task 2.1: two-one\n\n- [ ] **Step 1: t**\n'
+  test('each is its own row, completed and shown by its own ID', SLOW, async ($, on) => {
+    const sddOut = (tool: string, input: Record<string, unknown>) =>
+      tool === 'Bash' && /scripts\/sdd-workspace/.test(String(input.command)) ? { text: `${WS}\n` } : { text: '' }
+    const w = world(on, { installed: true, toolText: sddOut })
+    const d = drive($, w)
+    await d.start()
+    await d.skill('superpowers:subagent-driven-development')
+    await d.write(PLAN_REL, PLAN_IDS)
+    w.files[`${WS}/progress.md`] = LEDGER_HEAD
+    await d.bash(`bash scripts/sdd-workspace ${PLAN_REL}`)
+    expect((await d.band())?.progress).toMatchObject({ done: 0, total: 3 })
+    await d.spawn('Implement Task 1b: one-b', { model: 'haiku' })
+    expect((await d.band())?.agents[0]).toMatchObject({ role: 'implementer', task: '1b' })
+    await d.ledger(`${WS}/progress.md`, `${LEDGER_HEAD}Task 1: complete (commits a..b, review clean)\nTask 1b: complete (commits a..b, review clean)\n`)
+    expect((await d.band())?.progress).toMatchObject({ done: 2, total: 3 })
+    const status = await d.sp('status')
+    expect(status).toContain('1b one-b')
+    expect(status).toContain('2.1 two-one')
+    await d.flush()
+    expect(w.toasts.join('\n')).toContain('Task 1b complete')
   })
 })

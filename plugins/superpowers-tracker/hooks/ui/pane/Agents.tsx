@@ -1,6 +1,7 @@
 // Tab 3, Agents: swimlanes on the session's time axis, then a dense table,
 // running rows pinned on top; hover a row to reveal its full description.
 
+import { taskLabel } from '../../taskid'
 import type { RenderElement, RenderNode } from 'claude-code'
 import { Empty, Section, type PaneCtx } from './kit'
 import { clip, padEnd, padStart } from '../cells'
@@ -46,7 +47,7 @@ export const Agents = (c: PaneCtx): RenderElement => {
           <Box key={`agent-${i}`} flexDirection="column">
             <Box flexDirection="row" gap={1}>
               <Text color={hue}>{`${g} ${padEnd(clip(roleLabel(a.role), 13), 13)}`}</Text>
-              <Text>{padStart(a.task !== undefined ? `#${a.task}` : '', 4)}</Text>
+              <Text>{padStart(a.task !== undefined ? `#${taskLabel(a.task)}` : '', 4)}</Text>
               <Text color={a.modelOmitted ? c.t.warn : c.t.text}>{padEnd(model, 10)}</Text>
               <Text color={a.status === 'failed' ? c.t.critical : c.t.muted}>{padEnd(a.status, 8)}</Text>
               <Text>{padStart(fmtDuration((a.endedAt ?? c.now) - a.startedAt), 7)}</Text>

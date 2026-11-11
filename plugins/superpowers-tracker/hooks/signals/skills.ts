@@ -39,9 +39,15 @@ export const onSkill = async (io: Io, skill: SkillName, ctx: SkillContext): Prom
   const isMain = ctx.agentId === undefined
   // Brainstorming again once a plan is through (every task done, or past
   // review) is new work: the finished plan is filed and the rail starts over.
-  if (isMain && skill === 'brainstorming' && !run.spectator) {
+  if (isMain && skill === 'brainstorming') {
     const through = run.tasks.length > 0 && run.tasks.every(t => t.status === 'done' || t.status === 'parked')
-    if (run.lifecycle === 'shipped' || (run.planPath && (through || run.stage === 'review' || run.stage === 'finish'))) {
+    if (run.lifecycle !== 'live' && run.lifecycle !== 'shipped' && (run.planPath || run.workspace)) {
+      // The plan this session holds was only shown to it for resuming (the
+      // scan put it there, read-only). Brainstorming is new work, not that
+      // plan continued: the rail starts at Brainstorm, and nothing is filed,
+      // since none of it was this session's doing.
+      await archiveAndRestart(io, 'brainstorm', true)
+    } else if (!run.spectator && (run.lifecycle === 'shipped' || (run.planPath && (through || run.stage === 'review' || run.stage === 'finish')))) {
       await archiveAndRestart(io, 'brainstorm', ctx.via === 'replay')
     }
   }

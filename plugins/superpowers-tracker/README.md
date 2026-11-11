@@ -4,7 +4,7 @@ A live tracker for [obra/superpowers](https://github.com/obra/superpowers) insid
 
 It is an observer first. In the default mode it never blocks, rewrites or delays anything. It never writes inside superpowers' own folders (`.superpowers/sdd/`, `.superpowers/brainstorm/`, `docs/superpowers/`, the plugin install). It makes no network calls and sends no telemetry.
 
-Built against **superpowers 7.0.2**, and it still reads what 6.4 wrote: where the two differ (the rebuilt brainstorming's sizes, the builder check, the scripts' `-C DIR`), both forms are accepted. Every superpowers format the tracker depends on lives in `hooks/patterns.ts`, so a new superpowers release means editing that one file. A superpowers of another major version than the tracker was built against is noted in the Warnings tab.
+Built against **superpowers 7.0.2**, and it still reads what 6.4 wrote: where the two differ (the rebuilt brainstorming's sizes, the builder check, the scripts' `-C DIR`), both forms are accepted, and 7.0.2's task IDs (`6b`, `2.1`, `A1`) are tasks of their own. Every superpowers format the tracker depends on lives in `hooks/patterns.ts`, so a new superpowers release means editing that one file. A superpowers of another major version than the tracker was built against is noted in the Warnings tab.
 
 ## Install
 
@@ -78,11 +78,17 @@ Width tiers:
 | 90–139 | Everything |
 | 140 and up | Also the plan title |
 
-Motion is purposeful only:
-- a shimmer on the current segment while a turn runs (≤ 12 fps);
-- a pulse when a node lands;
-- a 400 ms ease on the progress bar;
-- a spinner per running subagent.
+Motion is purposeful only: each one marks something that happened, then stops (≤ 12 fps):
+- a stage lands: a head of light runs down the connector into its node, which pops as it arrives (720 ms);
+- finished connectors run in a gradient from their stage's hue into the next one's;
+- the progress bar fills in a gradient toward the review hue, eases over 400 ms, lights its count while it moves, and carries one lit cell across while a turn runs;
+- a shimmer on the current segment and a slow breath on the `ϟ` while a turn runs;
+- a spinner and a ticking clock per running subagent;
+- a plan to resume appears: its capsule breathes three times, then holds still;
+- a critical warning appears: its frame flashes three times;
+- shipped: braille particles in the arc gradient, and one highlight across the line.
+
+Truecolor themes get the blends; an ANSI theme gets the inverse-video forms of the same events.
 
 `/sp config motion off`, `NO_COLOR` or an ANSI theme stops all of it. An idle band runs no timer.
 
@@ -211,13 +217,16 @@ claude --plugin-dir plugins/superpowers-tracker
 
 Record with your tool of choice, for example `vhs`, `asciinema` plus `agg`, or a screen recorder. `/sp theme` switches palettes between takes.
 
-## Limits
+## What the engine decides
 
-- **Task IDs.** superpowers 7.0.2 lets a plan name tasks `6b` or `2.1`. The tracker counts whole-number tasks; such a heading is left alone, not read as Task 6 or Task 2, so those tasks are not tracked.
-- **Clicks** need the fullscreen terminal (`/tui fullscreen`). The classic main screen reports no mouse to any plugin.
-- **Digits.** While the resume strip or a critical warning is up, a digit typed first into an empty prompt presses its button. Resume only fills the prompt box, and a dismissed plan returns with `/sp scan`.
-- **The brainstorming size** (`SPIKE` / `BOUNDED` / `ARCH`: 7.x's quick task, small change, project) is read from what the agent says, and 7.x says it in plain words, so it stays marked `?` until a design doc confirms it.
-- **A new session after a crash** is offered the plan to resume; the whole run comes back only with `claude --resume` or `--continue`.
+These are Claude Code's own rules for every plugin, not gaps in the tracker:
+
+- **Clicks** reach a plugin only in the fullscreen terminal (`/tui fullscreen`). The classic main screen reports no mouse.
+- **A letter key** presses a Button only while its band or pane holds the keyboard; from the prompt it is typed. The pane shows its keys only then.
+- **A digit** typed first into an empty prompt presses the band's button of that number, the way a survey's digits answer. The tracker arms digits only while it asks something (a plan to resume, a critical warning); resume only fills the prompt box, and a dismissed plan returns with `/sp scan`.
+- **A new session is another session.** After a crash, `claude --resume` or `--continue` brings the whole run back; a brand-new session is offered the plan to resume, with its earlier story in the pane.
+
+The brainstorming size (`SPIKE` / `BOUNDED` / `ARCH`: 7.x's quick task, small change, project) is read from what the agent says, so it carries a `?` until a design doc confirms it.
 
 ## Tests
 
@@ -228,7 +237,7 @@ claude plugin test plugins/superpowers-tracker
 
 From the repository root, `make test` runs both, with every other plugin's checks. The tests live in `tests/engine/`.
 
-The 96 tests cover:
+The 100 tests cover:
 - the parsers (fenced Task headings, every ledger line form, roles and verdicts);
 - the full happy path, from brainstorming to finishing, with the band asserted at each step;
 - the fix loop to the breaker;
@@ -237,7 +246,8 @@ The 96 tests cover:
 - every startup-scan fixture: checkout, `.worktrees/`, orphan, unexecuted plan, spec without a plan, live and dead companion, live elsewhere, `--resume` replay;
 - ranking, the `+N` pill, suggestions, `/sp resume` (fills, never submits), dismiss and forget across a restart, the scan cache;
 - width tiers 48–160, themes, motion, every surface, every pane tab, hotkeys, the not-placed fallback;
-- the band's Buttons (digits, each acting, none inside the Client, the row never wider than it is given) and the pane with and without the keyboard;
+- the band's Buttons (digits, each acting, none inside the Client, the row never wider than it is given), the pane with and without the keyboard, and motion per theme;
+- task IDs (`6b`, `2.1`, `A1`) through plan, ledger, dispatch, scripts and display;
 - contrast, OKLCH, glyph widths, Raster code points, render time, an idle band holding still, the demo;
 - persistence (`persist.test.ts`): a crash with no `session.end` mid-task and mid-brainstorm, an interrupted subagent, ledger progress made while away, a reload that replays nothing twice, `/clear`, `/resume` to another session and back, a second plan starting clean, strict mode not judging a new plan by the old ledger, the plan a script names (shell variables, `-C`, a wandering cwd, look-alikes), the store sweep;
 - superpowers 7.x beside 6.x (`drift.test.ts`): the plain-word sizes, the builder check, the final-review fix subagent, the design-doc gate and the opt-out, hand-written ledger lines.

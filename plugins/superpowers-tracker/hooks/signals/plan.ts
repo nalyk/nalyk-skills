@@ -1,6 +1,7 @@
 // The plan file and its ledger: parsed on change, folded into task rows.
 // The ledger is the source of truth for progress.
 
+import { taskLabel } from '../taskid'
 import type { LedgerEntry, Run, TaskRow } from '../../types'
 import type { Io } from '../io'
 import { safe } from '../io'
@@ -176,11 +177,11 @@ export const refreshLedger = async (io: Io, toast: Toaster, opts: { force?: bool
     const took = t?.startedAt ? ` · ${fmtDuration((t.doneAt ?? now) - t.startedAt)}` : ''
     const how = fresh.find(e => e.kind === 'complete' && e.task === n)
     const detail = how?.parked ? `${how.parked} parked` : how?.clean ? 'review clean' : how?.tests ? 'tests green' : 'recorded'
-    toast('●', `Task ${n} complete`, `${detail}${took}`)
-    await note(io, { kind: 'ledger', label: `Task ${n} complete`, ok: true, detail: how?.commits ?? '' })
+    toast('●', `Task ${taskLabel(n)} complete`, `${detail}${took}`)
+    await note(io, { kind: 'ledger', label: `Task ${taskLabel(n)} complete`, ok: true, detail: how?.commits ?? '' })
   }
   for (const f of change.fixRounds) {
-    await note(io, { kind: 'ledger', label: `Task ${f.n} fix round ${f.round}/5`, ok: false })
+    await note(io, { kind: 'ledger', label: `Task ${taskLabel(f.n)} fix round ${f.round}/5`, ok: false })
   }
   return change
 }

@@ -1,6 +1,6 @@
 {
   "name": "superpowers-tracker",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Live tracker for obra/superpowers: a stage rail above the prompt, a dashboard pane, resume detection, toasts and optional guards.",
   "author": {
     "name": "nalyk"

@@ -1,6 +1,7 @@
 // Tab 2, Plan: one row per task (status, steps bar, fix pips, commits,
 // duration), an inline detail card, and the Gantt strip below.
 
+import { taskLabel } from '../../taskid'
 import type { RenderElement, RenderNode } from 'claude-code'
 import type { TaskRow } from '../../../types'
 import { Empty, ParseError, Section, type PaneCtx } from './kit'
@@ -40,7 +41,7 @@ export const Plan = (c: PaneCtx): RenderElement => {
           <Box flexDirection="column">
             <Box flexDirection="row" gap={1} flexWrap="nowrap" {...(tint ? { backgroundColor: tint } : {})}>
               <Text color={glyphColor} inverse={isSel && c.t.ansi}>{statusGlyph(t)}</Text>
-              <Text color={c.t.muted}>{padStart(`#${t.n}`, 3)}</Text>
+              <Text color={c.t.muted}>{padStart(`#${taskLabel(t.n)}`, 3)}</Text>
               <Box width={nameW} flexShrink={0}><Text wrap="truncate-end" bold={t.status === 'running' || t.status === 'fixing'}>{t.name}</Text></Box>
               <Text color={hue}>{full + part}<Text color={c.t.muted}>{empty.replace(/ /g, '·')}</Text></Text>
               <Text color={t.breaker ? c.t.critical : t.fixRound >= 4 ? c.t.warn : c.t.muted}>{(t.breaker ? '✗ breaker' : t.fixRound ? pips(t.fixRound) : '').padEnd(9)}</Text>
@@ -49,7 +50,7 @@ export const Plan = (c: PaneCtx): RenderElement => {
             </Box>
             {isSel && c.w.ui.expanded === i ? (
               <Box borderStyle="round" borderColor={hue} paddingX={1} marginLeft={4} flexDirection="column">
-                <Text bold color={hue}>{`Task ${t.n}: ${t.name}`}</Text>
+                <Text bold color={hue}>{`Task ${taskLabel(t.n)}: ${t.name}`}</Text>
                 <Text color={c.t.muted}>{`brief  ${t.brief ?? '—'}`}</Text>
                 <Text color={c.t.muted}>{`report ${t.report ?? '—'}`}</Text>
                 <Text>{`verdict ${t.verdict ?? '—'} · ${t.agents} subagent${t.agents === 1 ? '' : 's'}`}</Text>

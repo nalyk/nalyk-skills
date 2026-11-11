@@ -2,6 +2,7 @@
 // u32 triplets [codePoint, fg, bg]; 0x01000000 is the terminal's default color.
 // Plus the two charts drawn with them: the Gantt strip and the swimlanes.
 
+import { taskLabel } from '../taskid'
 import type { Agent, Run, Role } from '../../types'
 import type { Tokens } from './theme'
 import { isWide } from './cells'
@@ -65,7 +66,7 @@ export const ganttGrid = (run: Run, agents: readonly Agent[], t: Tokens, columns
   const col = (ms: number) => label + Math.min(span - 1, Math.max(0, Math.floor(((ms - start) / total) * span)))
   return run.tasks.map(task => {
     const row = blank(columns)
-    const tag = `#${task.n}`.padStart(4) + ' '
+    const tag = `#${taskLabel(task.n)}`.padStart(4) + ' '
     ;[...tag].forEach((ch, i) => (row[i] = { ch, fg: t.ansi ? undefined : t.stage.execute }))
     if (task.startedAt !== undefined) {
       const end = task.doneAt ?? now

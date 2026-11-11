@@ -162,7 +162,7 @@
       "name": "superpowers-tracker",
       "source": "./plugins/superpowers-tracker",
       "description": "Live tracker for obra/superpowers: a stage rail above the prompt, a seven-tab dashboard pane, resume detection for unfinished plans across worktrees, session checkpoints that survive a crash or restart, toasts, and opt-in assist/strict guards. Observer by default.",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "keywords": [
         "superpowers",
         "mod",

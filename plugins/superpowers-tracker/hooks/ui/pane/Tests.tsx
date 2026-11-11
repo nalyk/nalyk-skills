@@ -1,6 +1,7 @@
 // Tab 5, Tests: each task's chain of result dots, RED→GREEN when the order
 // was right, ⚠ impl first when it wasn't; the debugging meter.
 
+import { taskLabel } from '../../taskid'
 import type { RenderElement, RenderNode } from 'claude-code'
 import { Empty, Section, type PaneCtx } from './kit'
 import { clip, padStart } from '../cells'
@@ -22,7 +23,7 @@ export const Tests = (c: PaneCtx): RenderElement => {
         const greenAfter = red >= 0 && t.tdd.slice(red).some(d => d.ok)
         return (
           <Box flexDirection="row" gap={1}>
-            <Text color={c.t.muted}>{padStart(`#${t.n}`, 3)}</Text>
+            <Text color={c.t.muted}>{padStart(`#${taskLabel(t.n)}`, 3)}</Text>
             <Text>{t.tdd.slice(-16).map(d => <Text color={d.ok ? c.t.ok : c.t.critical}>{d.ok ? '● ' : '✗ '}</Text>)}</Text>
             {greenAfter && !t.implFirst ? <Text color={c.t.ok} bold>RED→GREEN ✓</Text> : null}
             {t.implFirst ? <Text color={c.t.warn}>⚠ impl first</Text> : null}
@@ -42,7 +43,7 @@ export const Tests = (c: PaneCtx): RenderElement => {
             <Text color={r.ok ? c.t.ok : c.t.critical}>{r.ok ? '● ' : '✗ '}</Text>
             <Text>{clip(r.command, Math.max(10, c.cols - 30))}</Text>
             {r.passed !== undefined || r.failed !== undefined ? <Text color={c.t.muted}>{` · ${r.passed ?? 0} passed, ${r.failed ?? 0} failed`}</Text> : null}
-            {r.task !== undefined ? <Text color={c.t.muted}>{` · Task ${r.task}`}</Text> : null}
+            {r.task !== undefined ? <Text color={c.t.muted}>{` · Task ${taskLabel(r.task)}`}</Text> : null}
           </Text>
           <Text color={c.t.muted}>{clock(r.at)}</Text>
         </Box>
